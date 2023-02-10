@@ -23,9 +23,6 @@ Requirements:
 
 ## Authors
 
-* [@Beto Estrada](https://github.com/BigToe33)
-* [@Son Nguyen](https://github.com/snguyen1)
-* [@Brian Colburn](https://github.com/BrianColburn)
 * [@Matthew Kastl](https://github.com/matdenkas)
 
 
