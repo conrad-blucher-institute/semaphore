@@ -1,0 +1,282 @@
+{
+  "name": "testDspec",
+  "author": "Matthew Kastl",
+  "modelName": "shallowNN_bhp_modelSaved",
+  "options": [
+    {"importMethod": "fromLocalSCV"},
+    {"importPath": "../../data/inputData/bobHallPier_testing_2013-14__24h_pred_12h_back.csv"}
+  ],
+  "inputs": [{
+	    "name": "date"
+    },
+    {
+        "name": "014-pwl"
+    },
+    {
+        "name": "014-harmwl"
+    },
+    {
+        "name": "014-surge"
+    },
+    {
+        "name": "x_wind"
+    },
+    {
+        "name": "y_wind"
+    },
+    {
+        "name": "surge_1h_ago"
+    },
+    {
+        "name": "surge_2h_ago"
+    },
+    {
+        "name": "surge_3h_ago"
+    },
+    {
+        "name": "surge_4h_ago"
+    },
+    {
+        "name": "surge_5h_ago"
+    },
+    {
+        "name": "surge_6h_ago"
+    },
+    {
+        "name": "surge_7h_ago"
+    },
+    {
+        "name": "surge_8h_ago"
+    },
+    {
+        "name": "surge_9h_ago"
+    },
+    {
+        "name": "surge_10h_ago"
+    },
+    {
+        "name": "surge_11h_ago"
+    },
+    {
+        "name": "surge_12h_ago"
+    },
+    {
+        "name": "x_wind_1h_ago"
+    },
+    {
+        "name": "x_wind_2h_ago"
+    },
+    {
+        "name": "x_wind_3h_ago"
+    },
+    {
+        "name": "x_wind_4h_ago"
+    },
+    {
+        "name": "x_wind_5h_ago"
+    },
+    {
+        "name": "x_wind_6h_ago"
+    },
+    {
+        "name": "x_wind_7h_ago"
+    },
+    {
+        "name": "x_wind_8h_ago"
+    },
+    {
+        "name": "x_wind_9h_ago"
+    },
+    {
+        "name": "x_wind_10h_ago"
+    },
+    {
+        "name": "x_wind_11h_ago"
+    },
+    {
+        "name": "x_wind_12h_ago"
+    },
+    {
+        "name": "y_wind_1h_ago"
+    },
+    {
+        "name": "y_wind_2h_ago"
+    },
+    {
+        "name": "y_wind_3h_ago"
+    },
+    {
+        "name": "y_wind_4h_ago"
+    },
+    {
+        "name": "y_wind_5h_ago"
+    },
+    {
+        "name": "y_wind_6h_ago"
+    },
+    {
+        "name": "y_wind_7h_ago"
+    },
+    {
+        "name": "y_wind_8h_ago"
+    },
+    {
+        "name": "y_wind_9h_ago"
+    },
+    {
+        "name": "y_wind_10h_ago"
+    },
+    {
+        "name": "y_wind_11h_ago"
+    },
+    {
+        "name": "y_wind_12h_ago"
+    },
+    {
+        "name": "x_wind_pred_1h_forecast"
+    },
+    {
+        "name": "x_wind_pred_2h_forecast"
+    },
+    {
+        "name": "x_wind_pred_3h_forecast"
+    },
+    {
+        "name": "x_wind_pred_4h_forecast"
+    },
+    {
+        "name": "x_wind_pred_5h_forecast"
+    },
+    {
+        "name": "x_wind_pred_6h_forecast"
+    },
+    {
+        "name": "x_wind_pred_7h_forecast"
+    },
+    {
+        "name": "x_wind_pred_8h_forecast"
+    },
+    {
+        "name": "x_wind_pred_9h_forecast"
+    },
+    {
+        "name": "x_wind_pred_10h_forecast"
+    },
+    {
+        "name": "x_wind_pred_11h_forecast"
+    },
+    {
+        "name": "x_wind_pred_12h_forecast"
+    },
+    {
+        "name": "x_wind_pred_13h_forecast"
+    },
+    {
+        "name": "x_wind_pred_14h_forecast"
+    },
+    {
+        "name": "x_wind_pred_15h_forecast"
+    },
+    {
+        "name": "x_wind_pred_16h_forecast"
+    },
+    {
+        "name": "x_wind_pred_17h_forecast"
+    },
+    {
+        "name": "x_wind_pred_18h_forecast"
+    },
+    {
+        "name": "x_wind_pred_19h_forecast"
+    },
+    {
+        "name": "x_wind_pred_20h_forecast"
+    },
+    {
+        "name": "x_wind_pred_21h_forecast"
+    },
+    {
+        "name": "x_wind_pred_22h_forecast"
+    },
+    {
+        "name": "x_wind_pred_23h_forecast"
+    },
+    {
+        "name": "x_wind_pred_24h_forecast"
+    },
+    {
+        "name": "y_wind_pred_1h_forecast"
+    },
+    {
+        "name": "y_wind_pred_2h_forecast"
+    },
+    {
+        "name": "y_wind_pred_3h_forecast"
+    },
+    {
+        "name": "y_wind_pred_4h_forecast"
+    },
+    {
+        "name": "y_wind_pred_5h_forecast"
+    },
+    {
+        "name": "y_wind_pred_6h_forecast"
+    },
+    {
+        "name": "y_wind_pred_7h_forecast"
+    },
+    {
+        "name": "y_wind_pred_8h_forecast"
+    },
+    {
+        "name": "y_wind_pred_9h_forecast"
+    },
+    {
+        "name": "y_wind_pred_10h_forecast"
+    },
+    {
+        "name": "y_wind_pred_11h_forecast"
+    },
+    {
+        "name": "y_wind_pred_12h_forecast"
+    },
+    {
+        "name": "y_wind_pred_13h_forecast"
+    },
+    {
+        "name": "y_wind_pred_14h_forecast"
+    },
+    {
+        "name": "y_wind_pred_15h_forecast"
+    },
+    {
+        "name": "y_wind_pred_16h_forecast"
+    },
+    {
+        "name": "y_wind_pred_17h_forecast"
+    },
+    {
+        "name": "y_wind_pred_18h_forecast"
+    },
+    {
+        "name": "y_wind_pred_19h_forecast"
+    },
+    {
+        "name": "y_wind_pred_20h_forecast"
+    },
+    {
+        "name": "y_wind_pred_21h_forecast"
+    },
+    {
+        "name": "y_wind_pred_22h_forecast"
+    },
+    {
+        "name": "y_wind_pred_23h_forecast"
+    },
+    {
+        "name": "y_wind_pred_24h_forecast"
+    },
+    {
+        "name": "target_24h"
+    }]
+}
