@@ -12,19 +12,18 @@ AI model from an H5 file from a datetime and inputs specified in a dspec file.
 # 
 #
 #Imports
+import datetime
 from os import path
 from utility import log
+from ModelExecution.inputGatherer import InputGatherer
 from tensorflow.keras.models import load_model
-from inputGatherer import InputGatherer
-import datetime
-
 
 class ModelWrapper:
-    def __init__(self, dspecFilePath: str) -> None:
+    def __init__(self, dspecFileName: str) -> None:
         """Constructor generates an InputGatherer parse the dspec file 
         and attempts to load the model.
         """
-        self.__inputGatherer = InputGatherer(self._dspecFilePath)
+        self.__inputGatherer = InputGatherer(dspecFileName)
         self.__load_modele()
 
 
@@ -33,10 +32,10 @@ class ModelWrapper:
         in the dspec file using Tenserflow/Karas
         """
         modelName = self.__inputGatherer.get_model_name()
-        h5FilePath = modelName if modelName.endswith('.h5') else modelName + '.h5'
+        h5FilePath = '../../data/models/' + (modelName if modelName.endswith('.h5') else modelName + '.h5')
 
         if not path.exists(h5FilePath): 
-            log(f'H5 file not found!')
+            log(f'H5 file for {modelName} not found at {h5FilePath}!')
             raise FileNotFoundError
 
         try:
@@ -52,7 +51,7 @@ class ModelWrapper:
         """Public method to generate a prediction given a datetime.
         """
         try:
-            self.__inputs = self.inputGatherer.get_inputs(dateTime)
+            self.__inputs = self.__inputGatherer.get_inputs(dateTime)
             return self._model.predict(self.__inputs) 
         except Exception as e:
             log(e)

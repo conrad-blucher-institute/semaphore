@@ -19,23 +19,32 @@ from csv import reader
 import datetime
 
 class InputGatherer:
-    def __init__(self, dspecFilePath: path) -> None:
+    def __init__(self, dspecFileName: str) -> None:
         """Constructor sends the specFile off to be loaded and parsed
         """
-        self.__parse_dspec(dspecFilePath)
+        self.__parse_dspec(dspecFileName)
     
-    def __parse_dspec(self, dspecFilePath: path) -> None:
+    def __parse_dspec(self, dspecFileName: str) -> None:
         """Loads a dspec as a JSON file and parses out the options and input sepcifications. 
         It saves them as private class objects.
         """
+
+        dspecFilePath = '../../data/dspec/' + dspecFileName
+
         if not path.exists(dspecFilePath):
-            log(f'dspecFilePath not found!')
+            log(f'{dspecFileName} not found!')
             raise FileNotFoundError
         
         with open(dspecFilePath) as dspecFile:
             self.__dspecDict = load(dspecFile)
-            self.__options = self.__dspecDict['options']
+            optionList = self.__dspecDict['options']
             self.__inputSpecification = self.__dspecDict['inputs']
+
+        #Combine every opetion into one "options dict"
+        self.__options = dict()
+        for dictionary in optionList:
+            for key, value in dictionary.items():
+                self.__options[key] = value
     
     def __pull_inputs_from_CSV(self) -> list[any]:
         """Pulls inputs from a CSV path. Assumes one row and no headers. Returns every column.
@@ -45,7 +54,13 @@ class InputGatherer:
             raise FileNotFoundError
 
         with open(self.__options['importPath'], newline= '') as csvfile:
-            return list(reader(csvfile))[0]
+            inputs =  list(reader(csvfile))[0]
+
+        #Convert to a 3D array and cast str -> floats
+        #TODO::Check this if 3D conversion is needed
+        data = [[]]
+        data[0].append([float(x) for x in inputs])
+        return data
     
     def get_model_name(self) -> str:
         """Returns the name of the model as specified in the DSPEC file."""
@@ -61,4 +76,7 @@ class InputGatherer:
             case _:
                 log(f'Failed to catch importMethod from dspec {self.__dspecDict["Name"]}!')
                 raise SyntaxError
+    
+    def get_options(self) -> dict:
+        return self.__options
 
