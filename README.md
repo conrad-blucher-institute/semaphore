@@ -1,25 +1,8 @@
-# op-WL-AI-model
-
-
-
+# Semaphore
 
 ## Description
 
-Compass is a full stack application created from CBOCP pull data, make AI and non AI computations, and then present to a frontend.
-
-
-## Getting Started
-
-
-### Installing
-
-Requirements: 
-]
-
-
-### Executing program
-
-
+Semaphore runs AI models saved as H5 files with thier inputs sepecified in a DSPEC JSON.  Semaphore is in the process of being constructed. At the end of its development it should be able to save its work in a database, supply information through an API, and run models automatically and consistantly. 
 
 ## Authors
 
