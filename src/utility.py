@@ -28,7 +28,7 @@ def log(text: str) -> None:
 	"""
 	now = datetime.now()
 	timeStamp = now.strftime("%x %X")
-	with open('log,txt', 'a+') as logFile:
+	with open('log.txt', 'a+') as logFile:
 		logFile.write(f'{timeStamp}: {text}\n')
 	print(f'{timeStamp}: {text}')
 

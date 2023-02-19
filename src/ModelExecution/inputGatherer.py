@@ -54,12 +54,10 @@ class InputGatherer:
             raise FileNotFoundError
 
         with open(self.__options['importPath'], newline= '') as csvfile:
-            inputs =  list(reader(csvfile))[0]
+            inputs =  list(reader(csvfile))[0] #TODO::Read all rows, and select by date
 
-        #Convert to a 3D array and cast str -> floats
-        #TODO::Check this if 3D conversion is needed
-        data = [[]]
-        data[0].append([float(x) for x in inputs])
+        #Cast str -> floats
+        data = [float(x) for x in inputs]
         return data
     
     def get_model_name(self) -> str:

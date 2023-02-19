@@ -16,6 +16,7 @@ import datetime
 from os import path
 from utility import log
 from ModelExecution.inputGatherer import InputGatherer
+from numpy import array, reshape
 from tensorflow.keras.models import load_model
 
 class ModelWrapper:
@@ -40,19 +41,35 @@ class ModelWrapper:
 
         try:
             self._model = load_model(h5FilePath)
-            self._model.summary() #TODO::check to remove
-            self._model.get_weights() #TODO::check to remove
         except Exception as e:
             log(e) 
             raise e
 
+    
+    def __shape_data(self, inputs: array) -> None:
+        """Private method to convert the shape  of the data from the inputGatherer, 
+        to the correct shape required by the model, dynamically. The shape that the input comes in
+        and what the model was trained with, aren't nessisarily the same.
+        """
+
+        #Get only first and last layers
+        firstLayer, *_, lastLayer = self._model.layers 
+
+        #Karas reports the Batch size as None in the shape; Convert None -> 1, 
+        #We only want one predictions as opposed to a batch.
+        shapeTarget = [int(1 if value is None else value) for value in firstLayer.input_shape]
+
+        #Reshape and return the data.
+        return reshape(inputs, shapeTarget) 
 
     def make_prediction(self, dateTime: datetime) -> any:
         """Public method to generate a prediction given a datetime.
         """
         try:
-            self.__inputs = self.__inputGatherer.get_inputs(dateTime)
-            return self._model.predict(self.__inputs) 
+            inputs = self.__inputGatherer.get_inputs(dateTime)
+            shapedInputs = self.__shape_data(inputs) #Ensure recived inputs are shaped right for model
+            print(shapedInputs)
+            return self._model.predict(shapedInputs) 
         except Exception as e:
             log(e)
             raise e
