@@ -70,7 +70,7 @@ class InputGatherer:
         """
         #TODO::Handle for requested date
         match self.__options['importMethod']:
-            case 'fromLocalSCV': return self.__pull_inputs_from_CSV()
+            case 'fromLocalCSV': return self.__pull_inputs_from_CSV()
             case _:
                 log(f'Failed to catch importMethod from dspec {self.__dspecDict["Name"]}!')
                 raise SyntaxError

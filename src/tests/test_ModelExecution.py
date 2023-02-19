@@ -5,7 +5,6 @@ from ModelExecution.inputGatherer import InputGatherer
 from datetime import datetime
 
 
-
 def test_makePrediction():
     dt = datetime.now()
     modelwrapper = ModelWrapper('test.json')
@@ -17,5 +16,5 @@ def test_getModelName():
 
 def test_readOption():
     inputGatherer = InputGatherer('test.json')
-    assert inputGatherer.get_options()['importMethod'] == 'fromLocalSCV'
+    assert inputGatherer.get_options()['importMethod'] == 'fromLocalCSV'
 
