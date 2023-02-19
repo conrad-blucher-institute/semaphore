@@ -56,7 +56,7 @@ class ModelWrapper:
         firstLayer, *_, lastLayer = self._model.layers 
 
         #Karas reports the Batch size as None in the shape; Convert None -> 1, 
-        #We only want one predictions as opposed to a batch.
+        #We only want one prediction as opposed to a batch.
         shapeTarget = [int(1 if value is None else value) for value in firstLayer.input_shape]
 
         #Reshape and return the data.
