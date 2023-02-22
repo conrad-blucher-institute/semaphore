@@ -68,7 +68,6 @@ class ModelWrapper:
         try:
             inputs = self.__inputGatherer.get_inputs(dateTime)
             shapedInputs = self.__shape_data(inputs) #Ensure recived inputs are shaped right for model
-            print(shapedInputs)
             return self._model.predict(shapedInputs) 
         except Exception as e:
             log(e)
