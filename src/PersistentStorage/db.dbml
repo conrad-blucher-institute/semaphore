@@ -4,23 +4,23 @@
 
 // this table stores the actual data values as retrieved or received 
 Table s_data_point {
-  id int  [pk, not null, increment]      // DB assigned ID                                                                                                                                  ??? Changed to incrament.
-  valueTimestamp varchar(20) [not null]  // the timestamp for the value in UTC                                                                                                              ??? Switched to UTC time.
-  dataValue varchar(10) [not null]       // actual value for the data points
+  id int  [pk, not null, increment]      // DB assigned ID                                                                                                                                  !!! More research!
+  valueTimestamp datetime [not null]  // the timestamp for the value in UTC GMT                                                                                                             !!! Switch to SQL date time UTC!
+  dataValue varchar(20) [not null]       // actual value for the data points
   sLocationCode varchar(25) [not null]   // CBI specific ID for the location 
   dataSourceCode varchar(10) [not null]  // the code for the source from which the value was obtained:  e.g, NOAA, NDFD, TCOON, etc.                                                                                                               
   seriesCode varchar(10) [not null]      // the code for the type of measurement or prediction.  E.g., wdir, wspeed, wlevel, wtemp, offswl, harmonic, etc..
-  datumCode varchar(10)                  // the datum(e.g., water-levle, harmonic)                                                                                                          ??? Datum = smallest point of data? Or something else? 
+  datumCode varchar(10)                  // the datum(e.g., water-levle, harmonic)                                                                                                          
   unitsCode varchar(6) [not null]        // unit for the value (e.g., Farheneit, Celcius, m/s, etc)                                                                                                        
-  latitude int                           // the latitude of the location for which the data point is provided
-  longitude int                          // the longitude of the location for which the data point is provided
-  _dateCreated varchar(20) [not null]    // metadata tells us when the row as insterted
-  _dateUpdated varchar(20)               // metadata tells us when/whether the row was updated
+  latitude varchar(#)                           // the latitude of the location for which the data point is provided
+  longitude varchar(#)                          // the longitude of the location for which the data point is provided
+  dateAcquired date(20) [not null]     // When the data was actually taken by us
+  _dateCreated datetime [not null]    // metadata tells us when the row as insterted
+  _dateUpdated datetime               // metadata tells us when/whether the row was updated
   _createdBy varchar(20) [not null]      // metadata tells us who/what created the row
   _updatedBy varchar(20)                 // metaata tells us who/what updated the row
   Indexes {
-    (valueTimestamp, seriesCode, sLocationCode, dataSourceCode) [unique]                                                                                                                    //???Include Datum in uniqueness?
-  }
+    (valueTimestamp, seriesCode, sLocationCode, dataSourceCode, dateAcquired) [unique]
 }
 
 
@@ -30,11 +30,11 @@ Table s_data_point {
 // between the CBI specific location code {e.g., 'AransasPassChannel') and the TaC location code for that
 // station {e.g., '8775241').  So the overall row for that station and TaC would look like this:
 // 'AransasPassChannel', 'NOAA_TAC', '8775241', 1, datetime{'now'), 'nc-metocean-depl'
-Table s_locationCode_dataSourceLocationCode_mapping {                                                                                                                                         //??? Will this be future minded enough? Info slots?
+Table s_locationCode_dataSourceLocationCode_mapping {
     id int [pk, not null, increment]
     sLocationCode varchar(25) [not null]      //local                                                                                                                                             
     dataSourceCode varchar(10) [not null]     //source
-    dataSourceLocationCode varchar(10) [not null]
+    dataSourceLocationCode varchar(255) [not null]
     priorityOrder int [not null]              // supoprts providing multiple mappings for the same location and pririoritize them
     _dateCreated varchar(20) [not null]       // metadata tells us when the row as insterted
     _dateUpdated varchar(20)                  // metadata tells us when/whether the row was updated
@@ -114,7 +114,7 @@ Table s_ref_units {
 }
 
 
-Table s_ref_datum {                                                                                                                                                                         //??? Datum reference table?
+Table s_ref_datum {                                                                                                                                                                         
   id int [pk, not null, increment]
   code char(10) [not null]
   displayName varchar(30)
@@ -127,6 +127,27 @@ Table s_ref_datum {                                                             
 	Indexes {
 		(code) [unique]
 	}
+}
+
+
+//A table for AI predictions, holds the same data of a measurment, but also the predicted time and the verification time                                                    !!! Make Table
+Table s_prediction {
+  id int  [pk, not null, increment]      // DB assigned ID                                                                                                                                                                                                                                            
+  dataValue varchar(10) [not null]       // actual value for the data points
+  sLocationCode varchar(25) [not null]   // CBI specific ID for the location                                                                                                              
+  datumCode varchar(10)                  // the datum(e.g., water-levle, harmonic)                                                                                                           
+  unitsCode varchar(6) [not null]        // unit for the value (e.g., Farheneit, Celcius, m/s, etc)                                                                                                        
+  latitude int                           // the latitude of the location for which the data point is provided
+  longitude int                          // the longitude of the location for which the data point is provided
+  AIName varchar(30)
+  predictionTime datetime
+  leadTime float                         // per hour
+  resultCode int                         // any information about the resulting prediction ???Need a reference table
+  _dateCreated varchar(20) [not null]    // metadata tells us when the row as insterted
+  _createdBy varchar(20) [not null]      // metadata tells us who/what created the row
+  Indexes {
+    (valueTimestamp, sLocationCode, datumCode, AIName) [unique]                                                                                                                    
+  }
 }
 
 Ref: "s_ref_series"."code" < "s_data_point"."seriesCode"
