@@ -57,7 +57,7 @@ Table s_prediction {
   _updatedBy varchar(20)   
 
   Indexes {
-    (AIName, timeGenerated, datumCode, AIName) [unique]                                                                                                                    
+    (AIName, timeGenerated, datumCode) [unique]                                                                                                                    
   }
 }
 
@@ -167,7 +167,7 @@ Table s_ref_datum {
 	}
 }
 
-Table s_ref_datum {                                                                                                                                                                         
+Table s_ref_resultCode {                                                                                                                                                                         
   id int [pk, not null, increment]
   code char(10) [not null]
   displayName varchar(30)
