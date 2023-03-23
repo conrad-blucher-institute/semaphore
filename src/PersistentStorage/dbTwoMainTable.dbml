@@ -6,7 +6,7 @@
 Table s_data_point {
   id int  [pk, not null, increment]       // DB assigned ID USE AUTOINCREMENT
 
-  timeActualized datetime [not null]      // the timestamp for the value in UTC GMT
+  timeActual datetime [not null]          // the timestamp for the value in UTC GMT
   timeAcquired datetime [not null]        // When the data was inserted by us
 
   dataValue varchar(20) [not null]        // actual value for the data points
@@ -19,11 +19,6 @@ Table s_data_point {
   latitude varchar(16)                    // the latitude of the location for which the data point is provided
   longitude varchar(16)                   // the longitude of the location for which the data point is provided
 
-  _dateCreated datetime [not null]        // metadata tells us when the row as insterted
-  _dateUpdated datetime                   // metadata tells us when/whether the row was updated
-  _createdBy varchar(20) [not null]       // metadata tells us who/what created the row
-  _updatedBy varchar(20)                  // metaata tells us who/what updated the row
-
   Indexes {
     (timeActualized, timeAcquired, seriesCode, sLocationCode, dataSourceCode) [unique]
   }
@@ -33,16 +28,13 @@ Table s_data_point {
 Table s_prediction {
   id int  [pk, not null, increment]       // DB assigned ID USE AUTOINCREMENT
 
-  timeActualized datetime [not null]      // the timestamp for the value in UTC GMT
   timeGenerated datetime [not null]       // the time the data was created, or for an AI when the prediction was made
-  timeAcquired datetime [not null]        // When the data was inserted
-  leadTime float [not null]               //lead time by hour
+  leadTime float [not null]               // lead time by hour
 
   dataValue varchar(20) [not null]        // actual value for the data points
   unitsCode varchar(6) [not null]         // unit for the value (e.g., Farheneit, Celcius, m/s, etc)  
 
-  AIName varchar(30)
-  resultCode int
+  resultCode int //turn into varchar
 
   sLocationCode varchar(25) [not null]    // CBI specific ID for the location 
   dataSourceCode varchar(10)              // the code for the source from which the value was obtained:  e.g, NOAA, NDFD, TCOON, etc.                                                                                                               
@@ -50,11 +42,6 @@ Table s_prediction {
   datumCode varchar(10)                   // the datum(e.g., water-levle, harmonic)                                                                                                                                                                                                                  
   latitude varchar(16)                    // the latitude of the location for which the data point is provided
   longitude varchar(16)                   // the longitude of the location for which the data point is provided
-
-  _dateCreated datetime [not null]        // metadata tells us when the row as insterted
-  _dateUpdated datetime                   // metadata tells us when/whether the row was updated
-  _createdBy varchar(20) [not null]       // metadata tells us who/what created the row
-  _updatedBy varchar(20)   
 
   Indexes {
     (AIName, timeGenerated, datumCode) [unique]                                                                                                                    
