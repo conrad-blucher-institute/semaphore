@@ -61,10 +61,6 @@ Table s_locationCode_dataSourceLocationCode_mapping {
     dataSourceCode varchar(10) [not null]     //source
     dataSourceLocationCode varchar(255) [not null]
     priorityOrder int [not null]              // supoprts providing multiple mappings for the same location and pririoritize them
-    _dateCreated datetime(20) [not null]       // metadata tells us when the row as insterted
-    _dateUpdated datetime(20)                  // metadata tells us when/whether the row was updated
-    _createdBy varchar(20) [not null]         // metadata tells us who/what created the row
-    _updatedBy varchar(20)                    // metaata tells us who/what updated the row
     
     Indexes {
 		  (sLocationCode, dataSourceCode, priorityOrder) [unique]
@@ -76,16 +72,12 @@ Table s_locationCode_dataSourceLocationCode_mapping {
 //  who may be looking for valid values to use for type code and data source code, or as a quick reference of what location a CBI ID refers to
 Table s_ref_slocation {
   id int [pk, not null, increment]
-  sLocationCode varchar(10) [not null]
+  code varchar(25) [not null]
   displayName varchar(30)
   notes varchar(250)
-  _dateCreated datetime(20) [not null]       // metadata tells us when the row as insterted
-  _dateUpdated datetime(20)                  // metadata tells us when/whether the row was updated
-  _createdBy varchar(20) [not null]         // metadata tells us who/what created the row
-  _updatedBy varchar(20)                    // metaata tells us who/what updated the row
  
   Indexes {
-   (sLocationCode) [unique]
+   (code) [unique]
 	}
 }
 
@@ -95,10 +87,6 @@ Table s_ref_data_source {
   code char(10) [not null]
   displayName varchar(30)
   notes varchar(250)
-  _dateCreated datetime(20) [not null]      // metadata tells us when the row as insterted
-  _dateUpdated datetime(20)                 // metadata tells us when/whether the row was updated
-  _createdBy varchar(20) [not null]        // metadata tells us who/what created the row
-  _updatedBy varchar(20)                   // metaata tells us who/what updated the row
     
 	Indexes {
 		(code) [unique]
@@ -110,12 +98,7 @@ Table s_ref_series{
   id int [pk, not null, increment]
   code char(10) [not null]
   displayName varchar(30)
-  recommendedUnitsCode varchar (6) [not null]
   notes varchar(250)
-  _dateCreated datetime(20) [not null]      // metadata tells us when the row as insterted
-  _dateUpdated datetime(20)                 // metadata tells us when/whether the row was updated
-  _createdBy varchar(20) [not null]        // metadata tells us who/what created the row
-  _updatedBy varchar(20)                   // metaata tells us who/what updated the row
 	
 	Indexes {
 		(code) [unique]
@@ -128,10 +111,6 @@ Table s_ref_units {
   code char(10) [not null]
   displayName varchar(30)
   notes varchar(250)
-  _dateCreated datetime(20) [not null]      // metadata tells us when the row as insterted
-  _dateUpdated datetime(20)                 // metadata tells us when/whether the row was updated
-  _createdBy varchar(20) [not null]        // metadata tells us who/what created the row
-  _updatedBy varchar(20)                   // metaata tells us who/what updated the row
 	
 	Indexes {
 		(code) [unique]
@@ -144,10 +123,6 @@ Table s_ref_datum {
   code char(10) [not null]
   displayName varchar(30)
   notes varchar(250)
-  _dateCreated datetime(20) [not null]      // metadata tells us when the row as insterted
-  _dateUpdated datetime(20)                 // metadata tells us when/whether the row was updated
-  _createdBy varchar(20) [not null]        // metadata tells us who/what created the row
-  _updatedBy varchar(20)                   // metaata tells us who/what updated the row
 	
 	Indexes {
 		(code) [unique]
@@ -159,10 +134,6 @@ Table s_ref_resultCode {
   code char(10) [not null]
   displayName varchar(30)
   notes varchar(250)
-  _dateCreated datetime(20) [not null]      // metadata tells us when the row as insterted
-  _dateUpdated datetime(20)                 // metadata tells us when/whether the row was updated
-  _createdBy varchar(20) [not null]        // metadata tells us who/what created the row
-  _updatedBy varchar(20)                   // metaata tells us who/what updated the row
 	
 	Indexes {
 		(code) [unique]
