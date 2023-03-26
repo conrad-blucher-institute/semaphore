@@ -1,13 +1,34 @@
       
+# -*- coding: utf-8 -*-
+#DBInterface.py
+#----------------------------------
+# Created By : Matthew Kastl
+# Created Date: 3/26/2023
+# version 1.0
+#----------------------------------
+""" This script defines a class that hold the Semaphore DB schema. It also has funtions to 
+    generate engines, and to create and drop the database.
+ """ 
+#----------------------------------
+# 
+#
+#Imports
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey
 
 class DBInterface():
     
     def __init__(self) -> None:
+        """Constructor generates an a db schema. Automatically creates the 
+        metadata object holding the defined scema.
+        """
         self.__create_schema()
 
     def create_DB(self) -> None:
+        """Creates the database with the tethered engine.
+        Requires the engine to be created before it will create the DB.
+        See: DBInterface.create_engine()
+        """
         try:
             self._metadata_obj.create_all(self._engine)
         except AttributeError:
@@ -15,24 +36,41 @@ class DBInterface():
         
 
     def drop_DB(self) -> None:
+        """Drops the database with the tethered engine.
+        Requires the engine to be created before it will drop the DB.
+        See: DBInterface.create_engine()
+        """
         try:
             self._metadata_obj.drop_all(self._engine)
         except AttributeError:
             raise Exception("An engine was requestied from DBInterface, but no engine has been created.")
 
-    def create_engine(self, parmaString: str, echo:str ) -> None: #"sqlite+pysqlite:///:memory:"
+    def create_engine(self, parmaString: str, echo: str ) -> None: #"sqlite+pysqlite:///:memory:"
+        """Creates an engine object and tethers it to this interface class as an atribute
+
+        Parameters:
+            permaString: str - An sqlalchemy string that defines the location the engine should point to: (e.g. "sqlite+pysqlite:///:memory:")
+            echo: str - Weather or not the engine should echo to stdout
+        """
         self._engine = create_engine(parmaString, echo=echo)
     
     def get_engine(self) -> Engine:
+        """Fetches the engine atribute. Requires the engine atribute to be created.
+        See: DBInterface.create_engine()
+        """
         try:
             return self._engine
         except AttributeError:
             raise Exception("An engine was requestied from DBInterface, but no engine has been created.")
         
     def get_metadata(self) -> MetaData:
+        """Fetches interface metadata that hold the DB schema
+        """
         return self._metadata_obj
 
     def __create_schema(self) -> None:
+        """This private meta builds the db schema in the metadata.
+        """
 
         self._metadata_obj = MetaData()
         
