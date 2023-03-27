@@ -10,7 +10,7 @@ Table s_data_point {
   timeAcquired datetime [not null]        // When the data was inserted by us
 
   dataValue varchar(20) [not null]        // actual value for the data points
-  unitsCode varchar(10) [not null]         // unit for the value (e.g., Farheneit, Celcius, m/s, etc)  
+  unitsCode varchar(6) [not null]         // unit for the value (e.g., Farheneit, Celcius, m/s, etc)  
 
   sLocationCode varchar(25) [not null]    // CBI specific ID for the location 
   dataSourceCode varchar(10) [not null]   // the code for the source from which the value was obtained:  e.g, NOAA, NDFD, TCOON, etc.                                                                                                               
@@ -32,10 +32,9 @@ Table s_prediction {
   leadTime float [not null]               // lead time by hour
 
   dataValue varchar(20) [not null]        // actual value for the data points
-  unitsCode varchar(10) [not null]         // unit for the value (e.g., Farheneit, Celcius, m/s, etc)  
+  unitsCode varchar(6) [not null]         // unit for the value (e.g., Farheneit, Celcius, m/s, etc)  
 
-  resultCode varchar(10) //turn into varchar
-  resultCodeUnit varchar(10)
+  resultCode int //turn into varchar
 
   sLocationCode varchar(25) [not null]    // CBI specific ID for the location 
   dataSourceCode varchar(10)              // the code for the source from which the value was obtained:  e.g, NOAA, NDFD, TCOON, etc.                                                                                                               
@@ -151,20 +150,12 @@ Ref: "s_ref_datum"."code" < "s_data_point"."datumCode"
 
 Ref: "s_ref_slocation"."sLocationCode" < "s_data_point"."sLocationCode"
 
-Ref: "s_ref_data_source"."code" < "s_data_point"."dataSourceCode"
-
 Ref: "s_ref_data_source"."code" < "s_locationCode_dataSourceLocationCode_mapping"."dataSourceCode"
+
+Ref: "s_ref_data_source"."code" < "s_data_point"."dataSourceCode"
 
 Ref: "s_ref_slocation"."sLocationCode" < "s_locationCode_dataSourceLocationCode_mapping"."sLocationCode"
 
-Ref: "resultCodeUnit"."code" < "s_prediction"."resultCodeUnit"
+Ref: "s_locationCode_dataSourceLocationCode_mapping"."sLocationCode" <> "s_data_point"."sLocationCode"
 
-Ref: "s_ref_series"."code" < "s_prediction"."seriesCode"
-
-Ref: "s_ref_units"."code" < "s_prediction"."unitsCode"
-
-Ref: "s_ref_datum"."code" < "s_prediction"."datumCode"
-
-Ref: "s_ref_slocation"."sLocationCode" < "s_prediction"."sLocationCode"
-
-Ref: "s_ref_data_source"."code" < "s_prediction"."dataSourceCode"
+Ref: "s_locationCode_dataSourceLocationCode_mapping"."dataSourceCode" <> "s_data_point"."dataSourceCode"
