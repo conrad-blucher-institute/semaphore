@@ -12,8 +12,13 @@ disctionary to insert or a SQLAlchemy selection statment to select.
 # 
 #
 #Imports
+import sys
+import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+
 from sqlalchemy import insert, Select, CursorResult
-from DBInterface import DBInterface
+from PersistentStorage.DBInterface import DBInterface
 
 def dbSelection(dbInterface: DBInterface, stmt: Select) -> CursorResult:
     """Runs a slection statment 
@@ -31,14 +36,14 @@ def dbSelection(dbInterface: DBInterface, stmt: Select) -> CursorResult:
 
     return result
 
-def s_data_point_insert(dbInterface: DBInterface, values: dict | list(dict)) -> CursorResult:
+def s_data_point_insert(dbInterface: DBInterface, values: dict | list[dict]) -> CursorResult:
     """Inserts a row or batch into s_data_point
     ------
     Dictionary reference: {"timeActualized", "timeAquired", "dataValue", "unitsCode", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
     ------
     Parameters:
         dbInterface: DBInterface - The interface to fetch the engine from.
-        values: dict | list(dict) - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
     ------
     Returns:
         SQLAlchemy CursorResult
@@ -51,14 +56,14 @@ def s_data_point_insert(dbInterface: DBInterface, values: dict | list(dict)) -> 
     return result
 
 
-def s_prediction_insert(dbInterface: DBInterface, values: dict | list(dict)) -> CursorResult:
+def s_prediction_insert(dbInterface: DBInterface, values: dict | list[dict]) -> CursorResult:
     """Inserts a row or batch into s_predictions
     ------
     Dictionary reference: {"timeGenerated", "leadTime", "dataValue", "unitsCode", (OP)"resultCode", (OP)"resultCodeUnit", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
     ------
     Parameters:
         dbInterface: DBInterface - The interface to fetch the engine from.
-        values: dict | list(dict) - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
     ------
     Returns:
         SQLAlchemy CursorResult
@@ -71,14 +76,14 @@ def s_prediction_insert(dbInterface: DBInterface, values: dict | list(dict)) -> 
     return result
 
 
-def s_locationCode_dataSourceLocationCode_mapping_insert(dbInterface: DBInterface, values: dict | list(dict)) -> CursorResult:
+def s_locationCode_dataSourceLocationCode_mapping_insert(dbInterface: DBInterface, values: dict | list[dict]) -> CursorResult:
     """Inserts a row or batch into s_locationCode_dataSourceLocationCode_mapping
     ------
     Dictionary reference: {"dataSourceCode", "sLocationCode", "dataSourceLocationCode", "priorityOrder"}
     ------
     Parameters:
         dbInterface: DBInterface - The interface to fetch the engine from.
-        values: dict | list(dict) - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
     ------
     Returns:
         SQLAlchemy CursorResult
@@ -91,14 +96,14 @@ def s_locationCode_dataSourceLocationCode_mapping_insert(dbInterface: DBInterfac
     return result
 
 
-def s_ref_slocation_insert(dbInterface: DBInterface, values: dict | list(dict)) -> CursorResult:
+def s_ref_slocation_insert(dbInterface: DBInterface, values: dict | list[dict]) -> CursorResult:
     """Inserts a row or batch into s_ref_slocation
     ------
     Dictionary reference: {"code", "displayName", (OP)"notes"}
     ------
     Parameters:
         dbInterface: DBInterface - The interface to fetch the engine from.
-        values: dict | list(dict) - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
     ------
     Returns:
         SQLAlchemy CursorResult
@@ -111,14 +116,14 @@ def s_ref_slocation_insert(dbInterface: DBInterface, values: dict | list(dict)) 
     return result
 
 
-def s_ref_data_source_insert(dbInterface: DBInterface, values: dict | list(dict)) -> CursorResult:
+def s_ref_data_source_insert(dbInterface: DBInterface, values: dict | list[dict]) -> CursorResult:
     """Inserts a row or batch into s_ref_data_source
     ------
     Dictionary reference: {"code", "displayName", (OP)"notes"}
     ------
     Parameters:
         dbInterface: DBInterface - The interface to fetch the engine from.
-        values: dict | list(dict) - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
     ------
     Returns:
         SQLAlchemy CursorResult
@@ -131,14 +136,14 @@ def s_ref_data_source_insert(dbInterface: DBInterface, values: dict | list(dict)
     return result
 
 
-def s_ref_series_insert(dbInterface: DBInterface, values: dict | list(dict)) -> CursorResult:
+def s_ref_series_insert(dbInterface: DBInterface, values: dict | list[dict]) -> CursorResult:
     """Inserts a row or batch into s_ref_series
     ------
     Dictionary reference: {"code", "displayName", (OP)"notes"}
     ------
     Parameters:
         dbInterface: DBInterface - The interface to fetch the engine from.
-        values: dict | list(dict) - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
     ------
     Returns:
         SQLAlchemy CursorResult
@@ -151,14 +156,14 @@ def s_ref_series_insert(dbInterface: DBInterface, values: dict | list(dict)) -> 
     return result
 
 
-def s_ref_units_insert(dbInterface: DBInterface, values: dict | list(dict)) -> CursorResult:
+def s_ref_units_insert(dbInterface: DBInterface, values: dict | list[dict]) -> CursorResult:
     """Inserts a row or batch into s_ref_units
     ------
     Dictionary reference: {"code", "displayName", (OP)"notes"}
     ------
     Parameters:
         dbInterface: DBInterface - The interface to fetch the engine from.
-        values: dict | list(dict) - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
     ------
     Returns:
         SQLAlchemy CursorResult
@@ -170,14 +175,14 @@ def s_ref_units_insert(dbInterface: DBInterface, values: dict | list(dict)) -> C
 
     return result
 
-def s_ref_datum_insert(dbInterface: DBInterface, values: dict | list(dict)) -> CursorResult:
+def s_ref_datum_insert(dbInterface: DBInterface, values: dict | list[dict]) -> CursorResult:
     """Inserts a row or batch into s_ref_datum
     ------
     Dictionary reference: {"code", "displayName", (OP)"notes"}
     ------
     Parameters:
         dbInterface: DBInterface - The interface to fetch the engine from.
-        values: dict | list(dict) - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
     ------
     Returns:
         SQLAlchemy CursorResult
@@ -190,14 +195,14 @@ def s_ref_datum_insert(dbInterface: DBInterface, values: dict | list(dict)) -> C
     return result
 
 
-def s_ref_resultCode_insert(dbInterface: DBInterface, values: dict | list(dict)) -> CursorResult:
+def s_ref_resultCode_insert(dbInterface: DBInterface, values: dict | list[dict]) -> CursorResult:
     """Inserts a row or batch into s_ref_resultCode
     ------
     Dictionary reference: {"code", "displayName", (OP)"notes"}
     ------
     Parameters:
         dbInterface: DBInterface - The interface to fetch the engine from.
-        values: dict | list(dict) - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
     ------
     Returns:
         SQLAlchemy CursorResult
