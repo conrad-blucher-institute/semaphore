@@ -12,8 +12,13 @@ disctionary to insert or a SQLAlchemy selection statment to select.
 # 
 #
 #Imports
+import sys
+import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+
 from sqlalchemy import insert, Select, CursorResult
-from DBInterface import DBInterface
+from PersistentStorage.DBInterface import DBInterface
 
 def dbSelection(dbInterface: DBInterface, stmt: Select) -> CursorResult:
     """Runs a slection statment 
