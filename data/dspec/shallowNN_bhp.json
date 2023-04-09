@@ -1,0 +1,64 @@
+{
+  "name": "shallowNN_bhp",
+  "author": "Marina VicensMiquel",
+  "modelName": "shallowNN_bhp_modelSaved",
+  "options": [],
+  "inputs": [
+    {
+        "debugName": "x_wind",
+        "Location": "bhp",
+        "source": "liHouse",
+        "series": "XWinDir",
+        "unit": "float"
+    },
+    {
+        "debugName": "y_wind",
+        "Location": "bhp",
+        "source": "liHouse",
+        "series": "YWinDir",
+        "unit": "float"
+    },
+    {
+        "debugName": "surge",
+        "Location": "bhp",
+        "source": "noaaT&C",
+        "series": "surge",
+        "between": [-1, -12],
+        "unit": "float"
+    },
+    {
+        "debugName": "x_wind_prev",
+        "Location": "bhp",
+        "source": "noaaT&C",
+        "series": "XWinSpd",
+        "between": [-1, -12],
+        "unit": "float"
+    },
+    {
+        "debugName": "y_wind_prev",
+        "Location": "bhp",
+        "source": "noaaT&C",
+        "series": "YWinSpd",
+        "between": [-1, -12],
+        "unit": "float"
+    },
+    {
+        "debugName": "x_wind_pred_forecast",
+        "Location": "bhp",
+        "source": "noaaT&C",
+        "series": "pXWinSpd",
+        "isBatch": false,
+        "between": [1, 24],
+        "unit": "float"
+
+    },
+    {
+        "debugName": "y_wind_pred_forecast",
+        "Location": "bhp",
+        "source": "noaaT&C",
+        "series": "pYWinSpd",
+        "isBatch": false,
+        "between": [1, 24],
+        "unit": "float"
+    }
+]}
