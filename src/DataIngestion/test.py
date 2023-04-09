@@ -27,10 +27,10 @@ try:
 
     iNOAA = INOAATidesAndCurrents(idb)
 
-    st = datetime.combine(date(2000, 1, 1), time(4, 0))
-    et = datetime.combine(date(2000, 1, 1), time(5, 0))
+    st = datetime.combine(date(2000, 1, 1), time(3, 0))
+    et = datetime.combine(date(2000, 1, 1), time(12, 0))
 
-    iNOAA.fetch_water_level("BHP", st, et, 'MLLW')
+    iNOAA.fetch_water_level_hourly("BHP", st, et, 'MLLW')
 
     stmt = select(idb.s_data_point)
     curser = dbSelection(idb, stmt)

@@ -87,20 +87,20 @@ class INOAATidesAndCurrents:
         return dbSelection(self.idb, stmt).first()[0]
         
 
-    def fetch_water_level(self, location: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> None:
+    def fetch_water_level_hourly(self, location: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> None:
         """Fetches water level data from NOAA Tides and currents. 
         -------
         Parameters:
             location: str - Semaphore specific location.
-            startDateTime: datetime - The from datetime to pull from.
+            startDateTime: datetime - The from datetime to pull from. (> not >=; You need to fetch for an hour before the first hour you want.)
             endDateTime: datetime - The to datem to pull from.
             datum: str - The required datum.
-        NOTE Hits: https://tidesandcurrents.noaa.gov/waterlevels.html?id=8775870&units=metric&bdate=20000101&edate=20000101&timezone=GMT&datum=MLLW&interval=6&action=data
+        NOTE Hits: https://tidesandcurrents.noaa.gov/waterlevels.html?id=8775870&units=metric&bdate=20000101&edate=20000101&timezone=GMT&datum=MLLW&interval=h&action=data
         """
         
         #Get mapped location from DB then make API request, wl hardcoded
         dataSourceCode = self.__get_station_number(location)
-        data = self.__api_request(dataSourceCode, 'water_level', startDateTime, endDateTime, datum)
+        data = self.__api_request(dataSourceCode, 'hourly_height', startDateTime, endDateTime, datum)
 
         #Iterate through data and format DB rows
         dateTimeNow = datetime.now()
