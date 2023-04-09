@@ -50,7 +50,6 @@
         "Location": "bhp",
         "source": "noaaT&C",
         "series": "pXWinSpd",
-        "isBatch": false,
         "unit": "float",
         "between": [1, 24],
         "interval": "1 hour"
@@ -60,10 +59,8 @@
         "Location": "bhp",
         "source": "noaaT&C",
         "series": "pYWinSpd",
-        "isBatch": false,
         "unit": "float",
         "between": [1, 24],
         "interval": "1 hour"
-        
     } /*[-1.369	-1.802	-2.472	-1.559	0.183	0	-0.697	0.508	-1.87	-2.038	-1.225	-1.62	-2.539	-1.476	-1.584	-3.078	-2.81	0	-0.481	-0.999	0.258	0.476	-0.619	0.628]*/
 ]}
