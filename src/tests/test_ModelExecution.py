@@ -1,5 +1,8 @@
-from sys import path
-path.append('..')
+import sys
+import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+
 from ModelExecution.modelWrapper import ModelWrapper
 from ModelExecution.inputGatherer import InputGatherer
 from datetime import datetime
