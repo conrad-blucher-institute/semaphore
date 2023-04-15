@@ -33,7 +33,7 @@ class ModelWrapper:
         in the dspec file using Tenserflow/Karas
         """
         modelName = self.__inputGatherer.get_model_name()
-        h5FilePath = '../../data/models/' + (modelName if modelName.endswith('.h5') else modelName + '.h5')
+        h5FilePath = '../data/models/' + (modelName if modelName.endswith('.h5') else modelName + '.h5')
 
         if not path.exists(h5FilePath): 
             log(f'H5 file for {modelName} not found at {h5FilePath}!')

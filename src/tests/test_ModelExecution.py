@@ -20,4 +20,3 @@ def test_getModelName():
 def test_readOption():
     inputGatherer = InputGatherer('test.json')
     assert inputGatherer.get_options()['importMethod'] == 'fromLocalCSV'
-

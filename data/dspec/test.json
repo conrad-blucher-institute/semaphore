@@ -4,7 +4,7 @@
   "modelName": "shallowNN_bhp_modelSaved",
   "options": [
     {"importMethod": "fromLocalCSV"},
-    {"importPath": "../../data/inputData/bobHallPier_testing_2013-14__24h_pred_12h_back.csv"}
+    {"importPath": "../data/inputData/bobHallPier_testing_2013-14__24h_pred_12h_back.csv"}
   ],
   "inputs": [{
 	    "name": "date"

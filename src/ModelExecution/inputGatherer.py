@@ -29,10 +29,10 @@ class InputGatherer:
         It saves them as private class objects.
         """
 
-        dspecFilePath = '../../data/dspec/' + dspecFileName
+        dspecFilePath = '../data/dspec/' + dspecFileName
 
         if not path.exists(dspecFilePath):
-            log(f'{dspecFileName} not found!')
+            log(f'{dspecFilePath} not found!')
             raise FileNotFoundError
         
         with open(dspecFilePath) as dspecFile:
@@ -50,7 +50,7 @@ class InputGatherer:
         """Pulls inputs from a CSV path. Assumes one row and no headers. Returns every column.
         """
         if not path.exists(self.__options['importPath']): 
-            log(f'CVS path not valid for {self.__dspecDict["Name"]}!')
+            log(f'CVS path not valid for {self.__dspecDict["name"]}!')
             raise FileNotFoundError
 
         with open(self.__options['importPath'], newline= '') as csvfile:
