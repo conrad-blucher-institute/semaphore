@@ -101,13 +101,12 @@ class NOAATidesAndCurrents:
         
         #Get mapped location from DB then make API request, wl hardcoded
         dataSourceCode = self.__get_station_number(location)
-        
         if dataSourceCode is None:
+            log('A problem occured in fetch_water_level_hourly, haulting!')
             return False
         
 
         data = self.__api_request(dataSourceCode, 'hourly_height', startDateTime, endDateTime, datum)
-
         if data is None:
             log('A problem occured in fetch_water_level_hourly, haulting!')
             return False
