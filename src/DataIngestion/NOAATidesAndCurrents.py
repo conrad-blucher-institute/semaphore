@@ -37,7 +37,7 @@ class NOAATidesAndCurrents:
         self.__dbManager = dbManager
 
     
-    def __api_request(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> Generator[str, None, None]:
+    def __api_request(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> None | dict:
         """Given the parameters, generates and utlizes a url to hit the t&C api. 
         NOTE No date range of 31 days will be accepted! - raises Value Errror
         NOTE On a bad api param, throws urlib HTTPError, code 400
@@ -49,7 +49,8 @@ class NOAATidesAndCurrents:
         log('Attempting fetch from NOAATides&Currents...')
         #Tides and Currents doesn't accept a range bigger than 31 days
         if((endDateTime - startDateTime).days > 31):
-            raise ValueError('The date range cannot exceed 31 days!')
+            log('The date range cannot exceed 31 days!')
+            return None
 
         #Create URL
         url = f'https://tidesandcurrents.noaa.gov/api/datagetter?product={product}&application=NOS.COOPS.TAC.MET&station={station}&time_zone=GMT&units=metric&interval=6&format=json&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&datum={datum}'
@@ -59,17 +60,13 @@ class NOAATidesAndCurrents:
 
         except HTTPError as err:
             log(f'Fetch faied, HTTPError of code: {err.status} for: {err.reason}')
-            raise HTTPError
+            return None
         except Exception as ex:
             log(f'Fetch failed, unhandled exceptions: {ex}')
+            return None
         log('Fetch complete.')
+        return data
 
-        #Prep generator
-        for lineNum,entry in enumerate(data['data']):
-            if lineNum == 0:
-                yield json.dumps(data['metadata'])
-            elif lineNum < len(data['data']) - 1:
-                yield json.dumps(entry) + '\n'
 
 
     def __get_station_number(self, location: str) -> str | None:
@@ -108,42 +105,36 @@ class NOAATidesAndCurrents:
         if dataSourceCode is None:
             return False
         
-        try:
-            data = self.__api_request(dataSourceCode, 'hourly_height', startDateTime, endDateTime, datum)
-        except HTTPError:
-            log('Haulting fetch water level hourly from noaa T&C because of HTTPError!!!')
+
+        data = self.__api_request(dataSourceCode, 'hourly_height', startDateTime, endDateTime, datum)
+
+        if data is None:
+            log('A problem occured in fetch_water_level_hourly, haulting!')
             return False
-        except ValueError:
-            log('Haulting fetch water level hourly from noaa T&C because of ValueError!!!')
-            return False
-        except Exception:
-            log('Haulting fetch water level hourly from noaa T&C because of unhandled exception!!!')
-            return False
+
+        #parse metadata
+        metaData = data['metadata']
+        lat = metaData['lat']
+        lon = metaData['lon']
 
         #Iterate through data and format DB rows
         dateTimeNow = datetime.now()
         insertionValues = []
-        for rowNum, row, in enumerate(data):
-            if rowNum == 0: #First row is metadata
-                parsedRow = json.loads(row)
-                lat = parsedRow['lat']
-                lon = parsedRow['lon']
-            else:
-                parsedRow = json.loads(row)
-                
-                #Consturct DB row to insert
-                insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
-                insertionValueRow["timeActualized"] = datetime.fromisoformat(parsedRow['t'])
-                insertionValueRow["timeAquired"] = dateTimeNow
-                insertionValueRow["dataValue"] = parsedRow["v"]
-                insertionValueRow["unitsCode"] = 'float'
-                insertionValueRow["dataSourceCode"] = self.sourceCode
-                insertionValueRow["sLocationCode"] = location
-                insertionValueRow["seriesCode"] = 'WlHr'
-                insertionValueRow["datumCode"] = datum
-                insertionValueRow["latitude"] = lat
-                insertionValueRow["longitude"] = lon
-                insertionValues.append(insertionValueRow)
+        for row in data['data']:
+            
+            #Consturct DB row to insert
+            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
+            insertionValueRow["timeActualized"] = datetime.fromisoformat(row['t'])
+            insertionValueRow["timeAquired"] = dateTimeNow
+            insertionValueRow["dataValue"] = row["v"]
+            insertionValueRow["unitsCode"] = 'float'
+            insertionValueRow["dataSourceCode"] = self.sourceCode
+            insertionValueRow["sLocationCode"] = location
+            insertionValueRow["seriesCode"] = 'WlHr'
+            insertionValueRow["datumCode"] = datum
+            insertionValueRow["latitude"] = lat
+            insertionValueRow["longitude"] = lon
+            insertionValues.append(insertionValueRow)
 
         #insertData to DB
         self.__dbManager.s_data_point_insert(insertionValues)

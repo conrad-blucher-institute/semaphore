@@ -72,7 +72,7 @@ class DataIngestionMap():
             case 'WlHr':
                 return noaa.fetch_water_level_hourly(location, startTime, endTime, datum)
             case _:
-                log(f'Data series: {series} not found for NOAAT&C')
+                log(f'Data series: {series}, not found for NOAAT&C')
                 return False
 
     

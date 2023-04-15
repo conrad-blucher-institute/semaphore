@@ -31,8 +31,10 @@ try:
 
 
     ###ACTUAL DEMO CODE###
-    dIngestionMap.map_fetch('noaaT&C', 'WlHr', 'BHP', startTime, endTime, datum='MLLW')
-
+    if dIngestionMap.map_fetch('noaaT&C', 'WlHr', 'BHP', startTime, endTime, datum='MLLW'):
+        print('SUCCESS!!')
+    else:
+        print('Something went wrong!')
 
 
     ###Print out from DB to confirm it worked
