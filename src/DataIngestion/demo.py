@@ -31,7 +31,7 @@ try:
 
 
     ###ACTUAL DEMO CODE###
-    dIngestionMap.map_fetch("NOAAT&C", "WlHr", "BHP", "MLLW", startTime, endTime)
+    dIngestionMap.map_fetch('noaaT&C', 'WlHr', 'BHP', startTime, endTime, datum='MLLW')
 
 
 

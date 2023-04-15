@@ -113,6 +113,9 @@ class NOAATidesAndCurrents:
         except HTTPError:
             log('Haulting fetch water level hourly from noaa T&C because of HTTPError!!!')
             return False
+        except ValueError:
+            log('Haulting fetch water level hourly from noaa T&C because of ValueError!!!')
+            return False
         except Exception:
             log('Haulting fetch water level hourly from noaa T&C because of unhandled exception!!!')
             return False

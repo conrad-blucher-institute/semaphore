@@ -25,7 +25,7 @@ from utility import log
 class DataIngestionMap():
 
     def __init__(self) -> None:
-        self.dbManager = DBManager
+        self.dbManager = DBManager()
 
     def get_dbManager(self):
         """Returns the dbManager used by this dataIngestionMap for debugging perposes"""
@@ -66,11 +66,11 @@ class DataIngestionMap():
             bool - Returns false if some error occured durring the ingestion prossess. Check log
         """
         from NOAATidesAndCurrents import NOAATidesAndCurrents
-        NOAATidesAndCurrents(self.dbManager)
+        noaa = NOAATidesAndCurrents(self.dbManager)
 
         match series:
-            case 'wlHr':
-                return NOAATidesAndCurrents.fetch_water_level_hourly(location, startTime, endTime, datum)
+            case 'WlHr':
+                return noaa.fetch_water_level_hourly(location, startTime, endTime, datum)
             case _:
                 log(f'Data series: {series} not found for NOAAT&C')
                 return False
