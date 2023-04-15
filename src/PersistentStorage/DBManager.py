@@ -4,46 +4,48 @@
 #----------------------------------
 # Created By : Matthew Kastl
 # Created Date: 3/26/2023
-# version 1.0
+# version 2.0
 #----------------------------------
 """ This script defines a class that hold the Semaphore DB schema. It also has funtions to 
-    generate engines, and to create and drop the database.
+    manage the DB and interact with the db.
  """ 
 #----------------------------------
 # 
 #
 #Imports
 from sqlalchemy import create_engine
-from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey
+from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select
+from dotenv import load_dotenv
+from os import getenv
 
-class DBInterface():
+class DBManager():
     
     def __init__(self) -> None:
         """Constructor generates an a db schema. Automatically creates the 
         metadata object holding the defined scema.
         """
         self.__create_schema()
+        load_dotenv()
+        self.create_engine(getenv('DB_LOCATION_STRING'), False)
+
 
     def create_DB(self) -> None:
         """Creates the database with the tethered engine.
         Requires the engine to be created before it will create the DB.
-        See: DBInterface.create_engine()
+        See: DBManager.create_engine()
         """
-        try:
-            self._metadata_obj.create_all(self._engine)
-        except AttributeError:
-            raise Exception("An engine was requestied from DBInterface, but no engine has been created.")
-        
+
+        self._metadata_obj.create_all(self.get_engine())
+     
 
     def drop_DB(self) -> None:
         """Drops the database with the tethered engine.
         Requires the engine to be created before it will drop the DB.
-        See: DBInterface.create_engine()
+        See: DBManager.create_engine()
         """
-        try:
-            self._metadata_obj.drop_all(self._engine)
-        except AttributeError:
-            raise Exception("An engine was requestied from DBInterface, but no engine has been created.")
+
+        self._metadata_obj.drop_all(self.get_engine())
+
 
     def create_engine(self, parmaString: str, echo: str ) -> None: #"sqlite+pysqlite:///:memory:"
         """Creates an engine object and tethers it to this interface class as an atribute
@@ -53,20 +55,24 @@ class DBInterface():
             echo: str - Weather or not the engine should echo to stdout
         """
         self._engine = create_engine(parmaString, echo=echo)
+
     
     def get_engine(self) -> Engine:
         """Fetches the engine atribute. Requires the engine atribute to be created.
-        See: DBInterface.create_engine()
+        See: DBManager.create_engine()
         """
-        try:
+
+        if not hasattr(self, "_engine"):
+            raise Exception("An engine was requestied from DBManager, but no engine has been created. See DBManager.create_engine()")
+        else:
             return self._engine
-        except AttributeError:
-            raise Exception("An engine was requestied from DBInterface, but no engine has been created.")
-        
+
+
     def get_metadata(self) -> MetaData:
         """Fetches interface metadata that hold the DB schema
         """
         return self._metadata_obj
+
 
     def __create_schema(self) -> None:
         """This private meta builds the db schema in the metadata.
@@ -216,4 +222,190 @@ class DBInterface():
         )
 
 
+    def dbSelection(self, stmt: Select) -> CursorResult:
+        """Runs a slection statment 
+        ------
+        ------
+        Parameters:
 
+            stmt: SQLAlchemy Select - The statement to run
+        ------
+        Returns:
+            SQLAlchemy CursorResult
+        """
+
+        with self.get_engine().connect() as conn:
+            result = conn.execute(stmt)
+
+        return result
+
+
+    def s_data_point_insert(self, values: dict | list[dict]) -> CursorResult:
+        """Inserts a row or batch into s_data_point
+        ------
+        Dictionary reference: {"timeActualized", "timeAquired", "dataValue", "unitsCode", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
+        ------
+        Parameters:
+            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        ------
+        Returns:
+            SQLAlchemy CursorResult
+        """
+
+        with self.get_engine().connect() as conn:
+            result = conn.execute(insert(self.s_data_point), values)
+            conn.commit()
+
+        return result
+
+
+    def s_prediction_insert(self, values: dict | list[dict]) -> CursorResult:
+        """Inserts a row or batch into s_predictions
+        ------
+        Dictionary reference: {"timeGenerated", "leadTime", "dataValue", "unitsCode", (OP)"resultCode", (OP)"resultCodeUnit", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
+        ------
+        Parameters:
+            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        ------
+        Returns:
+            SQLAlchemy CursorResult
+        """
+
+        with self.get_engine().connect() as conn:
+            result = conn.execute(insert(self.s_prediction), values)
+            conn.commit()
+
+        return result
+
+
+    def s_locationCode_dataSourceLocationCode_mapping_insert(self, values: dict | list[dict]) -> CursorResult:
+        """Inserts a row or batch into s_locationCode_dataSourceLocationCode_mapping
+        ------
+        Dictionary reference: {"dataSourceCode", "sLocationCode", "dataSourceLocationCode", "priorityOrder"}
+        ------
+        Parameters:
+            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        ------
+        Returns:
+            SQLAlchemy CursorResult
+        """
+
+        with self.get_engine().connect() as conn:
+            result = conn.execute(insert(self.s_locationCode_dataSourceLocationCode_mapping), values)
+            conn.commit()
+
+        return result
+
+
+    def s_ref_slocation_insert(self, values: dict | list[dict]) -> CursorResult:
+        """Inserts a row or batch into s_ref_slocation
+        ------
+        Dictionary reference: {"code", "displayName", (OP)"notes"}
+        ------
+        Parameters:
+            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        ------
+        Returns:
+            SQLAlchemy CursorResult
+        """
+        
+        with self.get_engine().connect() as conn:
+            result = conn.execute(insert(self.s_ref_slocation), values)
+            conn.commit()
+
+        return result
+
+
+    def s_ref_data_source_insert(self, values: dict | list[dict]) -> CursorResult:
+        """Inserts a row or batch into s_ref_data_source
+        ------
+        Dictionary reference: {"code", "displayName", (OP)"notes"}
+        ------
+        Parameters:
+            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        ------
+        Returns:
+            SQLAlchemy CursorResult
+        """
+
+        with self.get_engine().connect() as conn:
+            result = conn.execute(insert(self.s_ref_data_source), values)
+            conn.commit()
+
+        return result
+
+
+    def s_ref_series_insert(self, values: dict | list[dict]) -> CursorResult:
+        """Inserts a row or batch into s_ref_series
+        ------
+        Dictionary reference: {"code", "displayName", (OP)"notes"}
+        ------
+        Parameters:
+            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        ------
+        Returns:
+            SQLAlchemy CursorResult
+        """
+
+        with self.get_engine().connect() as conn:
+            result = conn.execute(insert(self.s_ref_series), values)
+            conn.commit()
+
+        return result
+
+
+    def s_ref_units_insert(self, values: dict | list[dict]) -> CursorResult:
+        """Inserts a row or batch into s_ref_units
+        ------
+        Dictionary reference: {"code", "displayName", (OP)"notes"}
+        ------
+        Parameters:
+            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        ------
+        Returns:
+            SQLAlchemy CursorResult
+        """
+
+        with self.get_engine().connect() as conn:
+            result = conn.execute(insert(self.s_ref_units), values)
+            conn.commit()
+
+        return result
+
+
+    def s_ref_datum_insert(self, values: dict | list[dict]) -> CursorResult:
+        """Inserts a row or batch into s_ref_datum
+        ------
+        Dictionary reference: {"code", "displayName", (OP)"notes"}
+        ------
+        Parameters:
+            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        ------
+        Returns:
+            SQLAlchemy CursorResult
+        """
+
+        with self.get_engine().connect() as conn:
+            result = conn.execute(insert(self.s_ref_datum), values)
+            conn.commit()
+
+        return result
+
+
+    def s_ref_resultCode_insert(self, values: dict | list[dict]) -> CursorResult:
+        """Inserts a row or batch into s_ref_resultCode
+        ------
+        Dictionary reference: {"code", "displayName", (OP)"notes"}
+        ------
+        Parameters:
+            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        ------
+        Returns:
+            SQLAlchemy CursorResult
+        """
+
+        with self.get_engine().connect() as conn:
+            result = conn.execute(insert(self.s_ref_resultCode), values)
+            conn.commit()
+
+        return result
