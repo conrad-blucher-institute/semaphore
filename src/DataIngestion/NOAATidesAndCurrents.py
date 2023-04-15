@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 #NOAATidesAndCurrents.py
 #----------------------------------
-# Created By: Brian Colburn 
-# Source: https://github.com/conrad-blucher-institute/water-level-processing/blob/master/tides_and_currents_downloader.py#L84
-# Refactored By : Matthew Kastl
+# Created By: Matthew Kastl
 # Created Date: 4/8/2023
-# version 2.0
+# version 2.2
 #----------------------------------
 """ This file is an interface with the NOAA tideas and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
 An object of this class must be initalized with a DBInterface, as fetched data is directly imported into the DB via that interface.
@@ -19,13 +17,12 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from PersistentStorage.DBInteractions import s_data_point_insert, dbSelection
-from PersistentStorage.DBInterface import DBInterface
+from PersistentStorage.DBManager import DBManager
 from utility import log
 
 from datetime import datetime
 from sqlalchemy import select
-from urllib.error import HTTPError, URLError
+from urllib.error import HTTPError
 from urllib.request import urlopen
 import json
 
@@ -33,11 +30,11 @@ from typing import Generator
 
 
 
-class INOAATidesAndCurrents:
+class NOAATidesAndCurrents:
 
-    def __init__(self, dbInterface: DBInterface):
+    def __init__(self, dbManager: DBManager):
         self.sourceCode = "noaaT&C"
-        self.idb = dbInterface
+        self.__dbManager = dbManager
 
     
     def __api_request(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> Generator[str, None, None]:
@@ -75,19 +72,26 @@ class INOAATidesAndCurrents:
                 yield json.dumps(entry) + '\n'
 
 
-    def __get_station_number(self, location: str) -> str:
-        """Given a semaphor specific location, tries to grab the mapped location from the s_locationCode_dataSorceLocationCode_mapping table"""
-        table = self.idb.s_locationCode_dataSourceLocationCode_mapping
+    def __get_station_number(self, location: str) -> str | None:
+        """Given a semaphor specific location, tries to grab the mapped location from the s_locationCode_dataSorceLocationCode_mapping table
+        -------
+        Returns None if DNE
+        """
+        table = self.__dbManager.s_locationCode_dataSourceLocationCode_mapping
         stmt = (select(table.c.dataSourceLocationCode)
                 .where(table.c.dataSourceCode == self.sourceCode)
                 .where(table.c.sLocationCode == location)
                 .where(table.c.priorityOrder == 0)
                 )
         
-        return dbSelection(self.idb, stmt).first()[0]
-        
+        if self.__dbManager.dbSelection(stmt).first() is None:
+            log(f'No station id found for {self.sourceCode} & {location}')
+            return None
+        else:
+            return self.__dbManager.dbSelection(stmt).first()[0]
+     
 
-    def fetch_water_level_hourly(self, location: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> None:
+    def fetch_water_level_hourly(self, location: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> bool:
         """Fetches water level data from NOAA Tides and currents. 
         -------
         Parameters:
@@ -100,7 +104,18 @@ class INOAATidesAndCurrents:
         
         #Get mapped location from DB then make API request, wl hardcoded
         dataSourceCode = self.__get_station_number(location)
-        data = self.__api_request(dataSourceCode, 'hourly_height', startDateTime, endDateTime, datum)
+        
+        if dataSourceCode is None:
+            return False
+        
+        try:
+            data = self.__api_request(dataSourceCode, 'hourly_height', startDateTime, endDateTime, datum)
+        except HTTPError:
+            log('Haulting fetch water level hourly from noaa T&C because of HTTPError!!!')
+            return False
+        except Exception:
+            log('Haulting fetch water level hourly from noaa T&C because of unhandled exception!!!')
+            return False
 
         #Iterate through data and format DB rows
         dateTimeNow = datetime.now()
@@ -121,15 +136,15 @@ class INOAATidesAndCurrents:
                 insertionValueRow["unitsCode"] = 'float'
                 insertionValueRow["dataSourceCode"] = self.sourceCode
                 insertionValueRow["sLocationCode"] = location
-                insertionValueRow["seriesCode"] = 'WL'
+                insertionValueRow["seriesCode"] = 'WlHr'
                 insertionValueRow["datumCode"] = datum
                 insertionValueRow["latitude"] = lat
                 insertionValueRow["longitude"] = lon
                 insertionValues.append(insertionValueRow)
 
-        
         #insertData to DB
-        s_data_point_insert(self.idb, insertionValues)
+        self.__dbManager.s_data_point_insert(insertionValues)
+        return True
 
 
 
