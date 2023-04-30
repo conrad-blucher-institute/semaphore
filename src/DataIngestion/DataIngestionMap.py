@@ -21,6 +21,7 @@ from PersistentStorage.DBManager import DBManager
 from datetime import datetime
 from utility import log
 
+from typing import List, Dict
 
 class DataIngestionMap():
 
@@ -31,7 +32,7 @@ class DataIngestionMap():
         """Returns the dbManager used by this dataIngestionMap for debugging perposes"""
         return self.dbManager
 
-    def map_fetch(self, source: str, series: str, location: str, startTime: datetime, endTime: datetime, datum: str= '') -> bool:
+    def map_fetch(self, source: str, series: str, location: str, startTime: datetime, endTime: datetime, datum: str= '') -> List[Dict] | None:
         """Maps a data fetch request to the propper class and method. Preforms the call and returns the result.
         ------
         Parameters
@@ -42,7 +43,7 @@ class DataIngestionMap():
             endDateTime: datetime - The to datem to pull from.
             datum: str - The required datum. (OP)
         Returns
-            bool - Returns false if some error occured durring the ingestion prossess. Check log
+            List[Dict] | None - Either a list of the succesffuly inserted rows in the db or None if something went wrong
         """
 
         match source:
@@ -52,7 +53,7 @@ class DataIngestionMap():
                 log(f'Data source: {source}, not found in data ingestion map!')
                 return False
             
-    def __noaaTandC(self, series: str, location: str, datum: str, startTime: datetime, endTime: datetime) -> bool:
+    def __noaaTandC(self, series: str, location: str, datum: str, startTime: datetime, endTime: datetime) -> List[Dict] | None:
         """Maps noaaTandC fetch request to proper function. Preforms the call and returns the result.
         ------
         Parameters
@@ -63,7 +64,7 @@ class DataIngestionMap():
             endDateTime: datetime - The to datem to pull from.
             datum: str - The required datum. (OP)
         Returns
-            bool - Returns false if some error occured durring the ingestion prossess. Check log
+            List[Dict] | None - Either a list of the succesffuly inserted rows in the db or None if something went wrong
         """
         from NOAATidesAndCurrents import NOAATidesAndCurrents
         noaa = NOAATidesAndCurrents(self.dbManager)
