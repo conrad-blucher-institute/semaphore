@@ -18,6 +18,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from PersistentStorage.DBManager import DBManager
+from DataManagement.DataClasses import Request
 from datetime import datetime
 from utility import log
 
@@ -32,48 +33,38 @@ class DataIngestionMap():
         """Returns the dbManager used by this dataIngestionMap for debugging perposes"""
         return self.dbManager
 
-    def map_fetch(self, source: str, series: str, location: str, startTime: datetime, endTime: datetime, datum: str= '') -> List[Dict] | None:
+    def map_fetch(self, request: Request) -> List[Dict] | None:
         """Maps a data fetch request to the propper class and method. Preforms the call and returns the result.
         ------
         Parameters
-            source: str - Semaphore source code
-            series: str - Semaphore series code
-            location: str - Semaphore specific location code.
-            startDateTime: datetime - The from datetime to pull from. (> not >=; You need to fetch for an hour before the first hour you want.)
-            endDateTime: datetime - The to datem to pull from.
-            datum: str - The required datum. (OP)
+            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
         Returns
             List[Dict] | None - Either a list of the succesffuly inserted rows in the db or None if something went wrong
         """
 
-        match source:
+        match request.source:
             case 'noaaT&C':
-                return self.__noaaTandC(series, location, datum, startTime, endTime)
+                return self.__noaaTandC(request)
             case _:
-                log(f'Data source: {source}, not found in data ingestion map!')
+                log(f'Data source: {request.source}, not found in data ingestion map for request: {request}!')
                 return False
             
-    def __noaaTandC(self, series: str, location: str, datum: str, startTime: datetime, endTime: datetime) -> List[Dict] | None:
+    def __noaaTandC(self, request: Request) -> List[Dict] | None:
         """Maps noaaTandC fetch request to proper function. Preforms the call and returns the result.
         ------
         Parameters
-            source: str - Semaphore source code
-            series: str - Semaphore series code
-            location: str - Semaphore specific location code.
-            startDateTime: datetime - The from datetime to pull from. (> not >=; You need to fetch for an hour before the first hour you want.)
-            endDateTime: datetime - The to datem to pull from.
-            datum: str - The required datum. (OP)
+            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
         Returns
             List[Dict] | None - Either a list of the succesffuly inserted rows in the db or None if something went wrong
         """
         from NOAATidesAndCurrents import NOAATidesAndCurrents
         noaa = NOAATidesAndCurrents(self.dbManager)
 
-        match series:
+        match request.series:
             case 'WlHr':
-                return noaa.fetch_water_level_hourly(location, startTime, endTime, datum)
+                return noaa.fetch_water_level_hourly(request)
             case _:
-                log(f'Data series: {series}, not found for NOAAT&C')
+                log(f'Data series: {request.series}, not found for NOAAT&C for request: {request}')
                 return False
 
     

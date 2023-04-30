@@ -18,10 +18,10 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from PersistentStorage.DBManager import DBManager
+from DataManagement.DataClasses import Request
 from utility import log
 
 from datetime import datetime
-from sqlalchemy import select
 from urllib.error import HTTPError
 from urllib.request import urlopen
 import json
@@ -82,18 +82,15 @@ class NOAATidesAndCurrents:
             stationIndex = 3
             return dbResult[resultOffset][stationIndex]
         else:
-            log('Empty dataSource Location mapping recieved in NOAATidesAndCurrents')
+            log(f'Empty dataSource Location mapping recieved in NOAATidesAndCurrents for sourceCode: {self.sourceCode} AND loacation: {location}')
             return None
 
 
-    def fetch_water_level_hourly(self, location: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> List[Dict] | None:
+    def fetch_water_level_hourly(self, request: Request) -> List[Dict] | None:
         """Fetches water level data from NOAA Tides and currents. 
         -------
         Parameters:
-            location: str - Semaphore specific location.
-            startDateTime: datetime - The from datetime to pull from. (> not >=; You need to fetch for an hour before the first hour you want.)
-            endDateTime: datetime - The to datem to pull from.
-            datum: str - The required datum.
+            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
 
         ------
         Returns:
@@ -102,11 +99,11 @@ class NOAATidesAndCurrents:
         """
         
         #Get mapped location from DB then make API request, wl hardcoded
-        dataSourceCode = self.__get_station_number(location)
+        dataSourceCode = self.__get_station_number(request.location)
         if dataSourceCode is None: return None
         
         #Make API request
-        data = self.__api_request(dataSourceCode, 'hourly_height', startDateTime, endDateTime, datum)
+        data = self.__api_request(dataSourceCode, 'hourly_height', request.fromDateTime, request.toDateTime, request.datum)
         if data is None: return None
 
         #Parse metadata
@@ -126,9 +123,9 @@ class NOAATidesAndCurrents:
             insertionValueRow["dataValue"] = row["v"]
             insertionValueRow["unitsCode"] = 'float'
             insertionValueRow["dataSourceCode"] = self.sourceCode
-            insertionValueRow["sLocationCode"] = location
+            insertionValueRow["sLocationCode"] = request.location
             insertionValueRow["seriesCode"] = 'WlHr'
-            insertionValueRow["datumCode"] = datum
+            insertionValueRow["datumCode"] = request.datum
             insertionValueRow["latitude"] = lat
             insertionValueRow["longitude"] = lon
             insertionValues.append(insertionValueRow)
