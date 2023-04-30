@@ -19,7 +19,6 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from PersistentStorage.DBManager import DBManager
 from DataManagement.DataClasses import Request
-from datetime import datetime
 from utility import log
 
 from typing import List, Dict
