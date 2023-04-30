@@ -1,4 +1,6 @@
 from datetime import datetime
+
+
 class DataPoint():
     def __init__(self, value: str, unit: str, dateTime: datetime) -> None:
         self.value = value
@@ -20,6 +22,7 @@ class Prediction():
     def __str__(self) -> str:
         return f'[Prediction] -> value: {self.value}, unit: {self.unit}, leadTime: {self.leadTime}, generatedTime: {self.generatedTime}, successValue {self.successValue}'
 
+
 class Request():
     def __init__(self, source: str, series: str, location: str, unit: str, isPrediction, fromDateTime: datetime, toDateTime: datetime, datum: str = None) -> None:
         self.source = source
@@ -33,6 +36,7 @@ class Request():
 
     def __str__(self) -> str:
         return f'[Request] -> source: {self.source}, series: {self.series}, location: {self.location}, unit: {self.unit}, datum {self.datum}, isPrediction {self.isPrediction}, fromDateTime {self.fromDateTime}, toDateTime {self.toDateTime}'
+
 
 class Response():
     def __init__(self, source: str, series: str, location: str, unit: str, datum: str = None) -> None:
