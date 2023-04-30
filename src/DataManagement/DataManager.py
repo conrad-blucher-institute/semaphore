@@ -59,7 +59,7 @@ class DataManager():
             if len(dbResults) != amntExpected:
 
                 #Call Data Ingestion to fetch data
-                dataIngestionMap = DataIngestionMap()
+                dataIngestionMap = DataIngestionMap(dbManager)
                 diResults = dataIngestionMap.map_fetch(request)
                 if diResults is None:
                     return self.__get_and_log_err_response(request, f'DB did not have data request, dataIngestion returned NONE, for request: {request}')

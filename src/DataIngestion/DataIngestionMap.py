@@ -26,8 +26,8 @@ from typing import List, Dict
 
 class DataIngestionMap():
 
-    def __init__(self) -> None:
-        self.dbManager = DBManager()
+    def __init__(self, dbManager: DBManager) -> None:
+        self.dbManager = dbManager
 
     def get_dbManager(self):
         """Returns the dbManager used by this dataIngestionMap for debugging perposes"""
