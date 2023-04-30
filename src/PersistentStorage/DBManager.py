@@ -36,6 +36,9 @@ class DBManager():
         load_dotenv()
         self.create_engine(getenv('DB_LOCATION_STRING'), False)
 
+    #############################################################################################
+    ################################################################################## DB Managment Methods
+    #############################################################################################
 
     def create_DB(self) -> None:
         """Creates the database with the tethered engine.
@@ -229,8 +232,16 @@ class DBManager():
             UniqueConstraint("code", "displayName"),
         )
 
+    #############################################################################################
+    ################################################################################## DB Interactio private methods
+    #############################################################################################
 
-    def dbSelection(self, stmt: Select) -> CursorResult:
+    def __cursorToList(self, cursor: CursorResult) -> list[dict]:
+        """Converts a SQLAlchemy cursor to a generic list obj"""
+        return [row for row in cursor]
+        
+
+    def __dbSelection(self, stmt: Select) -> CursorResult:
         """Runs a slection statment 
         ------
         ------
@@ -246,8 +257,12 @@ class DBManager():
             result = conn.execute(stmt)
 
         return result
+
+    #############################################################################################
+    ################################################################################## Public selection methods
+    #############################################################################################
     
-    def s_data_point_selection(self, sourceCode: str, locationCode: str, seriesCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> dict:
+    def s_data_point_selection(self, sourceCode: str, seriesCode: str, locationCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> list[dict]:
         """Selects from the data point table.
         -------
         Returns None if DNE
@@ -262,28 +277,43 @@ class DBManager():
             .where(table.c.timeActualized <= endTime)
         )
 
-        return self.dbSelection(stmt)
+        return self.__cursorToList(self.__dbSelection(stmt))
+    
+    def s_prediction_selection(self, sourceCode: str, seriesCode: str, locationCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> list[dict]:
+        """Selects from the prediction table.
+        -------
+        Returns None if DNE
+        """
+        table = self.s_prediction
+        stmt = (select(table)
+            .where(table.c.dataSourceCode == sourceCode)
+            .where(table.c.sLocationCode == locationCode)
+            .where(table.c.seriesCode == seriesCode)
+            .where(table.c.datumCode == datumCode)
+            .where((table.c.timeGenerated + table.c.leadTime) >= startTime)
+            .where((table.c.timeGenerated + table.c.leadTime) <= endTime)
+        )
 
-    def s_locationCode_dataSourceLocationCode_mapping_select(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str | None:
+        return self.__cursorToList(self.__dbSelection(stmt))
+        
+
+    def s_locationCode_dataSourceLocationCode_mapping_select(self, sourceCode: str, location: str, priorityOrder: int = 0) -> list[dict]:
         """Selects a a dataSourceLocationCode given a datasource and a location. 
         -------
         Returns None if DNE
         """
         table = self.s_locationCode_dataSourceLocationCode_mapping
-        stmt = (select(table.c.dataSourceLocationCode)
+        stmt = (select(table)
                 .where(table.c.dataSourceCode == sourceCode)
                 .where(table.c.sLocationCode == location)
                 .where(table.c.priorityOrder == priorityOrder)
                 )
-        
-        curser = self.dbSelection(stmt)
 
-        if curser.first() is None:
-            log(f'DBManager found no mapping for sourceCode: {sourceCode} & location: {location} at pryiority: {priorityOrder}')
-            return None
-        else:
-            return curser.first()[0]
+        return self.__cursorToList(self.__dbSelection(stmt))
 
+    #############################################################################################
+    ################################################################################## Purblic insertion Methods
+    #############################################################################################
 
     def s_data_point_insert(self, values: dict | list[dict]) -> CursorResult:
         """Inserts a row or batch into s_data_point
@@ -298,10 +328,13 @@ class DBManager():
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_data_point), values)
+            result = conn.execute(insert(self.s_data_point)
+                                  .returning(self.s_data_point), 
+                                  values
+                                  )
             conn.commit()
 
-        return result
+        return self.__cursorToList(result)
 
 
     def s_prediction_insert(self, values: dict | list[dict]) -> CursorResult:
@@ -317,10 +350,13 @@ class DBManager():
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_prediction), values)
+            result = conn.execute(insert(self.s_prediction)
+                                  .returning(self.s_prediction), 
+                                  values
+                                  )
             conn.commit()
 
-        return result
+        return self.__cursorToList(result)
 
 
     def s_locationCode_dataSourceLocationCode_mapping_insert(self, values: dict | list[dict]) -> CursorResult:
@@ -336,10 +372,13 @@ class DBManager():
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_locationCode_dataSourceLocationCode_mapping), values)
+            result = conn.execute(insert(self.s_locationCode_dataSourceLocationCode_mapping)
+                                  .returning(self.s_locationCode_dataSourceLocationCode_mapping), 
+                                  values
+                                  )
             conn.commit()
 
-        return result
+        return self.__cursorToList(result)
 
 
     def s_ref_slocation_insert(self, values: dict | list[dict]) -> CursorResult:
@@ -355,10 +394,13 @@ class DBManager():
         """
         
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_slocation), values)
+            result = conn.execute(insert(self.s_ref_slocation)
+                                  .returning(self.s_ref_slocation), 
+                                  values
+                                  )
             conn.commit()
 
-        return result
+        return self.__cursorToList(result)
 
 
     def s_ref_data_source_insert(self, values: dict | list[dict]) -> CursorResult:
@@ -374,10 +416,13 @@ class DBManager():
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_data_source), values)
+            result = conn.execute(insert(self.s_ref_data_source)
+                                  .returning(self.s_ref_data_source), 
+                                  values
+                                  )
             conn.commit()
 
-        return result
+        return self.__cursorToList(result)
 
 
     def s_ref_series_insert(self, values: dict | list[dict]) -> CursorResult:
@@ -393,10 +438,13 @@ class DBManager():
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_series), values)
+            result = conn.execute(insert(self.s_ref_series)
+                                  .returning(self.s_ref_series), 
+                                  values
+                                  )
             conn.commit()
 
-        return result
+        return self.__cursorToList(result)
 
 
     def s_ref_units_insert(self, values: dict | list[dict]) -> CursorResult:
@@ -412,10 +460,13 @@ class DBManager():
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_units), values)
+            result = conn.execute(insert(self.s_ref_units)
+                                  .returning(self.s_ref_units), 
+                                  values
+                                  )
             conn.commit()
 
-        return result
+        return self.__cursorToList(result)
 
 
     def s_ref_datum_insert(self, values: dict | list[dict]) -> CursorResult:
@@ -431,10 +482,13 @@ class DBManager():
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_datum), values)
+            result = conn.execute(insert(self.s_ref_datum)
+                                  .returning(self.s_ref_datum), 
+                                  values
+                                  )
             conn.commit()
 
-        return result
+        return self.__cursorToList(result)
 
 
     def s_ref_resultCode_insert(self, values: dict | list[dict]) -> CursorResult:
@@ -450,7 +504,10 @@ class DBManager():
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_resultCode), values)
+            result = conn.execute(insert(self.s_ref_resultCode)
+                                  .returning(self.s_ref_resultCode), 
+                                  values
+                                  )
             conn.commit()
 
-        return result
+        return self.__cursorToList(result)
