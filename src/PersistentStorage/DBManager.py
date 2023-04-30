@@ -233,11 +233,11 @@ class DBManager():
         )
 
     #############################################################################################
-    ################################################################################## DB Interactio private methods
+    ################################################################################## DB Interaction private methods
     #############################################################################################
 
     def __cursorToList(self, cursor: CursorResult) -> list[dict]:
-        """Converts a SQLAlchemy cursor to a generic list obj"""
+        """Converts a SQLAlchemy cursor to a generic list[dict] obj"""
         return [row for row in cursor]
         
 
