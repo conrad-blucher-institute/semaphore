@@ -13,10 +13,18 @@
 # 
 #
 #Imports
+import sys
+import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+
 from sqlalchemy import create_engine
-from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select
+from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select
 from dotenv import load_dotenv
 from os import getenv
+from utility import log
+
+from DataManagement.DataClasses import *
 
 class DBManager():
     
@@ -238,6 +246,43 @@ class DBManager():
             result = conn.execute(stmt)
 
         return result
+    
+    def s_data_point_selection(self, sourceCode: str, locationCode: str, seriesCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> dict:
+        """Selects from the data point table.
+        -------
+        Returns None if DNE
+        """
+        table = self.s_data_point
+        stmt = (select(table)
+            .where(table.c.dataSourceCode == sourceCode)
+            .where(table.c.sLocationCode == locationCode)
+            .where(table.c.seriesCode == seriesCode)
+            .where(table.c.datumCode == datumCode)
+            .where(table.c.timeActualized >= startTime)
+            .where(table.c.timeActualized <= endTime)
+        )
+
+        return self.dbSelection(stmt)
+
+    def s_locationCode_dataSourceLocationCode_mapping_select(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str | None:
+        """Selects a a dataSourceLocationCode given a datasource and a location. 
+        -------
+        Returns None if DNE
+        """
+        table = self.s_locationCode_dataSourceLocationCode_mapping
+        stmt = (select(table.c.dataSourceLocationCode)
+                .where(table.c.dataSourceCode == sourceCode)
+                .where(table.c.sLocationCode == location)
+                .where(table.c.priorityOrder == priorityOrder)
+                )
+        
+        curser = self.dbSelection(stmt)
+
+        if curser.first() is None:
+            log(f'DBManager found no mapping for sourceCode: {sourceCode} & location: {location} at pryiority: {priorityOrder}')
+            return None
+        else:
+            return curser.first()[0]
 
 
     def s_data_point_insert(self, values: dict | list[dict]) -> CursorResult:

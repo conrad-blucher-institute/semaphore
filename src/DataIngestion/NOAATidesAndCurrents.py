@@ -74,19 +74,7 @@ class NOAATidesAndCurrents:
         -------
         Returns None if DNE
         """
-        table = self.__dbManager.s_locationCode_dataSourceLocationCode_mapping
-        stmt = (select(table.c.dataSourceLocationCode)
-                .where(table.c.dataSourceCode == self.sourceCode)
-                .where(table.c.sLocationCode == location)
-                .where(table.c.priorityOrder == 0)
-                )
-        
-        if self.__dbManager.dbSelection(stmt).first() is None:
-            log(f'No station id found for {self.sourceCode} & {location}')
-            return None
-        else:
-            return self.__dbManager.dbSelection(stmt).first()[0]
-     
+        return self.__dbManager.s_locationCode_dataSourceLocationCode_mapping_select(self.sourceCode, location)
 
     def fetch_water_level_hourly(self, location: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> bool:
         """Fetches water level data from NOAA Tides and currents. 
