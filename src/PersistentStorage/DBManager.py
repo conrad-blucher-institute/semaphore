@@ -236,8 +236,8 @@ class DBManager():
     ################################################################################## DB Interaction private methods
     #############################################################################################
 
-    def __cursorToList(self, cursor: CursorResult) -> list[dict]:
-        """Converts a SQLAlchemy cursor to a generic list[dict] obj"""
+    def __cursorToList(self, cursor: CursorResult) -> list[tuple]:
+        """Converts a SQLAlchemy cursor to a generic list[tuple] obj"""
         return [row for row in cursor]
         
 
@@ -262,7 +262,7 @@ class DBManager():
     ################################################################################## Public selection methods
     #############################################################################################
     
-    def s_data_point_selection(self, sourceCode: str, seriesCode: str, locationCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> list[dict]:
+    def s_data_point_selection(self, sourceCode: str, seriesCode: str, locationCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> list[tuple]:
         """Selects from the data point table.
         -------
         Returns None if DNE
@@ -276,10 +276,10 @@ class DBManager():
             .where(table.c.timeActualized >= startTime)
             .where(table.c.timeActualized <= endTime)
         )
-
+        
         return self.__cursorToList(self.__dbSelection(stmt))
     
-    def s_prediction_selection(self, sourceCode: str, seriesCode: str, locationCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> list[dict]:
+    def s_prediction_selection(self, sourceCode: str, seriesCode: str, locationCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> list[tuple]:
         """Selects from the prediction table.
         -------
         Returns None if DNE
@@ -297,7 +297,7 @@ class DBManager():
         return self.__cursorToList(self.__dbSelection(stmt))
         
 
-    def s_locationCode_dataSourceLocationCode_mapping_select(self, sourceCode: str, location: str, priorityOrder: int = 0) -> list[dict]:
+    def s_locationCode_dataSourceLocationCode_mapping_select(self, sourceCode: str, location: str, priorityOrder: int = 0) -> list[tuple]:
         """Selects a a dataSourceLocationCode given a datasource and a location. 
         -------
         Returns None if DNE
@@ -315,13 +315,13 @@ class DBManager():
     ################################################################################## Purblic insertion Methods
     #############################################################################################
 
-    def s_data_point_insert(self, values: dict | list[dict]) -> CursorResult:
+    def s_data_point_insert(self, values: dict | list[tuple]) -> CursorResult:
         """Inserts a row or batch into s_data_point
         ------
         Dictionary reference: {"timeActualized", "timeAquired", "dataValue", "unitsCode", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
         ------
         Parameters:
-            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
         ------
         Returns:
             SQLAlchemy CursorResult
@@ -337,13 +337,13 @@ class DBManager():
         return self.__cursorToList(result)
 
 
-    def s_prediction_insert(self, values: dict | list[dict]) -> CursorResult:
+    def s_prediction_insert(self, values: dict | list[tuple]) -> CursorResult:
         """Inserts a row or batch into s_predictions
         ------
         Dictionary reference: {"timeGenerated", "leadTime", "dataValue", "unitsCode", (OP)"resultCode", (OP)"resultCodeUnit", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
         ------
         Parameters:
-            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
         ------
         Returns:
             SQLAlchemy CursorResult
@@ -359,13 +359,13 @@ class DBManager():
         return self.__cursorToList(result)
 
 
-    def s_locationCode_dataSourceLocationCode_mapping_insert(self, values: dict | list[dict]) -> CursorResult:
+    def s_locationCode_dataSourceLocationCode_mapping_insert(self, values: dict | list[tuple]) -> CursorResult:
         """Inserts a row or batch into s_locationCode_dataSourceLocationCode_mapping
         ------
         Dictionary reference: {"dataSourceCode", "sLocationCode", "dataSourceLocationCode", "priorityOrder"}
         ------
         Parameters:
-            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
         ------
         Returns:
             SQLAlchemy CursorResult
@@ -381,13 +381,13 @@ class DBManager():
         return self.__cursorToList(result)
 
 
-    def s_ref_slocation_insert(self, values: dict | list[dict]) -> CursorResult:
+    def s_ref_slocation_insert(self, values: dict | list[tuple]) -> CursorResult:
         """Inserts a row or batch into s_ref_slocation
         ------
         Dictionary reference: {"code", "displayName", (OP)"notes"}
         ------
         Parameters:
-            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
         ------
         Returns:
             SQLAlchemy CursorResult
@@ -403,13 +403,13 @@ class DBManager():
         return self.__cursorToList(result)
 
 
-    def s_ref_data_source_insert(self, values: dict | list[dict]) -> CursorResult:
+    def s_ref_data_source_insert(self, values: dict | list[tuple]) -> CursorResult:
         """Inserts a row or batch into s_ref_data_source
         ------
         Dictionary reference: {"code", "displayName", (OP)"notes"}
         ------
         Parameters:
-            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
         ------
         Returns:
             SQLAlchemy CursorResult
@@ -425,13 +425,13 @@ class DBManager():
         return self.__cursorToList(result)
 
 
-    def s_ref_series_insert(self, values: dict | list[dict]) -> CursorResult:
+    def s_ref_series_insert(self, values: dict | list[tuple]) -> CursorResult:
         """Inserts a row or batch into s_ref_series
         ------
         Dictionary reference: {"code", "displayName", (OP)"notes"}
         ------
         Parameters:
-            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
         ------
         Returns:
             SQLAlchemy CursorResult
@@ -447,13 +447,13 @@ class DBManager():
         return self.__cursorToList(result)
 
 
-    def s_ref_units_insert(self, values: dict | list[dict]) -> CursorResult:
+    def s_ref_units_insert(self, values: dict | list[tuple]) -> CursorResult:
         """Inserts a row or batch into s_ref_units
         ------
         Dictionary reference: {"code", "displayName", (OP)"notes"}
         ------
         Parameters:
-            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
         ------
         Returns:
             SQLAlchemy CursorResult
@@ -469,13 +469,13 @@ class DBManager():
         return self.__cursorToList(result)
 
 
-    def s_ref_datum_insert(self, values: dict | list[dict]) -> CursorResult:
+    def s_ref_datum_insert(self, values: dict | list[tuple]) -> CursorResult:
         """Inserts a row or batch into s_ref_datum
         ------
         Dictionary reference: {"code", "displayName", (OP)"notes"}
         ------
         Parameters:
-            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
         ------
         Returns:
             SQLAlchemy CursorResult
@@ -491,13 +491,13 @@ class DBManager():
         return self.__cursorToList(result)
 
 
-    def s_ref_resultCode_insert(self, values: dict | list[dict]) -> CursorResult:
+    def s_ref_resultCode_insert(self, values: dict | list[tuple]) -> CursorResult:
         """Inserts a row or batch into s_ref_resultCode
         ------
         Dictionary reference: {"code", "displayName", (OP)"notes"}
         ------
         Parameters:
-            values: dict | list[dict] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
         ------
         Returns:
             SQLAlchemy CursorResult

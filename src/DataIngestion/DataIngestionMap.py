@@ -32,7 +32,7 @@ class DataIngestionMap():
         """Returns the dbManager used by this dataIngestionMap for debugging perposes"""
         return self.dbManager
 
-    def map_fetch(self, request: Request) -> List[Dict] | None:
+    def map_fetch(self, request: Request) -> List[tuple] | None:
         """Maps a data fetch request to the propper class and method. Preforms the call and returns the result.
         ------
         Parameters
@@ -48,7 +48,7 @@ class DataIngestionMap():
                 log(f'Data source: {request.source}, not found in data ingestion map for request: {request}!')
                 return False
             
-    def __noaaTandC(self, request: Request) -> List[Dict] | None:
+    def __noaaTandC(self, request: Request) -> List[tuple] | None:
         """Maps noaaTandC fetch request to proper function. Preforms the call and returns the result.
         ------
         Parameters
@@ -56,11 +56,11 @@ class DataIngestionMap():
         Returns
             List[Dict] | None - Either a list of the succesffuly inserted rows in the db or None if something went wrong
         """
-        from NOAATidesAndCurrents import NOAATidesAndCurrents
+        from DataIngestion.NOAATidesAndCurrents import NOAATidesAndCurrents
         noaa = NOAATidesAndCurrents(self.dbManager)
 
         match request.series:
-            case 'WlHr':
+            case 'd1hrWl':
                 return noaa.fetch_water_level_hourly(request)
             case _:
                 log(f'Data series: {request.series}, not found for NOAAT&C for request: {request}')

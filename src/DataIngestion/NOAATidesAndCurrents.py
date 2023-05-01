@@ -54,7 +54,6 @@ class NOAATidesAndCurrents:
 
         #Create URL
         url = f'https://tidesandcurrents.noaa.gov/api/datagetter?product={product}&application=NOS.COOPS.TAC.MET&station={station}&time_zone=GMT&units=metric&interval=6&format=json&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&datum={datum}'
-        print(url)
         try: #Attempt download
             with urlopen(url) as response:
                 data = json.loads(''.join([line.decode() for line in response.readlines()])) #Download and parse
@@ -86,7 +85,7 @@ class NOAATidesAndCurrents:
             return None
 
 
-    def fetch_water_level_hourly(self, request: Request) -> List[Dict] | None:
+    def fetch_water_level_hourly(self, request: Request) -> List[tuple] | None:
         """Fetches water level data from NOAA Tides and currents. 
         -------
         Parameters:
@@ -124,7 +123,7 @@ class NOAATidesAndCurrents:
             insertionValueRow["unitsCode"] = 'float'
             insertionValueRow["dataSourceCode"] = self.sourceCode
             insertionValueRow["sLocationCode"] = request.location
-            insertionValueRow["seriesCode"] = 'WlHr'
+            insertionValueRow["seriesCode"] = request.series
             insertionValueRow["datumCode"] = request.datum
             insertionValueRow["latitude"] = lat
             insertionValueRow["longitude"] = lon

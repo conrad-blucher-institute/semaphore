@@ -20,12 +20,20 @@ from PersistentStorage.DBManager import DBManager
 from DataIngestion.DataIngestionMap import DataIngestionMap
 from  DataClasses import Request, Response, DataPoint, Prediction
 from utility import log
+from traceback import format_exc
 
 from datetime import datetime
 from typing import List, Dict
 
 
 class DataManager():
+
+    def __init__(self) -> None:
+        self.dbManager = DBManager()
+
+    def get_dbManager(self) -> DBManager:
+        """Get the dbManager this dataManager is using for debugging perposes."""
+        return self.dbManager
 
     def make_request(self, request: Request) -> Response:
         """This method attempts to fill a data request either by gettting the data from the DataBase or from DataIngestion. Will always return a response.
@@ -39,13 +47,12 @@ class DataManager():
             isPrediction, interval, seriesCode = self.__parse_series(request.series)
             
             ###Attempt to pull request from DB
-            dbManager = DBManager()
             checkedResults = []
             dbResults = []
             if isPrediction:
-                dbResults = dbManager.s_prediction_selection(request.source, request.series, request.location, request.fromDateTime, request.toDateTime, request.datum)
+                dbResults = self.dbManager.s_prediction_selection(request.source, request.series, request.location, request.fromDateTime, request.toDateTime, request.datum)
             else:
-                dbResults = dbManager.s_data_point_selection(request.source, request.series, request.location, request.fromDateTime, request.toDateTime, request.datum)
+                dbResults = self.dbManager.s_data_point_selection(request.source, request.series, request.location, request.fromDateTime, request.toDateTime, request.datum)
             
 
             ###Check contents contains the right amount of results
@@ -53,23 +60,24 @@ class DataManager():
             #Calculate the amnt of expected results
             amntExpected = self.__get_amnt_of_results_expected(interval, request.toDateTime, request.fromDateTime)
             if amntExpected is None:
-                return self.__get_and_log_err_response(request, f'Could not process series, {request.series}, interval value to determin amnt of expected results in request: {request}')
+                return self.__get_and_log_err_response(request, f'Could not process series, {request.series}, interval value to determin amnt of expected results in request.')
 
             #First AmountCheck
             if len(dbResults) != amntExpected:
 
                 #Call Data Ingestion to fetch data
-                dataIngestionMap = DataIngestionMap(dbManager)
+                dataIngestionMap = DataIngestionMap(self.dbManager)
                 diResults = dataIngestionMap.map_fetch(request)
                 if diResults is None:
-                    return self.__get_and_log_err_response(request, f'DB did not have data request, dataIngestion returned NONE, for request: {request}')
+                    return self.__get_and_log_err_response(request, f'DB did not have data request, dataIngestion returned NONE, for request.')
                 
                 #Merge data
                 mergedResults = self.__merge_results(dbResults, diResults)
 
                 #Second AmountCheck
                 if(len(mergedResults) != amntExpected):
-                    return self.__get_and_log_err_response(request, f'Merged Data Base Results and Data Ingestion Results failed to have the correct amount of results for request: {request}')
+                    print(f'----------------- {len(mergedResults)}    {amntExpected}')
+                    return self.__get_and_log_err_response(request, f'Merged Data Base Results and Data Ingestion Results failed to have the correct amount of results for request.')
                 else:
                     checkedResults = mergedResults
             else:
@@ -85,12 +93,12 @@ class DataManager():
                 else:
                     response.data = self.__splice_dataPoint_results(checkedResults)
             except Exception as e:
-                return self.__get_and_log_err_response(request, f'An issue occured when attempting to splice returned data into dataObjs for request: {request}\nException: {e}')
+                return self.__get_and_log_err_response(request, f'An issue occured when attempting to splice returned data into dataObjs for request.\nException: {format_exc()}')
             
             return response
         
         except Exception as e:
-            return self.__get_and_log_err_response(request, f'An unknown error occured attempting to fill request: {request}\nException: {e}')
+            return self.__get_and_log_err_response(request, f'An unknown error occured attempting to fill request.\nException: {format_exc()}')
     
 
     def __get_and_log_err_response(self, request: Request, msg: str) -> Response:
@@ -117,7 +125,7 @@ class DataManager():
             str = A six char unique code of the series.
         """
         isPrediction = (True if series[0] == 'p' else False)
-        interval = series[1:3]
+        interval = series[1:4]
         seriesCode = series[4:]
         return isPrediction, interval, seriesCode
     
@@ -141,11 +149,11 @@ class DataManager():
             case _:
                 return None
         
-        amntOfResultsExpected = int(totalSecondsrequested / secondsInInterval)
+        amntOfResultsExpected = int(totalSecondsrequested / secondsInInterval) + 1
         return amntOfResultsExpected
     
 
-    def __merge_results(self, first: List[Dict], second: List[Dict]) -> List[Dict]:
+    def __merge_results(self, first: List[tuple], second: List[tuple]) -> List[Dict]:
         """Merges two lists of dictionaries together, will only keep unique results.
         -------
         Parameters:
@@ -154,47 +162,55 @@ class DataManager():
         Returns:
             List[Dict] - The combined, unique List.
         """
-        uniqueToSecond = second - first
-        return first + uniqueToSecond
+        uniqueToSecond = set(second) - set(first)
+        return first + list(uniqueToSecond)
     
 
-    def __splice_prediction_results(self, results: List[Dict]) -> List[Prediction]:
+    def __splice_prediction_results(self, results: List[tuple]) -> List[Prediction]:
         """Splices up a list of dbresults, pulling out only the data that changes per point,
         and places them in a Prediction object.
         -------
         Parameters:
-            first List[Dict] - The collection of dbrows.
+            first List[tuple] - The collection of dbrows.
         Returns:
             List[Prediction] - The formatted objs.
         """
+        valueIndex = 3
+        unitIndex = 4
+        leadTimeIndex = 2
+        timeGeneratedIndex = 1
+        resultCodeIndex = 5
         predictions = []
         for row in results:
             predictions.append(Prediction(
-                row["dataValue"],
-                row["unitsCode"],
-                row["leadTime"],
-                row["timeGenerated"],
-                row["resultCode"]
+                row[valueIndex],
+                row[unitIndex],
+                row[leadTimeIndex],
+                row[timeGeneratedIndex],
+                row[resultCodeIndex]
             ))
 
         return predictions
         
 
-    def __splice_dataPoint_results(self, results: List[Dict]) -> List[DataPoint]:
+    def __splice_dataPoint_results(self, results: List[tuple]) -> List[DataPoint]:
         """Splices up a list of dbresults, pulling out only the data that changes per point,
         and places them in a DataPoint object.
         -------
         Parameters:
-            first List[Dict] - The collection of dbrows.
+            first List[tuple] - The collection of dbrows.
         Returns:
             List[Prediction] - The formatted objs.
         """
+        valueIndex = 3
+        unitIndex = 4
+        timeActualizedIndex = 1
         dataPoints = []
         for row in results:
             dataPoints.append(DataPoint(
-                row["dataValue"],
-                row["unitsCode"],
-                row["timeActualized"]
+                row[valueIndex],
+                row[unitIndex],
+                row[timeActualizedIndex]
             ))
 
         return dataPoints

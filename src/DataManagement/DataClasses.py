@@ -24,7 +24,9 @@ class DataPoint():
 
     def __str__(self) -> str:
         return f'[DataPoint] -> value: {self.value}, unit: {self.unit}, dataTime: {self.dateTime}'
-
+    
+    def __repr__(self):
+        return f'[DataPoint] -> value: {self.value}, unit: {self.unit}, dataTime: {self.dateTime}'
 
 class Prediction():
     def __init__(self, value: str, unit: str, leadTime: float, generatedTime: datetime, successValue: str = None) -> None:
@@ -35,6 +37,9 @@ class Prediction():
         self.successValue = successValue
     
     def __str__(self) -> str:
+        return f'[Prediction] -> value: {self.value}, unit: {self.unit}, leadTime: {self.leadTime}, generatedTime: {self.generatedTime}, successValue {self.successValue}'
+    
+    def __repr__(self):
         return f'[Prediction] -> value: {self.value}, unit: {self.unit}, leadTime: {self.leadTime}, generatedTime: {self.generatedTime}, successValue {self.successValue}'
 
 
@@ -49,7 +54,7 @@ class Request():
         self.toDateTime = toDateTime
 
     def __str__(self) -> str:
-        return f'[Request] -> source: {self.source}, series: {self.series}, location: {self.location}, unit: {self.unit}, datum {self.datum}, isPrediction {self.isPrediction}, fromDateTime {self.fromDateTime}, toDateTime {self.toDateTime}'
+        return f'[Request] -> source: {self.source}, series: {self.series}, location: {self.location}, unit: {self.unit}, datum {self.datum}, fromDateTime {self.fromDateTime}, toDateTime {self.toDateTime}'
 
 
 class Response():
@@ -60,5 +65,5 @@ class Response():
         self.errorReason = errorReason
 
     def __str__(self) -> str:
-        return f'[Response] -> request: {self.request}, data: {self.data}, wasSuccessful: {self.wasSuccessful}, errorReason: {self.errorReason}'
+        return f'[Response] -> request: {self.request}, data: {[d for d in self.data]}, wasSuccessful: {self.wasSuccessful}, errorReason: {self.errorReason}'
     

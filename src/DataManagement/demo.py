@@ -1,20 +1,12 @@
-#imports
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
+from DataClasses import Request
+from DataManager import DataManager
 
-from DataIngestionMap import DataIngestionMap
-from PersistentStorage.DBManager import DBManager
 from datetime import date, time, datetime
-from sqlalchemy import select
-from DataManagement.DataClasses import Request
 
 
 #init NOAAT&C obj, and grab ref to its dbMangaer
-
-dbm = DBManager()
-dIngestionMap = DataIngestionMap(dbm)
+dataManager = DataManager()
+dbm = dataManager.get_dbManager()
 
 try:
     #Create DB and insert some needed context values
@@ -35,14 +27,16 @@ try:
 
     ###ACTUAL DEMO CODE###
     r = Request('noaaT&C', 'd1hrWl', 'BHP', 'float', startTime, endTime, datum='MLLW')
-    
-    print(dIngestionMap.map_fetch(r))
+    response = dataManager.make_request(r)
+    for point in response.data:
+        print(point)
+    #print(response)
 
 
     ###Print out from DB to confirm it worked
-    stmt = select(dbm.s_data_point)
-    curser = dbm.s_data_point_selection('noaaT&C', 'd1hrWl', 'BHP', startTime, endTime, datumCode='MLLW')
-    print(curser)
+    dbResults = dbm.s_data_point_selection(r.source, r.series, r.location, r.fromDateTime, r.toDateTime, r.datum)
+    for result in dbResults:
+        print(result)
 
 finally:
     dbm.drop_DB()
