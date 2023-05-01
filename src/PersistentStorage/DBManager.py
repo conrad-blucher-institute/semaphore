@@ -238,7 +238,7 @@ class DBManager():
 
     def __cursorToList(self, cursor: CursorResult) -> list[tuple]:
         """Converts a SQLAlchemy cursor to a generic list[tuple] obj"""
-        return [row for row in cursor]
+        return [tuple(row) for row in cursor]
         
 
     def __dbSelection(self, stmt: Select) -> CursorResult:
