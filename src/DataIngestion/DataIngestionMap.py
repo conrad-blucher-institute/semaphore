@@ -46,7 +46,7 @@ class DataIngestionMap():
                 return self.__noaaTandC(request)
             case _:
                 log(f'Data source: {request.source}, not found in data ingestion map for request: {request}!')
-                return False
+                return None
             
     def __noaaTandC(self, request: Request) -> List[tuple] | None:
         """Maps noaaTandC fetch request to proper function. Preforms the call and returns the result.
@@ -64,7 +64,7 @@ class DataIngestionMap():
                 return noaa.fetch_water_level_hourly(request)
             case _:
                 log(f'Data series: {request.series}, not found for NOAAT&C for request: {request}')
-                return False
+                return None
 
     
     
