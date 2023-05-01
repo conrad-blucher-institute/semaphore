@@ -28,15 +28,19 @@ try:
     ###ACTUAL DEMO CODE###
     r = Request('noaaT&C', 'd1hrWl', 'BHP', 'float', startTime, endTime, datum='MLLW')
     response = dataManager.make_request(r)
-    for point in response.data:
-        print(point)
-    #print(response)
+    
+    print(response)
+    
+    # for point in response.data:
+    #     print(point)
+
 
 
     ###Print out from DB to confirm it worked
     dbResults = dbm.s_data_point_selection(r.source, r.series, r.location, r.fromDateTime, r.toDateTime, r.datum)
-    for result in dbResults:
-        print(result)
+    
+    # for result in dbResults:
+    #     print(result)
 
 finally:
     dbm.drop_DB()
