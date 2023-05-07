@@ -26,6 +26,7 @@
         "source": "noaaT&C",
         "series": "d1hrSurge",
         "unit": "float",
+        "datum": "MHW",
         "between": [0, -11]
     },
     {
@@ -43,23 +44,5 @@
         "series": "d1hrYWnCmp",
         "unit": "float",
         "between": [-1, -12]
-    }, 
-    {
-        "name": "x_wind_pred_forecast",
-        "location": "packChan",
-        "source": "noaaT&C",
-        "series": "p1hrXWnSpd",
-        "unit": "float",
-        "isBatch": true,
-        "between": [0, 23]
-    },
-    {
-        "name": "y_wind_pred_forecast",
-        "location": "packChan",
-        "source": "noaaT&C",
-        "series": "p1hrYWnSpd",
-        "unit": "float",
-        "isBatch": true,
-        "between": [0, 23]
     }
 ]}

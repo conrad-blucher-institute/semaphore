@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from PersistentStorage.DBManager import DBManager
 from DataIngestion.DataIngestionMap import DataIngestionMap
-from  DataClasses import Request, Response, DataPoint, Prediction
+from DataManagement.DataClasses import Request, Response, DataPoint, Prediction
 from utility import log
 from traceback import format_exc
 
