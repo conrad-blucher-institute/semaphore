@@ -1,8 +1,6 @@
 from DataClasses import Request
 from DataManager import DataManager
-
 from datetime import date, time, datetime
-
 
 #init NOAAT&C obj, and grab ref to its dbMangaer
 dataManager = DataManager()
@@ -19,10 +17,9 @@ try:
     ]
     dbm.s_locationCode_dataSourceLocationCode_mapping_insert(values)
 
-    #create face dattimes
+    #create fake datetimes
     startTime = datetime.combine(date(2000, 1, 1), time(3, 0))
     endTime = datetime.combine(date(2000, 1, 1), time(12, 0))
-
 
 
     ###ACTUAL DEMO CODE###
@@ -30,10 +27,8 @@ try:
     response = dataManager.make_request(r)
     
     print(response)
-    
     # for point in response.data:
     #     print(point)
-
 
 
     ###Print out from DB to confirm it worked
