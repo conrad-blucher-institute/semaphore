@@ -60,7 +60,7 @@ class DataManager():
             #Calculate the amnt of expected results
             amntExpected = self.__get_amnt_of_results_expected(interval, request.toDateTime, request.fromDateTime)
             if amntExpected is None:
-                return self.__get_and_log_err_response(request, f'Could not process series, {request.series}, interval value to determin amnt of expected results in request.')
+                return self.__get_and_log_err_response(request, dbResults, f'Could not process series, {request.series}, interval value to determin amnt of expected results in request.')
 
             #First AmountCheck
             if len(dbResults) != amntExpected:
@@ -69,14 +69,14 @@ class DataManager():
                 dataIngestionMap = DataIngestionMap(self.dbManager)
                 diResults = dataIngestionMap.map_fetch(request)
                 if diResults is None:
-                    return self.__get_and_log_err_response(request, f'DB did not have data request, dataIngestion returned NONE, for request.')
+                    return self.__get_and_log_err_response(request, dbResults, f'DB did not have data request, dataIngestion returned NONE, for request.')
                 
                 #Merge data
                 mergedResults = self.__merge_results(dbResults, diResults)
 
                 #Second AmountCheck
                 if(len(mergedResults) != amntExpected):
-                    return self.__get_and_log_err_response(request, f'Merged Data Base Results and Data Ingestion Results failed to have the correct amount of results for request. Got:{len(mergedResults)} Expected:{amntExpected}')
+                    return self.__get_and_log_err_response(request, mergedResults, f'Merged Data Base Results and Data Ingestion Results failed to have the correct amount of results for request. Got:{len(mergedResults)} Expected:{amntExpected}')
                 else:
                     checkedResults = mergedResults
             else:
@@ -92,15 +92,15 @@ class DataManager():
                 else:
                     response.data = self.__splice_dataPoint_results(checkedResults)
             except Exception as e:
-                return self.__get_and_log_err_response(request, f'An issue occured when attempting to splice returned data into dataObjs for request.\nException: {format_exc()}')
+                return self.__get_and_log_err_response(request, mergedResults, f'An issue occured when attempting to splice returned data into dataObjs for request.\nException: {format_exc()}')
             
             return response
         
         except Exception as e:
-            return self.__get_and_log_err_response(request, f'An unknown error occured attempting to fill request.\nException: {format_exc()}')
+            return self.__get_and_log_err_response(request, [], f'An unknown error occured attempting to fill request.\nException: {format_exc()}')
     
 
-    def __get_and_log_err_response(self, request: Request, msg: str) -> Response:
+    def __get_and_log_err_response(self, currentData: List, request: Request, msg: str) -> Response:
         """This function logs an error message as well as generating a Response object with the same message
         -------
         Parameters:
@@ -110,7 +110,9 @@ class DataManager():
             Response: A response object holding the error information.
         """
         log(msg)
-        return Response(request, False, msg)
+        response = Response(request, False, msg)
+        response.data = currentData
+        return response
     
 
     def __parse_series(self, series: str) -> tuple:
