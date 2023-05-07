@@ -8,7 +8,7 @@
         "debugName": "x_wind",
         "Location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrXWnDir",
+        "series": "d1hrXWnCmp",
         "unit": "float",
         "between": [0, 0]
     }, /*-6.791*/
@@ -16,7 +16,7 @@
         "debugName": "y_wind",
         "Location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrYWnDir",
+        "series": "d1hrYWnCmp",
         "unit": "float",
         "between": [0, 0]
     }, /*-0.356*/
@@ -32,17 +32,17 @@
         "debugName": "x_wind_prev",
         "Location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrXWnSpd",
+        "series": "d1hrXWnCmp",
         "unit": "float",
-        "between": [0, -11]
+        "between": [1, -12]
     }, /*[-7.603	-4.886	-3.347	-4.603	-4.898	-5.057	-4.728	-3.412	-2.13	-3.026	-4.375	-6.402]*/
     {
         "debugName": "y_wind_prev",
         "Location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrYWnSpd",
+        "series": "d1hrYWnCmp",
         "unit": "float",
-        "between": [0, -11]
+        "between": [-1, -12]
     }, /*[3.072	3.817	-1.023	1.954	2.715	3.039	3.694	3.924	1.491	1.042	1.421	6.182]*/
     {
         "debugName": "x_wind_pred_forecast",

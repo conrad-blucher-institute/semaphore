@@ -7,6 +7,11 @@
 #----------------------------------
 """ This file is an interface with the NOAA tideas and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
 An object of this class must be initalized with a DBInterface, as fetched data is directly imported into the DB via that interface.
+
+NOTE:: For an Interval of 6min, no request can be longer than 31 days. A year for 1 hour.
+NOTE::Origenal code was taken from:
+        Created By: Brian Colburn 
+        Source: https://github.com/conrad-blucher-institute/water-level-processing/blob/master/tides_and_currents_downloader.py#L84
  """ 
 #----------------------------------
 # 
@@ -24,6 +29,7 @@ from utility import log
 from datetime import datetime
 from urllib.error import HTTPError
 from urllib.request import urlopen
+from math import radians, cos, sin
 import json
 
 from typing import List, Dict
@@ -36,24 +42,26 @@ class NOAATidesAndCurrents:
         self.sourceCode = "noaaT&C"
         self.__dbManager = dbManager
 
+    #TODO:: There has to be a better way to do this!
+    def __create_pattern1_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> str:
+        return f'https://tidesandcurrents.noaa.gov/api/datagetter?product={product}&application=NOS.COOPS.TAC.MET&station={station}&time_zone=GMT&units=metric&interval=6&format=json&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&datum={datum}'
     
-    def __api_request(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> None | dict:
+    def __create_pattern2_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: str) -> str:
+        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.MET&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&time_zone=GMT&units=metric&interval={interval}&format=json'
+    
+    def __create_pattern3_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: str, datum: str) -> str:
+        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.WL&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&datum={datum}&station={station}&time_zone=GMT&units=metric&interval={interval}&format=json'
+    
+        
+    
+    def __api_request(self, url: str) -> None | dict:
         """Given the parameters, generates and utlizes a url to hit the t&C api. 
         NOTE No date range of 31 days will be accepted! - raises Value Errror
         NOTE On a bad api param, throws urlib HTTPError, code 400
-
-        Created By: Brian Colburn 
-        Source: https://github.com/conrad-blucher-institute/water-level-processing/blob/master/tides_and_currents_downloader.py#L84
         """
 
         log('Attempting fetch from NOAATides&Currents...')
-        #Tides and Currents doesn't accept a range bigger than 31 days
-        if((endDateTime - startDateTime).days > 31):
-            log('The date range cannot exceed 31 days!')
-            return None
-
-        #Create URL
-        url = f'https://tidesandcurrents.noaa.gov/api/datagetter?product={product}&application=NOS.COOPS.TAC.MET&station={station}&time_zone=GMT&units=metric&interval=6&format=json&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&datum={datum}'
+       
         try: #Attempt download
             with urlopen(url) as response:
                 data = json.loads(''.join([line.decode() for line in response.readlines()])) #Download and parse
@@ -102,7 +110,8 @@ class NOAATidesAndCurrents:
         if dataSourceCode is None: return None
         
         #Make API request
-        data = self.__api_request(dataSourceCode, 'hourly_height', request.fromDateTime, request.toDateTime, request.datum)
+        url = self.__create_pattern1_url(dataSourceCode, 'hourly_height', request.fromDateTime, request.toDateTime, request.datum)
+        data = self.__api_request(url)
         if data is None: return None
 
         #Parse metadata
@@ -120,6 +129,311 @@ class NOAATidesAndCurrents:
             insertionValueRow["timeActualized"] = datetime.fromisoformat(row['t'])
             insertionValueRow["timeAquired"] = dateTimeNow
             insertionValueRow["dataValue"] = row["v"]
+            insertionValueRow["unitsCode"] = 'float'
+            insertionValueRow["dataSourceCode"] = self.sourceCode
+            insertionValueRow["sLocationCode"] = request.location
+            insertionValueRow["seriesCode"] = request.series
+            insertionValueRow["datumCode"] = request.datum
+            insertionValueRow["latitude"] = lat
+            insertionValueRow["longitude"] = lon
+            insertionValues.append(insertionValueRow)
+
+        #insertData to DB
+        insertedRows = self.__dbManager.s_data_point_insert(insertionValues)
+        return insertedRows
+
+
+    def fetch_X_wind_componants_6min(self, request: Request) -> List[tuple] | None:
+        """Fetches wind spd and direction and calculates the X componant.
+        -------
+        Parameters:
+            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+
+        ------
+        Returns:
+            List[Dict] | None - The successfully inserted rows or None
+        NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
+        """
+        
+        #Get mapped location from DB then make API request, wl hardcoded
+        dataSourceCode = self.__get_station_number(request.location)
+        if dataSourceCode is None: return None
+        
+        #Make API request
+        url = self.__create_pattern2_url(dataSourceCode, 'wind', request.fromDateTime, request.toDateTime, '6')
+        data = self.__api_request(url)
+        if data is None: return None
+
+        #Parse metadata
+        metaData = data['metadata']
+        lat = metaData['lat']
+        lon = metaData['lon']
+
+        #Split the 
+        xValues = []
+        dateTimes = []
+        for row in data['data']:
+            winDirDeg = float(row['d'])
+            winSpd = float(row['s'])
+            time = datetime.fromisoformat(row['t'])
+
+            winDirRad = radians(winDirDeg)
+            winDir_X = winSpd * cos(winDirRad - 30)
+
+            xValues.append(str(winDir_X))
+            dateTimes.append(time)
+
+        #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
+        #They are saved as different series.
+        dateTimeNow = datetime.now()
+        insertionValues = []
+        for index, value in enumerate(xValues):
+            #Consturct DB row to insert
+            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
+            insertionValueRow["timeActualized"] = dateTimes[index]
+            insertionValueRow["timeAquired"] = dateTimeNow
+            insertionValueRow["dataValue"] = value
+            insertionValueRow["unitsCode"] = 'float'
+            insertionValueRow["dataSourceCode"] = self.sourceCode
+            insertionValueRow["sLocationCode"] = request.location
+            insertionValueRow["seriesCode"] = request.series
+            insertionValueRow["latitude"] = lat
+            insertionValueRow["longitude"] = lon
+            insertionValues.append(insertionValueRow)
+
+        #insertData to DB
+        insertedRows = self.__dbManager.s_data_point_insert(insertionValues)
+        return insertedRows
+    
+    def fetch_Y_wind_componants_6min(self, request: Request) -> List[tuple] | None:
+        """Fetches wind spd and direction and calculates the Y componant.
+        -------
+        Parameters:
+            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+
+        ------
+        Returns:
+            List[Dict] | None - The successfully inserted rows or None
+        NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
+        """
+        
+        #Get mapped location from DB then make API request, wl hardcoded
+        dataSourceCode = self.__get_station_number(request.location)
+        if dataSourceCode is None: return None
+        
+        #Make API request
+        url = self.__create_pattern2_url(dataSourceCode, 'wind', request.fromDateTime, request.toDateTime, '6')
+        data = self.__api_request(url)
+        if data is None: return None
+
+        #Parse metadata
+        metaData = data['metadata']
+        lat = metaData['lat']
+        lon = metaData['lon']
+
+        #Split the 
+        yValues = []
+        dateTimes = []
+        for row in data['data']:
+            winDirDeg = float(row['d'])
+            winSpd = float(row['s'])
+            time = datetime.fromisoformat(row['t'])
+
+            winDirRad = radians(winDirDeg)
+            winDir_Y = winSpd * cos(winDirRad - 30)
+
+            yValues.append(str(winDir_Y))
+            dateTimes.append(time)
+
+        #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
+        #They are saved as different series.
+        dateTimeNow = datetime.now()
+        insertionValues = []
+        for index, value in enumerate(yValues):
+            #Consturct DB row to insert
+            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
+            insertionValueRow["timeActualized"] = dateTimes[index]
+            insertionValueRow["timeAquired"] = dateTimeNow
+            insertionValueRow["dataValue"] = value
+            insertionValueRow["unitsCode"] = 'float'
+            insertionValueRow["dataSourceCode"] = self.sourceCode
+            insertionValueRow["sLocationCode"] = request.location
+            insertionValueRow["seriesCode"] = request.series
+            insertionValueRow["datumCode"] = ''
+            insertionValueRow["latitude"] = lat
+            insertionValueRow["longitude"] = lon
+            insertionValues.append(insertionValueRow)
+
+        #insertData to DB
+        insertedRows = self.__dbManager.s_data_point_insert(insertionValues)
+        return insertedRows
+
+
+    def fetch_X_wind_componants_hourly(self, request: Request) -> List[tuple] | None:
+        """Fetches wind spd and direction and calculates the X componant. 
+        -------
+        Parameters:
+            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+
+        ------
+        Returns:
+            List[Dict] | None - The successfully inserted rows or None
+        NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
+        """
+        
+        #Get mapped location from DB then make API request, wl hardcoded
+        dataSourceCode = self.__get_station_number(request.location)
+        if dataSourceCode is None: return None
+        
+        #Make API request
+        url = self.__create_pattern2_url(dataSourceCode, 'wind', request.fromDateTime, request.toDateTime, 'h')
+        data = self.__api_request(url)
+        if data is None: return None
+
+        #Parse metadata
+        metaData = data['metadata']
+        lat = metaData['lat']
+        lon = metaData['lon']
+
+        #Split the 
+        xValues = []
+        dateTimes = []
+        for row in data['data']:
+            winDirDeg = float(row['d'])
+            winSpd = float(row['s'])
+            time = datetime.fromisoformat(row['t'])
+
+            winDirRad = radians(winDirDeg)
+            winDir_X = winSpd * cos(winDirRad - 30)
+
+            xValues.append(str(winDir_X))
+            dateTimes.append(time)
+
+        #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
+        #They are saved as different series.
+        dateTimeNow = datetime.now()
+        insertionValues = []
+        for index, value in enumerate(xValues):
+            #Consturct DB row to insert
+            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
+            insertionValueRow["timeActualized"] = dateTimes[index]
+            insertionValueRow["timeAquired"] = dateTimeNow
+            insertionValueRow["dataValue"] = value
+            insertionValueRow["unitsCode"] = 'float'
+            insertionValueRow["dataSourceCode"] = self.sourceCode
+            insertionValueRow["sLocationCode"] = request.location
+            insertionValueRow["seriesCode"] = request.series
+            insertionValueRow["latitude"] = lat
+            insertionValueRow["longitude"] = lon
+            insertionValues.append(insertionValueRow)
+
+        #insertData to DB
+        insertedRows = self.__dbManager.s_data_point_insert(insertionValues)
+        return insertedRows
+
+
+    def fetch_Y_wind_componants_hourly(self, request: Request) -> List[tuple] | None:
+        """Fetches wind spd and direction and calculates the Y componant.
+        -------
+        Parameters:
+            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+
+        ------
+        Returns:
+            List[Dict] | None - The successfully inserted rows or None
+        NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
+        """
+        
+        #Get mapped location from DB then make API request, wl hardcoded
+        dataSourceCode = self.__get_station_number(request.location)
+        if dataSourceCode is None: return None
+        
+        #Make API request
+        url = self.__create_pattern2_url(dataSourceCode, 'wind', request.fromDateTime, request.toDateTime, 'h')
+        data = self.__api_request(url)
+        if data is None: return None
+
+        #Parse metadata
+        metaData = data['metadata']
+        lat = metaData['lat']
+        lon = metaData['lon']
+
+        #Split the 
+        yValues = []
+        dateTimes = []
+        for row in data['data']:
+            winDirDeg = float(row['d'])
+            winSpd = float(row['s'])
+            time = datetime.fromisoformat(row['t'])
+
+            winDirRad = radians(winDirDeg)
+            winDir_Y = winSpd * cos(winDirRad - 30)
+
+            yValues.append(str(winDir_Y))
+            dateTimes.append(time)
+
+        #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
+        #They are saved as different series.
+        dateTimeNow = datetime.now()
+        insertionValues = []
+        for index, value in enumerate(yValues):
+            #Consturct DB row to insert
+            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
+            insertionValueRow["timeActualized"] = dateTimes[index]
+            insertionValueRow["timeAquired"] = dateTimeNow
+            insertionValueRow["dataValue"] = value
+            insertionValueRow["unitsCode"] = 'float'
+            insertionValueRow["dataSourceCode"] = self.sourceCode
+            insertionValueRow["sLocationCode"] = request.location
+            insertionValueRow["seriesCode"] = request.series
+            insertionValueRow["latitude"] = lat
+            insertionValueRow["longitude"] = lon
+            insertionValues.append(insertionValueRow)
+
+        #insertData to DB
+        insertedRows = self.__dbManager.s_data_point_insert(insertionValues)
+        return insertedRows
+
+    
+    def fetch_surge_hourly(self, request: Request) -> List[tuple] | None:
+        """Fetches water level data and predicted wl to calculate serge.
+        -------
+        Parameters:
+            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+
+        ------
+        Returns:
+            List[Dict] | None - The successfully inserted rows or None
+        NOTE Hits: https://tidesandcurrents.noaa.gov/waterlevels.html?id=8775870&units=metric&bdate=20000101&edate=20000101&timezone=GMT&datum=MLLW&interval=h&action=data
+        """
+        
+        #Get mapped location from DB then make API request, wl hardcoded
+        dataSourceCode = self.__get_station_number(request.location)
+        if dataSourceCode is None: return None
+        
+        #Make API request, get wl and predictions
+        wlurl = self.__create_pattern1_url(dataSourceCode, 'hourly_height', request.fromDateTime, request.toDateTime, request.datum)
+        wlData = self.__api_request(wlurl)
+        predUrl = self.__create_pattern3_url(dataSourceCode, 'predictions', request.fromDateTime, request.toDateTime, 'h', request.datum)
+        predData = self.__api_request(predUrl)
+        if (wlData is None) or (predData is None): return None
+
+        #Parse metadata
+        metaData = wlData['metadata']
+        lat = metaData['lat']
+        lon = metaData['lon']
+
+        #Iterate through data and format DB rows
+        dateTimeNow = datetime.now()
+        insertionValues = []
+        #Waterlevels are returned as a complex JSOn with a meta header, but pred is just a list of objs named predictions
+        for wlRow, predRow in zip(wlData['data'], predData['predictions']):
+            
+            #Consturct DB row to insert
+            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
+            insertionValueRow["timeActualized"] = datetime.fromisoformat(wlRow['t'])
+            insertionValueRow["timeAquired"] = dateTimeNow
+            insertionValueRow["dataValue"] = str(float(wlRow['v']) - float(predRow['v']))
             insertionValueRow["unitsCode"] = 'float'
             insertionValueRow["dataSourceCode"] = self.sourceCode
             insertionValueRow["sLocationCode"] = request.location

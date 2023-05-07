@@ -11,24 +11,22 @@ try:
     dbm.create_DB()
     values = [
         {"dataSourceCode": "noaaT&C", "sLocationCode": "BHP", "dataSourceLocationCode": "8775870", "priorityOrder": 0},
-        {"dataSourceCode": "noaaT&C", "sLocationCode": "BHP", "dataSourceLocationCode": "8775870", "priorityOrder": 2},
-        {"dataSourceCode": "noaaT&C", "sLocationCode": "HCP", "dataSourceLocationCode": "1253252512", "priorityOrder": 0},
-        {"dataSourceCode": "lHouse", "sLocationCode": "BHP", "dataSourceLocationCode": "otine", "priorityOrder": 0}
+        {"dataSourceCode": "noaaT&C", "sLocationCode": "packChan", "dataSourceLocationCode": "8775792", "priorityOrder": 0},
+        {"dataSourceCode": "noaaT&C", "sLocationCode": "Aransas", "dataSourceLocationCode": "8775241", "priorityOrder": 0}
     ]
     dbm.s_locationCode_dataSourceLocationCode_mapping_insert(values)
 
     #create fake datetimes
-    startTime = datetime.combine(date(2000, 1, 1), time(3, 0))
-    endTime = datetime.combine(date(2000, 1, 1), time(12, 0))
-
+    startTime = datetime.combine(date(2020, 1, 1), time(3, 0))
+    endTime = datetime.combine(date(2020, 1, 1), time(12, 0))
 
     ###ACTUAL DEMO CODE###
-    r = Request('noaaT&C', 'd1hrWl', 'BHP', 'float', startTime, endTime, datum='MLLW')
+    r = Request('noaaT&C', 'd1hrSurge', 'Aransas', 'float', startTime, endTime, datum='MHW')
     response = dataManager.make_request(r)
     
-    print(response)
-    # for point in response.data:
-    #     print(point)
+    #print(response)
+    for point in response.data:
+        print(point)
 
 
     ###Print out from DB to confirm it worked

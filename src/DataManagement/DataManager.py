@@ -76,8 +76,7 @@ class DataManager():
 
                 #Second AmountCheck
                 if(len(mergedResults) != amntExpected):
-                    print(f'----------------- {len(mergedResults)}    {amntExpected}')
-                    return self.__get_and_log_err_response(request, f'Merged Data Base Results and Data Ingestion Results failed to have the correct amount of results for request.')
+                    return self.__get_and_log_err_response(request, f'Merged Data Base Results and Data Ingestion Results failed to have the correct amount of results for request. Got:{len(mergedResults)} Expected:{amntExpected}')
                 else:
                     checkedResults = mergedResults
             else:
@@ -146,6 +145,8 @@ class DataManager():
         match interval:
             case '1hr':
                 secondsInInterval = 3600
+            case '6mn':
+                secondsInInterval = 360
             case _:
                 return None
         
