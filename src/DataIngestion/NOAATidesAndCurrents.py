@@ -353,6 +353,7 @@ class NOAATidesAndCurrents:
         data = self.__api_request(url)
         if data is None: return None
 
+        print(url)
         #Parse metadata
         metaData = data['metadata']
         lat = metaData['lat']

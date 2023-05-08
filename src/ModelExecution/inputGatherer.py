@@ -31,6 +31,10 @@ class InputGatherer:
         """Constructor sends the specFile off to be loaded and parsed
         """
         self.__parse_dspec(dspecFileName)
+        self.__dataManager = DataManager()
+
+    def get_dataManager(self):
+        return self.__dataManager
     
     def __parse_dspec(self, dspecFileName: str) -> None:
         """Loads a dspec as a JSON file and parses out the options and input sepcifications. 
@@ -56,8 +60,10 @@ class InputGatherer:
 
     def __create_request(self, spec: dict, now: datetime):
         span = spec["between"]
+        
         fromDateTime = now + timedelta(hours= span[0])
         toDateTime = now + timedelta(hours= span[1])
+        print(f'{now} - {span[0]} | {fromDateTime} - {span[1]} | {toDateTime}')
         return Request(spec['source'], spec['series'], spec['location'], spec['unit'], fromDateTime, toDateTime, spec.get('datum'))
     
     def get_model_name(self) -> str:
@@ -68,12 +74,15 @@ class InputGatherer:
         """Public method that reads the import method from the dspec file and starts execution to
         gather said inputs. Returns the inputs as an array.
         """
-
-        dataManager = DataManager()
+        inputVector = []
         for specification in self.__inputSpecifications:
             request = self.__create_request(specification, dateTime)
-            response = dataManager.make_request(request)
-            print(response)
+            print(request)
+            # response = self.__dataManager.make_request(request)
+            
+            # print(type(response))
+
+            # print(inputVector)
         assert False
 
     
