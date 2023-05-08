@@ -65,5 +65,5 @@ class Response():
         self.errorReason = errorReason
 
     def __str__(self) -> str:
-        return f'[Response] -> request: {self.request}, data: {[d for d in self.data]}, wasSuccessful: {self.wasSuccessful}, errorReason: {self.errorReason}'
+        return f'[Response] -> request: {self.request}, wasSuccessful: {self.wasSuccessful}, errorReason: {self.errorReason}'
     

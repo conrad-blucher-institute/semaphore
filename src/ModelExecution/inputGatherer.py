@@ -61,8 +61,8 @@ class InputGatherer:
     def __create_request(self, spec: dict, now: datetime):
         span = spec["between"]
         
-        fromDateTime = now + timedelta(hours= span[0])
-        toDateTime = now + timedelta(hours= span[1])
+        toDateTime = now + timedelta(hours= span[0])
+        fromDateTime = now + timedelta(hours= span[1])
         print(f'{now} - {span[0]} | {fromDateTime} - {span[1]} | {toDateTime}')
         return Request(spec['source'], spec['series'], spec['location'], spec['unit'], fromDateTime, toDateTime, spec.get('datum'))
     
@@ -78,11 +78,12 @@ class InputGatherer:
         for specification in self.__inputSpecifications:
             request = self.__create_request(specification, dateTime)
             print(request)
-            # response = self.__dataManager.make_request(request)
+        #     response = self.__dataManager.make_request(request)
             
-            # print(type(response))
+        #     for data in response.data:
+        #         inputVector.append(data)
 
-            # print(inputVector)
+        # print(inputVector)
         assert False
 
     

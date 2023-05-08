@@ -1,6 +1,6 @@
 from modelWrapper import ModelWrapper
 from inputGatherer import InputGatherer
-from datetime import datetime
+from datetime import datetime, date, time
 
 
 # now = datetime.now()
@@ -15,6 +15,13 @@ ig = InputGatherer('shallowNN_bhp_test.json')
 dm = ig.get_dataManager()
 dbm = dm.get_dbManager()
 
+
+# from DataManagement.DataClasses import Request, Response
+
+# r = Response(Request('a', 'a','a','a', datetime.now(), datetime.now()), False, '')
+# r.data = None
+# print(r)
+
 try:
     dbm.create_DB()
     values = [
@@ -25,7 +32,8 @@ try:
     dbm.s_locationCode_dataSourceLocationCode_mapping_insert(values)
 
     now = datetime.utcnow()
-    ig.get_inputs(now)
+    tim = datetime.combine(date(2023, 5, 7), time(3, 0))
+    ig.get_inputs(tim)
 
 finally:
     dbm.drop_DB()
