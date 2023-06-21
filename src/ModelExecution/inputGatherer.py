@@ -77,14 +77,12 @@ class InputGatherer:
         inputVector = []
         for specification in self.__inputSpecifications:
             request = self.__create_request(specification, dateTime)
-            print(request)
-        #     response = self.__dataManager.make_request(request)
+            response = self.__dataManager.make_request(request)
             
-        #     for data in response.data:
-        #         inputVector.append(data)
+            for data in response.data:
+                inputVector.append(data.value)
 
-        # print(inputVector)
-        assert False
+        return inputVector
 
     
     def get_options(self) -> dict:
