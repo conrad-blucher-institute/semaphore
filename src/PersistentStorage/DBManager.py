@@ -1,15 +1,15 @@
       
 # -*- coding: utf-8 -*-
 #DBInterface.py
-#----------------------------------
+#-------------------------------
 # Created By : Matthew Kastl
 # Created Date: 3/26/2023
-# version 2.0
-#----------------------------------
+# version 3.0
+#-------------------------------
 """ This script defines a class that hold the Semaphore DB schema. It also has funtions to 
     manage the DB and interact with the db.
  """ 
-#----------------------------------
+#-------------------------------
 # 
 #
 #Imports
@@ -80,13 +80,13 @@ class DBManager():
 
 
     def get_metadata(self) -> MetaData:
-        """Fetches interface metadata that hold the DB schema
+        """Fetches metadata that hold the DB schema
         """
         return self._metadata_obj
 
 
     def __create_schema(self) -> None:
-        """This private meta builds the db schema in the metadata.
+        """Builds the db schema in the metadata.
         """
 
         self._metadata_obj = MetaData()
@@ -236,19 +236,14 @@ class DBManager():
     ################################################################################## DB Interaction private methods
     #############################################################################################
 
-    def __cursorToList(self, cursor: CursorResult) -> list[tuple]:
-        """Converts a SQLAlchemy cursor to a generic list[tuple] obj"""
-        return [tuple(row) for row in cursor]
-        
-
     def __dbSelection(self, stmt: Select) -> CursorResult:
         """Runs a slection statment 
-        ------
-        ------
+        ---
+        ---
         Parameters:
 
             stmt: SQLAlchemy Select - The statement to run
-        ------
+        ---
         Returns:
             SQLAlchemy CursorResult
         """
@@ -264,8 +259,8 @@ class DBManager():
     
     def s_data_point_selection(self, sourceCode: str, seriesCode: str, locationCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> list[tuple]:
         """Selects from the data point table.
-        -------
-        Returns None if DNE
+        ----
+        Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
         table = self.s_data_point
         stmt = (select(table)
@@ -277,12 +272,12 @@ class DBManager():
             .where(table.c.timeActualized <= endTime)
         )
         
-        return self.__cursorToList(self.__dbSelection(stmt))
+        return self.__dbSelection(stmt).fetchall()
     
     def s_prediction_selection(self, sourceCode: str, seriesCode: str, locationCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> list[tuple]:
         """Selects from the prediction table.
-        -------
-        Returns None if DNE
+        ----
+        Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
         table = self.s_prediction
         stmt = (select(table)
@@ -294,13 +289,13 @@ class DBManager():
             .where((table.c.timeGenerated + table.c.leadTime) <= endTime)
         )
 
-        return self.__cursorToList(self.__dbSelection(stmt))
+        return self.__dbSelection(stmt).fetchall()
         
 
     def s_locationCode_dataSourceLocationCode_mapping_select(self, sourceCode: str, location: str, priorityOrder: int = 0) -> list[tuple]:
         """Selects a a dataSourceLocationCode given a datasource and a location. 
-        -------
-        Returns None if DNE
+        ----
+        Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
         table = self.s_locationCode_dataSourceLocationCode_mapping
         stmt = (select(table)
@@ -309,205 +304,214 @@ class DBManager():
                 .where(table.c.priorityOrder == priorityOrder)
                 )
 
-        return self.__cursorToList(self.__dbSelection(stmt))
+        return self.__dbSelection(stmt).fetchall()
 
     #############################################################################################
     ################################################################################## Purblic insertion Methods
     #############################################################################################
 
-    def s_data_point_insert(self, values: dict | list[tuple]) -> CursorResult:
+    def s_data_point_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_data_point
-        ------
+        ---
         Dictionary reference: {"timeActualized", "timeAquired", "dataValue", "unitsCode", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
-        ------
+        ---
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ------
+        ---
         Returns:
-            SQLAlchemy CursorResult
+           Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_data_point)
+            cursor = conn.execute(insert(self.s_data_point)
                                   .returning(self.s_data_point), 
                                   values
                                   )
+            result = cursor.fetchall()
             conn.commit()
 
-        return self.__cursorToList(result)
+        return result
 
 
-    def s_prediction_insert(self, values: dict | list[tuple]) -> CursorResult:
+    def s_prediction_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_predictions
-        ------
+        ---
         Dictionary reference: {"timeGenerated", "leadTime", "dataValue", "unitsCode", (OP)"resultCode", (OP)"resultCodeUnit", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
-        ------
+        ---
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ------
+        ---
         Returns:
-            SQLAlchemy CursorResult
+           Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_prediction)
+            cursor = conn.execute(insert(self.s_prediction)
                                   .returning(self.s_prediction), 
                                   values
                                   )
+            result = cursor.fetchall()
             conn.commit()
 
-        return self.__cursorToList(result)
+        return result
 
 
-    def s_locationCode_dataSourceLocationCode_mapping_insert(self, values: dict | list[tuple]) -> CursorResult:
+    def s_locationCode_dataSourceLocationCode_mapping_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_locationCode_dataSourceLocationCode_mapping
-        ------
+        ---
         Dictionary reference: {"dataSourceCode", "sLocationCode", "dataSourceLocationCode", "priorityOrder"}
-        ------
+        ---
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ------
+        ---
         Returns:
-            SQLAlchemy CursorResult
+            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_locationCode_dataSourceLocationCode_mapping)
+            cursor = conn.execute(insert(self.s_locationCode_dataSourceLocationCode_mapping)
                                   .returning(self.s_locationCode_dataSourceLocationCode_mapping), 
                                   values
                                   )
+            result = cursor.fetchall()
             conn.commit()
 
-        return self.__cursorToList(result)
+        return result
 
 
-    def s_ref_slocation_insert(self, values: dict | list[tuple]) -> CursorResult:
+    def s_ref_slocation_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_slocation
-        ------
+        ---
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ------
+        ---
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ------
+        ---
         Returns:
-            SQLAlchemy CursorResult
+            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
         
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_slocation)
+            cursor = conn.execute(insert(self.s_ref_slocation)
                                   .returning(self.s_ref_slocation), 
                                   values
                                   )
+            result = cursor.fetchall()
             conn.commit()
 
-        return self.__cursorToList(result)
+        return result
 
 
-    def s_ref_data_source_insert(self, values: dict | list[tuple]) -> CursorResult:
+    def s_ref_data_source_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_data_source
-        ------
+        ---
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ------
+        ---
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ------
+        ---
         Returns:
-            SQLAlchemy CursorResult
+            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_data_source)
+            cursor = conn.execute(insert(self.s_ref_data_source)
                                   .returning(self.s_ref_data_source), 
                                   values
                                   )
+            result = cursor.fetchall()
             conn.commit()
 
-        return self.__cursorToList(result)
+        return result
 
 
-    def s_ref_series_insert(self, values: dict | list[tuple]) -> CursorResult:
+    def s_ref_series_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_series
-        ------
+        ---
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ------
+        ---
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ------
+        ---
         Returns:
-            SQLAlchemy CursorResult
+            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_series)
+            cursor = conn.execute(insert(self.s_ref_series)
                                   .returning(self.s_ref_series), 
                                   values
                                   )
+            result = cursor.fetchall()
             conn.commit()
 
-        return self.__cursorToList(result)
+        return result
 
 
-    def s_ref_units_insert(self, values: dict | list[tuple]) -> CursorResult:
+    def s_ref_units_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_units
-        ------
+        ---
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ------
+        ---
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ------
+        ---
         Returns:
-            SQLAlchemy CursorResult
+            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_units)
+            cursor = conn.execute(insert(self.s_ref_units)
                                   .returning(self.s_ref_units), 
                                   values
                                   )
+            result = cursor.fetchall()
             conn.commit()
 
-        return self.__cursorToList(result)
+        return result
 
 
-    def s_ref_datum_insert(self, values: dict | list[tuple]) -> CursorResult:
+    def s_ref_datum_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_datum
-        ------
+        ---
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ------
+        ---
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ------
+        ---
         Returns:
-            SQLAlchemy CursorResult
+            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_datum)
+            cursor = conn.execute(insert(self.s_ref_datum)
                                   .returning(self.s_ref_datum), 
                                   values
                                   )
+            result = cursor.fetchall()
             conn.commit()
 
-        return self.__cursorToList(result)
+        return result
 
 
-    def s_ref_resultCode_insert(self, values: dict | list[tuple]) -> CursorResult:
+    def s_ref_resultCode_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_resultCode
-        ------
+        ---
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ------
+        ---
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ------
+        ---
         Returns:
-            SQLAlchemy CursorResult
+            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
 
         with self.get_engine().connect() as conn:
-            result = conn.execute(insert(self.s_ref_resultCode)
+            cursor = conn.execute(insert(self.s_ref_resultCode)
                                   .returning(self.s_ref_resultCode), 
                                   values
                                   )
+            result = cursor.fetchall()
             conn.commit()
 
-        return self.__cursorToList(result)
+        return result
