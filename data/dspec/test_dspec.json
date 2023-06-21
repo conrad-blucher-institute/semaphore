@@ -1,7 +1,7 @@
 {
-  "name": "shallowNN_bhp",
-  "author": "Marina VicensMiquel",
-  "modelName": "shallowNN_bhp_modelSaved",
+  "name": "test AI",
+  "author": "John Doe",
+  "modelName": "test_AI",
   "options": [],
   "inputs": [
     { 
@@ -34,6 +34,38 @@
         "location": "packChan",
         "source": "noaaT&C",
         "series": "d1hrXWnCmp",
+        "unit": "float",
+        "between": [-1, -12]
+    },
+    {
+        "name": "y_wind_prev",
+        "location": "packChan",
+        "source": "noaaT&C",
+        "series": "d1hrYWnCmp",
+        "unit": "float",
+        "between": [-1, -12]
+    },
+    {
+        "name": "y_wind_prev",
+        "location": "packChan",
+        "source": "noaaT&C",
+        "series": "d1hrYWnCmp",
+        "unit": "float",
+        "between": [-1, -12]
+    },
+    {
+        "name": "y_wind_prev",
+        "location": "packChan",
+        "source": "noaaT&C",
+        "series": "d1hrYWnCmp",
+        "unit": "float",
+        "between": [-1, -12]
+    },
+    {
+        "name": "y_wind_prev",
+        "location": "packChan",
+        "source": "noaaT&C",
+        "series": "d1hrYWnCmp",
         "unit": "float",
         "between": [-1, -12]
     },
