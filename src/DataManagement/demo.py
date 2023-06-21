@@ -17,11 +17,11 @@ try:
     dbm.s_locationCode_dataSourceLocationCode_mapping_insert(values)
 
     #create fake datetimes
-    startTime = datetime.combine(date(2020, 1, 1), time(3, 0))
-    endTime = datetime.combine(date(2020, 1, 1), time(12, 0))
+    startTime = datetime.combine(date(2023, 5, 7), time(0, 0))
+    endTime = datetime.combine(date(2023, 5, 7), time(1, 0))
 
     ###ACTUAL DEMO CODE###
-    r = Request('noaaT&C', 'd1hrSurge', 'Aransas', 'float', startTime, endTime, datum='MHW')
+    r = Request('noaaT&C', 'd1hrYWnCmp', 'packChan', 'float', startTime, endTime, datum='MHW')
     response = dataManager.make_request(r)
     
     #print(response)
