@@ -76,11 +76,19 @@ class InputGatherer:
         """
         inputVector = []
         for specification in self.__inputSpecifications:
-            request = self.__create_request(specification, dateTime)
-            response = self.__dataManager.make_request(request)
+                
+            try:
             
-            for data in response.data:
-                inputVector.append(data.value)
+                request = self.__create_request(specification, dateTime)
+
+
+                response = self.__dataManager.make_request(request)
+
+                for data in response.data:
+                    inputVector.append(data.value)
+            except Exception as e:
+                log(f'ERROR: There was a problem in the input gatherer interpreting the response.\n\n Specification= {specification}\n\n Error={e}')
+                return -1
 
         return inputVector
 

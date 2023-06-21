@@ -35,7 +35,7 @@
         "source": "noaaT&C",
         "series": "d1hrXWnCmp",
         "unit": "float",
-        "between": [1, -12]
+        "between": [-1, -12]
     },
     {
         "name": "y_wind_prev",
