@@ -18,7 +18,7 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine as sqlalchemy_create_engine
 from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select
 from dotenv import load_dotenv
 from os import getenv
@@ -58,14 +58,14 @@ class DBManager():
         self._metadata_obj.drop_all(self.get_engine())
 
 
-    def create_engine(self, parmaString: str, echo: str ) -> None: #"sqlite+pysqlite:///:memory:"
+    def create_engine(self, parmaString: str, echo: bool ) -> None: #"sqlite+pysqlite:///:memory:"
         """Creates an engine object and tethers it to this interface class as an atribute
 
         Parameters:
             permaString: str - An sqlalchemy string that defines the location the engine should point to: (e.g. "sqlite+pysqlite:///:memory:")
             echo: str - Weather or not the engine should echo to stdout
         """
-        self._engine = create_engine(parmaString, echo=echo)
+        self._engine = sqlalchemy_create_engine(parmaString, echo=echo)
 
     
     def get_engine(self) -> Engine:
