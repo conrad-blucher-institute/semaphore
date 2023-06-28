@@ -20,8 +20,8 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 from DataManagement.DataManager import DataManager
 from DataManagement.DataClasses import Request, Response, DataPoint, Prediction
 
-from os import path
-from utility import log
+from os import path, getenv
+from utility import log, construct_true_path
 from json import load
 from csv import reader
 from datetime import datetime, timedelta
@@ -41,7 +41,7 @@ class InputGatherer:
         It saves them as private class objects.
         """
 
-        dspecFilePath = '../data/dspec/' + dspecFileName
+        dspecFilePath = construct_true_path(getenv('DSPEC_FOLDER_PATH')) + dspecFileName
 
         if not path.exists(dspecFilePath):
             log(f'{dspecFilePath} not found!')

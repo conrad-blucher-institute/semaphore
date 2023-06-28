@@ -18,8 +18,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 import datetime
-from os import path
-from utility import log
+from os import path, getenv
+from utility import log, construct_true_path
 from ModelExecution.inputGatherer import InputGatherer
 from numpy import array, reshape
 from tensorflow.keras.models import load_model
@@ -38,7 +38,7 @@ class ModelWrapper:
         in the dspec file using Tenserflow/Karas
         """
         modelName = self.__inputGatherer.get_model_name()
-        h5FilePath = '../data/models/' + (modelName if modelName.endswith('.h5') else modelName + '.h5')
+        h5FilePath = construct_true_path(getenv('MODEL_FOLDER_PATH')) + (modelName if modelName.endswith('.h5') else modelName + '.h5')
 
         if not path.exists(h5FilePath): 
             log(f'H5 file for {modelName} not found at {h5FilePath}!')
