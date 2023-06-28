@@ -12,6 +12,8 @@
 #
 #Imports
 from datetime import datetime
+from os.path import isabs
+from os import getcwd
 
 def get_time_stamp() -> None:
 	"""Fetches and formats system time, returns the formatted timestamp."""
@@ -32,5 +34,21 @@ def log(text: str) -> None:
 		logFile.write(f'{timeStamp}: {text}\n')
 	print(f'{timeStamp}: {text}')
 
+def construct_true_path(path: str) -> str:
+	"""A method to determin if a given path is a relative or abolute path. If
+	its a relative path it concatinates the working dir with the relative path
+
+	Parameters
+	---
+	path - String
+		The given path you want to test.
+
+	Returns
+	---
+		str - The safe path to use.
+	"""
+	if(not isabs(path)):
+		return getcwd() + path
+	else: return path
 
     
