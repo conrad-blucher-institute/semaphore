@@ -324,8 +324,9 @@ class DBManager():
 
         with self.get_engine().connect() as conn:
             cursor = conn.execute(insert(self.s_data_point)
-                                  .returning(self.s_data_point), 
-                                  values
+                                  .returning(self.s_data_point)
+                                  .values(values)
+                                  .prefix_with('OR IGNORE')
                                   )
             result = cursor.fetchall()
             conn.commit()
@@ -347,8 +348,9 @@ class DBManager():
 
         with self.get_engine().connect() as conn:
             cursor = conn.execute(insert(self.s_prediction)
-                                  .returning(self.s_prediction), 
-                                  values
+                                  .returning(self.s_prediction) 
+                                  .values(values)
+                                  .prefix_with('OR IGNORE')
                                   )
             result = cursor.fetchall()
             conn.commit()
