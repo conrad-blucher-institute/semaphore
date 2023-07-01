@@ -97,7 +97,7 @@ class DataManager():
             return response
         
         except Exception as e:
-            return self.__get_and_log_err_response(request, [], f'An unknown error occured attempting to fill request.\nException: {format_exc()}')
+            return self.__get_and_log_err_response(request, [], f'An unknown error occured attempting to fill request.\nRequest: {request}\nException: {format_exc()}')
     
 
     def __get_and_log_err_response(self, currentData: List, request: Request, msg: str) -> Response:
