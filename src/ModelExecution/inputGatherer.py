@@ -60,9 +60,15 @@ class InputGatherer:
 
     def __create_request(self, spec: dict, now: datetime):
         span = spec["between"]
-        
+
         toDateTime = now + timedelta(hours= span[0])
         fromDateTime = now + timedelta(hours= span[1])
+
+        #TODO:: Create better logic to propperly analyse a given input
+        isOnePoint = span[0] == span[1]
+        if isOnePoint:
+            fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
+
         print(f'{now} - {span[0]} | {fromDateTime} - {span[1]} | {toDateTime}')
         return Request(spec['source'], spec['series'], spec['location'], spec['unit'], fromDateTime, toDateTime, spec.get('datum'))
     
@@ -80,7 +86,7 @@ class InputGatherer:
             try:
             
                 request = self.__create_request(specification, dateTime)
-
+                print(request)
 
                 response = self.__dataManager.make_request(request)
 
