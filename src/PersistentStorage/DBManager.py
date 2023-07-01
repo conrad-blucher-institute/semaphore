@@ -111,7 +111,7 @@ class DBManager():
             Column("latitude", String(16), nullable=True),
             Column("longitude", String(16), nullable=True),
 
-            UniqueConstraint("timeActualized", "timeAquired", "dataValue", "unitsCode", "dataSourceCode", "sLocationCode", "seriesCode"),
+            UniqueConstraint("timeActualized", "dataValue", "unitsCode", "dataSourceCode", "sLocationCode", "seriesCode"),
         )
 
         self.s_prediction = Table(
