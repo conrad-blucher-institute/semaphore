@@ -21,13 +21,12 @@
         "between": [0, 0]
     },
     {
-        "name": "surge",
-        "location": "Aransas",
+        "name": "x_wind_prev",
+        "location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrSurge",
+        "series": "d1hrXWnCmp",
         "unit": "float",
-        "datum": "MHW",
-        "between": [0, -11]
+        "between": [-1, -12]
     },
     {
         "name": "x_wind_prev",
