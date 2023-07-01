@@ -86,7 +86,6 @@ class InputGatherer:
             try:
                 response = None
                 request = self.__create_request(specification, dateTime)
-
                 response = self.__dataManager.make_request(request)
 
                 for data in response.data:
