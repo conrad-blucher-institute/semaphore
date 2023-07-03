@@ -152,8 +152,8 @@ class DataManager():
             case _:
                 return None
         
-        amntOfResultsExpected = int(totalSecondsrequested / secondsInInterval) + 1
-        return amntOfResultsExpected
+        if totalSecondsrequested < secondsInInterval: return 1 #Only one point was requested
+        else: return int(totalSecondsrequested / secondsInInterval)
     
 
     def __merge_results(self, first: List[tuple], second: List[tuple]) -> List[Dict]:

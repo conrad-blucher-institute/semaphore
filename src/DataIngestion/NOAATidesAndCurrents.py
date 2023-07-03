@@ -59,8 +59,6 @@ class NOAATidesAndCurrents:
         NOTE No date range of 31 days will be accepted! - raises Value Errror
         NOTE On a bad api param, throws urlib HTTPError, code 400
         """
-
-        log('Attempting fetch from NOAATides&Currents...')
        
         try: #Attempt download
             with urlopen(url) as response:
@@ -72,7 +70,6 @@ class NOAATidesAndCurrents:
         except Exception as ex:
             log(f'Fetch failed, unhandled exceptions: {ex}')
             return None
-        log('Fetch complete.')
         return data
 
 
@@ -353,7 +350,6 @@ class NOAATidesAndCurrents:
         data = self.__api_request(url)
         if data is None: return None
 
-        log(url)
         #Parse metadata
         metaData = data['metadata']
         lat = metaData['lat']

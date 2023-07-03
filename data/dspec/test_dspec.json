@@ -26,7 +26,7 @@
         "source": "noaaT&C",
         "series": "d1hrXWnCmp",
         "unit": "float",
-        "between": [-1, -12]
+        "between": [0, -12]
     },
     {
         "name": "x_wind_prev",
@@ -34,7 +34,7 @@
         "source": "noaaT&C",
         "series": "d1hrXWnCmp",
         "unit": "float",
-        "between": [-1, -12]
+        "between": [0, -12]
     },
     {
         "name": "y_wind_prev",
@@ -42,7 +42,7 @@
         "source": "noaaT&C",
         "series": "d1hrYWnCmp",
         "unit": "float",
-        "between": [-1, -12]
+        "between": [0, -12]
     },
     {
         "name": "y_wind_prev",
@@ -50,7 +50,7 @@
         "source": "noaaT&C",
         "series": "d1hrYWnCmp",
         "unit": "float",
-        "between": [-1, -12]
+        "between": [0, -12]
     },
     {
         "name": "y_wind_prev",
@@ -58,7 +58,7 @@
         "source": "noaaT&C",
         "series": "d1hrYWnCmp",
         "unit": "float",
-        "between": [-1, -12]
+        "between": [0, -12]
     },
     {
         "name": "y_wind_prev",
@@ -66,7 +66,7 @@
         "source": "noaaT&C",
         "series": "d1hrYWnCmp",
         "unit": "float",
-        "between": [-1, -12]
+        "between": [0, -12]
     },
     {
         "name": "y_wind_prev",
@@ -74,6 +74,6 @@
         "source": "noaaT&C",
         "series": "d1hrYWnCmp",
         "unit": "float",
-        "between": [-1, -12]
+        "between": [0, -13]
     }
 ]}

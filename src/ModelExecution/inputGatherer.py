@@ -69,7 +69,6 @@ class InputGatherer:
         if isOnePoint:
             fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
 
-        print(f'{now} - {span[0]} | {fromDateTime} - {span[1]} | {toDateTime}')
         return Request(spec['source'], spec['series'], spec['location'], spec['unit'], fromDateTime, toDateTime, spec.get('datum'))
     
     def get_model_name(self) -> str:
@@ -80,20 +79,26 @@ class InputGatherer:
         """Public method that reads the import method from the dspec file and starts execution to
         gather said inputs. Returns the inputs as an array.
         """
+        
         inputVector = []
         for specification in self.__inputSpecifications:
                 
             try:
-            
+                response = None
                 request = self.__create_request(specification, dateTime)
-                print(request)
-
                 response = self.__dataManager.make_request(request)
 
                 for data in response.data:
-                    inputVector.append(data.value)
+                    
+                    #Cast from string to unit then append
+                    match data.unit:
+                        case 'float':
+                            inputVector.append(float(data.value))
+                        case _:
+                            log(f'Input gatherer has no conversion for Unit: {data.unit}')
+
             except Exception as e:
-                log(f'ERROR: There was a problem in the input gatherer interpreting the response.\n\n Specification= {specification}\n\n Error={e}')
+                log(f'ERROR: There was a problem in the input gatherer gathering a sepcification.\n\n Specification= {specification}\n\n Response= {response}\n\n Error={e}')
                 return -1
 
         return inputVector
@@ -101,4 +106,3 @@ class InputGatherer:
     
     def get_options(self) -> dict:
         return self.__options
-
