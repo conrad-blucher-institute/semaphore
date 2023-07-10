@@ -133,10 +133,36 @@ class DBManager():
             Column("sLocationCode", String(25), ForeignKey("s_ref_slocation.code"), nullable=False),        #the code for the source from which the value was obtained e.g, NOAA
             Column("seriesCode", String(10), ForeignKey("s_ref_series.code"), nullable=False),              #The code fot the type of measurment or prediction e.g, wdir
             Column("datumCode", String(10), ForeignKey("s_ref_datum.code"), nullable=True),                 #the datum(e.g., water-level, harmonic)
-            Column("latitude", String(16), nullable=False),
-            Column("longitude", String(16), nullable=False),
+            Column("latitude", String(16), nullable=True),
+            Column("longitude", String(16), nullable=True),
 
             UniqueConstraint("timeGenerated", "leadTime", "dataValue", "unitsCode", "dataSourceCode", "sLocationCode", "seriesCode"),
+        )
+
+        
+        self.s_prediction_output = Table(
+            "s_prediction_output",
+            self._metadata_obj,
+
+            Column("id", Integer, autoincrement=True, primary_key=True),
+            Column("timeAquired", DateTime, nullable=False),    #When the data was inserted by us
+
+            Column("timeGenerated", DateTime, nullable=False),  #The time at which the prediction was made
+            Column("leadTime", Float, nullable=False),          #the amount of hours till the predicted even occurs
+
+            Column("AIName", String(25), nullable=False),  #The name of the Ai that generated this
+            Column("AIGeneratedVersion", String(10), nullable=False),  #The name of the Ai that generated this
+
+            Column("dataValue", String(20), nullable=False),    #the actual value
+            Column("unitsCode", String(10), ForeignKey("s_ref_units.code"), nullable=False), #the units the data point is stored in
+
+            Column("sLocationCode", String(25), ForeignKey("s_ref_slocation.code"), nullable=False),        #the code for the source from which the value was obtained e.g, NOAA
+            Column("datumCode", String(10), ForeignKey("s_ref_datum.code"), nullable=True),                 #the datum(e.g., water-level, harmonic)
+           
+            Column("latitude", String(16), nullable=True),
+            Column("longitude", String(16), nullable=True),
+
+            UniqueConstraint("timeGenerated", "leadTime", "AIName", "AIGeneratedVersion"),
         )
 
         #This table maps CBI location codes to location codes used by datasorces
@@ -357,6 +383,29 @@ class DBManager():
 
         return result
 
+
+    def s_prediction_output_insert(self, values: dict | list[tuple]) -> list[tuple]:
+        """Inserts a row or batch into s_prediction_output
+        ---
+        Dictionary reference: {"timeAquired", "timeGenerated", "leadTime", "AIName", "AIGeneratedVersion", "dataValue", "unitsCode", "sLocationCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
+        ---
+        Parameters:
+            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+        ---
+        Returns:
+           Returns list[tupleish (sqlalchemy.engine.row.Row)]
+        """
+
+        with self.get_engine().connect() as conn:
+            cursor = conn.execute(insert(self.s_prediction_output)
+                                  .returning(self.s_prediction_output) 
+                                  .values(values)
+                                  )
+            result = cursor.fetchall()
+            conn.commit()
+
+        return result
+    
 
     def s_locationCode_dataSourceLocationCode_mapping_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_locationCode_dataSourceLocationCode_mapping
