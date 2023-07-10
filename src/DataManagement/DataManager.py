@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from PersistentStorage.DBManager import DBManager
 from DataIngestion.DataIngestionMap import DataIngestionMap
-from DataManagement.DataClasses import Request, Response, DataPoint, Prediction
+from DataManagement.DataClasses import Request, Response, DataPoint, Prediction, SaveRequest
 from utility import log
 from traceback import format_exc
 
@@ -34,6 +34,40 @@ class DataManager():
     def get_dbManager(self) -> DBManager:
         """Get the dbManager this dataManager is using for debugging perposes."""
         return self.dbManager
+    
+    def make_SaveRequest(self, saveRequest: SaveRequest) -> Response:
+
+        try:
+            insertionValues = []
+            for point in saveRequest.predictions:
+
+                #Consturct DB row to insert
+                insertionValueRow = {"timeAquired": None, "timeGenerated": None, "leadTime": None, "AIName": None, "AIGeneratedVersion": None, "dataValue": None, "unitsCode": None, "sLocationCode": None, "datumCode": None, "latitude": None, "longitude": None}
+                insertionValueRow["timeAquired"] = datetime.now()
+                insertionValueRow["timeGenerated"] = point.generatedTime
+                insertionValueRow["leadTime"] = point.leadTime
+                insertionValueRow["AIGeneratedVersion"] = saveRequest.AIGeneratedVersion
+                insertionValueRow["AIName"] = saveRequest.AIName
+                insertionValueRow["AIGeneratedVersion"] = saveRequest.AIGeneratedVersion
+                insertionValueRow["dataValue"] = point.value
+                insertionValueRow["unitsCode"] = point.unit
+                insertionValueRow["sLocationCode"] = saveRequest.location
+                insertionValueRow["datumCode"] = saveRequest.datum
+                insertionValueRow["latitude"] = saveRequest.latitude
+                insertionValueRow["longitude"] = saveRequest.longitude
+                insertionValues.append(insertionValueRow)
+                
+        except Exception as e:
+            self.__get_and_log_err_response([], saveRequest, f'A problem occured when attempting to build rows to insert for s_prediction_output! Caused error: \n{e}')
+        
+        try:
+            insertedValues = self.dbManager.s_prediction_output_insert(insertionValues)
+        except Exception as e:
+            self.__get_and_log_err_response([], saveRequest, f'A problem occured when attempting to insert rows to s_prediction_output! Caused error: \n{e}')
+
+        response = Response(saveRequest, True)
+        response.bind_data(insertedValues)
+        return response
 
     def make_request(self, request: Request) -> Response:
         """This method attempts to fill a data request either by gettting the data from the DataBase or from DataIngestion. Will always return a response.
