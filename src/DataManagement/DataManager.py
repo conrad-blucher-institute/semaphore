@@ -36,7 +36,12 @@ class DataManager():
         return self.dbManager
     
     def make_SaveRequest(self, saveRequest: SaveRequest) -> Response:
-
+        """Unpacks the prediction value before saving them to the db
+        Paremeters:
+            saveRequest: SaveRequest - The save request object detailing the request
+        Returns:
+            Response A response object returning what happened 
+        """
         try:
             insertionValues = []
             for point in saveRequest.predictions:
@@ -49,7 +54,7 @@ class DataManager():
                 insertionValueRow["AIGeneratedVersion"] = saveRequest.AIGeneratedVersion
                 insertionValueRow["AIName"] = saveRequest.AIName
                 insertionValueRow["AIGeneratedVersion"] = saveRequest.AIGeneratedVersion
-                insertionValueRow["dataValue"] = point.value
+                insertionValueRow["dataValue"] = str(point.value)
                 insertionValueRow["unitsCode"] = point.unit
                 insertionValueRow["sLocationCode"] = saveRequest.location
                 insertionValueRow["datumCode"] = saveRequest.datum
