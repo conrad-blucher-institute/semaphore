@@ -150,19 +150,17 @@ class DBManager():
             Column("timeGenerated", DateTime, nullable=False),  #The time at which the prediction was made
             Column("leadTime", Float, nullable=False),          #the amount of hours till the predicted even occurs
 
-            Column("AIName", String(25), nullable=False),  #The name of the Ai that generated this
-            Column("AIGeneratedVersion", String(10), nullable=False),  #The name of the Ai that generated this
+            Column("ModelName", String(25), nullable=False),  #The name of the Ai that generated this
+            Column("ModelVersion", String(10), nullable=False),  #The name of the Ai that generated this
 
             Column("dataValue", String(20), nullable=False),    #the actual value
             Column("unitsCode", String(10), ForeignKey("s_ref_units.code"), nullable=False), #the units the data point is stored in
 
             Column("sLocationCode", String(25), ForeignKey("s_ref_slocation.code"), nullable=False),        #the code for the source from which the value was obtained e.g, NOAA
+            Column("seriesCode", String(10), ForeignKey("s_ref_series.code"), nullable=False),              #The code fot the type of measurment or prediction e.g, wdir
             Column("datumCode", String(10), ForeignKey("s_ref_datum.code"), nullable=True),                 #the datum(e.g., water-level, harmonic)
-           
-            Column("latitude", String(16), nullable=True),
-            Column("longitude", String(16), nullable=True),
 
-            UniqueConstraint("timeGenerated", "leadTime", "AIName", "AIGeneratedVersion"),
+            UniqueConstraint("timeGenerated", "leadTime", "ModelName", "ModelVersion"),
         )
 
         #This table maps CBI location codes to location codes used by datasorces
@@ -194,6 +192,8 @@ class DBManager():
             Column("code", String(25), nullable=False),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
+            Column("latitude", String(16), nullable=False),
+            Column("longitude", String(16), nullable=False),
 
             UniqueConstraint("code", "displayName"),
         )
@@ -387,7 +387,7 @@ class DBManager():
     def s_prediction_output_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_prediction_output
         ---
-        Dictionary reference: {"timeAquired", "timeGenerated", "leadTime", "AIName", "AIGeneratedVersion", "dataValue", "unitsCode", "sLocationCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
+        Dictionary reference: {"timeAquired": None, "timeGenerated": None, "leadTime": None, "ModelName": None, "ModelVersion": None, "dataValue": None, "unitsCode": None, "sLocationCode": None, "seriesCode": None, (OP)"datumCode": None}
         ---
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.

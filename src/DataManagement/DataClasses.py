@@ -72,13 +72,12 @@ class Response():
         return f'[Response] -> request: {self.request}, wasSuccessful: {self.wasSuccessful}, errorReason: {self.errorReason}'
     
 class SaveRequest():
-    def __init__(self, AIName: str, AIGeneratedVersion: str, location: str, datum: str = None, latitude: str = None, longitude: str = None) -> None:
-        self.AIName = AIName
-        self.AIGeneratedVersion = AIGeneratedVersion
+    def __init__(self, ModelName: str, ModelVersion: str, series:str, location: str, datum: str = None) -> None:
+        self.ModelName = ModelName
+        self.ModelVersion = ModelVersion
+        self.series = series
         self.location = location
         self.datum = datum
-        self.latitude = latitude
-        self.longitude =  longitude
         self.predictions = []
 
     def bind_predictions(self, predictions: List) -> None:

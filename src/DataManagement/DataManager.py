@@ -47,19 +47,17 @@ class DataManager():
             for point in saveRequest.predictions:
 
                 #Consturct DB row to insert
-                insertionValueRow = {"timeAquired": None, "timeGenerated": None, "leadTime": None, "AIName": None, "AIGeneratedVersion": None, "dataValue": None, "unitsCode": None, "sLocationCode": None, "datumCode": None, "latitude": None, "longitude": None}
+                insertionValueRow = {"timeAquired": None, "timeGenerated": None, "leadTime": None, "ModelName": None, "ModelVersion": None, "dataValue": None, "unitsCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None}
                 insertionValueRow["timeAquired"] = datetime.now()
                 insertionValueRow["timeGenerated"] = point.generatedTime
                 insertionValueRow["leadTime"] = point.leadTime
-                insertionValueRow["AIGeneratedVersion"] = saveRequest.AIGeneratedVersion
-                insertionValueRow["AIName"] = saveRequest.AIName
-                insertionValueRow["AIGeneratedVersion"] = saveRequest.AIGeneratedVersion
+                insertionValueRow["ModelName"] = saveRequest.ModelName
+                insertionValueRow["ModelVersion"] = saveRequest.ModelVersion
                 insertionValueRow["dataValue"] = str(point.value)
                 insertionValueRow["unitsCode"] = point.unit
                 insertionValueRow["sLocationCode"] = saveRequest.location
+                insertionValueRow["seriesCode"] = saveRequest.series
                 insertionValueRow["datumCode"] = saveRequest.datum
-                insertionValueRow["latitude"] = saveRequest.latitude
-                insertionValueRow["longitude"] = saveRequest.longitude
                 insertionValues.append(insertionValueRow)
                 
         except Exception as e:
@@ -71,7 +69,7 @@ class DataManager():
             self.__get_and_log_err_response([], saveRequest, f'A problem occured when attempting to insert rows to s_prediction_output! Caused error: \n{e}')
 
         response = Response(saveRequest, True)
-        response.bind_data(insertedValues)
+
         return response
 
     def make_request(self, request: Request) -> Response:

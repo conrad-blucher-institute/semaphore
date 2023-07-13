@@ -29,7 +29,7 @@ class OutputManager():
     def __init__(self) -> None:
         self.dataManager = DataManager()
 
-    def output_method_map(self, method, prediction, AIName: str, generatedTime: datetime, leadTime: float, AIGeneratedVersion: str, location: str, datum: str = None, latitude: str = None, longitude: str = None) -> Response:
+    def output_method_map(self, method, prediction, AIName: str, generatedTime: datetime, leadTime: float, AIGeneratedVersion: str, series: str, location: str, datum: str = None, latitude: str = None, longitude: str = None) -> Response:
         """Maps a request to the specific method that handles its output.
         Paremeters:
             TODO IN refactor
@@ -39,12 +39,12 @@ class OutputManager():
         
         match method:
                 case 'one_packed_float':
-                    return self.__one_packed_float( prediction, AIName, generatedTime, leadTime, AIGeneratedVersion, location, datum, latitude, longitude)
+                    return self.__one_packed_float( prediction, AIName, generatedTime, leadTime, AIGeneratedVersion, series, location, datum, latitude, longitude)
                 case _:
                     log(f'No output method found for {method}!')
                     return None
     
-    def __one_packed_float(self, prediction, AIName: str, generatedTime: datetime, leadTime: float, AIGeneratedVersion: str, location: str, datum: str = None, latitude: str = None, longitude: str = None) -> Response:
+    def __one_packed_float(self, prediction, ModelName: str, generatedTime: datetime, leadTime: float, ModelVersion: str, series: str, location: str, datum: str = None, latitude: str = None, longitude: str = None) -> Response:
         """Unpacks the prediction value before saving them to the db
         Paremeters:
             TODO IN refactor
@@ -55,7 +55,7 @@ class OutputManager():
 
         predictions = []
         predictions.append(Prediction(prediction, 'float', leadTime, generatedTime))
-        request = SaveRequest(AIName, AIGeneratedVersion, location, datum, latitude, longitude)
+        request = SaveRequest(ModelName, ModelVersion, series, location, datum)
         request.bind_predictions(predictions)
         return self.dataManager.make_SaveRequest(request)
     

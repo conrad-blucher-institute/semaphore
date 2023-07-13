@@ -1,6 +1,6 @@
     {
-    "name": "test AI",
-    "version": "1.0.0",
+    "ModelName": "test AI",
+    "ModelVersion": "1.0.0",
     "author": "John Doe",
     "modelName": "test_AI",
     "outputInfo": {
@@ -8,9 +8,7 @@
         "leadTime": 24,
         "series": "waterHeight",
         "sLocation": "packChan",
-        "datum": "test_datum",
-        "latitude": 16.0000,
-        "logitude": 15.00000
+        "datum": "test_datum"
     },
     "inputs": [
     { 

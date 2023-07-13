@@ -100,14 +100,13 @@ class ModelWrapper:
             om.output_method_map(
                 method=outputInfo["outputMethod"],
                 prediction=prediction,
-                AIName=dspec["name"],
+                AIName=dspec["ModelName"],
                 generatedTime=dateTime,
                 leadTime=outputInfo["leadTime"],
-                AIGeneratedVersion=dspec["version"],
+                AIGeneratedVersion=dspec["ModelVersion"],
+                series=outputInfo["series"],
                 location=outputInfo["sLocation"],
                 datum=outputInfo["datum"],
-                latitude=outputInfo["latitude"],
-                longitude=outputInfo["logitude"]
             )
 
             return prediction
