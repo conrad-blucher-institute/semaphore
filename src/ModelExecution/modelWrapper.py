@@ -92,9 +92,25 @@ class ModelWrapper:
             
             shapedInputs = self.__shape_data(inputs) #Ensure recived inputs are shaped right for model
             prediction =  self._model.predict(shapedInputs) 
-            
+            dspec = self.__inputGatherer.get_dspec()
+            outputInfo = self.__inputGatherer.get_outputInfo()
+
+
             om = OutputManager()
-            om.output_method_map()
+            om.output_method_map(
+                method=outputInfo["outputMethod"],
+                prediction=prediction,
+                AIName=dspec["name"],
+                generatedTime=dateTime,
+                leadTime=outputInfo["leadTime"],
+                AIGeneratedVersion=dspec["version"],
+                location=outputInfo["sLocation"],
+                datum=outputInfo["datum"],
+                latitude=outputInfo["latitude"],
+                longitude=outputInfo["logitude"]
+            )
+
+            return prediction
 
         except Exception as e:
             log(e)
