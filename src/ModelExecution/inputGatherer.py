@@ -49,14 +49,8 @@ class InputGatherer:
         
         with open(dspecFilePath) as dspecFile:
             self.__dspecDict = load(dspecFile)
-            optionList = self.__dspecDict['options']
+            self.__outputInfo = self.__dspecDict['outputInfo']
             self.__inputSpecifications = self.__dspecDict['inputs']
-
-        #Combine every opetion into one "options dict"
-        self.__options = dict()
-        for dictionary in optionList:
-            for key, value in dictionary.items():
-                self.__options[key] = value
 
     def __create_request(self, spec: dict, now: datetime):
         span = spec["between"]
@@ -104,5 +98,8 @@ class InputGatherer:
         return inputVector
 
     
-    def get_options(self) -> dict:
-        return self.__options
+    def get_outputInfo(self) -> dict:
+        return self.__outputInfo
+    
+    def get_dspec(self) -> dict:
+        return self.__dspecDict
