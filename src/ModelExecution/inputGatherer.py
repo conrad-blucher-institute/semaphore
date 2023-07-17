@@ -67,7 +67,7 @@ class InputGatherer:
     
     def get_model_name(self) -> str:
         """Returns the name of the model as specified in the DSPEC file."""
-        return self.__dspecDict['modelName']       
+        return self.__dspecDict['modelFileName']       
 
     def get_inputs(self, dateTime: datetime) -> list[any]:
         """Public method that reads the import method from the dspec file and starts execution to

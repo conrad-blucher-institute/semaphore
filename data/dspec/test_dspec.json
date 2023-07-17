@@ -2,7 +2,7 @@
     "ModelName": "test AI",
     "ModelVersion": "1.0.0",
     "author": "John Doe",
-    "modelName": "test_AI",
+    "modelFileName": "test_AI",
     "outputInfo": {
         "outputMethod": "one_packed_float",
         "leadTime": 24,
