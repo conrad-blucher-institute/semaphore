@@ -51,7 +51,7 @@ class OutputManager():
         Returns:
             The Response from the datamanager 
         """
-        self.__unpack(prediction)
+        prediction = self.__unpack(prediction)
 
         predictions = []
         predictions.append(Prediction(prediction, 'float', leadTime, generatedTime))
