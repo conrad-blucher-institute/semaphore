@@ -1,13 +1,13 @@
     {
-    "ModelName": "test AI",
-    "ModelVersion": "1.0.0",
+    "modelName": "test AI",
+    "modelVersion": "1.0.0",
     "author": "John Doe",
     "modelFileName": "test_AI",
     "outputInfo": {
         "outputMethod": "one_packed_float",
         "leadTime": 24,
         "series": "waterHeight",
-        "sLocation": "packChan",
+        "location": "packChan",
         "datum": "test_datum"
     },
     "inputs": [
@@ -16,71 +16,80 @@
         "location": "packChan",
         "source": "noaaT&C",
         "series": "d1hrXWnCmp",
-        "unit": "float",
-        "between": [0, 0]
+        "unit": "meter",
+        "type": "float",
+        "range": [0, 0]
     },
     {
         "name": "y_wind",
         "location": "packChan",
         "source": "noaaT&C",
         "series": "d1hrYWnCmp",
-        "unit": "float",
-        "between": [0, 0]
+        "unit": "meter",
+        "type": "float",
+        "range": [0, 0]
     },
     {
         "name": "x_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
         "series": "d1hrXWnCmp",
-        "unit": "float",
-        "between": [0, -12]
+        "unit": "meter",
+        "type": "float",
+        "range": [0, -12]
     },
     {
         "name": "x_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
         "series": "d1hrXWnCmp",
-        "unit": "float",
-        "between": [0, -12]
+        "unit": "meter",
+        "type": "float",
+        "range": [0, -12]
     },
     {
         "name": "y_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
         "series": "d1hrYWnCmp",
-        "unit": "float",
-        "between": [0, -12]
+        "unit": "meter",
+        "type": "float",
+        "range": [0, -12]
     },
     {
         "name": "y_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
         "series": "d1hrYWnCmp",
-        "unit": "float",
-        "between": [0, -12]
+        "unit": "meter",
+        "type": "float",
+        "range": [0, -12]
     },
     {
         "name": "y_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
         "series": "d1hrYWnCmp",
-        "unit": "float",
-        "between": [0, -12]
+        "unit": "meter",
+        "type": "float",
+        "range": [0, -12]
     },
     {
         "name": "y_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
         "series": "d1hrYWnCmp",
-        "unit": "float",
-        "between": [0, -12]
+        "unit":  "meter",
+        "type": "float",
+        "range": [0, -12]
     },
     {
         "name": "y_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
         "series": "d1hrYWnCmp",
-        "unit": "float",
-        "between": [0, -13]
+        "unit": "meter",
+        "type": "float",
+        "range": [0, -13]
     }
 ]}
