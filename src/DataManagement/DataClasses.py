@@ -15,6 +15,7 @@ to when it could be verified.
 #
 #Inports
 from datetime import datetime
+from typing import List
 
 class DataPoint():
     def __init__(self, value: str, unit: str, dateTime: datetime) -> None:
@@ -64,6 +65,25 @@ class Response():
         self.wasSuccessful = wasSuccessful
         self.errorReason = errorReason
 
+    def bind_data(self, data: List) -> None:
+        self.data = data
+
     def __str__(self) -> str:
         return f'[Response] -> request: {self.request}, wasSuccessful: {self.wasSuccessful}, errorReason: {self.errorReason}'
     
+class SaveRequest():
+    def __init__(self, ModelName: str, ModelVersion: str, series:str, location: str, datum: str = None) -> None:
+        self.ModelName = ModelName
+        self.ModelVersion = ModelVersion
+        self.series = series
+        self.location = location
+        self.datum = datum
+        self.predictions = []
+
+    def bind_predictions(self, predictions: List) -> None:
+        self.predictions = predictions
+
+    def __str__(self) -> str:
+        return f'[Request] -> AIName: {self.AIName}, AIGeneratedVersion: {self.AIGeneratedVersion}, location: {self.location}, datum: {self.datum}, latitude {self.latitude}, longitude {self.longitude}'
+
+

@@ -17,10 +17,12 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
+from ModelExecution.inputGatherer import InputGatherer
+from ModelExecution.OutputManager import OutputManager
+
 import datetime
 from os import path, getenv
 from utility import log, construct_true_path
-from ModelExecution.inputGatherer import InputGatherer
 from numpy import array, reshape
 from tensorflow.keras.models import load_model
 
@@ -66,6 +68,7 @@ class ModelWrapper:
 
         #Reshape and return the data.
         return reshape(inputs, shapeTarget) 
+    
 
     def make_prediction(self, dateTime: datetime) -> any:
         """Public method to generate a prediction given a datetime.
@@ -76,6 +79,38 @@ class ModelWrapper:
             
             shapedInputs = self.__shape_data(inputs) #Ensure recived inputs are shaped right for model
             return self._model.predict(shapedInputs) 
+        except Exception as e:
+            log(e)
+            raise e
+        
+    def make_and_save_prediction(self, dateTime: datetime) -> any:
+        """Public method to generate a prediction given a datetime.
+        """
+        try:
+            inputs = self.__inputGatherer.get_inputs(dateTime)
+            if inputs == -1: return -1
+            
+            shapedInputs = self.__shape_data(inputs) #Ensure recived inputs are shaped right for model
+            prediction =  self._model.predict(shapedInputs) 
+            dspec = self.__inputGatherer.get_dspec()
+            outputInfo = self.__inputGatherer.get_outputInfo()
+
+
+            om = OutputManager()
+            om.output_method_map(
+                method=outputInfo["outputMethod"],
+                prediction=prediction,
+                AIName=dspec["ModelName"],
+                generatedTime=dateTime,
+                leadTime=outputInfo["leadTime"],
+                AIGeneratedVersion=dspec["ModelVersion"],
+                series=outputInfo["series"],
+                location=outputInfo["sLocation"],
+                datum=outputInfo["datum"],
+            )
+
+            return prediction
+
         except Exception as e:
             log(e)
             raise e
