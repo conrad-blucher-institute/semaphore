@@ -17,10 +17,12 @@ from typing import List
 
 class Actual():
     '''An Actual is a real data point with a value and a unit and can be linked to a date time.'''
-    def __init__(self, value: str, unit: str, dateTime: datetime) -> None:
+    def __init__(self, value: str, unit: str, dateTime: datetime, longitude: str = None, latitude: str = None) -> None:
         self.value = value
         self.unit = unit
         self.dateTime = dateTime
+        self.longitude = longitude
+        self.latitude = latitude
 
     def __str__(self) -> str:
         return f'\n[DataPoint] -> value: {self.value}, unit: {self.unit}, dataTime: {self.dateTime}'
@@ -33,12 +35,14 @@ class Prediction():
     was made and the lead time till its verification time.
     generatedTime + leadTime = verificationTime
     '''
-    def __init__(self, value: str, unit: str, leadTime: float, generatedTime: datetime, successValue: str = None) -> None:
+    def __init__(self, value: str, unit: str, leadTime: float, generatedTime: datetime, successValue: str = None, longitude: str = None, latitude: str = None) -> None:
         self.value = value
         self.unit = unit
         self.leadTime = leadTime
         self.generatedTime = generatedTime
         self.successValue = successValue
+        self.longitude = longitude
+        self.latitude = latitude
     
     def __str__(self) -> str:
         return f'\n[Prediction] -> value: {self.value}, unit: {self.unit}, leadTime: {self.leadTime}, generatedTime: {self.generatedTime}, successValue {self.successValue}'
