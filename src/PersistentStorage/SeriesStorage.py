@@ -4,7 +4,7 @@
 #-------------------------------
 # Created By : Matthew Kastl
 # Created Date: 3/26/2023
-# version 3.0
+# version 4.0
 #-------------------------------
 """ This script defines a class that hold the Semaphore DB schema. It also has funtions to 
     manage the DB and interact with the db.
@@ -127,7 +127,6 @@ class SeriesStorage():
             Column("unitsCode", String(10), ForeignKey("s_ref_units.code"), nullable=False), #the units the data point is stored in
 
             Column("resultCode", String(10), nullable=True), #some value that discribes the quality of the pridiction
-            Column("resultCodeUnit", String(10), ForeignKey("s_ref_resultCodeUnits.code"), nullable=True), #how that quality is stored
 
             Column("dataSourceCode", String(10), ForeignKey("s_ref_data_source.code"), nullable=False),     #CBI specific ID for the Location
             Column("sLocationCode", String(25), ForeignKey("s_ref_slocation.code"), nullable=False),        #the code for the source from which the value was obtained e.g, NOAA
@@ -336,13 +335,10 @@ class SeriesStorage():
     ################################################################################## Purblic insertion Methods
     #############################################################################################
 
-    def s_data_point_insert(self, series: Series | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_data_point
-        ---
-        Dictionary reference: {"timeActualized", "timeAquired", "dataValue", "unitsCode", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
-        ---
+    def s_data_point_insert(self, series: Series) -> list[tuple]:
+        """Inserts a series into s_data_point
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            series: Series - The series to insert.
         ---
         Returns:
            Returns list[tupleish (sqlalchemy.engine.row.Row)]
@@ -361,14 +357,14 @@ class SeriesStorage():
             insertionValueRow["sLocationCode"] = series.description.location
             insertionValueRow["seriesCode"] = series.description.series
             insertionValueRow["datumCode"] = series.description.datum
-            insertionValueRow["latitude"] = series.description.
-            insertionValueRow["longitude"] = lon
+            insertionValueRow["latitude"] = actual.latitude
+            insertionValueRow["longitude"] = actual.longitude
             insertionRows.append(insertionValueRow)
 
         with self.get_engine().connect() as conn:
             cursor = conn.execute(insert(self.s_data_point)
                                   .returning(self.s_data_point)
-                                  .values(values)
+                                  .values(insertionRows)
                                   .prefix_with('OR IGNORE')
                                   )
             result = cursor.fetchall()
@@ -377,22 +373,36 @@ class SeriesStorage():
         return result
 
 
-    def s_prediction_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_predictions
-        ---
-        Dictionary reference: {"timeGenerated", "leadTime", "dataValue", "unitsCode", (OP)"resultCode", (OP)"resultCodeUnit", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
-        ---
+    def s_prediction_insert(self, series: Series) -> list[tuple]:
+        """Inserts a series into s_prediction
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            series: Series - The series to insert.
         ---
         Returns:
            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
+
+        insertionRows = []
+        for prediction in series.get_data():
+            insertionValueRow = {"timeGenerated": None, "leadTime": None, "dataValue": None, "unitsCode": None, "resultCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
+            insertionValueRow["timeGenerated"] = prediction.generatedTime
+            insertionValueRow["leadTime"] = prediction.leadTime
+            insertionValueRow["dataValue"] = prediction.value
+            insertionValueRow["unitsCode"] = prediction.unit
+            insertionValueRow["resultCode"] = prediction.successValue
+            insertionValueRow["dataSourceCode"] = series.description.source
+            insertionValueRow["sLocationCode"] = series.description.location
+            insertionValueRow["seriesCode"] = series.description.location
+            insertionValueRow["datumCode"] = series.description.datum
+            insertionValueRow["latitude"] = prediction.latitude
+            insertionValueRow["longitude"] = prediction.longitude
+    
+            insertionRows.append(insertionValueRow)
 
         with self.get_engine().connect() as conn:
             cursor = conn.execute(insert(self.s_prediction)
                                   .returning(self.s_prediction) 
-                                  .values(values)
+                                  .values(insertionRows)
                                   .prefix_with('OR IGNORE')
                                   )
             result = cursor.fetchall()
@@ -401,22 +411,37 @@ class SeriesStorage():
         return result
 
 
-    def s_prediction_output_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_prediction_output
-        ---
-        Dictionary reference: {"timeAquired": None, "timeGenerated": None, "leadTime": None, "ModelName": None, "ModelVersion": None, "dataValue": None, "unitsCode": None, "sLocationCode": None, "seriesCode": None, (OP)"datumCode": None}
-        ---
+    def s_prediction_output_insert(self, series: Series) -> list[tuple]:
+        """Inserts a series into s_prediction_output
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            series: Series - The series to insert.
         ---
         Returns:
            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
 
+        now = datetime.now()
+        insertionRows = []
+        for prediction in series.get_data():
+
+            #Consturct DB row to insert
+            insertionValueRow = {"timeAquired": None, "timeGenerated": None, "leadTime": None, "ModelName": None, "ModelVersion": None, "dataValue": None, "unitsCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None}
+            insertionValueRow["timeAquired"] = now
+            insertionValueRow["timeGenerated"] = prediction.generatedTime
+            insertionValueRow["leadTime"] = prediction.leadTime
+            insertionValueRow["ModelName"] = series.description.ModelName
+            insertionValueRow["ModelVersion"] = series.description.ModelVersion
+            insertionValueRow["dataValue"] = prediction.value
+            insertionValueRow["unitsCode"] = prediction.unit
+            insertionValueRow["sLocationCode"] = series.description.location
+            insertionValueRow["seriesCode"] = series.description.series
+            insertionValueRow["datumCode"] = series.description.datum
+            insertionRows.append(insertionValueRow)
+
         with self.get_engine().connect() as conn:
             cursor = conn.execute(insert(self.s_prediction_output)
                                   .returning(self.s_prediction_output) 
-                                  .values(values)
+                                  .values(insertionRows)
                                   )
             result = cursor.fetchall()
             conn.commit()
