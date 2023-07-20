@@ -5,17 +5,17 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 
 from datetime import datetime
-from PersistentStorage.DBManager import DBManager
+from PersistentStorage.SeriesStorage import SeriesStorage
 
 def test_create_engine():
-    DBI = DBManager()
+    DBI = SeriesStorage()
     DBI.create_engine("sqlite+pysqlite:///:memory:", False)
     assert True
 
 
 def test_create_and_drop_DB():
     try:
-        DBI = DBManager()
+        DBI = SeriesStorage()
         DBI.create_DB()
     finally:
         DBI.drop_DB()
@@ -24,7 +24,7 @@ def test_create_and_drop_DB():
 
 def test_s_data_point():
     try:
-        DBI = DBManager()
+        DBI = SeriesStorage()
         DBI.create_DB()
         dt = datetime.now()
         row = {"timeActualized": dt, "timeAquired": dt, "dataValue": "7.12", "unitsCode": "float", "dataSourceCode": "WL", "sLocationCode": "HCP", "seriesCode": "HNC", "datumCode": "MHW", "latitude": "16.12312312", "longitude": "17.12312312"}
