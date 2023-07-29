@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 from os import getenv
 from utility import log
 
-from DataManagement.DataClasses import *
+from SeriesProvider.DataClasses import *
 
 class SeriesStorage():
     
