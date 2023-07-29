@@ -16,7 +16,7 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from PersistentStorage.DBManager import DBManager
+from PersistentStorage.SeriesStorage import SeriesStorage
 from DataIngestion.DataIngestionMap import DataIngestionMap
 from DataManagement.DataClasses import Request, Response, DataPoint, Prediction, SaveRequest
 from utility import log
@@ -29,9 +29,9 @@ from typing import List, Dict
 class DataManager():
 
     def __init__(self) -> None:
-        self.dbManager = DBManager()
+        self.dbManager = SeriesStorage()
 
-    def get_dbManager(self) -> DBManager:
+    def get_dbManager(self) -> SeriesStorage:
         """Get the dbManager this dataManager is using for debugging perposes."""
         return self.dbManager
     

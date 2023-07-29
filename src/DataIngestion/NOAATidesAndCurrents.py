@@ -22,7 +22,7 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from PersistentStorage.DBManager import DBManager
+from PersistentStorage.SeriesStorage import SeriesStorage
 from DataManagement.DataClasses import Request
 from utility import log
 
@@ -38,9 +38,9 @@ from typing import List, Dict
 
 class NOAATidesAndCurrents:
 
-    def __init__(self, dbManager: DBManager):
+    def __init__(self, dbManager: SeriesStorage):
         self.sourceCode = "noaaT&C"
-        self.__dbManager = dbManager
+        self.__dbManager = SeriesStorage
 
     #TODO:: There has to be a better way to do this!
     def __create_pattern1_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> str:

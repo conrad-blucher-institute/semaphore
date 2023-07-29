@@ -1,10 +1,10 @@
       
 # -*- coding: utf-8 -*-
-#DBInterface.py
+#SeriesStorage.py
 #-------------------------------
 # Created By : Matthew Kastl
 # Created Date: 3/26/2023
-# version 3.0
+# version 4.0
 #-------------------------------
 """ This script defines a class that hold the Semaphore DB schema. It also has funtions to 
     manage the DB and interact with the db.
@@ -26,7 +26,7 @@ from utility import log
 
 from DataManagement.DataClasses import *
 
-class DBManager():
+class SeriesStorage():
     
     def __init__(self) -> None:
         """Constructor generates an a db schema. Automatically creates the 
@@ -127,7 +127,6 @@ class DBManager():
             Column("unitsCode", String(10), ForeignKey("s_ref_units.code"), nullable=False), #the units the data point is stored in
 
             Column("resultCode", String(10), nullable=True), #some value that discribes the quality of the pridiction
-            Column("resultCodeUnit", String(10), ForeignKey("s_ref_resultCodeUnits.code"), nullable=True), #how that quality is stored
 
             Column("dataSourceCode", String(10), ForeignKey("s_ref_data_source.code"), nullable=False),     #CBI specific ID for the Location
             Column("sLocationCode", String(25), ForeignKey("s_ref_slocation.code"), nullable=False),        #the code for the source from which the value was obtained e.g, NOAA
@@ -283,36 +282,36 @@ class DBManager():
     ################################################################################## Public selection methods
     #############################################################################################
     
-    def s_data_point_selection(self, sourceCode: str, seriesCode: str, locationCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> list[tuple]:
+    def s_data_point_selection(self, seriesDescription: SeriesDescription) -> list[tuple]:
         """Selects from the data point table.
         ----
         Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
         table = self.s_data_point
         stmt = (select(table)
-            .where(table.c.dataSourceCode == sourceCode)
-            .where(table.c.sLocationCode == locationCode)
-            .where(table.c.seriesCode == seriesCode)
-            .where(table.c.datumCode == datumCode)
-            .where(table.c.timeActualized >= startTime)
-            .where(table.c.timeActualized <= endTime)
+            .where(table.c.dataSourceCode == seriesDescription.source)
+            .where(table.c.sLocationCode == seriesDescription.location)
+            .where(table.c.seriesCode == seriesDescription.series)
+            .where(table.c.datumCode == seriesDescription.datum)
+            .where(table.c.timeActualized >= seriesDescription.fromDateTime)
+            .where(table.c.timeActualized <= seriesDescription.toDateTime)
         )
         
         return self.__dbSelection(stmt).fetchall()
     
-    def s_prediction_selection(self, sourceCode: str, seriesCode: str, locationCode: str, startTime: datetime, endTime: datetime, datumCode: str = '') -> list[tuple]:
+    def s_prediction_selection(self, seriesDescription: SeriesDescription) -> list[tuple]:
         """Selects from the prediction table.
         ----
         Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
         table = self.s_prediction
         stmt = (select(table)
-            .where(table.c.dataSourceCode == sourceCode)
-            .where(table.c.sLocationCode == locationCode)
-            .where(table.c.seriesCode == seriesCode)
-            .where(table.c.datumCode == datumCode)
-            .where((table.c.timeGenerated + table.c.leadTime) >= startTime)
-            .where((table.c.timeGenerated + table.c.leadTime) <= endTime)
+            .where(table.c.dataSourceCode == seriesDescription.source)
+            .where(table.c.sLocationCode == seriesDescription.location)
+            .where(table.c.seriesCode == seriesDescription.series)
+            .where(table.c.datumCode == seriesDescription.datum)
+            .where((table.c.timeGenerated + table.c.leadTime) >= seriesDescription.fromDateTime)
+            .where((table.c.timeGenerated + table.c.leadTime) <= seriesDescription.toDateTime)
         )
 
         return self.__dbSelection(stmt).fetchall()
@@ -336,22 +335,36 @@ class DBManager():
     ################################################################################## Purblic insertion Methods
     #############################################################################################
 
-    def s_data_point_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_data_point
-        ---
-        Dictionary reference: {"timeActualized", "timeAquired", "dataValue", "unitsCode", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
-        ---
+    def s_data_point_insert(self, series: Series) -> list[tuple]:
+        """Inserts a series into s_data_point
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            series: Series - The series to insert.
         ---
         Returns:
            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
+
+        #Consturct DB row to insert
+        now = datetime.now()
+        insertionRows = []
+        for actual in series.get_data():
+            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
+            insertionValueRow["timeActualized"] = actual.dateTime
+            insertionValueRow["timeAquired"] = now
+            insertionValueRow["dataValue"] = actual.value
+            insertionValueRow["unitsCode"] = actual.unit
+            insertionValueRow["dataSourceCode"] = series.description.source
+            insertionValueRow["sLocationCode"] = series.description.location
+            insertionValueRow["seriesCode"] = series.description.series
+            insertionValueRow["datumCode"] = series.description.datum
+            insertionValueRow["latitude"] = actual.latitude
+            insertionValueRow["longitude"] = actual.longitude
+            insertionRows.append(insertionValueRow)
 
         with self.get_engine().connect() as conn:
             cursor = conn.execute(insert(self.s_data_point)
                                   .returning(self.s_data_point)
-                                  .values(values)
+                                  .values(insertionRows)
                                   .prefix_with('OR IGNORE')
                                   )
             result = cursor.fetchall()
@@ -360,22 +373,36 @@ class DBManager():
         return result
 
 
-    def s_prediction_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_predictions
-        ---
-        Dictionary reference: {"timeGenerated", "leadTime", "dataValue", "unitsCode", (OP)"resultCode", (OP)"resultCodeUnit", "dataSourceCode", "sLocationCode", "seriesCode", (OP)"datumCode", (OP)"latitude", (OP)"longitude"}
-        ---
+    def s_prediction_insert(self, series: Series) -> list[tuple]:
+        """Inserts a series into s_prediction
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            series: Series - The series to insert.
         ---
         Returns:
            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
+
+        insertionRows = []
+        for prediction in series.get_data():
+            insertionValueRow = {"timeGenerated": None, "leadTime": None, "dataValue": None, "unitsCode": None, "resultCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
+            insertionValueRow["timeGenerated"] = prediction.generatedTime
+            insertionValueRow["leadTime"] = prediction.leadTime
+            insertionValueRow["dataValue"] = prediction.value
+            insertionValueRow["unitsCode"] = prediction.unit
+            insertionValueRow["resultCode"] = prediction.successValue
+            insertionValueRow["dataSourceCode"] = series.description.source
+            insertionValueRow["sLocationCode"] = series.description.location
+            insertionValueRow["seriesCode"] = series.description.location
+            insertionValueRow["datumCode"] = series.description.datum
+            insertionValueRow["latitude"] = prediction.latitude
+            insertionValueRow["longitude"] = prediction.longitude
+    
+            insertionRows.append(insertionValueRow)
 
         with self.get_engine().connect() as conn:
             cursor = conn.execute(insert(self.s_prediction)
                                   .returning(self.s_prediction) 
-                                  .values(values)
+                                  .values(insertionRows)
                                   .prefix_with('OR IGNORE')
                                   )
             result = cursor.fetchall()
@@ -384,22 +411,37 @@ class DBManager():
         return result
 
 
-    def s_prediction_output_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_prediction_output
-        ---
-        Dictionary reference: {"timeAquired": None, "timeGenerated": None, "leadTime": None, "ModelName": None, "ModelVersion": None, "dataValue": None, "unitsCode": None, "sLocationCode": None, "seriesCode": None, (OP)"datumCode": None}
-        ---
+    def s_prediction_output_insert(self, series: Series) -> list[tuple]:
+        """Inserts a series into s_prediction_output
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            series: Series - The series to insert.
         ---
         Returns:
            Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
 
+        now = datetime.now()
+        insertionRows = []
+        for prediction in series.get_data():
+
+            #Consturct DB row to insert
+            insertionValueRow = {"timeAquired": None, "timeGenerated": None, "leadTime": None, "ModelName": None, "ModelVersion": None, "dataValue": None, "unitsCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None}
+            insertionValueRow["timeAquired"] = now
+            insertionValueRow["timeGenerated"] = prediction.generatedTime
+            insertionValueRow["leadTime"] = prediction.leadTime
+            insertionValueRow["ModelName"] = series.description.ModelName
+            insertionValueRow["ModelVersion"] = series.description.ModelVersion
+            insertionValueRow["dataValue"] = prediction.value
+            insertionValueRow["unitsCode"] = prediction.unit
+            insertionValueRow["sLocationCode"] = series.description.location
+            insertionValueRow["seriesCode"] = series.description.series
+            insertionValueRow["datumCode"] = series.description.datum
+            insertionRows.append(insertionValueRow)
+
         with self.get_engine().connect() as conn:
             cursor = conn.execute(insert(self.s_prediction_output)
                                   .returning(self.s_prediction_output) 
-                                  .values(values)
+                                  .values(insertionRows)
                                   )
             result = cursor.fetchall()
             conn.commit()
