@@ -17,9 +17,10 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from DataManagement.DataManager import DataManager
-from DataManagement.DataClasses import Request, Response, DataPoint, Prediction
+from SeriesProvider.SeriesProvider import DataManager
+from SeriesProvider.DataClasses import Request, Response, DataPoint, Prediction
 from ModelExecution.dspec import Dspec, OutputInfo, Input
+
 
 from os import path, getenv
 from utility import log, construct_true_path

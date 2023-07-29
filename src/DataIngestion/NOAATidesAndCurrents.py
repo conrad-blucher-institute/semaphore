@@ -3,7 +3,7 @@
 #----------------------------------
 # Created By: Matthew Kastl
 # Created Date: 4/8/2023
-# version 2.2
+# version 3.0
 #----------------------------------
 """ This file is an interface with the NOAA tideas and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
 An object of this class must be initalized with a DBInterface, as fetched data is directly imported into the DB via that interface.
@@ -22,8 +22,8 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from PersistentStorage.SeriesStorage import SeriesStorage
-from DataManagement.DataClasses import Request
+from SeriesStorage.SeriesStorage import SeriesStorage
+from SeriesProvider.DataClasses import Series, SeriesDescription, Actual, Prediction
 from utility import log
 
 from datetime import datetime
@@ -38,9 +38,9 @@ from typing import List, Dict
 
 class NOAATidesAndCurrents:
 
-    def __init__(self, dbManager: SeriesStorage):
+    def __init__(self, seriesStorage: SeriesStorage):
         self.sourceCode = "noaaT&C"
-        self.__dbManager = SeriesStorage
+        self.__seriesStorage = SeriesStorage
 
     #TODO:: There has to be a better way to do this!
     def __create_pattern1_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> str:
@@ -80,7 +80,7 @@ class NOAATidesAndCurrents:
         Returns None if DNE
         """
 
-        dbResult = self.__dbManager.s_locationCode_dataSourceLocationCode_mapping_select(self.sourceCode, location)
+        dbResult = self.__seriesStorage.s_locationCode_dataSourceLocationCode_mapping_select(self.sourceCode, location)
         if dbResult:
             resultOffset = 0
             stationIndex = 3
@@ -90,15 +90,15 @@ class NOAATidesAndCurrents:
             return None
 
 
-    def fetch_water_level_hourly(self, request: Request) -> List[tuple] | None:
+    def fetch_water_level_hourly(self, request: SeriesDescription) -> Series | None:
         """Fetches water level data from NOAA Tides and currents. 
         -------
         Parameters:
-            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+            request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
 
         ------
         Returns:
-            List[Dict] | None - The successfully inserted rows or None
+           Series | None - The successfully inserted rows or None
         NOTE Hits: https://tidesandcurrents.noaa.gov/waterlevels.html?id=8775870&units=metric&bdate=20000101&edate=20000101&timezone=GMT&datum=MLLW&interval=h&action=data
         """
         
@@ -118,37 +118,38 @@ class NOAATidesAndCurrents:
 
         #Iterate through data and format DB rows
         dateTimeNow = datetime.now()
-        insertionValues = []
+        actuals = []
         for row in data['data']:
             
-            #Consturct DB row to insert
-            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
-            insertionValueRow["timeActualized"] = datetime.fromisoformat(row['t'])
-            insertionValueRow["timeAquired"] = dateTimeNow
-            insertionValueRow["dataValue"] = row["v"]
-            insertionValueRow["unitsCode"] = 'float'
-            insertionValueRow["dataSourceCode"] = self.sourceCode
-            insertionValueRow["sLocationCode"] = request.location
-            insertionValueRow["seriesCode"] = request.series
-            insertionValueRow["datumCode"] = request.datum
-            insertionValueRow["latitude"] = lat
-            insertionValueRow["longitude"] = lon
-            insertionValues.append(insertionValueRow)
+            #Construct list of actuals
+            actual = Actual()
+            actual.dateTime = datetime.fromisoformat(row['t'])
+            actual.value = row["v"]
+            actual.unit = 'meter'
+            actual.latitude = lat
+            actual.longitude = lon
+            actuals.append(actual)
+
+        series = Series()
+        series.description = request
+        series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__dbManager.s_data_point_insert(insertionValues)
-        return insertedRows
+        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+
+        series.bind_data(insertedRows) #Rebind to only return what rows were inserted?
+        return series
 
 
-    def fetch_X_wind_componants_6min(self, request: Request) -> List[tuple] | None:
+    def fetch_X_wind_componants_6min(self, request: SeriesDescription) -> Series | None:
         """Fetches wind spd and direction and calculates the X componant.
         -------
         Parameters:
-            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+            request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
 
         ------
         Returns:
-            List[Dict] | None - The successfully inserted rows or None
+           Series | None - The successfully inserted rows or None
         NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
         """
         
@@ -182,35 +183,35 @@ class NOAATidesAndCurrents:
 
         #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
         #They are saved as different series.
-        dateTimeNow = datetime.now()
-        insertionValues = []
+        actuals = []
         for index, value in enumerate(xValues):
-            #Consturct DB row to insert
-            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
-            insertionValueRow["timeActualized"] = dateTimes[index]
-            insertionValueRow["timeAquired"] = dateTimeNow
-            insertionValueRow["dataValue"] = value
-            insertionValueRow["unitsCode"] = 'float'
-            insertionValueRow["dataSourceCode"] = self.sourceCode
-            insertionValueRow["sLocationCode"] = request.location
-            insertionValueRow["seriesCode"] = request.series
-            insertionValueRow["latitude"] = lat
-            insertionValueRow["longitude"] = lon
-            insertionValues.append(insertionValueRow)
+          
+            #Construct list of actuals
+            actual = Actual()
+            actual.dateTime = dateTimes[index]
+            actual.value = value
+            actual.unit = 'meter'
+            actual.latitude = lat
+            actual.longitude = lon
+            actuals.append(actual)
+
+        series = Series()
+        series.description = request
+        series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__dbManager.s_data_point_insert(insertionValues)
-        return insertedRows
+        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+        return series
     
-    def fetch_Y_wind_componants_6min(self, request: Request) -> List[tuple] | None:
+    def fetch_Y_wind_componants_6min(self, request: SeriesDescription) -> Series | None:
         """Fetches wind spd and direction and calculates the Y componant.
         -------
         Parameters:
-            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+            request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
 
         ------
         Returns:
-            List[Dict] | None - The successfully inserted rows or None
+           Series | None - The successfully inserted rows or None
         NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
         """
         
@@ -244,37 +245,35 @@ class NOAATidesAndCurrents:
 
         #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
         #They are saved as different series.
-        dateTimeNow = datetime.now()
-        insertionValues = []
+        actuals = []
         for index, value in enumerate(yValues):
-            #Consturct DB row to insert
-            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
-            insertionValueRow["timeActualized"] = dateTimes[index]
-            insertionValueRow["timeAquired"] = dateTimeNow
-            insertionValueRow["dataValue"] = value
-            insertionValueRow["unitsCode"] = 'float'
-            insertionValueRow["dataSourceCode"] = self.sourceCode
-            insertionValueRow["sLocationCode"] = request.location
-            insertionValueRow["seriesCode"] = request.series
-            insertionValueRow["datumCode"] = ''
-            insertionValueRow["latitude"] = lat
-            insertionValueRow["longitude"] = lon
-            insertionValues.append(insertionValueRow)
+             #Construct list of actuals
+            actual = Actual()
+            actual.dateTime = dateTimes[index]
+            actual.value = value
+            actual.unit = 'meter'
+            actual.latitude = lat
+            actual.longitude = lon
+            actuals.append(actual)
+
+        series = Series()
+        series.description = request
+        series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__dbManager.s_data_point_insert(insertionValues)
-        return insertedRows
+        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+        return series  
 
 
-    def fetch_X_wind_componants_hourly(self, request: Request) -> List[tuple] | None:
+    def fetch_X_wind_componants_hourly(self, request: SeriesDescription) -> Series | None:
         """Fetches wind spd and direction and calculates the X componant. 
         -------
         Parameters:
-            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+            request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
 
         ------
         Returns:
-            List[Dict] | None - The successfully inserted rows or None
+           Series | None - The successfully inserted rows or None
         NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
         """
         
@@ -308,36 +307,35 @@ class NOAATidesAndCurrents:
 
         #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
         #They are saved as different series.
-        dateTimeNow = datetime.now()
-        insertionValues = []
+        actuals = []
         for index, value in enumerate(xValues):
-            #Consturct DB row to insert
-            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
-            insertionValueRow["timeActualized"] = dateTimes[index]
-            insertionValueRow["timeAquired"] = dateTimeNow
-            insertionValueRow["dataValue"] = value
-            insertionValueRow["unitsCode"] = 'float'
-            insertionValueRow["dataSourceCode"] = self.sourceCode
-            insertionValueRow["sLocationCode"] = request.location
-            insertionValueRow["seriesCode"] = request.series
-            insertionValueRow["latitude"] = lat
-            insertionValueRow["longitude"] = lon
-            insertionValues.append(insertionValueRow)
+            #Construct list of actuals
+            actual = Actual()
+            actual.dateTime = dateTimes[index]
+            actual.value = value
+            actual.unit = 'meter'
+            actual.latitude = lat
+            actual.longitude = lon
+            actuals.append(actual)
+
+        series = Series()
+        series.description = request
+        series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__dbManager.s_data_point_insert(insertionValues)
-        return insertedRows
+        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+        return series 
 
 
-    def fetch_Y_wind_componants_hourly(self, request: Request) -> List[tuple] | None:
-        """Fetches wind spd and direction and calculates the Y componant.
+    def fetch_Y_wind_componants_hourly(self, request: SeriesDescription) -> Series | None:
+        """Fetches wind spd and direction and calculates the Y componant.. 
         -------
         Parameters:
-            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+            request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
 
         ------
         Returns:
-            List[Dict] | None - The successfully inserted rows or None
+           Series | None - The successfully inserted rows or None
         NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
         """
         
@@ -371,36 +369,35 @@ class NOAATidesAndCurrents:
 
         #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
         #They are saved as different series.
-        dateTimeNow = datetime.now()
-        insertionValues = []
+        actuals = []
         for index, value in enumerate(yValues):
-            #Consturct DB row to insert
-            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
-            insertionValueRow["timeActualized"] = dateTimes[index]
-            insertionValueRow["timeAquired"] = dateTimeNow
-            insertionValueRow["dataValue"] = value
-            insertionValueRow["unitsCode"] = 'float'
-            insertionValueRow["dataSourceCode"] = self.sourceCode
-            insertionValueRow["sLocationCode"] = request.location
-            insertionValueRow["seriesCode"] = request.series
-            insertionValueRow["latitude"] = lat
-            insertionValueRow["longitude"] = lon
-            insertionValues.append(insertionValueRow)
+            #Construct list of actuals
+            actual = Actual()
+            actual.dateTime = dateTimes[index]
+            actual.value = value
+            actual.unit = 'meter'
+            actual.latitude = lat
+            actual.longitude = lon
+            actuals.append(actual)
+
+        series = Series()
+        series.description = request
+        series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__dbManager.s_data_point_insert(insertionValues)
-        return insertedRows
+        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+        return series 
 
     
-    def fetch_surge_hourly(self, request: Request) -> List[tuple] | None:
-        """Fetches water level data and predicted wl to calculate serge.
+    def fetch_surge_hourly(self, request: SeriesDescription) -> Series | None:
+        """Fetches water level data and predicted wl to calculate serge. 
         -------
         Parameters:
-            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+            request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
 
         ------
         Returns:
-            List[Dict] | None - The successfully inserted rows or None
+           Series | None - The successfully inserted rows or None
         NOTE Hits: https://tidesandcurrents.noaa.gov/waterlevels.html?id=8775870&units=metric&bdate=20000101&edate=20000101&timezone=GMT&datum=MLLW&interval=h&action=data
         """
         
@@ -421,28 +418,26 @@ class NOAATidesAndCurrents:
         lon = metaData['lon']
 
         #Iterate through data and format DB rows
-        dateTimeNow = datetime.now()
-        insertionValues = []
+        actuals = []
         #Waterlevels are returned as a complex JSOn with a meta header, but pred is just a list of objs named predictions
         for wlRow, predRow in zip(wlData['data'], predData['predictions']):
-            
-            #Consturct DB row to insert
-            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
-            insertionValueRow["timeActualized"] = datetime.fromisoformat(wlRow['t'])
-            insertionValueRow["timeAquired"] = dateTimeNow
-            insertionValueRow["dataValue"] = str(float(wlRow['v']) - float(predRow['v']))
-            insertionValueRow["unitsCode"] = 'float'
-            insertionValueRow["dataSourceCode"] = self.sourceCode
-            insertionValueRow["sLocationCode"] = request.location
-            insertionValueRow["seriesCode"] = request.series
-            insertionValueRow["datumCode"] = request.datum
-            insertionValueRow["latitude"] = lat
-            insertionValueRow["longitude"] = lon
-            insertionValues.append(insertionValueRow)
+
+            #Construct list of actuals
+            actual = Actual()
+            actual.dateTime = datetime.fromisoformat(wlRow['t'])
+            actual.value = str(float(wlRow['v']) - float(predRow['v']))
+            actual.unit = 'meter'
+            actual.latitude = lat
+            actual.longitude = lon
+            actuals.append(actual)
+
+        series = Series()
+        series.description = request
+        series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__dbManager.s_data_point_insert(insertionValues)
-        return insertedRows
+        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+        return series
 
 
 

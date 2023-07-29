@@ -3,10 +3,10 @@
 #----------------------------------
 # Created By: Matthew Kastl
 # Created Date: 4/15/2023
-# version 1.0
+# version 2.0
 #----------------------------------
-"""This file holds the DataIngestionMap class. It maps a data fetch request to the propper class and method. Preforms the call and returns the result. 
-It includes some methods for debugging perposes.
+"""This file holds the DataIngestionMap class. This calss is supposed to make a series and sorce to a givin class
+and method to ingest the data.
  """ 
 #----------------------------------
 # 
@@ -17,28 +17,26 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from PersistentStorage.SeriesStorage import SeriesStorage
-from DataManagement.DataClasses import Request
+from SeriesStorage.SeriesStorage import SeriesStorage
+from SeriesProvider.DataClasses import Series, SeriesDescription
 from utility import log
-
-from typing import List, Dict
 
 class DataIngestionMap():
 
-    def __init__(self, dbManager: SeriesStorage) -> None:
-        self.dbManager = dbManager
+    def __init__(self, seriesStorage: SeriesStorage) -> None:
+        self.seriesStorage = seriesStorage
 
-    def get_dbManager(self):
-        """Returns the dbManager used by this dataIngestionMap for debugging perposes"""
-        return self.dbManager
+    def get_seriesStorage(self) -> SeriesStorage:
+        """Returns the seriesStorage used by this dataIngestionMap for debugging perposes"""
+        return self.seriesStorage
 
-    def map_fetch(self, request: Request) -> List[tuple] | None:
+    def map_fetch(self, request: SeriesDescription) -> Series | None:
         """Maps a data fetch request to the propper class and method. Preforms the call and returns the result.
         ------
         Parameters
-            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+            request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>Series)
         Returns
-            List[Dict] | None - Either a list of the succesffuly inserted rows in the db or None if something went wrong
+            series | None - Either the seires returned by the given function or None
         """
 
         match request.source:
@@ -48,16 +46,16 @@ class DataIngestionMap():
                 log(f'Data source: {request.source}, not found in data ingestion map for request: {request}!')
                 return None
             
-    def __noaaTandC(self, request: Request) -> List[tuple] | None:
+    def __noaaTandC(self, request: SeriesDescription) -> Series | None:
         """Maps noaaTandC fetch request to proper function. Preforms the call and returns the result.
         ------
         Parameters
-            request: Request - A data Request object with the information to pull (src/DataManagment/DataClasses>Request)
+            request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>Series)
         Returns
-            List[Dict] | None - Either a list of the succesffuly inserted rows in the db or None if something went wrong
+            series | None - Either the seires returned by the given function or None
         """
         from DataIngestion.NOAATidesAndCurrents import NOAATidesAndCurrents
-        noaa = NOAATidesAndCurrents(self.dbManager)
+        noaa = NOAATidesAndCurrents(self.seriesStorage)
 
         match request.series:
             case 'd1hrWl':
