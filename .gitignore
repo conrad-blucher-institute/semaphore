@@ -1,6 +1,8 @@
-.vscode
 *.env
 demo.py
+db
+!.vscode/launch.json
+!.vscode/tasks.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

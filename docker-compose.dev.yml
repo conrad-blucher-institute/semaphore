@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  semaphore-dev-main:
+    container_name: semaphore-dev-main
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    # restart: always
+    env_file:
+      - .env
+    environment:
+      - DB_LOCATION_STRING=${DB_LOCATION_STRING}
+      - DSPEC_FOLDER_PATH=${DSPEC_FOLDER_PATH}
+      - MODEL_FOLDER_PATH=${MODEL_FOLDER_PATH}
+    volumes:
+      - .:/app
+  semaphore-db:
+    container_name: semaphore-dev-psql
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user-name
+      POSTGRES_PASSWORD: thisisapassword
+    ports:
+      - "5432:5432"
+    volumes:
+    - semaphore-pgdata:/var/lib/postgresql/data
+  semaphore-pgadmin:
+    container_name: semaphore-dev-pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: thisisapassword
+    ports:
+      - "8888:80"
+    volumes:
+      - semaphore-pgadmin-data:/var/lib/pgadmin
+volumes:
+  semaphore-pgdata:
+  semaphore-pgadmin-data:
