@@ -17,8 +17,8 @@ import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-from SeriesProvider.DataClasses import Prediction, SaveRequest, Response
-from SeriesProvider.SeriesProvider import DataManager
+from DataManagement.DataClasses import Prediction, SaveRequest, Response
+from DataManagement.DataManager import DataManager
 
 
 from utility import log
