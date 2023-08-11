@@ -78,10 +78,10 @@ class LocalSeriesDescription():
         self.datum = datum
 
     def __str__(self) -> str:
-        return f'\n[LocalSeriesDescription] -> AIName: {self.AIName}, AIGeneratedVersion: {self.AIGeneratedVersion}, location: {self.location}, datum: {self.datum}, latitude {self.latitude}, longitude {self.longitude}'
+        return f'\n[LocalSeriesDescription] -> AIName: {self.ModelName}, AIGeneratedVersion: {self.ModelVersion}, location: {self.location}, datum: {self.datum}'
     
     def __repr__(self) -> str:
-        return f'\n[LocalSeriesDescription] -> AIName: {self.AIName}, AIGeneratedVersion: {self.AIGeneratedVersion}, location: {self.location}, datum: {self.datum}, latitude {self.latitude}, longitude {self.longitude}'
+        return f'\n[LocalSeriesDescription] -> AIName: {self.AIName}, AIGeneratedVersion: {self.AIGeneratedVersion}, location: {self.location}, datum: {self.datum}'
 
 class Series():
     '''A series is a pairing of an object discribing a series of data, and an array of the data itself. It also includes some metta data about how well the data provided matches the discription.'''
@@ -92,11 +92,11 @@ class Series():
         self.__data = []
 
     def bind_data(self, data: List[Actual | Prediction]) -> None:
-        self.data = data
+        self.__data = data
 
     def get_data(self) -> List[Actual | Prediction] | None:
         return self.__data
 
     def __str__(self) -> str:
-        return f'\n[Series] -> description: {self.description}, wasSuccessful: {self.wasSuccessful}, errorReason: {self.errorReason}'
+        return f'\n[Series] -> description: {self.description}, wasSuccessful: {self.isComplete}, errorReason: {self.nonCompleteReason}'
     
