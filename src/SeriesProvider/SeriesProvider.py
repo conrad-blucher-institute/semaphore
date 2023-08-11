@@ -26,7 +26,7 @@ from datetime import datetime
 from typing import List, Dict
 
 
-class DataManager():
+class SeriesProvider():
 
     def __init__(self) -> None:
         self.seriesStorage = SeriesStorage()
@@ -68,11 +68,12 @@ class DataManager():
             
             ###Attempt to pull request from DB
             checkedResults = []
-            dbResults = []
             if isPrediction:
-                dbResults = self.seriesStorage.s_prediction_selection(requestDesc.source, requestDesc.series, requestDesc.location, requestDesc.fromDateTime, requestDesc.toDateTime, requestDesc.datum)
+                dbSeries = self.seriesStorage.s_prediction_selection(requestDesc)
             else:
-                dbResults = self.seriesStorage.s_data_point_selection(requestDesc.source, requestDesc.series, requestDesc.location, requestDesc.fromDateTime, requestDesc.toDateTime, requestDesc.datum)
+                dbSeries = self.seriesStorage.s_data_point_selection(requestDesc)
+
+            dbdata = dbSeries.get_data()
             
 
             ###Check contents contains the right amount of results
@@ -80,19 +81,20 @@ class DataManager():
             #Calculate the amnt of expected results
             amntExpected = self.__get_amnt_of_results_expected(interval, requestDesc.toDateTime, requestDesc.fromDateTime)
             if amntExpected is None:
-                return self.__get_and_log_err_response(requestDesc, dbResults, f'Could not process series, {requestDesc.series}, interval value to determin amnt of expected results in request.')
+                return self.__get_and_log_err_response(requestDesc, dbSeries, f'Could not process series, {requestDesc.series}, interval value to determin amnt of expected results in request.')
 
             #First AmountCheck
-            if len(dbResults) != amntExpected:
+            if len(dbdata) != amntExpected:
 
                 #Call Data Ingestion to fetch data
                 dataIngestionMap = DataIngestionMap(self.seriesStorage)
                 diResults = dataIngestionMap.map_fetch(requestDesc)
                 if diResults is None:
-                    return self.__get_and_log_err_response(requestDesc, dbResults, f'DB did not have data request, dataIngestion returned NONE, for request.')
+                    return self.__get_and_log_err_response(requestDesc, dbSeries, f'DB did not have data request, dataIngestion returned NONE, for request.')
+                diData = diResults.get_data()
                 
                 #Merge data
-                mergedResults = self.__merge_results(dbResults, diResults)
+                mergedResults = self.__merge_results(dbdata, diData)
 
                 #Second AmountCheck
                 if(len(mergedResults) != amntExpected):
@@ -100,21 +102,11 @@ class DataManager():
                 else:
                     checkedResults = mergedResults
             else:
-                checkedResults = dbResults
+                checkedResults = dbdata
 
             ###Generate proper response object
-            responseSeries = Series()
-            
-            #Splice data down into data objects 
-            #TODO:: MOve to data ingestion????
-            try:
-                if isPrediction:
-                    responseSeries.bind_data(self.__splice_prediction_results(checkedResults))
-                else:
-                    responseSeries.bind_data(self.__splice_dataPoint_results(checkedResults))
-            except Exception as e:
-                return self.__get_and_log_err_response(requestDesc, mergedResults, f'An issue occured when attempting to splice returned data into dataObjs for request.\nException: {format_exc()}')
-            
+            responseSeries = Series(requestDesc, True)
+            responseSeries.bind_data(checkedResults)
             return responseSeries
         
         except Exception as e:
@@ -181,12 +173,12 @@ class DataManager():
         else: return int(totalSecondsrequested / secondsInInterval)
     
 
-    def __merge_results(self, first: List[tuple], second: List[tuple]) -> List[Dict]:
+    def __merge_results(self, first: List[Actual | Prediction], second: List[Actual | Prediction]) -> List[Dict]:
         """Merges two lists of dictionaries together, will only keep unique results.
         -------
         Parameters:
-            first List[Dict] - The first list to combine.
-            second List[Dict] - The second list to combine.
+            first List[Actual | Prediction] - The first list to combine.
+            second List[Actual | Prediction] - The second list to combine.
         Returns:
             List[Dict] - The combined, unique List.
         """
