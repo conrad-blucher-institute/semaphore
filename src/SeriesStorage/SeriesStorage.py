@@ -297,7 +297,11 @@ class SeriesStorage():
             .where(table.c.timeActualized <= seriesDescription.toDateTime)
         )
         
-        return self.__dbSelection(stmt).fetchall()
+        result = self.__dbSelection(stmt).fetchall()
+        resultSeries = Series(seriesDescription, True)
+        resultSeries.bind_data(self.__splice_actual_results(result)) #Turn tuple objects into prediction objects
+        return resultSeries
+    
     
     def s_prediction_selection(self, seriesDescription: SeriesDescription) -> list[tuple]:
         """Selects from the prediction table.
@@ -314,7 +318,10 @@ class SeriesStorage():
             .where((table.c.timeGenerated + table.c.leadTime) <= seriesDescription.toDateTime)
         )
 
-        return self.__dbSelection(stmt).fetchall()
+        result = self.__dbSelection(stmt).fetchall()
+        resultSeries = Series(seriesDescription, True)
+        resultSeries.bind_data(self.__splice_prediction_results(result)) #Turn tuple objects into prediction objects
+        return resultSeries
         
 
     def s_locationCode_dataSourceLocationCode_mapping_select(self, sourceCode: str, location: str, priorityOrder: int = 0) -> list[tuple]:
@@ -370,7 +377,10 @@ class SeriesStorage():
             result = cursor.fetchall()
             conn.commit()
 
-        return result
+        resultSeries = Series(series.description, True)
+        resultSeries.bind_data(self.__splice_actual_results(result)) #Turn tuple objects into actual objects
+        return resultSeries
+    
 
 
     def s_prediction_insert(self, series: Series) -> list[tuple]:
@@ -408,10 +418,14 @@ class SeriesStorage():
             result = cursor.fetchall()
             conn.commit()
 
-        return result
+        resultSeries = Series(series.description, True)
+        resultSeries.description = series.description
+        resultSeries.bind_data(self.__splice_prediction_results(result)) #Turn tuple objects into prediction objects
+        return resultSeries
+    
 
 
-    def s_prediction_output_insert(self, series: Series) -> list[tuple]:
+    def s_prediction_output_insert(self, series: Series) -> Series:
         """Inserts a series into s_prediction_output
         Parameters:
             series: Series - The series to insert.
@@ -446,7 +460,10 @@ class SeriesStorage():
             result = cursor.fetchall()
             conn.commit()
 
-        return result
+        resultSeries = Series(series.description, True)
+        resultSeries.description = series.description
+        resultSeries.bind_data(self.__splice_prediction_results(result)) #Turn tuple objects into prediction objects
+        return resultSeries
     
 
     def s_locationCode_dataSourceLocationCode_mapping_insert(self, values: dict | list[tuple]) -> list[tuple]:
@@ -608,3 +625,53 @@ class SeriesStorage():
             conn.commit()
 
         return result
+    
+
+    def __splice_prediction_results(self, results: List[tuple]) -> List[Prediction]:
+        """Splices up a list of dbresults, pulling out only the data that changes per point,
+        and places them in a Prediction object.
+        -------
+        Parameters:
+            first List[tuple] - The collection of dbrows.
+        Returns:
+            List[Prediction] - The formatted objs.
+        """
+        valueIndex = 3
+        unitIndex = 4
+        leadTimeIndex = 2
+        timeGeneratedIndex = 1
+        resultCodeIndex = 5
+        predictions = []
+        for row in results:
+            predictions.append(Prediction(
+                row[valueIndex],
+                row[unitIndex],
+                row[leadTimeIndex],
+                row[timeGeneratedIndex],
+                row[resultCodeIndex]
+            ))
+
+        return predictions
+        
+
+    def __splice_actual_results(self, results: List[tuple]) -> List[Actual]:
+        """Splices up a list of dbresults, pulling out only the data that changes per point,
+        and places them in a DataPoint object.
+        -------
+        Parameters:
+            first List[tuple] - The collection of dbrows.
+        Returns:
+            List[Prediction] - The formatted objs.
+        """
+        valueIndex = 3
+        unitIndex = 4
+        timeActualizedIndex = 1
+        dataPoints = []
+        for row in results:
+            dataPoints.append(Actual(
+                row[valueIndex],
+                row[unitIndex],
+                row[timeActualizedIndex]
+            ))
+
+        return dataPoints
