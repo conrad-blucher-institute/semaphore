@@ -25,10 +25,19 @@ class Actual():
         self.latitude = latitude
 
     def __str__(self) -> str:
-        return f'\n[DataPoint] -> value: {self.value}, unit: {self.unit}, dataTime: {self.dateTime}'
+        return f'\n[Actual] -> value: {self.value}, unit: {self.unit}, dataTime: {self.dateTime}. longitude: {self.longitude}. latitude: {self.latitude}'
     
     def __repr__(self) -> str:
-        return f'\n[DataPoint] -> value: {self.value}, unit: {self.unit}, dataTime: {self.dateTime}'
+        return f'\n[Actual] -> value: {self.value}, unit: {self.unit}, dataTime: {self.dateTime}. longitude: {self.longitude}. latitude: {self.latitude}'
+    
+    def __eq__(self, __value: object) -> bool:
+        if (self.value == __value.value and 
+            self.unit == __value.unit and 
+            self.dateTime == __value.dateTime and 
+            self.longitude == __value.longitude and 
+            self.latitude == __value.latitude):
+            return True
+        else: return False
 
 class Prediction():
     '''An Pridiction is a Is a predicted value. It has all the same things as an Actual, but it decribes its time as the time the prediction
@@ -49,7 +58,19 @@ class Prediction():
     
     def __repr__(self):
         return f'\n[Prediction] -> value: {self.value}, unit: {self.unit}, leadTime: {self.leadTime}, generatedTime: {self.generatedTime}, successValue {self.successValue}'
+    
+    def __eq__(self, __value: object) -> bool:
+        if (self.value == __value.value and 
+            self.unit == __value.unit and 
+            self.leadTime == __value.leadTime and 
+            self.generatedTime == __value.generatedTime and 
+            self.successValue == __value.successValue and 
+            self.longitude == __value.longitude and 
+            self.latitude == __value.latitude):
+            return True
+        else: return False
 
+    
 
 class SeriesDescription():
     '''A series description should describe a set of data wihtout actually including the data.'''
@@ -81,7 +102,7 @@ class LocalSeriesDescription():
         return f'\n[LocalSeriesDescription] -> AIName: {self.ModelName}, AIGeneratedVersion: {self.ModelVersion}, location: {self.location}, datum: {self.datum}'
     
     def __repr__(self) -> str:
-        return f'\n[LocalSeriesDescription] -> AIName: {self.AIName}, AIGeneratedVersion: {self.AIGeneratedVersion}, location: {self.location}, datum: {self.datum}'
+        return f'\n[LocalSeriesDescription] -> AIName: {self.ModelName}, AIGeneratedVersion: {self.ModelVersion}, location: {self.location}, datum: {self.datum}'
 
 class Series():
     '''A series is a pairing of an object discribing a series of data, and an array of the data itself. It also includes some metta data about how well the data provided matches the discription.'''
