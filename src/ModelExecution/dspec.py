@@ -36,12 +36,13 @@ class OutputInfo:
         self.series = None
         self.location = None
         self.datum = None
+        self.unit = None
 
     def __str__(self) -> str:
-        return f'[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, datum: {self.datum}'
+        return f'[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, datum: {self.datum}, unit: {self.unit}'
     
     def __repr__(self):
-        return f'[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, datum: {self.datum}'
+        return f'[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, datum: {self.datum}, unit: {self.unit}'
 
 class Input:
     '''input object should contain everything that could be contained
