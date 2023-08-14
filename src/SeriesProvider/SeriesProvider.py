@@ -42,8 +42,7 @@ class SeriesProvider():
         Returns:
             series: A response object returning what happened 
         """
-        returningSeries = Series()
-        returningSeries.description = series.description
+        returningSeries = Series(series.description, True)
 
         if not (type(series.description) == LocalSeriesDescription): #Check and make sure this is actually something with the proper description to be inserted
             self.__get_and_log_err_series([], returningSeries, f'A save Request must be provided a series with a LocalSeriesDescription \n')
@@ -95,7 +94,6 @@ class SeriesProvider():
                 
                 #Merge data
                 mergedResults = self.__merge_results(dbdata, diData)
-
                 #Second AmountCheck
                 if(len(mergedResults) != amntExpected):
                     return self.__get_and_log_err_response(requestDesc, mergedResults, f'Merged Data Base Results and Data Ingestion Results failed to have the correct amount of results for request. Got:{len(mergedResults)} Expected:{amntExpected}')
@@ -124,10 +122,7 @@ class SeriesProvider():
             Series: A series object holding the error information and marked not complete.
         """
         log(msg)
-        response = Series()
-        response.isComplete = False
-        response.nonCompleteReason = msg
-        response.description = description
+        response = Series(description, False, msg)
         response.bind_data(currentData)
         return response
     
@@ -182,6 +177,14 @@ class SeriesProvider():
         Returns:
             List[Dict] - The combined, unique List.
         """
-        uniqueToSecond = set(second) - set(first)
-        return first + list(uniqueToSecond)
+
+        #TODO:: This is a very slow, it was optimized with hashing like this:    
+            # uniqueToSecond = set(second) - set(first)
+            # return first + list(uniqueToSecond)
+        #But its not hashing properly anymore, needs to be looked into
+
+        for actual in second:
+            if not actual in first: first.append(actual)
+
+        return first
     
