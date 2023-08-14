@@ -40,7 +40,7 @@ class NOAATidesAndCurrents:
 
     def __init__(self, seriesStorage: SeriesStorage):
         self.sourceCode = "noaaT&C"
-        self.__seriesStorage = SeriesStorage
+        self.__seriesStorage = seriesStorage
 
     #TODO:: There has to be a better way to do this!
     def __create_pattern1_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> str:
@@ -122,16 +122,17 @@ class NOAATidesAndCurrents:
         for row in data['data']:
             
             #Construct list of actuals
-            actual = Actual()
-            actual.dateTime = datetime.fromisoformat(row['t'])
-            actual.value = row["v"]
-            actual.unit = 'meter'
-            actual.latitude = lat
-            actual.longitude = lon
+            actual = Actual(
+                value= row["v"],
+                unit= 'meter',
+                dateTime= datetime.fromisoformat(row['t']),
+                longitude= lon,
+                latitude= lat
+
+            )
             actuals.append(actual)
 
-        series = Series()
-        series.description = request
+        series = Series(request, True)
         series.bind_data(actuals)
 
         #insertData to DB
@@ -187,16 +188,10 @@ class NOAATidesAndCurrents:
         for index, value in enumerate(xValues):
           
             #Construct list of actuals
-            actual = Actual()
-            actual.dateTime = dateTimes[index]
-            actual.value = value
-            actual.unit = 'meter'
-            actual.latitude = lat
-            actual.longitude = lon
+            actual = Actual(value, 'meter', dateTimes[index], lon, lat)
             actuals.append(actual)
 
-        series = Series()
-        series.description = request
+        series = Series(request, True)
         series.bind_data(actuals)
 
         #insertData to DB
@@ -248,16 +243,10 @@ class NOAATidesAndCurrents:
         actuals = []
         for index, value in enumerate(yValues):
              #Construct list of actuals
-            actual = Actual()
-            actual.dateTime = dateTimes[index]
-            actual.value = value
-            actual.unit = 'meter'
-            actual.latitude = lat
-            actual.longitude = lon
+            actual = Actual(value, 'meter', dateTimes[index], lon, lat)
             actuals.append(actual)
 
-        series = Series()
-        series.description = request
+        series = Series(request, True)
         series.bind_data(actuals)
 
         #insertData to DB
@@ -310,16 +299,10 @@ class NOAATidesAndCurrents:
         actuals = []
         for index, value in enumerate(xValues):
             #Construct list of actuals
-            actual = Actual()
-            actual.dateTime = dateTimes[index]
-            actual.value = value
-            actual.unit = 'meter'
-            actual.latitude = lat
-            actual.longitude = lon
+            actual = Actual(value, 'meter', dateTimes[index], lon, lat)
             actuals.append(actual)
 
-        series = Series()
-        series.description = request
+        series = Series(request, True)
         series.bind_data(actuals)
 
         #insertData to DB
@@ -372,16 +355,10 @@ class NOAATidesAndCurrents:
         actuals = []
         for index, value in enumerate(yValues):
             #Construct list of actuals
-            actual = Actual()
-            actual.dateTime = dateTimes[index]
-            actual.value = value
-            actual.unit = 'meter'
-            actual.latitude = lat
-            actual.longitude = lon
+            actual = Actual(value, 'meter', dateTimes[index], lon, lat)
             actuals.append(actual)
 
-        series = Series()
-        series.description = request
+        series = Series(request, True)
         series.bind_data(actuals)
 
         #insertData to DB
@@ -423,16 +400,16 @@ class NOAATidesAndCurrents:
         for wlRow, predRow in zip(wlData['data'], predData['predictions']):
 
             #Construct list of actuals
-            actual = Actual()
-            actual.dateTime = datetime.fromisoformat(wlRow['t'])
-            actual.value = str(float(wlRow['v']) - float(predRow['v']))
-            actual.unit = 'meter'
-            actual.latitude = lat
-            actual.longitude = lon
+            actual = Actual(
+                value= str(float(wlRow['v']) - float(predRow['v'])),
+                unit= 'meter',
+                dateTime= datetime.fromisoformat(wlRow['t']),
+                latitude= lat,
+                longitude= lon
+            )
             actuals.append(actual)
 
-        series = Series()
-        series.description = request
+        series = Series(request, True)
         series.bind_data(actuals)
 
         #insertData to DB
