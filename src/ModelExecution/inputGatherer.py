@@ -17,8 +17,8 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from SeriesProvider.SeriesProvider import DataManager
-from SeriesProvider.DataClasses import Request, Response, DataPoint, Prediction
+from SeriesProvider.SeriesProvider import SeriesProvider
+from SeriesProvider.DataClasses import SeriesDescription, Series, Actual, Prediction
 from ModelExecution.dspec import Dspec, OutputInfo, Input
 
 
@@ -35,16 +35,14 @@ class InputGatherer:
     def __init__(self, dspecFileName: str) -> None:
         """Constructor sends the specFile off to be loaded and parsed
         """
-        self.__parse_dspec(dspecFileName)
-        self.__dataManager = DataManager()
         self.__dspec = None
         self.__specifications = None
         self.__specificationsConstrucionTime = None
         self.__inputVector = None
 
-    def get_dataManager(self):
-        return self.__dataManager
-    
+        self.__parse_dspec(dspecFileName)
+        self.__seriesProvider = SeriesProvider()
+
     def __parse_dspec(self, dspecFileName: str) -> None:
         """Parses the JSON Dspec file into a dspec object.
         """
@@ -75,6 +73,7 @@ class InputGatherer:
             outputInfo.series = outputJson["series"]
             outputInfo.location = outputJson["location"]
             outputInfo.datum = outputJson["datum"]
+            outputInfo.unit = outputJson["unit"]
             dspec.outputInfo = outputInfo #Bind to dspec
 
             #inputs
@@ -109,16 +108,16 @@ class InputGatherer:
         specifications = []
         for input in self.__dspec.inputs:
             try:
-                toDateTime = now + timedelta(hours= input.rang[0])
-                fromDateTime = now + timedelta(hours= input.rang[1])
+                toDateTime = now + timedelta(hours= input.range[0])
+                fromDateTime = now + timedelta(hours= input.range[1])
 
                 #TODO:: Create better logic to propperly analyse a given input
-                if (input.rang[0] == input.rang[1]): #isOnePoint
+                if (input.range[0] == input.range[1]): #isOnePoint
                     fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
 
                 #specifications is a pairing of a request and what type it should be
                 specifications.append((
-                    Request(
+                    SeriesDescription(
                         input.source, 
                         input.series, 
                         input.location, 
@@ -142,35 +141,34 @@ class InputGatherer:
         inputVector = []
         for specification in self.__specifications:
             #unpack specification tuple
-            request = specification[0]
+            requestDesc = specification[0]
             dataType = specification[1]
 
-            response = None
-            response = self.__dataManager.make_request(request)
-            if response.wasSuccessful:
-                inputVector.append(self.__cast_data(response.data, dataType))
+            responseSeries = self.__seriesProvider.make_request(requestDesc)
+            if responseSeries.isComplete:
+                [inputVector.append(dataPoint) for dataPoint in self.__cast_data(responseSeries.get_data(), dataType)]
             else:
-                log(f'ERROR: There was a problem with input gathere making requests.\n\n Response: {response}\n\n')
-
+                log(f'ERROR: There was a problem with input gathere making requests.\n\n Response: {responseSeries}\n\n')
         self.__inputVector = inputVector
 
-    def __cast_data(data: list[str], dataType: str) -> list[any]:
+    def __cast_data(self, data: list[Actual | Prediction], dataType: str) -> list[any]:
         """Casts vector of data to a given type.
 
         Parameters:
-            data: list[str] - The data to cast.
+            data: list[Actual | Prediction] - The data to cast.
             dataTYpe: str = The datatype as a string to cast to.
         ReturnsL
             list[any] - The casted data
         """
         castedData = []
         #Cast from string to unit then append
-        match dataType:
-            case 'float':
-                castedData.append(float(data.value))
-            case _:
-                log(f'Input gatherer has no conversion for Unit: {data.unit}')
-                raise NotImplementedError
+        for datapoint in  data:
+            match dataType:
+                case 'float':
+                    castedData.append(float(datapoint.value))
+                case _:
+                    log(f'Input gatherer has no conversion for Unit: {dataType}')
+                    raise NotImplementedError
         return castedData
 
     def get_inputs(self, dateTime: datetime) -> list[any]:
@@ -191,12 +189,10 @@ class InputGatherer:
             return self.__inputVector
         else:
             return self.__inputVector
-            
-    
 
-    def get_model_name(self) -> str:
+    def get_model_file_name(self) -> str:
         """Returns the name of the model as specified in the DSPEC file."""
-        return self.__dspec.modelName     
+        return self.__dspec.modelFileName     
     
     def get_dspec(self) -> Dspec:
         return self.__dspec
