@@ -17,8 +17,8 @@ import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-from SeriesProvider.DataClasses import Prediction, SaveRequest, Response
-from SeriesProvider.SeriesProvider import DataManager
+from SeriesProvider.DataClasses import Prediction, LocalSeriesDescription, Series
+from SeriesProvider.SeriesProvider import SeriesProvider
 
 
 from utility import log
@@ -27,37 +27,43 @@ from datetime import datetime
 class OutputManager():
 
     def __init__(self) -> None:
-        self.dataManager = DataManager()
+        self.seriesProvider = SeriesProvider()
 
-    def output_method_map(self, method, prediction, AIName: str, generatedTime: datetime, leadTime: float, AIGeneratedVersion: str, series: str, location: str, datum: str = None, latitude: str = None, longitude: str = None) -> Response:
+    def output_method_map(self, method: str, predictionDesc: LocalSeriesDescription, predictions: Prediction | list[Prediction]) -> Series:
         """Maps a request to the specific method that handles its output.
         Paremeters:
-            TODO IN refactor
+            method: str - The string key to match to an output method
+            predictionDesc: LocalSeriesDescription - The description object holding all the info that the db will need to save it
+            predictions: any | list[any] - The actual prediction(s) to save
         Returns:
-            The Response from the datamanager
+            The inserted Series
         """
         
         match method:
                 case 'one_packed_float':
-                    return self.__one_packed_float( prediction, AIName, generatedTime, leadTime, AIGeneratedVersion, series, location, datum, latitude, longitude)
+                    return self.__one_packed_float(predictionDesc, predictions)
                 case _:
                     log(f'No output method found for {method}!')
                     return None
     
-    def __one_packed_float(self, prediction, ModelName: str, generatedTime: datetime, leadTime: float, ModelVersion: str, series: str, location: str, datum: str = None, latitude: str = None, longitude: str = None) -> Response:
+    def __one_packed_float(self, predictionDesc: LocalSeriesDescription, prediction: Prediction) -> Series:
         """Unpacks the prediction value before saving them to the db
         Paremeters:
             TODO IN refactor
         Returns:
-            The Response from the datamanager 
+            The Response from the seriesprovider 
         """
-        prediction = self.__unpack(prediction)
+        unpackedPrediction = self.__unpack(prediction.value)
 
         predictions = []
-        predictions.append(Prediction(prediction, 'float', leadTime, generatedTime))
-        request = SaveRequest(ModelName, ModelVersion, series, location, datum)
-        request.bind_predictions(predictions)
-        return self.dataManager.make_SaveRequest(request)
+        predictions.append(Prediction(unpackedPrediction, prediction.unit, prediction.leadTime, prediction.generatedTime))
+
+        #Create a series to be sent to be stored in db
+        request = Series(predictionDesc, True)
+        request.bind_data(predictions)
+
+        #Send the data to be stored in db
+        return self.seriesProvider.make_SaveRequest(request)
     
     def __unpack(self, packedValue: any) -> any:
         """Flattens any deminsion of array and indexes and retruns the first time, unpacking it.
