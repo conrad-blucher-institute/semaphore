@@ -445,7 +445,7 @@ class SeriesStorage():
             insertionValueRow["leadTime"] = prediction.leadTime
             insertionValueRow["ModelName"] = series.description.ModelName
             insertionValueRow["ModelVersion"] = series.description.ModelVersion
-            insertionValueRow["dataValue"] = prediction.value
+            insertionValueRow["dataValue"] = str(prediction.value)
             insertionValueRow["unitsCode"] = prediction.unit
             insertionValueRow["sLocationCode"] = series.description.location
             insertionValueRow["seriesCode"] = series.description.series
@@ -462,7 +462,7 @@ class SeriesStorage():
 
         resultSeries = Series(series.description, True)
         resultSeries.description = series.description
-        resultSeries.bind_data(self.__splice_prediction_results(result)) #Turn tuple objects into prediction objects
+        resultSeries.bind_data(self.__splice_output_table_results(result)) #Turn tuple objects into prediction objects
         return resultSeries
     
 
@@ -641,6 +641,8 @@ class SeriesStorage():
         leadTimeIndex = 2
         timeGeneratedIndex = 1
         resultCodeIndex = 5
+        latitudeIndex = 10
+        longitudeIndex = 11
         predictions = []
         for row in results:
             predictions.append(Prediction(
@@ -648,7 +650,9 @@ class SeriesStorage():
                 row[unitIndex],
                 row[leadTimeIndex],
                 row[timeGeneratedIndex],
-                row[resultCodeIndex]
+                row[resultCodeIndex],
+                row[longitudeIndex],
+                row[latitudeIndex]
             ))
 
         return predictions
@@ -665,6 +669,33 @@ class SeriesStorage():
         """
         valueIndex = 3
         unitIndex = 4
+        timeActualizedIndex = 1
+        longitudeIndex = 10
+        latitudeIndex = 9
+        dataPoints = []
+        for row in results:
+            dataPoints.append(Actual(
+                row[valueIndex],
+                row[unitIndex],
+                row[timeActualizedIndex],
+                row[longitudeIndex],
+                row[latitudeIndex]
+            ))
+
+        return dataPoints
+    
+
+    def __splice_output_table_results(self, results: List[tuple]) -> List[Actual]:
+        """Splices up a list of dbresults, pulling out only the data that changes per point,
+        and places them in a DataPoint object.
+        -------
+        Parameters:
+            first List[tuple] - The collection of dbrows.
+        Returns:
+            List[Prediction] - The formatted objs.
+        """
+        valueIndex = 6
+        unitIndex = 7
         timeActualizedIndex = 1
         dataPoints = []
         for row in results:
