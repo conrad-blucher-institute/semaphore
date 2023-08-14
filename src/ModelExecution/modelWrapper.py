@@ -19,6 +19,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from ModelExecution.inputGatherer import InputGatherer
 from ModelExecution.OutputManager import OutputManager
+from SeriesProvider.DataClasses import LocalSeriesDescription, Prediction
 
 import datetime
 from os import path, getenv
@@ -39,7 +40,7 @@ class ModelWrapper:
         """Private method to load a model saves as an h5 file designated
         in the dspec file using Tenserflow/Karas
         """
-        modelName = self.__inputGatherer.get_model_name()
+        modelName = self.__inputGatherer.get_model_file_name()
         h5FilePath = construct_true_path(getenv('MODEL_FOLDER_PATH')) + (modelName if modelName.endswith('.h5') else modelName + '.h5')
 
         if not path.exists(h5FilePath): 
@@ -93,22 +94,14 @@ class ModelWrapper:
             shapedInputs = self.__shape_data(inputs) #Ensure recived inputs are shaped right for model
             prediction =  self._model.predict(shapedInputs) 
             dspec = self.__inputGatherer.get_dspec()
-            outputInfo = self.__inputGatherer.get_outputInfo()
+            outputInfo = dspec.outputInfo
 
+            #TODO::This code will need to be reworded we we get more than one value from a mdel
+            predecitionDesc = LocalSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
+            prediction = Prediction(prediction, outputInfo.unit, outputInfo.leadTime, dateTime)
 
             om = OutputManager()
-            om.output_method_map(
-                method=outputInfo["outputMethod"],
-                prediction=prediction,
-                AIName=dspec["ModelName"],
-                generatedTime=dateTime,
-                leadTime=outputInfo["leadTime"],
-                AIGeneratedVersion=dspec["ModelVersion"],
-                series=outputInfo["series"],
-                location=outputInfo["sLocation"],
-                datum=outputInfo["datum"],
-            )
-
+            om.output_method_map(outputInfo.outputMethod, predecitionDesc, prediction)
             return prediction
 
         except Exception as e:
