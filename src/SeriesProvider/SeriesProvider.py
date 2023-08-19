@@ -63,7 +63,7 @@ class SeriesProvider():
         
         try:
 
-            isPrediction, interval, seriesCode = self.__parse_series(requestDesc.series)
+            isPrediction, seriesCode = self.__parse_series(requestDesc.series)
             
             ###Attempt to pull request from DB
             checkedResults = []
@@ -78,7 +78,7 @@ class SeriesProvider():
             ###Check contents contains the right amount of results
 
             #Calculate the amnt of expected results
-            amntExpected = self.__get_amnt_of_results_expected(interval, requestDesc.toDateTime, requestDesc.fromDateTime)
+            amntExpected = self.__get_amnt_of_results_expected(requestDesc)
             if amntExpected is None:
                 return self.__get_and_log_err_response(requestDesc, dbSeries, f'Could not process series, {requestDesc.series}, interval value to determin amnt of expected results in request.')
 
@@ -96,6 +96,7 @@ class SeriesProvider():
                 mergedResults = self.__merge_results(dbdata, diData)
                 #Second AmountCheck
                 if(len(mergedResults) != amntExpected):
+                    print(mergedResults)
                     return self.__get_and_log_err_response(requestDesc, mergedResults, f'Merged Data Base Results and Data Ingestion Results failed to have the correct amount of results for request. Got:{len(mergedResults)} Expected:{amntExpected}')
                 else:
                     checkedResults = mergedResults
@@ -134,38 +135,25 @@ class SeriesProvider():
             series: str - The series to parse.
         Returns: (tuple)
             bool - If it is a prediction (true) or data point (false).
-            str - A three char code indicating the interval the data is in.
             str = A six char unique code of the series.
         """
         isPrediction = (True if series[0] == 'p' else False)
-        interval = series[1:4]
         seriesCode = series[4:]
-        return isPrediction, interval, seriesCode
+        return isPrediction, seriesCode
     
     
-    def __get_amnt_of_results_expected(self, interval: str, toDateTime: datetime, fromDateTime: datetime) -> int | None:
+    def __get_amnt_of_results_expected(self, seriesDescription: SeriesDescription) -> int:
         """Calculates the amount of records we should expect given a time span and an interval code
         -------
         Parameters:
-            interval: str - A 3 char interval code.
-            toDateTime: datetime - The late datetime.
-            fromDateTime: datetime - The early datetime.
+            seriesDescription: SeriesDescirption
         Returns:
-            int | None - Returns the amount of results or none if it can't map the interval to a method
+            int - Returns the amount of results
         """
-        totalSecondsrequested = (toDateTime - fromDateTime).total_seconds()
-        amntOfResultsExpected = None
-        
-        match interval:
-            case '1hr':
-                secondsInInterval = 3600
-            case '6mn':
-                secondsInInterval = 360
-            case _:
-                return None
-        
-        if totalSecondsrequested < secondsInInterval: return 1 #Only one point was requested
-        else: return int(totalSecondsrequested / secondsInInterval)
+        totalSecondsrequested = (seriesDescription.toDateTime - seriesDescription.fromDateTime).total_seconds()
+    
+        if totalSecondsrequested < seriesDescription.interval: return 1 #Only one point was requested
+        else: return int(totalSecondsrequested / seriesDescription.interval)
     
 
     def __merge_results(self, first: List[Actual | Prediction], second: List[Actual | Prediction]) -> List[Dict]:
