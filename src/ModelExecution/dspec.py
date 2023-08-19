@@ -55,6 +55,7 @@ class Input:
         self.unit = None
         self.type = None
         self.datum = None
+        self.interval = None
         self.range = None
 
     def __str__(self) -> str:

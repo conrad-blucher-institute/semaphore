@@ -89,6 +89,7 @@ class InputGatherer:
                 input.unit = inputJson["unit"]
                 input.type = inputJson["type"]
                 input.datum = inputJson.get("datum")
+                input.interval = inputJson["interval"]
                 input.range = inputJson["range"]
                 inputs.append(input)
             dspec.inputs = inputs #Bind to dspec
@@ -122,6 +123,7 @@ class InputGatherer:
                         input.series, 
                         input.location, 
                         input.unit, 
+                        input.interval,
                         fromDateTime, 
                         toDateTime, 
                         input.datum
