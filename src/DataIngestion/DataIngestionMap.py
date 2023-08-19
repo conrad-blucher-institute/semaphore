@@ -58,17 +58,21 @@ class DataIngestionMap():
         noaa = NOAATidesAndCurrents(self.seriesStorage)
 
         match request.series:
-            case 'd1hrWl':
+            case 'dWl':
                 return noaa.fetch_water_level_hourly(request)
-            case 'd1hrXWnCmp':
-                return noaa.fetch_X_wind_componants_hourly(request)
-            case 'd1hrYWnCmp':
-                return noaa.fetch_Y_wind_componants_hourly(request)
-            case 'd6mnXWnCmp':
-                return noaa.fetch_X_wind_componants_6min(request)
-            case 'd6mnYWnCmp':
-                return noaa.fetch_Y_wind_componants_6min(request)
-            case 'd1hrSurge':
+            case 'dXWnCmp':
+                match request.interval:
+                    case 3600:
+                        return noaa.fetch_X_wind_componants_hourly(request)
+                    case 360:
+                        return noaa.fetch_X_wind_componants_6min(request)
+            case 'dYWnCmp':
+                match request.interval:
+                    case 3600:
+                        return noaa.fetch_Y_wind_componants_hourly(request)
+                    case 360:
+                        return noaa.fetch_Y_wind_componants_6min
+            case 'dSurge':
                 return noaa.fetch_surge_hourly(request)
             case _:
                 log(f'Data series: {request.series}, not found for NOAAT&C for request: {request}')
