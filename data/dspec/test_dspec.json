@@ -16,81 +16,90 @@
         "name": "x_wind",
         "location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrXWnCmp",
+        "series": "dXWnCmp",
         "unit": "meter",
         "type": "float",
+        "interval": 3600,
         "range": [0, 0]
     },
     {
         "name": "y_wind",
         "location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrYWnCmp",
+        "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
+        "interval": 3600,
         "range": [0, 0]
     },
     {
         "name": "x_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrXWnCmp",
+        "series": "dXWnCmp",
         "unit": "meter",
         "type": "float",
+        "interval": 3600,
         "range": [0, -12]
     },
     {
         "name": "x_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrXWnCmp",
+        "series": "dXWnCmp",
         "unit": "meter",
         "type": "float",
+        "interval": 3600,
         "range": [0, -12]
     },
     {
         "name": "y_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrYWnCmp",
+        "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
+        "interval": 3600,
         "range": [0, -12]
     },
     {
         "name": "y_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrYWnCmp",
+        "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
+        "interval": 3600,
         "range": [0, -12]
     },
     {
         "name": "y_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrYWnCmp",
+        "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
+        "interval": 3600,
         "range": [0, -12]
     },
     {
         "name": "y_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrYWnCmp",
+        "series": "dYWnCmp",
         "unit":  "meter",
         "type": "float",
+        "interval": 3600,
         "range": [0, -12]
     },
     {
         "name": "y_wind_prev",
         "location": "packChan",
         "source": "noaaT&C",
-        "series": "d1hrYWnCmp",
+        "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
+        "interval": 3600,
         "range": [0, -13]
     }
 ]}
