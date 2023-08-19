@@ -103,7 +103,8 @@ class SeriesStorage():
 
             Column("dataValue", String(20), nullable=False),    #Actual value for data points
             Column("unitsCode", String(10), ForeignKey("s_ref_units.code"), nullable=False), #unit the value is stored in
-
+            Column("interval", Integer, nullable=False),
+        
             Column("dataSourceCode", String(10), ForeignKey("s_ref_data_source.code"), nullable=False), #CBI specific ID for the Location
             Column("sLocationCode", String(25), ForeignKey("s_ref_slocation.code"), nullable=False),    #the code for the source from which the value was obtained e.g, NOAA
             Column("seriesCode", String(10), ForeignKey("s_ref_series.code"), nullable=False),          #The code fot the type of measurment or prediction e.g, wdir
@@ -125,6 +126,7 @@ class SeriesStorage():
 
             Column("dataValue", String(20), nullable=False),    #the actual value
             Column("unitsCode", String(10), ForeignKey("s_ref_units.code"), nullable=False), #the units the data point is stored in
+            Column("interval", Integer, nullable=False),
 
             Column("resultCode", String(10), nullable=True), #some value that discribes the quality of the pridiction
 
@@ -292,6 +294,7 @@ class SeriesStorage():
             .where(table.c.dataSourceCode == seriesDescription.source)
             .where(table.c.sLocationCode == seriesDescription.location)
             .where(table.c.seriesCode == seriesDescription.series)
+            .where(table.c.interval == seriesDescription.interval)
             .where(table.c.datumCode == seriesDescription.datum)
             .where(table.c.timeActualized >= seriesDescription.fromDateTime)
             .where(table.c.timeActualized <= seriesDescription.toDateTime)
@@ -313,6 +316,7 @@ class SeriesStorage():
             .where(table.c.dataSourceCode == seriesDescription.source)
             .where(table.c.sLocationCode == seriesDescription.location)
             .where(table.c.seriesCode == seriesDescription.series)
+            .where(table.c.interval == seriesDescription.interval)
             .where(table.c.datumCode == seriesDescription.datum)
             .where((table.c.timeGenerated + table.c.leadTime) >= seriesDescription.fromDateTime)
             .where((table.c.timeGenerated + table.c.leadTime) <= seriesDescription.toDateTime)
@@ -355,11 +359,12 @@ class SeriesStorage():
         now = datetime.now()
         insertionRows = []
         for actual in series.get_data():
-            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
+            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "interval": 0, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
             insertionValueRow["timeActualized"] = actual.dateTime
             insertionValueRow["timeAquired"] = now
             insertionValueRow["dataValue"] = actual.value
             insertionValueRow["unitsCode"] = actual.unit
+            insertionValueRow["interval"] = series.description.interval
             insertionValueRow["dataSourceCode"] = series.description.source
             insertionValueRow["sLocationCode"] = series.description.location
             insertionValueRow["seriesCode"] = series.description.series
@@ -394,11 +399,12 @@ class SeriesStorage():
 
         insertionRows = []
         for prediction in series.get_data():
-            insertionValueRow = {"timeGenerated": None, "leadTime": None, "dataValue": None, "unitsCode": None, "resultCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
+            insertionValueRow = {"timeGenerated": None, "leadTime": None, "dataValue": None, "unitsCode": None, "interval": 0, "resultCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
             insertionValueRow["timeGenerated"] = prediction.generatedTime
             insertionValueRow["leadTime"] = prediction.leadTime
             insertionValueRow["dataValue"] = prediction.value
             insertionValueRow["unitsCode"] = prediction.unit
+            insertionValueRow["interval"] = series.description.interval
             insertionValueRow["resultCode"] = prediction.successValue
             insertionValueRow["dataSourceCode"] = series.description.source
             insertionValueRow["sLocationCode"] = series.description.location
@@ -640,9 +646,9 @@ class SeriesStorage():
         unitIndex = 4
         leadTimeIndex = 2
         timeGeneratedIndex = 1
-        resultCodeIndex = 5
-        latitudeIndex = 10
-        longitudeIndex = 11
+        resultCodeIndex = 6
+        latitudeIndex = 11
+        longitudeIndex = 12
         predictions = []
         for row in results:
             predictions.append(Prediction(
@@ -670,8 +676,8 @@ class SeriesStorage():
         valueIndex = 3
         unitIndex = 4
         timeActualizedIndex = 1
-        longitudeIndex = 10
-        latitudeIndex = 9
+        longitudeIndex = 11
+        latitudeIndex = 10
         dataPoints = []
         for row in results:
             dataPoints.append(Actual(
