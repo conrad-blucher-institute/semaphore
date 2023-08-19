@@ -5,8 +5,7 @@
 # Created Date: 4/15/2023
 # version 2.0
 #----------------------------------
-"""This file holds the DataIngestionMap class. This calss is supposed to make a series and sorce to a givin class
-and method to ingest the data.
+"""This file holds the DataIngestionMap class. This calss maps a series description to the DataIngestion class that can fulfill it
  """ 
 #----------------------------------
 # 
@@ -31,7 +30,7 @@ class DataIngestionMap():
         return self.seriesStorage
 
     def map_fetch(self, request: SeriesDescription) -> Series | None:
-        """Maps a data fetch request to the propper class and method. Preforms the call and returns the result.
+        """Maps a series description request to the propper class and method. Preforms the call and returns the result.
         ------
         Parameters
             request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>Series)

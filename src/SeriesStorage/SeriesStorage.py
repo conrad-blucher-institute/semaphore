@@ -1,4 +1,3 @@
-      
 # -*- coding: utf-8 -*-
 #SeriesStorage.py
 #-------------------------------
@@ -112,7 +111,7 @@ class SeriesStorage():
             Column("latitude", String(16), nullable=True),
             Column("longitude", String(16), nullable=True),
 
-            UniqueConstraint("timeActualized", "dataValue", "unitsCode", "dataSourceCode", "sLocationCode", "seriesCode"),
+            UniqueConstraint("timeActualized", "dataValue", "unitsCode", "interval", "dataSourceCode", "sLocationCode", "seriesCode"),
         )
 
         self.s_prediction = Table(
@@ -137,7 +136,7 @@ class SeriesStorage():
             Column("latitude", String(16), nullable=True),
             Column("longitude", String(16), nullable=True),
 
-            UniqueConstraint("timeGenerated", "leadTime", "dataValue", "unitsCode", "dataSourceCode", "sLocationCode", "seriesCode"),
+            UniqueConstraint("timeGenerated", "leadTime", "dataValue", "unitsCode", "interval", "dataSourceCode", "sLocationCode", "seriesCode"),
         )
 
         
@@ -265,12 +264,8 @@ class SeriesStorage():
 
     def __dbSelection(self, stmt: Select) -> CursorResult:
         """Runs a slection statment 
-        ---
-        ---
         Parameters:
-
             stmt: SQLAlchemy Select - The statement to run
-        ---
         Returns:
             SQLAlchemy CursorResult
         """
@@ -279,15 +274,99 @@ class SeriesStorage():
             result = conn.execute(stmt)
 
         return result
+    
+    def __splice_prediction_results(self, results: List[tuple]) -> List[Prediction]:
+        """Splices up a list of dbresults, pulling out only the data that changes per point,
+        and places them in a Prediction object.
+        Parameters:
+            first list[tupleish (sqlalchemy.engine.row.Row)] - The collection of dbrows.
+        Returns:
+            List[Prediction] - The formatted objs.
+        """
+        valueIndex = 3
+        unitIndex = 4
+        leadTimeIndex = 2
+        timeGeneratedIndex = 1
+        resultCodeIndex = 6
+        latitudeIndex = 11
+        longitudeIndex = 12
+        predictions = []
+        for row in results:
+            predictions.append(Prediction(
+                row[valueIndex],
+                row[unitIndex],
+                row[leadTimeIndex],
+                row[timeGeneratedIndex],
+                row[resultCodeIndex],
+                row[longitudeIndex],
+                row[latitudeIndex]
+            ))
+
+        return predictions
+        
+
+    def __splice_actual_results(self, results: List[tuple]) -> List[Actual]:
+        """Splices up a list of dbresults, pulling out only the data that changes per point,
+        and places them in a DataPoint object.
+        -------
+        Parameters:
+            first list[tupleish (sqlalchemy.engine.row.Row)] - The collection of dbrows.
+        Returns:
+            List[Actual] - The formatted objs.
+        """
+        valueIndex = 3
+        unitIndex = 4
+        timeActualizedIndex = 1
+        longitudeIndex = 11
+        latitudeIndex = 10
+        dataPoints = []
+        for row in results:
+            dataPoints.append(Actual(
+                row[valueIndex],
+                row[unitIndex],
+                row[timeActualizedIndex],
+                row[longitudeIndex],
+                row[latitudeIndex]
+            ))
+
+        return dataPoints
+    
+
+    def __splice_output_table_results(self, results: List[tuple]) -> List[Prediction]:
+        """Splices up a list of dbresults, pulling out only the data that changes per point,
+        and places them in a Prediction object.
+        -------
+        -------
+        Parameters:
+            first list[tupleish (sqlalchemy.engine.row.Row)] - The collection of dbrows.
+        Returns:
+            List[Prediction] - The formatted objs.
+        """
+        valueIndex = 6
+        unitIndex = 7
+        leadTimeIndex = 3
+        timeGeneratedIndex = 2
+        dataPoints = []
+        for row in results:
+            dataPoints.append(Prediction(
+                row[valueIndex],
+                row[unitIndex],
+                row[leadTimeIndex],
+                row[timeGeneratedIndex]
+            ))
+
+        return dataPoints
 
     #############################################################################################
     ################################################################################## Public selection methods
     #############################################################################################
     
-    def s_data_point_selection(self, seriesDescription: SeriesDescription) -> list[tuple]:
+    def s_data_point_selection(self, seriesDescription: SeriesDescription) -> Series:
         """Selects from the data point table.
-        ----
-        Returns list[tupleish (sqlalchemy.engine.row.Row)]
+        Parameter:
+            seriesDescription
+        Returns:
+            Series
         """
         table = self.s_data_point
         stmt = (select(table)
@@ -306,10 +385,12 @@ class SeriesStorage():
         return resultSeries
     
     
-    def s_prediction_selection(self, seriesDescription: SeriesDescription) -> list[tuple]:
+    def s_prediction_selection(self, seriesDescription: SeriesDescription) -> Series:
         """Selects from the prediction table.
-        ----
-        Returns list[tupleish (sqlalchemy.engine.row.Row)]
+        Parameter:
+            seriesDescription
+        Returns:
+            Series
         """
         table = self.s_prediction
         stmt = (select(table)
@@ -346,13 +427,12 @@ class SeriesStorage():
     ################################################################################## Purblic insertion Methods
     #############################################################################################
 
-    def s_data_point_insert(self, series: Series) -> list[tuple]:
+    def s_data_point_insert(self, series: Series) -> Series:
         """Inserts a series into s_data_point
-        Parameters:
-            series: Series - The series to insert.
-        ---
+        Parameter:
+            Series - The data to insert.
         Returns:
-           Returns list[tupleish (sqlalchemy.engine.row.Row)]
+            Series - The data actually inserted.
         """
 
         #Consturct DB row to insert
@@ -388,13 +468,12 @@ class SeriesStorage():
     
 
 
-    def s_prediction_insert(self, series: Series) -> list[tuple]:
+    def s_prediction_insert(self, series: Series) -> Series:
         """Inserts a series into s_prediction
-        Parameters:
-            series: Series - The series to insert.
-        ---
+        Parameter:
+            Series - The data to insert.
         Returns:
-           Returns list[tupleish (sqlalchemy.engine.row.Row)]
+            Series - The data actually inserted.
         """
 
         insertionRows = []
@@ -433,11 +512,10 @@ class SeriesStorage():
 
     def s_prediction_output_insert(self, series: Series) -> Series:
         """Inserts a series into s_prediction_output
-        Parameters:
-            series: Series - The series to insert.
-        ---
+        Parameter:
+            Series - The data to insert.
         Returns:
-           Returns list[tupleish (sqlalchemy.engine.row.Row)]
+            Series - The data actually inserted.
         """
 
         now = datetime.now()
@@ -474,12 +552,12 @@ class SeriesStorage():
 
     def s_locationCode_dataSourceLocationCode_mapping_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_locationCode_dataSourceLocationCode_mapping
-        ---
+
         Dictionary reference: {"dataSourceCode", "sLocationCode", "dataSourceLocationCode", "priorityOrder"}
-        ---
+
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ---
+
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
@@ -497,12 +575,12 @@ class SeriesStorage():
 
     def s_ref_slocation_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_slocation
-        ---
+
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ---
+
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ---
+
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
@@ -520,12 +598,12 @@ class SeriesStorage():
 
     def s_ref_data_source_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_data_source
-        ---
+
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ---
+
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ---
+
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
@@ -543,12 +621,12 @@ class SeriesStorage():
 
     def s_ref_series_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_series
-        ---
+
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ---
+
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ---
+
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
@@ -566,12 +644,12 @@ class SeriesStorage():
 
     def s_ref_units_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_units
-        ---
+
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ---
+
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ---
+
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
@@ -589,12 +667,12 @@ class SeriesStorage():
 
     def s_ref_datum_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_datum
-        ---
+
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ---
+
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ---
+
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
@@ -612,12 +690,12 @@ class SeriesStorage():
 
     def s_ref_resultCode_insert(self, values: dict | list[tuple]) -> list[tuple]:
         """Inserts a row or batch into s_ref_resultCode
-        ---
+
         Dictionary reference: {"code", "displayName", (OP)"notes"}
-        ---
+
         Parameters:
             values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-        ---
+
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
         """
@@ -633,82 +711,3 @@ class SeriesStorage():
         return result
     
 
-    def __splice_prediction_results(self, results: List[tuple]) -> List[Prediction]:
-        """Splices up a list of dbresults, pulling out only the data that changes per point,
-        and places them in a Prediction object.
-        -------
-        Parameters:
-            first List[tuple] - The collection of dbrows.
-        Returns:
-            List[Prediction] - The formatted objs.
-        """
-        valueIndex = 3
-        unitIndex = 4
-        leadTimeIndex = 2
-        timeGeneratedIndex = 1
-        resultCodeIndex = 6
-        latitudeIndex = 11
-        longitudeIndex = 12
-        predictions = []
-        for row in results:
-            predictions.append(Prediction(
-                row[valueIndex],
-                row[unitIndex],
-                row[leadTimeIndex],
-                row[timeGeneratedIndex],
-                row[resultCodeIndex],
-                row[longitudeIndex],
-                row[latitudeIndex]
-            ))
-
-        return predictions
-        
-
-    def __splice_actual_results(self, results: List[tuple]) -> List[Actual]:
-        """Splices up a list of dbresults, pulling out only the data that changes per point,
-        and places them in a DataPoint object.
-        -------
-        Parameters:
-            first List[tuple] - The collection of dbrows.
-        Returns:
-            List[Prediction] - The formatted objs.
-        """
-        valueIndex = 3
-        unitIndex = 4
-        timeActualizedIndex = 1
-        longitudeIndex = 11
-        latitudeIndex = 10
-        dataPoints = []
-        for row in results:
-            dataPoints.append(Actual(
-                row[valueIndex],
-                row[unitIndex],
-                row[timeActualizedIndex],
-                row[longitudeIndex],
-                row[latitudeIndex]
-            ))
-
-        return dataPoints
-    
-
-    def __splice_output_table_results(self, results: List[tuple]) -> List[Actual]:
-        """Splices up a list of dbresults, pulling out only the data that changes per point,
-        and places them in a DataPoint object.
-        -------
-        Parameters:
-            first List[tuple] - The collection of dbrows.
-        Returns:
-            List[Prediction] - The formatted objs.
-        """
-        valueIndex = 6
-        unitIndex = 7
-        timeActualizedIndex = 1
-        dataPoints = []
-        for row in results:
-            dataPoints.append(Actual(
-                row[valueIndex],
-                row[unitIndex],
-                row[timeActualizedIndex]
-            ))
-
-        return dataPoints

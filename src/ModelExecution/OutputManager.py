@@ -17,7 +17,7 @@ import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-from SeriesProvider.DataClasses import Prediction, LocalSeriesDescription, Series
+from SeriesProvider.DataClasses import Prediction, SemaphoreSeriesDescription, Series
 from SeriesProvider.SeriesProvider import SeriesProvider
 
 
@@ -29,11 +29,11 @@ class OutputManager():
     def __init__(self) -> None:
         self.seriesProvider = SeriesProvider()
 
-    def output_method_map(self, method: str, predictionDesc: LocalSeriesDescription, predictions: Prediction | list[Prediction]) -> Series:
+    def output_method_map(self, method: str, predictionDesc: SemaphoreSeriesDescription, predictions: Prediction | list[Prediction]) -> Series:
         """Maps a request to the specific method that handles its output.
         Paremeters:
             method: str - The string key to match to an output method
-            predictionDesc: LocalSeriesDescription - The description object holding all the info that the db will need to save it
+            predictionDesc: SemaphoreSeriesDescription - The description object holding all the info that the db will need to save it
             predictions: any | list[any] - The actual prediction(s) to save
         Returns:
             The inserted Series
@@ -46,7 +46,7 @@ class OutputManager():
                     log(f'No output method found for {method}!')
                     return None
     
-    def __one_packed_float(self, predictionDesc: LocalSeriesDescription, prediction: Prediction) -> Series:
+    def __one_packed_float(self, predictionDesc: SemaphoreSeriesDescription, prediction: Prediction) -> Series:
         """Unpacks the prediction value before saving them to the db
         Paremeters:
             TODO IN refactor

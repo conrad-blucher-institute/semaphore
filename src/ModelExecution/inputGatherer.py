@@ -5,8 +5,7 @@
 # Created Date: 2/3/2023
 # version 1.0
 #----------------------------------
-""" This file houses the InputGathere class, it houses funtion and methods of parsing
-the dspec file and pulling inputs from different places.
+""" This file should parse despec files, compunicate with series provider to request series and build the imput vector for a model.
  """ 
 #----------------------------------
 # 
@@ -137,7 +136,7 @@ class InputGatherer:
         self.__specificationsConstrucionTime = now
 
     def __generate_inputVector(self) -> None:
-        """This method fulfilles input specifications. IT queries the system
+        """This method fulfilles input specifications. It queries the system
         for the data and casts the data acording to the dspec
         """
         inputVector = []
@@ -158,7 +157,7 @@ class InputGatherer:
 
         Parameters:
             data: list[Actual | Prediction] - The data to cast.
-            dataTYpe: str = The datatype as a string to cast to.
+            dataType: str = The datatype as a string to cast to.
         ReturnsL
             list[any] - The casted data
         """

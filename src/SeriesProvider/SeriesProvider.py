@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesStorage.SeriesStorage import SeriesStorage
 from DataIngestion.DataIngestionMap import DataIngestionMap
-from SeriesProvider.DataClasses import Series, LocalSeriesDescription, SeriesDescription, Actual, Prediction
+from SeriesProvider.DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, Actual, Prediction
 from utility import log
 from traceback import format_exc
 
@@ -44,8 +44,8 @@ class SeriesProvider():
         """
         returningSeries = Series(series.description, True)
 
-        if not (type(series.description) == LocalSeriesDescription): #Check and make sure this is actually something with the proper description to be inserted
-            self.__get_and_log_err_series([], returningSeries, f'A save Request must be provided a series with a LocalSeriesDescription \n')
+        if not (type(series.description) == SemaphoreSeriesDescription): #Check and make sure this is actually something with the proper description to be inserted
+            self.__get_and_log_err_series([], returningSeries, f'A save Request must be provided a series with a SemaphoreSeriesDescription \n')
         else:
             self.seriesStorage.s_prediction_output_insert(series)
             returningSeries.isComplete = True
@@ -112,11 +112,11 @@ class SeriesProvider():
             return self.__get_and_log_err_response(requestDesc, [], f'An unknown error occured attempting to fill request.\nRequest: {requestDesc}\nException: {format_exc()}')
     
 
-    def __get_and_log_err_response(self, description: LocalSeriesDescription | SeriesDescription, currentData: List, msg: str) -> Series:
+    def __get_and_log_err_response(self, description: SemaphoreSeriesDescription | SeriesDescription, currentData: List, msg: str) -> Series:
         """This function logs an error message as well as generating a Response object with the same message
         -------
         Parameters:
-            description: LocalSeriesDescription | SeriesDescription - The description to pass back, either the output or input description
+            description: SemaphoreSeriesDescription | SeriesDescription - The description to pass back, either the output or input description
             currentData: List - Any data we already have, even if its not complete
             msg: str - The error message
         Returns:

@@ -5,8 +5,8 @@
 # Created Date: 2/3/2023
 # version 1.0
 #----------------------------------
-""" This script houses the ModelWrapper class. The class functions to run an
-AI model from an H5 file from a datetime and inputs specified in a dspec file.
+""" This script houses the ModelWrapper class. The class wrapps around tenserflow and all 
+tenserflow related actions allowing us to run models from .H5
  """ 
 #----------------------------------
 # 
@@ -19,7 +19,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from ModelExecution.inputGatherer import InputGatherer
 from ModelExecution.OutputManager import OutputManager
-from SeriesProvider.DataClasses import LocalSeriesDescription, Prediction
+from SeriesProvider.DataClasses import SemaphoreSeriesDescription, Prediction
 
 import datetime
 from os import path, getenv
@@ -97,7 +97,7 @@ class ModelWrapper:
             outputInfo = dspec.outputInfo
 
             #TODO::This code will need to be reworded we we get more than one value from a mdel
-            predecitionDesc = LocalSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
+            predecitionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
             prediction = Prediction(prediction, outputInfo.unit, outputInfo.leadTime, dateTime)
 
             om = OutputManager()

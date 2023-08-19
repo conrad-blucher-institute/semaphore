@@ -5,8 +5,7 @@
 # Created Date: 2/3/2023
 # version 1.0
 #----------------------------------
-""" This file should be a python class that matches a despec
-one to one for use in modelExecution.
+""" This file should a one for one match what a dspec looks like such that it can be passes around and worked with easily.
  """ 
 #----------------------------------
 # 

@@ -5,7 +5,7 @@
 # Created Date: 4/8/2023
 # version 3.0
 #----------------------------------
-""" This file is an interface with the NOAA tideas and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
+""" This file is an comunicator with the NOAA tideas and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
 An object of this class must be initalized with a DBInterface, as fetched data is directly imported into the DB via that interface.
 
 NOTE:: For an Interval of 6min, no request can be longer than 31 days. A year for 1 hour.
