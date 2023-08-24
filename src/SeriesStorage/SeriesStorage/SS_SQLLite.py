@@ -21,12 +21,45 @@ from sqlalchemy import create_engine as sqlalchemy_create_engine
 from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select
 from dotenv import load_dotenv
 from os import getenv
-from utility import log
+
+
+from src.SeriesStorage.ISeriesStorage import ISeriesStorage
 
 from SeriesProvider.DataClasses import *
 
-class SeriesStorage():
+class SS_SQLLite(ISeriesStorage):
+
+    #############################################################################################
+    ################################################################################## Interface methods
+    #############################################################################################
+    def select_actuals(self, seriesDescription) -> Series:
+        return self.s_data_point_selection(seriesDescription)
     
+
+    def select_prediction(self, seriesDescription) -> Series:
+        return self.s_prediction_selection(seriesDescription)
+    
+
+    def find_external_location_code(self, sourceCode, location, priorityOrder: int = 0) -> str:
+        return self.s_locationCode_dataSourceLocationCode_mapping_select(sourceCode, location, priorityOrder)
+
+
+    def insert_actuals(self, Series) -> Series:
+        return self.s_data_point_insert(Series)
+
+
+    def insert_predictions(self, Series) -> Series:
+        return self.s_prediction_insert(Series)
+    
+
+    def insert_output(self, Series) -> Series:
+        return self.s_prediction_output_insert(Series)
+
+    #############################################################################################
+    ################################################################################## Class start
+    #############################################################################################
+
+
     def __init__(self) -> None:
         """Constructor generates an a db schema. Automatically creates the 
         metadata object holding the defined scema.

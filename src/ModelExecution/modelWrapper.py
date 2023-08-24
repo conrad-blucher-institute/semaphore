@@ -18,8 +18,9 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from ModelExecution.inputGatherer import InputGatherer
-from ModelExecution.OutputManager import OutputManager
-from SeriesProvider.DataClasses import SemaphoreSeriesDescription, Prediction
+from ModelExecution.IOutputHandler import map_to_OH_Instance
+from SeriesProvider.DataClasses import SemaphoreSeriesDescription, Prediction, Series
+from SeriesStorage.SeriesStorage.SS_Map import map_to_SS_Instance
 
 import datetime
 from os import path, getenv
@@ -100,9 +101,18 @@ class ModelWrapper:
             predecitionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
             prediction = Prediction(prediction, outputInfo.unit, outputInfo.leadTime, dateTime)
 
-            om = OutputManager()
-            om.output_method_map(outputInfo.outputMethod, predecitionDesc, prediction)
-            return prediction
+            #Instantiate the right output handler method then post process the predictions
+            OH_Class = map_to_OH_Instance(outputInfo.outputMethod)
+            processedOutput = OH_Class.save_prediction(prediction)
+
+            #Put the post processed predictions in a seriese
+            series = Series(predecitionDesc, True)
+            series.bind_data(processedOutput)
+
+            #Send the predition to the database and reutn the result
+            SS_Class = map_to_SS_Instance()
+            result = SS_Class.insert_output(series)
+            return result
 
         except Exception as e:
             log(e)

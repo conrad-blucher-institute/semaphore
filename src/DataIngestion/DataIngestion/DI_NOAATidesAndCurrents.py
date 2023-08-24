@@ -22,8 +22,9 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from SeriesStorage.SeriesStorage import SeriesStorage
+from SeriesStorage.SeriesStorage.SS_Map import map_to_SS_Instance
 from SeriesProvider.DataClasses import Series, SeriesDescription, Actual, Prediction
+from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
 
 from datetime import datetime
@@ -36,11 +37,34 @@ from typing import List, Dict
 
 
 
-class NOAATidesAndCurrents:
+class NOAATidesAndCurrents(IDataIngestion):
 
-    def __init__(self, seriesStorage: SeriesStorage):
+
+    def ingest_series(self, seriesDescription: SeriesDescription) -> Series | None:
+        match seriesDescription.series:
+            case 'dWl':
+                return self.fetch_water_level_hourly(seriesDescription)
+            case 'dXWnCmp':
+                match seriesDescription.interval:
+                    case 3600:
+                        return self.fetch_X_wind_componants_hourly(seriesDescription)
+                    case 360:
+                        return self.fetch_X_wind_componants_6min(seriesDescription)
+            case 'dYWnCmp':
+                match seriesDescription.interval:
+                    case 3600:
+                        return self.fetch_Y_wind_componants_hourly(seriesDescription)
+                    case 360:
+                        return self.fetch_Y_wind_componants_6min
+            case 'dSurge':
+                return self.fetch_surge_hourly(seriesDescription)
+            case _:
+                log(f'Data series: {seriesDescription.series}, not found for NOAAT&C for request: {seriesDescription}')
+                return None
+
+    def __init__(self):
         self.sourceCode = "noaaT&C"
-        self.__seriesStorage = seriesStorage
+        self.__seriesStorage = map_to_SS_Instance()
 
     #TODO:: There has to be a better way to do this!
     def __create_pattern1_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> str:
@@ -80,7 +104,7 @@ class NOAATidesAndCurrents:
         Returns None if DNE
         """
 
-        dbResult = self.__seriesStorage.s_locationCode_dataSourceLocationCode_mapping_select(self.sourceCode, location)
+        dbResult = self.__seriesStorage.find_external_location_code(self.sourceCode, location)
         if dbResult:
             resultOffset = 0
             stationIndex = 3
@@ -136,7 +160,7 @@ class NOAATidesAndCurrents:
         series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+        insertedRows = self.__seriesStorage.insert_actuals(series)
 
         series.bind_data(insertedRows) #Rebind to only return what rows were inserted?
         return series
@@ -195,7 +219,7 @@ class NOAATidesAndCurrents:
         series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+        insertedRows = self.__seriesStorage.insert_actuals(series)
         return series
     
     def fetch_Y_wind_componants_6min(self, request: SeriesDescription) -> Series | None:
@@ -250,7 +274,7 @@ class NOAATidesAndCurrents:
         series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+        insertedRows = self.__seriesStorage.insert_actuals(series)
         return series  
 
 
@@ -306,7 +330,7 @@ class NOAATidesAndCurrents:
         series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+        insertedRows = self.__seriesStorage.insert_actuals(series)
         return series 
 
 
@@ -362,7 +386,7 @@ class NOAATidesAndCurrents:
         series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+        insertedRows = self.__seriesStorage.insert_actuals(series)
         return series 
 
     
@@ -413,7 +437,7 @@ class NOAATidesAndCurrents:
         series.bind_data(actuals)
 
         #insertData to DB
-        insertedRows = self.__seriesStorage.s_data_point_insert(series)
+        insertedRows = self.__seriesStorage.insert_actuals(series)
         return series
 
 

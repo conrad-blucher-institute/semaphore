@@ -16,8 +16,8 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from SeriesStorage.SeriesStorage import SeriesStorage
-from DataIngestion.DataIngestionMap import DataIngestionMap
+from SeriesStorage.SeriesStorage.SS_Map import map_to_SS_Instance
+from DataIngestion.IDataIngestion import map_to_DI_Instance
 from SeriesProvider.DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, Actual, Prediction
 from utility import log
 from traceback import format_exc
@@ -29,11 +29,7 @@ from typing import List, Dict
 class SeriesProvider():
 
     def __init__(self) -> None:
-        self.seriesStorage = SeriesStorage()
-
-    def get_SeriesStorage(self) -> SeriesStorage:
-        """Get the seriesStorage this dataManager is using for debugging perposes."""
-        return self.seriesStorage
+        self.seriesStorage = map_to_SS_Instance()
     
     def make_SaveRequest(self, series: Series) -> Series:
         """Passes a series to the DBManager to be saved.
@@ -86,8 +82,9 @@ class SeriesProvider():
             if len(dbdata) != amntExpected:
 
                 #Call Data Ingestion to fetch data
-                dataIngestionMap = DataIngestionMap(self.seriesStorage)
-                diResults = dataIngestionMap.map_fetch(requestDesc)
+                diClass = map_to_DI_Instance(requestDesc)
+                diResults = diClass.ingest_series(requestDesc)
+
                 if diResults is None:
                     return self.__get_and_log_err_response(requestDesc, dbSeries, f'DB did not have data request, dataIngestion returned NONE, for request.')
                 diData = diResults.get_data()
