@@ -6,6 +6,7 @@ Semaphore is a student-built and maintained Python application that semi-automat
 
 ## Dependency
 Right now the only external dependency that is not included in the requirements file, is some version of SQLite as this is the only Database system currently supported.
+[SQLite Download Page](https://www.sqlite.org/download.html)
     
 ## Deployment
 
