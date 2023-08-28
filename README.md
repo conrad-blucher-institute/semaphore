@@ -10,14 +10,17 @@ Right now the only external dependency that is not included in the requirements 
     
 ## Deployment
 
-1. Edit construct env.dict.
-   a. DB_LOCATION_STRING Maps your database file locations.or sqlite it will look like this "sqlite:///{YOUR FILE PATH}{your db name}". You do not already need a db in place, it will create it at the location when run for the first time. 
-   b. DSPEC_FOLDER_PATH & MODEL_FOLDER_PATH can either be relative paths from working directory(default) or you can overide with absolute paths.
-2. requirments.txt (tenserflow currently CPU build only)
-    
-## Authors
+1. Construct env.dict    
+    - Create the .env file at the root directory of Semaphore, and copy the text from env.dict into it.
+    - Assign DB_LOCATION_STRING. It maps your database file locations. It Should look like this "sqlite:///{YOUR FILE PATH}{your db file name}". You do not already need a DB file in place, it will create it at the location when run for the first time.
+    - (Optional) DSPEC_FOLDER_PATH & MODEL_FOLDER_PATH can either be relative paths from the working directory(default) or you can override with absolute paths.
+3. Import the Python dependencies with the requirments.txt file. NOTE:: TensorFlow currently CPU build only.
 
-* [@Matthew Kastl](https://github.com/matdenkas)
+## Running Semaphore
+Currently, you can run Semaphore through the make_and_save_prediction and make_prediction methods in the `src/ModelExecution/modelWrapper.py`. Keep in mind the DB will need to be loaded with the proper location mappings for your ingested data. Feel free to reach out to one of the authors for help getting Semaphore up and running.
+
+## Authors
+* [@Matthew Kastl](https://github.com/matdenkas) - mkastl@islander.tamucc.edu
 
 
 
