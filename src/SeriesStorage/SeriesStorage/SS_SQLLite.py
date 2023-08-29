@@ -78,7 +78,7 @@ class SS_SQLLite(ISeriesStorage):
         See: DBManager.create_engine()
         """
 
-        self._metadata_obj.create_all(self.get_engine())
+        self._metadata.create_all(self.get_engine())
      
 
     def drop_DB(self) -> None:
@@ -87,7 +87,7 @@ class SS_SQLLite(ISeriesStorage):
         See: DBManager.create_engine()
         """
 
-        self._metadata_obj.drop_all(self.get_engine())
+        self._metadata.drop_all(self.get_engine())
 
 
     def create_engine(self, parmaString: str, echo: bool ) -> None: #"sqlite+pysqlite:///:memory:"
@@ -105,7 +105,7 @@ class SS_SQLLite(ISeriesStorage):
         See: DBManager.create_engine()
         """
 
-        if not hasattr(self, "_engine"):
+        if not hasattr(self, '_engine') or self._engine == None:
             raise Exception("An engine was requestied from DBManager, but no engine has been created. See DBManager.create_engine()")
         else:
             return self._engine
@@ -114,19 +114,19 @@ class SS_SQLLite(ISeriesStorage):
     def get_metadata(self) -> MetaData:
         """Fetches metadata that hold the DB schema
         """
-        return self._metadata_obj
+        return self._metadata
 
 
     def __create_schema(self) -> None:
         """Builds the db schema in the metadata.
         """
 
-        self._metadata_obj = MetaData()
+        self._metadata = MetaData()
         
         #this table stores the actual data values as retrieved or received 
         self.s_data_point = Table(
             "s_data_point",
-            self._metadata_obj,
+            self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
 
@@ -149,7 +149,7 @@ class SS_SQLLite(ISeriesStorage):
 
         self.s_prediction = Table(
             "s_prediction",
-            self._metadata_obj,
+            self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
 
@@ -175,7 +175,7 @@ class SS_SQLLite(ISeriesStorage):
         
         self.s_prediction_output = Table(
             "s_prediction_output",
-            self._metadata_obj,
+            self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             Column("timeAquired", DateTime, nullable=False),    #When the data was inserted by us
@@ -199,7 +199,7 @@ class SS_SQLLite(ISeriesStorage):
         #This table maps CBI location codes to location codes used by datasorces
         self.s_locationCode_dataSourceLocationCode_mapping = Table(
             "s_locationCode_dataSourceLocationCode_mapping",
-            self._metadata_obj,
+            self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             
@@ -213,13 +213,13 @@ class SS_SQLLite(ISeriesStorage):
 
 
         #The rest of these tables are reference tables for values stored in the tables above. They all contain
-        # ID - aoutincamented id
+        # ID - Automated id
         # code - that mapped code
         # display name - a non compressed pretty name
         # notes - more information about that item
         self.s_ref_slocation = Table(
             "s_ref_slocation",
-            self._metadata_obj,
+            self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             Column("code", String(25), nullable=False),
@@ -233,7 +233,7 @@ class SS_SQLLite(ISeriesStorage):
 
         self.s_ref_data_source = Table(
             "s_ref_data_source",
-            self._metadata_obj,
+            self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             Column("code", String(10), nullable=False),
@@ -245,7 +245,7 @@ class SS_SQLLite(ISeriesStorage):
 
         self.s_ref_series = Table(
             "s_ref_series",
-            self._metadata_obj,
+            self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             Column("code", String(10), nullable=False),
@@ -257,7 +257,7 @@ class SS_SQLLite(ISeriesStorage):
 
         self.s_ref_units = Table(
             "s_ref_units",
-            self._metadata_obj,
+            self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             Column("code", String(10), nullable=False),
@@ -269,7 +269,7 @@ class SS_SQLLite(ISeriesStorage):
 
         self.s_ref_datum = Table(
             "s_ref_datum",
-            self._metadata_obj,
+            self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             Column("code", String(10), nullable=False),
@@ -281,7 +281,7 @@ class SS_SQLLite(ISeriesStorage):
         
         self.s_ref_resultCodeUnits = Table(
             "s_ref_resultCodeUnits",
-            self._metadata_obj,
+            self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             Column("code", String(10), nullable=False),
@@ -414,7 +414,7 @@ class SS_SQLLite(ISeriesStorage):
         
         result = self.__dbSelection(stmt).fetchall()
         resultSeries = Series(seriesDescription, True)
-        resultSeries.bind_data(self.__splice_actual_results(result)) #Turn tuple objects into prediction objects
+        resultSeries.data = self.__splice_actual_results(result) #Turn tuple objects into prediction objects
         return resultSeries
     
     
@@ -438,7 +438,7 @@ class SS_SQLLite(ISeriesStorage):
 
         result = self.__dbSelection(stmt).fetchall()
         resultSeries = Series(seriesDescription, True)
-        resultSeries.bind_data(self.__splice_prediction_results(result)) #Turn tuple objects into prediction objects
+        resultSeries.data = self.__splice_prediction_results(result) #Turn tuple objects into prediction objects
         return resultSeries
         
 
@@ -471,7 +471,7 @@ class SS_SQLLite(ISeriesStorage):
         #Consturct DB row to insert
         now = datetime.now()
         insertionRows = []
-        for actual in series.get_data():
+        for actual in series.data:
             insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "interval": 0, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
             insertionValueRow["timeActualized"] = actual.dateTime
             insertionValueRow["timeAquired"] = now
@@ -496,7 +496,7 @@ class SS_SQLLite(ISeriesStorage):
             conn.commit()
 
         resultSeries = Series(series.description, True)
-        resultSeries.bind_data(self.__splice_actual_results(result)) #Turn tuple objects into actual objects
+        resultSeries.data = self.__splice_actual_results(result) #Turn tuple objects into actual objects
         return resultSeries
     
 
@@ -510,7 +510,7 @@ class SS_SQLLite(ISeriesStorage):
         """
 
         insertionRows = []
-        for prediction in series.get_data():
+        for prediction in series.data:
             insertionValueRow = {"timeGenerated": None, "leadTime": None, "dataValue": None, "unitsCode": None, "interval": 0, "resultCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
             insertionValueRow["timeGenerated"] = prediction.generatedTime
             insertionValueRow["leadTime"] = prediction.leadTime
@@ -538,7 +538,7 @@ class SS_SQLLite(ISeriesStorage):
 
         resultSeries = Series(series.description, True)
         resultSeries.description = series.description
-        resultSeries.bind_data(self.__splice_prediction_results(result)) #Turn tuple objects into prediction objects
+        resultSeries.data = self.__splice_prediction_results(result) #Turn tuple objects into prediction objects
         return resultSeries
     
 
@@ -553,7 +553,7 @@ class SS_SQLLite(ISeriesStorage):
 
         now = datetime.now()
         insertionRows = []
-        for prediction in series.get_data():
+        for prediction in series.data:
 
             #Consturct DB row to insert
             insertionValueRow = {"timeAquired": None, "timeGenerated": None, "leadTime": None, "ModelName": None, "ModelVersion": None, "dataValue": None, "unitsCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None}
@@ -579,7 +579,7 @@ class SS_SQLLite(ISeriesStorage):
 
         resultSeries = Series(series.description, True)
         resultSeries.description = series.description
-        resultSeries.bind_data(self.__splice_output_table_results(result)) #Turn tuple objects into prediction objects
+        resultSeries.data = self.__splice_output_table_results(result) #Turn tuple objects into prediction objects
         return resultSeries
     
 

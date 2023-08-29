@@ -107,7 +107,7 @@ class ModelWrapper:
 
             #Put the post processed predictions in a seriese
             series = Series(predecitionDesc, True)
-            series.bind_data(processedOutput)
+            series.data = processedOutput
 
             #Send the predition to the database and reutn the result
             SS_Class = map_to_SS_Instance()
