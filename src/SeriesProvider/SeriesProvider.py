@@ -68,7 +68,7 @@ class SeriesProvider():
             else:
                 dbSeries = self.seriesStorage.s_data_point_selection(requestDesc)
 
-            dbdata = dbSeries.get_data()
+            dbdata = dbSeries.data
             
 
             ###Check contents contains the right amount of results
@@ -87,7 +87,7 @@ class SeriesProvider():
 
                 if diResults is None:
                     return self.__get_and_log_err_response(requestDesc, dbSeries, f'DB did not have data request, dataIngestion returned NONE, for request.')
-                diData = diResults.get_data()
+                diData = diResults.data
                 
                 #Merge data
                 mergedResults = self.__merge_results(dbdata, diData)
@@ -102,7 +102,7 @@ class SeriesProvider():
 
             ###Generate proper response object
             responseSeries = Series(requestDesc, True)
-            responseSeries.bind_data(checkedResults)
+            responseSeries.data = checkedResults
             return responseSeries
         
         except Exception as e:
@@ -121,7 +121,7 @@ class SeriesProvider():
         """
         log(msg)
         response = Series(description, False, msg)
-        response.bind_data(currentData)
+        response.data = currentData
         return response
     
 

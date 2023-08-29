@@ -157,12 +157,12 @@ class NOAATidesAndCurrents(IDataIngestion):
             actuals.append(actual)
 
         series = Series(request, True)
-        series.bind_data(actuals)
+        series.data = actuals
 
         #insertData to DB
         insertedRows = self.__seriesStorage.insert_actuals(series)
 
-        series.bind_data(insertedRows) #Rebind to only return what rows were inserted?
+        series.data = insertedRows #Rebind to only return what rows were inserted?
         return series
 
 
@@ -216,7 +216,7 @@ class NOAATidesAndCurrents(IDataIngestion):
             actuals.append(actual)
 
         series = Series(request, True)
-        series.bind_data(actuals)
+        series.data = actuals
 
         #insertData to DB
         insertedRows = self.__seriesStorage.insert_actuals(series)
@@ -271,7 +271,7 @@ class NOAATidesAndCurrents(IDataIngestion):
             actuals.append(actual)
 
         series = Series(request, True)
-        series.bind_data(actuals)
+        series.data = actuals
 
         #insertData to DB
         insertedRows = self.__seriesStorage.insert_actuals(series)
@@ -327,7 +327,7 @@ class NOAATidesAndCurrents(IDataIngestion):
             actuals.append(actual)
 
         series = Series(request, True)
-        series.bind_data(actuals)
+        series.data = actuals
 
         #insertData to DB
         insertedRows = self.__seriesStorage.insert_actuals(series)
@@ -383,7 +383,7 @@ class NOAATidesAndCurrents(IDataIngestion):
             actuals.append(actual)
 
         series = Series(request, True)
-        series.bind_data(actuals)
+        series.data = actuals
 
         #insertData to DB
         insertedRows = self.__seriesStorage.insert_actuals(series)
@@ -434,7 +434,7 @@ class NOAATidesAndCurrents(IDataIngestion):
             actuals.append(actual)
 
         series = Series(request, True)
-        series.bind_data(actuals)
+        series.data = actuals
 
         #insertData to DB
         insertedRows = self.__seriesStorage.insert_actuals(series)

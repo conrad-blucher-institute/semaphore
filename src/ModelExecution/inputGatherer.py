@@ -147,7 +147,7 @@ class InputGatherer:
 
             responseSeries = self.__seriesProvider.make_request(requestDesc)
             if responseSeries.isComplete:
-                [inputVector.append(dataPoint) for dataPoint in self.__cast_data(responseSeries.get_data(), dataType)]
+                [inputVector.append(dataPoint) for dataPoint in self.__cast_data(responseSeries.data, dataType)]
             else:
                 log(f'ERROR: There was a problem with input gathere making requests.\n\n Response: {responseSeries}\n\n')
         self.__inputVector = inputVector
