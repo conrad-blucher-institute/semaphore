@@ -5,11 +5,11 @@
 # Created Date: 4/8/2023
 # version 3.0
 #----------------------------------
-""" This file is an comunicator with the NOAA tideas and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
-An object of this class must be initalized with a DBInterface, as fetched data is directly imported into the DB via that interface.
+""" This file is a communicator with the NOAA tides and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
+An object of this class must be initialized with a DBInterface, as fetched data is directly imported into the DB via that interface.
 
 NOTE:: For an Interval of 6min, no request can be longer than 31 days. A year for 1 hour.
-NOTE::Origenal code was taken from:
+NOTE:: Original code was taken from:
         Created By: Brian Colburn 
         Source: https://github.com/conrad-blucher-institute/water-level-processing/blob/master/tides_and_currents_downloader.py#L84
  """ 
@@ -47,15 +47,15 @@ class NOAATidesAndCurrents(IDataIngestion):
             case 'dXWnCmp':
                 match seriesDescription.interval:
                     case 3600:
-                        return self.fetch_X_wind_componants_hourly(seriesDescription)
+                        return self.fetch_X_wind_components_hourly(seriesDescription)
                     case 360:
-                        return self.fetch_X_wind_componants_6min(seriesDescription)
+                        return self.fetch_X_wind_components_6min(seriesDescription)
             case 'dYWnCmp':
                 match seriesDescription.interval:
                     case 3600:
-                        return self.fetch_Y_wind_componants_hourly(seriesDescription)
+                        return self.fetch_Y_wind_components_hourly(seriesDescription)
                     case 360:
-                        return self.fetch_Y_wind_componants_6min
+                        return self.fetch_Y_wind_components_6min
             case 'dSurge':
                 return self.fetch_surge_hourly(seriesDescription)
             case _:
@@ -79,8 +79,8 @@ class NOAATidesAndCurrents(IDataIngestion):
         
     
     def __api_request(self, url: str) -> None | dict:
-        """Given the parameters, generates and utlizes a url to hit the t&C api. 
-        NOTE No date range of 31 days will be accepted! - raises Value Errror
+        """Given the parameters, generates and utilize a url to hit the t&C api. 
+        NOTE No date range of 31 days will be accepted! - raises Value Error
         NOTE On a bad api param, throws urlib HTTPError, code 400
         """
        
@@ -89,7 +89,7 @@ class NOAATidesAndCurrents(IDataIngestion):
                 data = json.loads(''.join([line.decode() for line in response.readlines()])) #Download and parse
 
         except HTTPError as err:
-            log(f'Fetch faied, HTTPError of code: {err.status} for: {err.reason}')
+            log(f'Fetch failed, HTTPError of code: {err.status} for: {err.reason}')
             return None
         except Exception as ex:
             log(f'Fetch failed, unhandled exceptions: {ex}')
@@ -110,7 +110,7 @@ class NOAATidesAndCurrents(IDataIngestion):
             stationIndex = 3
             return dbResult[resultOffset][stationIndex]
         else:
-            log(f'Empty dataSource Location mapping recieved in NOAATidesAndCurrents for sourceCode: {self.sourceCode} AND loacation: {location}')
+            log(f'Empty dataSource Location mapping received in NOAATidesAndCurrents for sourceCode: {self.sourceCode} AND locations: {location}')
             return None
 
 
@@ -166,8 +166,8 @@ class NOAATidesAndCurrents(IDataIngestion):
         return series
 
 
-    def fetch_X_wind_componants_6min(self, request: SeriesDescription) -> Series | None:
-        """Fetches wind spd and direction and calculates the X componant.
+    def fetch_X_wind_components_6min(self, request: SeriesDescription) -> Series | None:
+        """Fetches wind spd and direction and calculates the X component.
         -------
         Parameters:
             request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
@@ -206,7 +206,7 @@ class NOAATidesAndCurrents(IDataIngestion):
             xValues.append(str(winDir_X))
             dateTimes.append(time)
 
-        #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
+        #Iterate through data and format DB rows. Makes rows for both the X components and Y components
         #They are saved as different series.
         actuals = []
         for index, value in enumerate(xValues):
@@ -222,8 +222,8 @@ class NOAATidesAndCurrents(IDataIngestion):
         insertedRows = self.__seriesStorage.insert_actuals(series)
         return series
     
-    def fetch_Y_wind_componants_6min(self, request: SeriesDescription) -> Series | None:
-        """Fetches wind spd and direction and calculates the Y componant.
+    def fetch_Y_wind_components_6min(self, request: SeriesDescription) -> Series | None:
+        """Fetches wind spd and direction and calculates the Y component.
         -------
         Parameters:
             request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
@@ -262,7 +262,7 @@ class NOAATidesAndCurrents(IDataIngestion):
             yValues.append(str(winDir_Y))
             dateTimes.append(time)
 
-        #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
+        #Iterate through data and format DB rows. Makes rows for both the X components and Y components
         #They are saved as different series.
         actuals = []
         for index, value in enumerate(yValues):
@@ -278,8 +278,8 @@ class NOAATidesAndCurrents(IDataIngestion):
         return series  
 
 
-    def fetch_X_wind_componants_hourly(self, request: SeriesDescription) -> Series | None:
-        """Fetches wind spd and direction and calculates the X componant. 
+    def fetch_X_wind_components_hourly(self, request: SeriesDescription) -> Series | None:
+        """Fetches wind spd and direction and calculates the X component. 
         -------
         Parameters:
             request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
@@ -318,7 +318,7 @@ class NOAATidesAndCurrents(IDataIngestion):
             xValues.append(str(winDir_X))
             dateTimes.append(time)
 
-        #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
+        #Iterate through data and format DB rows. Makes rows for both the X components and Y components
         #They are saved as different series.
         actuals = []
         for index, value in enumerate(xValues):
@@ -334,8 +334,8 @@ class NOAATidesAndCurrents(IDataIngestion):
         return series 
 
 
-    def fetch_Y_wind_componants_hourly(self, request: SeriesDescription) -> Series | None:
-        """Fetches wind spd and direction and calculates the Y componant.. 
+    def fetch_Y_wind_components_hourly(self, request: SeriesDescription) -> Series | None:
+        """Fetches wind spd and direction and calculates the Y component.. 
         -------
         Parameters:
             request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
@@ -374,7 +374,7 @@ class NOAATidesAndCurrents(IDataIngestion):
             yValues.append(str(winDir_Y))
             dateTimes.append(time)
 
-        #Iterate through data and format DB rows. Makes rows for both the X componants and Y componants
+        #Iterate through data and format DB rows. Makes rows for both the X components and Y components
         #They are saved as different series.
         actuals = []
         for index, value in enumerate(yValues):

@@ -5,7 +5,7 @@
 # Created Date: 2/3/2023
 # version 1.0
 #----------------------------------
-""" This file should parse despec files, compunicate with series provider to request series and build the imput vector for a model.
+""" This file should parse despec files, communicate with series provider to request series and build the input vector for a model.
  """ 
 #----------------------------------
 # 
@@ -36,7 +36,7 @@ class InputGatherer:
         """
         self.__dspec = None
         self.__specifications = None
-        self.__specificationsConstrucionTime = None
+        self.__specificationsConstructionTime = None
         self.__inputVector = None
 
         self.__parse_dspec(dspecFileName)
@@ -96,13 +96,13 @@ class InputGatherer:
             self.__dspec = dspec #Bind dspec to this obj
 
     def __generate_inputSpecifications(self, now: datetime) -> None:
-        """Generates the list of input specifcations. This is a request paired
-        with the expected datatype as a tuple. This list is saved as an atribute
+        """Generates the list of input specification. This is a request paired
+        with the expected datatype as a tuple. This list is saved as an attributes
         on this class. Also saves the time in which this was requested. This can be 
-        used to determin if the specification needs to be remade.
+        used to determine if the specification needs to be remade.
 
         Parameters:
-            now: datetime - The time to generate the sepcifications of of
+            now: datetime - The time to generate the specification of
             The data requests will be relative to this time.
         """
         specifications = []
@@ -111,7 +111,7 @@ class InputGatherer:
                 toDateTime = now + timedelta(hours= input.range[0])
                 fromDateTime = now + timedelta(hours= input.range[1])
 
-                #TODO:: Create better logic to propperly analyse a given input
+                #TODO:: Create better logic to properly analyse a given input
                 if (input.range[0] == input.range[1]): #isOnePoint
                     fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
 
@@ -131,13 +131,13 @@ class InputGatherer:
                     )
                 )
             except Exception as e:
-                log(f'ERROR: There was a problem in the input generating inputrequests.\n\n Input= {input} Error= {e}')
+                log(f'ERROR: There was a problem in the input generating input requests.\n\n Input= {input} Error= {e}')
         self.__specifications = specifications
-        self.__specificationsConstrucionTime = now
+        self.__specificationsConstructionTime = now
 
     def __generate_inputVector(self) -> None:
-        """This method fulfilles input specifications. It queries the system
-        for the data and casts the data acording to the dspec
+        """This method fills input specifications. It queries the system
+        for the data and casts the data according to the dspec
         """
         inputVector = []
         for specification in self.__specifications:
@@ -149,7 +149,7 @@ class InputGatherer:
             if responseSeries.isComplete:
                 [inputVector.append(dataPoint) for dataPoint in self.__cast_data(responseSeries.data, dataType)]
             else:
-                log(f'ERROR: There was a problem with input gathere making requests.\n\n Response: {responseSeries}\n\n')
+                log(f'ERROR: There was a problem with input gatherer making requests.\n\n Response: {responseSeries}\n\n')
         self.__inputVector = inputVector
 
     def __cast_data(self, data: list[Actual | Prediction], dataType: str) -> list[any]:
@@ -181,9 +181,9 @@ class InputGatherer:
             will be relative to it.
         """
 
-        #Only regenerate specification IF its truely a new request.
+        #Only regenerate specification If its truly a new request.
         specificationIsCreated = self.__specifications != None
-        requestTimeIsDifferent = dateTime != self.__specificationsConstrucionTime
+        requestTimeIsDifferent = dateTime != self.__specificationsConstructionTime
         if not specificationIsCreated or (specificationIsCreated and requestTimeIsDifferent):
             self.__generate_inputSpecifications(dateTime)
             self.__generate_inputVector()
