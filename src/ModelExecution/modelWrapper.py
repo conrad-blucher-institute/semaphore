@@ -5,8 +5,8 @@
 # Created Date: 2/3/2023
 # version 1.0
 #----------------------------------
-""" This script houses the ModelWrapper class. The class wrapps around tenserflow and all 
-tenserflow related actions allowing us to run models from .H5
+""" This script houses the ModelWrapper class. The class wraps around Tenserflow and all 
+Tenserflow related actions allowing us to run models from .H5
  """ 
 #----------------------------------
 # 
@@ -34,10 +34,10 @@ class ModelWrapper:
         and attempts to load the model.
         """
         self.__inputGatherer = InputGatherer(dspecFileName)
-        self.__load_modele()
+        self.__load_model()
 
 
-    def __load_modele(self) -> None:
+    def __load_model(self) -> None:
         """Private method to load a model saves as an h5 file designated
         in the dspec file using Tenserflow/Karas
         """
@@ -58,7 +58,7 @@ class ModelWrapper:
     def __shape_data(self, inputs: array) -> None:
         """Private method to convert the shape  of the data from the inputGatherer, 
         to the correct shape required by the model, dynamically. The shape that the input comes in
-        and what the model was trained with, aren't nessisarily the same.
+        and what the model was trained with, aren't necessarily the same.
         """
 
         #Get only first and last layers
@@ -79,7 +79,7 @@ class ModelWrapper:
             inputs = self.__inputGatherer.get_inputs(dateTime)
             if inputs == -1: return -1
             
-            shapedInputs = self.__shape_data(inputs) #Ensure recived inputs are shaped right for model
+            shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
             return self._model.predict(shapedInputs) 
         except Exception as e:
             log(e)
@@ -92,24 +92,24 @@ class ModelWrapper:
             inputs = self.__inputGatherer.get_inputs(dateTime)
             if inputs == -1: return -1
             
-            shapedInputs = self.__shape_data(inputs) #Ensure recived inputs are shaped right for model
+            shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
             prediction =  self._model.predict(shapedInputs) 
             dspec = self.__inputGatherer.get_dspec()
             outputInfo = dspec.outputInfo
 
             #TODO::This code will need to be reworded we we get more than one value from a mdel
-            predecitionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
+            predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
             prediction = Prediction(prediction, outputInfo.unit, outputInfo.leadTime, dateTime)
 
             #Instantiate the right output handler method then post process the predictions
             OH_Class = map_to_OH_Instance(outputInfo.outputMethod)
-            processedOutput = OH_Class.save_prediction(prediction)
+            processedOutput = OH_Class.post_process_prediction(prediction)
 
-            #Put the post processed predictions in a seriese
-            series = Series(predecitionDesc, True)
+            #Put the post processed predictions in a series
+            series = Series(predictionDesc, True)
             series.data = processedOutput
 
-            #Send the predition to the database and reutn the result
+            #Send the prediction to the database and return the result
             SS_Class = map_to_SS_Instance()
             result = SS_Class.insert_output(series)
             return result

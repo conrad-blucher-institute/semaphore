@@ -25,13 +25,13 @@ from ModelExecution.IOutputHandler import IOutputHandler
 class OH_OnePackedFloat(IOutputHandler):
 
 
-    def save_prediction(self, prediction: Prediction) -> list[Prediction]:
+    def post_process_prediction(self, prediction: Prediction) -> list[Prediction]:
         """Unpacks the prediction value before saving them to the db
-        Paremeters:
+        Parameters:
             predictionDesc: SemaphoreSeriesDescription
             prediction: Prediction
         Returns:
-            The Response from the seriesprovider 
+            The Response from the series provider 
         """
         unpackedPrediction = self.__unpack(prediction.value)
 
@@ -41,8 +41,8 @@ class OH_OnePackedFloat(IOutputHandler):
         return predictions
     
     def __unpack(self, packedValue: any) -> any:
-        """Flattens any deminsion of array and indexes and retruns the first time, unpacking it.
-        Paremeters:
+        """Flattens any dimensions of array and indexes and returns the first time, unpacking it.
+        Parameters:
             prediction: any - the value to unpack. Should obv be arraylike.
         Returns:
             any - Whatever was inside    

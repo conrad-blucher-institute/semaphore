@@ -25,12 +25,12 @@ from abc import ABC, abstractmethod
 class IOutputHandler(ABC):
 
     @abstractmethod
-    def save_prediction(self, predictionDesc: SemaphoreSeriesDescription, prediction: Prediction) -> Series:
+    def post_process_prediction(self, predictionDesc: SemaphoreSeriesDescription, prediction: Prediction) -> Series:
         raise NotImplementedError()
     
 def map_to_OH_Instance(method: str) -> IOutputHandler  :
         """Maps a request to the specific Instance of the OutputHandler
-        Paremeters:
+        Parameters:
             method: str - The string key to match to an output method
             predictionDesc: LocalSeriesDescription - The description object holding all the info that the db will need to save it
             predictions: any | list[any] - The actual prediction(s) to save

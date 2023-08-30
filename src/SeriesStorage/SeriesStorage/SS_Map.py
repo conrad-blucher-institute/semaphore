@@ -5,7 +5,7 @@
 # Created Date: 8/24/2023
 # version 1.0
 #-------------------------------
-""" This scrips maps the code to an instance of the ISeriese Storage class
+""" This scrips maps the code to an instance of the ISeriesStorage class
  """ 
 #-------------------------------
 # 

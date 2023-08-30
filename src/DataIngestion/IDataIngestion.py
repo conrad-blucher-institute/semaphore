@@ -32,12 +32,12 @@ class IDataIngestion(ABC):
     
 
 def map_to_DI_Instance(request: SeriesDescription) -> IDataIngestion:
-    """Maps a series description request to the propper class and method. Preforms the call and returns the result.
+    """Maps a series description request to the proper class and method. Preforms the call and returns the result.
     ------
     Parameters
         request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>Series)
     Returns
-        series | None - Either the seires returned by the given function or None
+        series | None - Either the series returned by the given function or None
     """
 
     match request.source:

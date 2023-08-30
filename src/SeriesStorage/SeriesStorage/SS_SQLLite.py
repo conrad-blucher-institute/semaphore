@@ -5,7 +5,7 @@
 # Created Date: 3/26/2023
 # version 4.0
 #-------------------------------
-""" This script defines a class that hold the Semaphore DB schema. It also has funtions to 
+""" This script defines a class that hold the Semaphore DB schema. It also has functions to 
     manage the DB and interact with the db.
  """ 
 #-------------------------------
@@ -101,12 +101,12 @@ class SS_SQLLite(ISeriesStorage):
 
     
     def get_engine(self) -> Engine:
-        """Fetches the engine atribute. Requires the engine atribute to be created.
+        """Fetches the engine attribute. Requires the engine attribute to be created.
         See: DBManager.create_engine()
         """
 
         if not hasattr(self, '_engine') or self._engine == None:
-            raise Exception("An engine was requestied from DBManager, but no engine has been created. See DBManager.create_engine()")
+            raise Exception("An engine was requested from DBManager, but no engine has been created. See DBManager.create_engine()")
         else:
             return self._engine
 
@@ -296,7 +296,7 @@ class SS_SQLLite(ISeriesStorage):
     #############################################################################################
 
     def __dbSelection(self, stmt: Select) -> CursorResult:
-        """Runs a slection statment 
+        """Runs a selection statement 
         Parameters:
             stmt: SQLAlchemy Select - The statement to run
         Returns:
@@ -468,7 +468,7 @@ class SS_SQLLite(ISeriesStorage):
             Series - The data actually inserted.
         """
 
-        #Consturct DB row to insert
+        #Construct DB row to insert
         now = datetime.now()
         insertionRows = []
         for actual in series.data:
@@ -589,7 +589,7 @@ class SS_SQLLite(ISeriesStorage):
         Dictionary reference: {"dataSourceCode", "sLocationCode", "dataSourceLocationCode", "priorityOrder"}
 
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
 
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
@@ -612,7 +612,7 @@ class SS_SQLLite(ISeriesStorage):
         Dictionary reference: {"code", "displayName", (OP)"notes"}
 
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
 
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
@@ -635,7 +635,7 @@ class SS_SQLLite(ISeriesStorage):
         Dictionary reference: {"code", "displayName", (OP)"notes"}
 
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
 
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
@@ -658,7 +658,7 @@ class SS_SQLLite(ISeriesStorage):
         Dictionary reference: {"code", "displayName", (OP)"notes"}
 
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
 
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
@@ -681,7 +681,7 @@ class SS_SQLLite(ISeriesStorage):
         Dictionary reference: {"code", "displayName", (OP)"notes"}
 
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
 
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
@@ -704,7 +704,7 @@ class SS_SQLLite(ISeriesStorage):
         Dictionary reference: {"code", "displayName", (OP)"notes"}
 
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
 
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]
@@ -727,7 +727,7 @@ class SS_SQLLite(ISeriesStorage):
         Dictionary reference: {"code", "displayName", (OP)"notes"}
 
         Parameters:
-            values: dict | list[tuple] - THe dictionary containing the inssersion valuess (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
+            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
 
         Returns:
             Returns list[tupleish (sqlalchemy.engine.row.Row)]

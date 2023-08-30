@@ -5,7 +5,7 @@
 # Created Date: 4/30/2023
 # version 2.0
 #----------------------------------
-"""This class holds is the startpoint for interacting with the data section of semaphore. All data requests should go through here.
+"""This class holds is the start point for interacting with the data section of semaphore. All data requests should go through here.
  """ 
 #----------------------------------
 # 
@@ -33,7 +33,7 @@ class SeriesProvider():
     
     def make_SaveRequest(self, series: Series) -> Series:
         """Passes a series to the DBManager to be saved.
-        Paremeters:
+        Parameters:
             series: series - The series request object detailing the request
         Returns:
             series: A response object returning what happened 
@@ -43,13 +43,13 @@ class SeriesProvider():
         if not (type(series.description) == SemaphoreSeriesDescription): #Check and make sure this is actually something with the proper description to be inserted
             self.__get_and_log_err_series([], returningSeries, f'A save Request must be provided a series with a SemaphoreSeriesDescription \n')
         else:
-            self.seriesStorage.s_prediction_output_insert(series)
+            self.seriesStorage.insert_output(series)
             returningSeries.isComplete = True
 
         return returningSeries
 
     def make_request(self, requestDesc: SeriesDescription) -> Series:
-        """This method attempts to fill a data request either by gettting the data from the DataBase or from DataIngestion. Will always return a series response.
+        """This method attempts to fill a data request either by getting the data from the DataBase or from DataIngestion. Will always return a series response.
         ------
         Parameters:
             requestDesc:SeriesDescription - A SeriesDescription obj detailing the request (src/DataManagement/DataClasses.py)
@@ -64,9 +64,9 @@ class SeriesProvider():
             ###Attempt to pull request from DB
             checkedResults = []
             if isPrediction:
-                dbSeries = self.seriesStorage.s_prediction_selection(requestDesc)
+                dbSeries = self.seriesStorage.select_prediction(requestDesc)
             else:
-                dbSeries = self.seriesStorage.s_data_point_selection(requestDesc)
+                dbSeries = self.seriesStorage.select_actuals(requestDesc)
 
             dbdata = dbSeries.data
             
@@ -106,7 +106,7 @@ class SeriesProvider():
             return responseSeries
         
         except Exception as e:
-            return self.__get_and_log_err_response(requestDesc, [], f'An unknown error occured attempting to fill request.\nRequest: {requestDesc}\nException: {format_exc()}')
+            return self.__get_and_log_err_response(requestDesc, [], f'An unknown error occurred attempting to fill request.\nRequest: {requestDesc}\nException: {format_exc()}')
     
 
     def __get_and_log_err_response(self, description: SemaphoreSeriesDescription | SeriesDescription, currentData: List, msg: str) -> Series:
@@ -143,14 +143,14 @@ class SeriesProvider():
         """Calculates the amount of records we should expect given a time span and an interval code
         -------
         Parameters:
-            seriesDescription: SeriesDescirption
+            seriesDescription: SeriesDescription
         Returns:
             int - Returns the amount of results
         """
-        totalSecondsrequested = (seriesDescription.toDateTime - seriesDescription.fromDateTime).total_seconds()
+        totalSecondsRequested = (seriesDescription.toDateTime - seriesDescription.fromDateTime).total_seconds()
     
-        if totalSecondsrequested < seriesDescription.interval: return 1 #Only one point was requested
-        else: return int(totalSecondsrequested / seriesDescription.interval)
+        if totalSecondsRequested < seriesDescription.interval: return 1 #Only one point was requested
+        else: return int(totalSecondsRequested / seriesDescription.interval)
     
 
     def __merge_results(self, first: List[Actual | Prediction], second: List[Actual | Prediction]) -> List[Dict]:
