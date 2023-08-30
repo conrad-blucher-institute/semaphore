@@ -25,7 +25,7 @@ from os import getenv
 
 from src.SeriesStorage.ISeriesStorage import ISeriesStorage
 
-from SeriesProvider.DataClasses import *
+from DataClasses import *
 
 class SS_SQLLite(ISeriesStorage):
 

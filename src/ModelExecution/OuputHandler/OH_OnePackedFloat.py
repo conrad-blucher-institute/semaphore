@@ -17,7 +17,7 @@ import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-from SeriesProvider.DataClasses import Prediction, SemaphoreSeriesDescription, Series
+from DataClasses import Prediction, SemaphoreSeriesDescription, Series
 from ModelExecution.IOutputHandler import IOutputHandler
 
 

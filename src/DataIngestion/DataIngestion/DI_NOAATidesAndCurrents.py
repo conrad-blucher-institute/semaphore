@@ -23,7 +23,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesStorage.SeriesStorage.SS_Map import map_to_SS_Instance
-from SeriesProvider.DataClasses import Series, SeriesDescription, Actual, Prediction
+from DataClasses import Series, SeriesDescription, Actual, Prediction
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
 

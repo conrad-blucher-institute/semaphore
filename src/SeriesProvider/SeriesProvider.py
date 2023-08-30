@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesStorage.SeriesStorage.SS_Map import map_to_SS_Instance
 from DataIngestion.IDataIngestion import map_to_DI_Instance
-from SeriesProvider.DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, Actual, Prediction
+from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, Actual, Prediction
 from utility import log
 from traceback import format_exc
 

@@ -19,7 +19,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from ModelExecution.inputGatherer import InputGatherer
 from ModelExecution.IOutputHandler import map_to_OH_Instance
-from SeriesProvider.DataClasses import SemaphoreSeriesDescription, Prediction, Series
+from DataClasses import SemaphoreSeriesDescription, Prediction, Series
 from SeriesStorage.SeriesStorage.SS_Map import map_to_SS_Instance
 
 import datetime
