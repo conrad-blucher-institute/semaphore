@@ -17,7 +17,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesProvider.SeriesProvider import SeriesProvider
-from SeriesProvider.DataClasses import SeriesDescription, Series, Actual, Prediction
+from DataClasses import SeriesDescription, Series, Actual, Prediction
 from ModelExecution.dspec import Dspec, OutputInfo, Input
 
 
