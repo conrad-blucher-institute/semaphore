@@ -1,6 +1,8 @@
 .vscode
 *.env
 demo.py
+# Ignore virtual enviroment root
+venv/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
