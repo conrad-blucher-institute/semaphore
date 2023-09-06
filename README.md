@@ -16,13 +16,15 @@ Right now the only external dependency that is not included in the requirements 
     - (Optional) DSPEC_FOLDER_PATH & MODEL_FOLDER_PATH can either be relative paths from the working directory(default) or you can override with absolute paths.
 2. Create virtual environment & install required Python dependencies
 ```python
-python3 -m venv ~/venv/{venv name}
-source ~/venv/{venv name}/Scripts/activate
+python3 -m venv ./venv/vsem
+source ./venv/vsem/Scripts/activate
 pip install -r requirements.txt
 ```
-(*NOTE:: depends on the python version, you may want to use `source ~/venv/{venv name}/bin/activate)` instead)
+(*NOTE:: depends on the python version, you may want to use `source ./venv/vsem/bin/activate)` instead)
 
-(**NOTE:: TensorFlow currently CPU build only.)
+(**NOTE:: You might want to use git bash if your terminal isn't recognizing `source`)
+
+(***NOTE:: TensorFlow currently CPU build only.)
 
 ## Running Semaphore
 Currently, you can run Semaphore through the make_and_save_prediction and make_prediction methods in the `src/ModelExecution/modelWrapper.py`. Keep in mind the DB will need to be loaded with the proper location mappings for your ingested data. Feel free to reach out to one of the authors for help getting Semaphore up and running.
