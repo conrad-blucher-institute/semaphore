@@ -9,15 +9,19 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(os.path.pardir)))
 sys.path.append(os.path.dirname(os.path.abspath(os.path.curdir)))
 
+from DataClasses import SeriesDescription
 from ModelExecution.modelWrapper import ModelWrapper
+from SeriesProvider.SeriesProvider import SeriesProvider
 
 load_dotenv()
 
 app = FastAPI()
 
+
 @app.get('/')
 def read_main():
     return {'message': 'Hello World'}
+
 
 @app.get('/prediction')
 async def get_prediction():
@@ -46,3 +50,39 @@ async def get_prediction():
 
     #return {'message': f'{result.data}'}
     return result.data[0]
+
+
+@app.get('/input/source={source}series={series}location={location}unit={unit}interval={interval}')
+async def get_input(source: str, series: str, location: str, unit: str, interval: int, 
+                    fromDateTime: datetime = None, toDateTime: datetime = None, datum: str = None):
+    """
+    Retrieve input
+
+    Args:
+
+    Returns:
+
+    Raises:
+        HTTPException: If the item is not found.
+    """
+    now = datetime.now()
+    fromDateTime = now 
+    toDateTime = now
+    
+    requestDesc = SeriesDescription(
+        source, 
+        series, 
+        location, 
+        unit, 
+        interval,
+        fromDateTime, 
+        toDateTime, 
+    )
+
+    provider = SeriesProvider()
+    responseSeries = provider.make_request(requestDesc)
+
+    print(responseSeries)
+    print(responseSeries.data)
+
+    return responseSeries
