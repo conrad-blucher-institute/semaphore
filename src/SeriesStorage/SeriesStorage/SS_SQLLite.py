@@ -573,6 +573,7 @@ class SS_SQLLite(ISeriesStorage):
             cursor = conn.execute(insert(self.s_prediction_output)
                                   .returning(self.s_prediction_output) 
                                   .values(insertionRows)
+                                  .prefix_with('OR IGNORE')
                                   )
             result = cursor.fetchall()
             conn.commit()
