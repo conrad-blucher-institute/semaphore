@@ -40,7 +40,7 @@
         "unit": "meter",
         "type": "float",
         "interval": 3600,
-        "range": [0, -12]
+        "range": [0, -11]
     },
     {
         "name": "x_wind_prev",
@@ -50,7 +50,7 @@
         "unit": "meter",
         "type": "float",
         "interval": 3600,
-        "range": [0, -12]
+        "range": [0, -11]
     },
     {
         "name": "y_wind_prev",
@@ -60,7 +60,7 @@
         "unit": "meter",
         "type": "float",
         "interval": 3600,
-        "range": [0, -12]
+        "range": [0, -11]
     },
     {
         "name": "y_wind_prev",
@@ -70,7 +70,7 @@
         "unit": "meter",
         "type": "float",
         "interval": 3600,
-        "range": [0, -12]
+        "range": [0, -11]
     },
     {
         "name": "y_wind_prev",
@@ -80,7 +80,7 @@
         "unit": "meter",
         "type": "float",
         "interval": 3600,
-        "range": [0, -12]
+        "range": [0, -11]
     },
     {
         "name": "y_wind_prev",
@@ -90,7 +90,7 @@
         "unit":  "meter",
         "type": "float",
         "interval": 3600,
-        "range": [0, -12]
+        "range": [0, -11]
     },
     {
         "name": "y_wind_prev",
@@ -100,6 +100,6 @@
         "unit": "meter",
         "type": "float",
         "interval": 3600,
-        "range": [0, -13]
+        "range": [0, -12]
     }
 ]}

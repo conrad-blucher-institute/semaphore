@@ -108,9 +108,10 @@ class InputGatherer:
         specifications = []
         for input in self.__dspec.inputs:
             try:
-                toDateTime = now + timedelta(hours= input.range[0])
-                fromDateTime = now + timedelta(hours= input.range[1])
-
+                #Calculate the to and from time from the interval and range
+                toDateTime = now + timedelta(seconds= input.range[0] * input.interval)
+                fromDateTime = now + timedelta(seconds= input.range[1] * input.interval)
+                
                 #TODO:: Create better logic to properly analyse a given input
                 if (input.range[0] == input.range[1]): #isOnePoint
                     fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
@@ -163,7 +164,7 @@ class InputGatherer:
         """
         castedData = []
         #Cast from string to unit then append
-        for datapoint in  data:
+        for datapoint in data:
             match dataType:
                 case 'float':
                     castedData.append(float(datapoint.value))
