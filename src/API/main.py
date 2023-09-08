@@ -2,13 +2,17 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Response, HTTPException
 from fastapi.responses import StreamingResponse
 
-from datetime import datetime
+from datetime import datetime, date, time
 import os
 import sys
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+
+'''
 sys.path.append(os.path.dirname(os.path.abspath(os.path.pardir)))
 sys.path.append(os.path.dirname(os.path.abspath(os.path.curdir)))
-
+'''
 from DataClasses import SeriesDescription
 from ModelExecution.modelWrapper import ModelWrapper
 from SeriesProvider.SeriesProvider import SeriesProvider
@@ -52,7 +56,7 @@ async def get_prediction():
     return result.data[0]
 
 
-@app.get('/input/source={source}series={series}location={location}unit={unit}interval={interval}')
+@app.get('/input/source={source}/series={series}/location={location}/unit={unit}/interval={interval}')
 async def get_input(source: str, series: str, location: str, unit: str, interval: int, 
                     fromDateTime: datetime = None, toDateTime: datetime = None, datum: str = None):
     """
@@ -66,8 +70,8 @@ async def get_input(source: str, series: str, location: str, unit: str, interval
         HTTPException: If the item is not found.
     """
     now = datetime.now()
-    fromDateTime = now 
-    toDateTime = now
+    fromDateTime = datetime.combine(date(2023, 9, 4), time(11, 0))
+    toDateTime = datetime.combine(date(2023, 9, 5), time(11, 0))
     
     requestDesc = SeriesDescription(
         source, 
