@@ -58,17 +58,22 @@ class SeriesProvider():
         """
         
         try:
-
-            isPrediction, seriesCode = self.__parse_series(requestDesc.series)
             
             ###Attempt to pull request from DB
-            checkedResults = []
-            if isPrediction:
-                dbSeries = self.seriesStorage.select_prediction(requestDesc)
-            else:
-                dbSeries = self.seriesStorage.select_actuals(requestDesc)
 
-            dbdata = dbSeries.data
+            #Checking which database table to pull data from
+            match requestDesc.dataClassification:
+                case 'actual': 
+                    dbSeries = self.seriesStorage.select_actuals(requestDesc)
+                case 'prediction':
+                    dbSeries = self.seriesStorage.select_prediction(requestDesc)
+                case 'output':
+                    pass
+                case _:
+                    log(f'Data Classification {requestDesc.dataClassification} was unable to be matched by series provider.')
+                    raise NotImplementedError
+                    
+            dbData = dbSeries.data
             
 
             ###Check contents contains the right amount of results
@@ -79,7 +84,7 @@ class SeriesProvider():
                 return self.__get_and_log_err_response(requestDesc, dbSeries, f'Could not process series, {requestDesc.series}, interval value to determin amnt of expected results in request.')
 
             #First AmountCheck
-            if len(dbdata) != amntExpected:
+            if len(dbData) != amntExpected:
 
                 #Call Data Ingestion to fetch data
                 diClass = map_to_DI_Instance(requestDesc)
@@ -90,7 +95,7 @@ class SeriesProvider():
                 diData = diResults.data
                 
                 #Merge data
-                mergedResults = self.__merge_results(dbdata, diData)
+                mergedResults = self.__merge_results(dbData, diData)
                 #Second AmountCheck
                 if(len(mergedResults) != amntExpected):
                     print(mergedResults)
@@ -98,7 +103,7 @@ class SeriesProvider():
                 else:
                     checkedResults = mergedResults
             else:
-                checkedResults = dbdata
+                checkedResults = dbData
 
             ###Generate proper response object
             responseSeries = Series(requestDesc, True)
@@ -123,20 +128,6 @@ class SeriesProvider():
         response = Series(description, False, msg)
         response.data = currentData
         return response
-    
-
-    def __parse_series(self, series: str) -> tuple:
-        """Parses a series object into its usable parts
-        -------
-        Parameters:
-            series: str - The series to parse.
-        Returns: (tuple)
-            bool - If it is a prediction (true) or data point (false).
-            str = A six char unique code of the series.
-        """
-        isPrediction = (True if series[0] == 'p' else False)
-        seriesCode = series[4:]
-        return isPrediction, seriesCode
     
     
     def __get_amnt_of_results_expected(self, seriesDescription: SeriesDescription) -> int:

@@ -51,6 +51,7 @@ class Input:
         self.location = None
         self.source = None
         self.series = None
+        self.dataClassification = None
         self.unit = None
         self.type = None
         self.datum = None
@@ -58,7 +59,7 @@ class Input:
         self.range = None
 
     def __str__(self) -> str:
-        return f'[Input] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, type: {self.type}, datum: {self.datum}, range: {self.range}'
+        return f'[Input] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, dataClassification: {self.dataClassification}, unit: {self.unit}, type: {self.type}, datum: {self.datum}, range: {self.range}'
     
     def __repr__(self):
-        return f'[Input] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, type: {self.type}, datum: {self.datum}, range: {self.range}'
+        return f'[Input] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, dataClassification: {self.dataClassification}, unit: {self.unit}, type: {self.type}, datum: {self.datum}, range: {self.range}'
