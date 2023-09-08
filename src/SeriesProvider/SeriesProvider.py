@@ -150,7 +150,7 @@ class SeriesProvider():
         totalSecondsRequested = (seriesDescription.toDateTime - seriesDescription.fromDateTime).total_seconds()
     
         if totalSecondsRequested < seriesDescription.interval: return 1 #Only one point was requested
-        else: return int(totalSecondsRequested / seriesDescription.interval)
+        else: return int(totalSecondsRequested / seriesDescription.interval) + 1
     
 
     def __merge_results(self, first: List[Actual | Prediction], second: List[Actual | Prediction]) -> List[Dict]:
