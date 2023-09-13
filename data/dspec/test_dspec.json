@@ -4,7 +4,7 @@
     "author": "John Doe",
     "modelFileName": "test_AI",
     "outputInfo": {
-        "outputMethod": "one_packed_float",
+        "outputMethod": "OnePackedFloat",
         "leadTime": 24,
         "series": "waterHeight",
         "location": "packChan",
@@ -15,7 +15,7 @@
     { 
         "name": "x_wind",
         "location": "packChan",
-        "source": "noaaT&C",
+        "source": "NOAATANDC",
         "series": "dXWnCmp",
         "unit": "meter",
         "type": "float",
@@ -25,7 +25,7 @@
     {
         "name": "y_wind",
         "location": "packChan",
-        "source": "noaaT&C",
+        "source": "NOAATANDC",
         "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
@@ -35,7 +35,7 @@
     {
         "name": "x_wind_prev",
         "location": "packChan",
-        "source": "noaaT&C",
+        "source": "NOAATANDC",
         "series": "dXWnCmp",
         "unit": "meter",
         "type": "float",
@@ -45,7 +45,7 @@
     {
         "name": "x_wind_prev",
         "location": "packChan",
-        "source": "noaaT&C",
+        "source": "NOAATANDC",
         "series": "dXWnCmp",
         "unit": "meter",
         "type": "float",
@@ -55,7 +55,7 @@
     {
         "name": "y_wind_prev",
         "location": "packChan",
-        "source": "noaaT&C",
+        "source": "NOAATANDC",
         "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
@@ -65,7 +65,7 @@
     {
         "name": "y_wind_prev",
         "location": "packChan",
-        "source": "noaaT&C",
+        "source": "NOAATANDC",
         "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
@@ -75,7 +75,7 @@
     {
         "name": "y_wind_prev",
         "location": "packChan",
-        "source": "noaaT&C",
+        "source": "NOAATANDC",
         "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
@@ -85,7 +85,7 @@
     {
         "name": "y_wind_prev",
         "location": "packChan",
-        "source": "noaaT&C",
+        "source": "NOAATANDC",
         "series": "dYWnCmp",
         "unit":  "meter",
         "type": "float",
@@ -95,7 +95,7 @@
     {
         "name": "y_wind_prev",
         "location": "packChan",
-        "source": "noaaT&C",
+        "source": "NOAATANDC",
         "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
