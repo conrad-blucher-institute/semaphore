@@ -2,11 +2,11 @@
     "modelName": "MLP-OP",
     "modelVersion": "1.0.0",
     "author": "Christian Duff",
-    "modelFileName": "",
+    "modelFileName": "MLP-OP",
     "outputInfo": {
-        "outputMethod": "", //Array of floats, water temps. 12hrs
-        "leadTime": 1 -> 13, //Some array of lead times starting an hour after
-        "series": "pWaterTmp", //water temp
+        "outputMethod": "IncrementalOutput",
+        "leadTime": [0, 12],
+        "series": "pWaterTmp",
         "location": "South Bird Island",
         "unit" : "celsius"
     },
@@ -19,7 +19,7 @@
             "unit": "celsius",
             "type": "float",
             "interval": 3600,
-            "range": [0, 0]
+            "range": [0, -24]
         },
         { 
             "name": "Air Temp",
@@ -29,17 +29,17 @@
             "unit": "celsius",
             "type": "float",
             "interval": 3600,
-            "range": [0, 0]
+            "range": [0, -24]
         },
         { 
             "name": "Air Temp",
             "location": "South Bird Island",
-            "source": "NDFD", //<---- Unsure
+            "source": "NDFD",
             "series": "pAirTemp",
             "unit": "celsius",
             "type": "float",
             "interval": 3600,
-            "range": [0, 0]
-        },
+            "range": [0, -6]
+        }
 
 ]}
