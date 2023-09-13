@@ -3,10 +3,10 @@
 #----------------------------------
 # Created By: Matthew Kastl
 # Created Date: 8/20/2023
-# version 1.0
+# version 2.0
 #----------------------------------
 """This is an interface for OutputManager
-Methods.
+Methods. And Factory to get instance
  """ 
 #----------------------------------
 # 
@@ -21,27 +21,26 @@ from DataClasses import Prediction, SemaphoreSeriesDescription, Series
 from utility import log
 
 from abc import ABC, abstractmethod
+from importlib import import_module
 
 class IOutputHandler(ABC):
 
     @abstractmethod
     def post_process_prediction(self, predictionDesc: SemaphoreSeriesDescription, prediction: Prediction) -> Series:
         raise NotImplementedError()
+             
+
+
+def output_handler_factory(method: str) -> IOutputHandler:
+    """Uses the source attribute of a data request to dynamically import a module
+    ------
+    Parameters
+        method: str - the string name for the outputHandler class
+    Returns
+        IOutputHandler - An child of the IOutputHandler interface.
+    """
+    try:
+        return getattr(import_module(f'src.ModelExecution.OutputHandler.{method}'), f'{method}')()
+    except Exception:
+        raise ModuleNotFoundError(f'No module named {method} in src.DataIngestion.DataIngestion!')
     
-def map_to_OH_Instance(method: str) -> IOutputHandler  :
-        """Maps a request to the specific Instance of the OutputHandler
-        Parameters:
-            method: str - The string key to match to an output method
-            predictionDesc: LocalSeriesDescription - The description object holding all the info that the db will need to save it
-            predictions: any | list[any] - The actual prediction(s) to save
-        Returns:
-            The inserted Series
-        """
-        
-        match method:
-                case 'one_packed_float':
-                    from ModelExecution.OuputHandler.OH_OnePackedFloat import OH_OnePackedFloat
-                    return OH_OnePackedFloat()
-                case _:
-                    log(f'No output method found for {method}!')
-                    raise NotImplementedError()
