@@ -27,7 +27,7 @@ from src.SeriesStorage.ISeriesStorage import ISeriesStorage
 
 from DataClasses import *
 
-class SS_SQLLite(ISeriesStorage):
+class SQLLite(ISeriesStorage):
 
     #############################################################################################
     ################################################################################## Interface methods
