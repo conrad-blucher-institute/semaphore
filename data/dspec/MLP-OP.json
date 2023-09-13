@@ -4,8 +4,8 @@
     "author": "Christian Duff",
     "modelFileName": "MLP-OP",
     "outputInfo": {
-        "outputMethod": "IncrementalOutput",
-        "leadTime": [0, 12],
+        "outputMethod": "one_packed_float",
+        "leadTime": 12,
         "series": "pWaterTmp",
         "location": "South Bird Island",
         "unit" : "celsius"
