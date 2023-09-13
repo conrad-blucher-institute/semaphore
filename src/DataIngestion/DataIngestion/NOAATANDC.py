@@ -37,7 +37,7 @@ from typing import List, Dict
 
 
 
-class NOAATidesAndCurrents(IDataIngestion):
+class NOAATANDC(IDataIngestion):
 
 
     def ingest_series(self, seriesDescription: SeriesDescription) -> Series | None:
