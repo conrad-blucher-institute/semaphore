@@ -71,6 +71,7 @@ class InputGatherer:
             outputInfo.leadTime = outputJson["leadTime"]
             outputInfo.series = outputJson["series"]
             outputInfo.location = outputJson["location"]
+            outputInfo.interval = outputJson["interval"]
             outputInfo.datum = outputJson.get("datum")
             outputInfo.unit = outputJson["unit"]
             dspec.outputInfo = outputInfo #Bind to dspec

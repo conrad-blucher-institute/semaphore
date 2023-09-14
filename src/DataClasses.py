@@ -83,6 +83,35 @@ class Prediction():
             return True
         else: return False
 
+class Output():
+    """An output is a a predicted value created by the model semaphore is running. It has all the same things as an Actual, but it describes its time as the time the prediction
+    was made and the lead time till its verification time.
+    generatedTime + leadTime = verificationTime
+        :param value: str - The actual measurements value
+        :param unit: str - the type the value is of
+        :param leadTime: float - The time in hours between the generated time and verification time
+        :param generatedTime: datetime - Time the prediction was created
+    """
+    def __init__(self, value: str, unit: str, leadTime: float, generatedTime: datetime) -> None:
+        self.value = value
+        self.unit = unit
+        self.leadTime = leadTime
+        self.generatedTime = generatedTime
+    
+    def __str__(self) -> str:
+        return f'\n[Prediction] -> value: {self.value}, unit: {self.unit}, leadTime: {self.leadTime}, generatedTime: {self.generatedTime}'
+    
+    def __repr__(self):
+        return f'\n[Prediction] -> value: {self.value}, unit: {self.unit}, leadTime: {self.leadTime}, generatedTime: {self.generatedTime}'
+    
+    def __eq__(self, __value: object) -> bool:
+        if (self.value == __value.value and 
+            self.unit == __value.unit and 
+            self.leadTime == __value.leadTime and 
+            self.generatedTime == __value.generatedTime):
+            return True
+        else: return False
+
     
 
 class SeriesDescription():
@@ -120,20 +149,28 @@ class SemaphoreSeriesDescription():
         :param ModelVersion: str - The version of the model
         :param series: str - The series name
         :param location: str - The data's location
+        :param interval: int - The time step separating the datapoints in order
+        :param fromDateTime: datetime - The datetime the data starts at
+        :param toDateTime: datetime - The datetime the data stops at
         :param datum: str = None
+        :param leadTime: float - The time in hours between the generated time and verification time
     """
-    def __init__(self, ModelName: str, ModelVersion: str, series:str, location: str, datum: str = None) -> None:
+    def __init__(self, ModelName: str, ModelVersion: str, series:str, location: str, interval: int, leadTime: float, datum: str = None) -> None:
         self.ModelName = ModelName
         self.ModelVersion = ModelVersion
         self.series = series
         self.location = location
+        self.interval = interval
+        self.fromDateTime = None
+        self.toDateTime = None
+        self.leadTime = leadTime
         self.datum = datum
 
     def __str__(self) -> str:
-        return f'\n[SemaphoreSeriesDescription] -> AIName: {self.ModelName}, AIGeneratedVersion: {self.ModelVersion}, location: {self.location}, datum: {self.datum}'
+        return f'\n[SemaphoreSeriesDescription] -> AIName: {self.ModelName}, AIGeneratedVersion: {self.ModelVersion}, location: {self.location}, interval: {self.interval}, fromDateTime {self.fromDateTime}, toDateTime {self.toDateTime}, leadTime {self.leadTime}, datum: {self.datum}'
     
     def __repr__(self) -> str:
-        return f'\n[SemaphoreSeriesDescription] -> AIName: {self.ModelName}, AIGeneratedVersion: {self.ModelVersion}, location: {self.location}, datum: {self.datum}'
+        return f'\n[SemaphoreSeriesDescription] -> AIName: {self.ModelName}, AIGeneratedVersion: {self.ModelVersion}, location: {self.location}, interval: {self.interval}, fromDateTime {self.fromDateTime}, toDateTime {self.toDateTime}, leadTime {self.leadTime}, datum: {self.datum}'
 
 class Series():
     """A series is a pairing of an object describing a series of data, and an array of the data itself. It also includes some meta data about how well the data provided matches the description.

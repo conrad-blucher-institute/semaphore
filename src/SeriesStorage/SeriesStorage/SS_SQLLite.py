@@ -341,7 +341,7 @@ class SS_SQLLite(ISeriesStorage):
 
         return predictions
     
-    def __splice_output_prediction_results(self, results: List[tuple]) -> List[Prediction]:
+    def __splice_output_prediction_results(self, results: List[tuple]) -> List[Output]:
         """Splices up a list of dbresults, pulling out only the data that changes per point,
         and places them in a Prediction object.
         Parameters:
@@ -355,14 +355,11 @@ class SS_SQLLite(ISeriesStorage):
         timeGeneratedIndex = 2
         predictions = []
         for row in results:
-            predictions.append(Prediction(
+            predictions.append(Output(
                 row[valueIndex],
                 row[unitIndex],
                 row[leadTimeIndex],
-                row[timeGeneratedIndex],
-                0,
-                0,
-                0
+                row[timeGeneratedIndex]
             ))
 
         return predictions
@@ -475,10 +472,11 @@ class SS_SQLLite(ISeriesStorage):
 
         table = self.s_prediction_output
         stmt = (select(table)
-                .where(table.timeGenerated == seriesDescription.timeGenerated)
-                .where(table.leadTime == seriesDescription.leadTime)
-                .where(table.ModelName == seriesDescription.modelName)
-                .where(table.ModelVersion == seriesDescription.modelVersion)
+                .where(table.c.leadTime == seriesDescription.leadTime)
+                .where(table.c.ModelName == seriesDescription.ModelName)
+                .where(table.c.ModelVersion == seriesDescription.ModelVersion)
+                .where((table.c.timeGenerated + table.c.leadTime) >= seriesDescription.fromDateTime)
+                .where((table.c.timeGenerated + table.c.leadTime) <= seriesDescription.toDateTime)
                 )
         
         result = self.__dbSelection(stmt).fetchall()

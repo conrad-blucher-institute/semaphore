@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesStorage.SeriesStorage.SS_Map import map_to_SS_Instance
 from DataIngestion.IDataIngestion import map_to_DI_Instance
-from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, Actual, Prediction
+from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, Actual, Prediction, Output
 from utility import log
 from traceback import format_exc
 
@@ -67,8 +67,6 @@ class SeriesProvider():
                     dbSeries = self.seriesStorage.select_actuals(requestDesc)
                 case 'prediction':
                     dbSeries = self.seriesStorage.select_prediction(requestDesc)
-                case 'output':
-                    pass
                 case _:
                     log(f'Data Classification {requestDesc.dataClassification} was unable to be matched by series provider.')
                     raise NotImplementedError
@@ -113,6 +111,24 @@ class SeriesProvider():
         except Exception as e:
             return self.__get_and_log_err_response(requestDesc, [], f'An unknown error occurred attempting to fill request.\nRequest: {requestDesc}\nException: {format_exc()}')
     
+    def make_output_request(self, requestDesc: SemaphoreSeriesDescription) -> Series: 
+        ###See if we can get the outputs from the database
+        dbi = map_to_SS_Instance() 
+        requestedSeries = dbi.select_output(requestDesc)
+
+        ###Do we have enough outputs? 
+        expected = self.__get_amnt_of_results_expected(requestDesc)
+        if (len(requestedSeries.data) == expected): 
+            requestedSeries.isComplete = True
+        else: 
+            requestedSeries.isComplete = False
+            error = f"This description {requestDesc} had incomplete data."
+            requestedSeries.nonCompleteReason = error
+            log(error) 
+
+        ###return that series object to the requester'
+        return requestedSeries
+        
 
     def __get_and_log_err_response(self, description: SemaphoreSeriesDescription | SeriesDescription, currentData: List, msg: str) -> Series:
         """This function logs an error message as well as generating a Response object with the same message
@@ -130,7 +146,7 @@ class SeriesProvider():
         return response
     
     
-    def __get_amnt_of_results_expected(self, seriesDescription: SeriesDescription) -> int:
+    def __get_amnt_of_results_expected(self, seriesDescription: SeriesDescription | SemaphoreSeriesDescription) -> int:
         """Calculates the amount of records we should expect given a time span and an interval code
         -------
         Parameters:
