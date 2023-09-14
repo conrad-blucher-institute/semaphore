@@ -22,7 +22,7 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from SeriesStorage.SeriesStorage.SS_Map import map_to_SS_Instance
+from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, Actual, Prediction
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
@@ -64,7 +64,7 @@ class NOAATANDC(IDataIngestion):
 
     def __init__(self):
         self.sourceCode = "noaaT&C"
-        self.__seriesStorage = map_to_SS_Instance()
+        self.__seriesStorage = series_storage_factory()
 
     #TODO:: There has to be a better way to do this!
     def __create_pattern1_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> str:
