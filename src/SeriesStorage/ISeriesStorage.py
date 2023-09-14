@@ -30,10 +30,9 @@ class ISeriesStorage(ABC):
     def select_prediction(self, seriesDescription) -> Series:
         raise NotImplementedError()
     
-    #TODO::Needs to be added
-    # @abstractmethod
-    # def select_output(self, seriesDescription) -> Series:
-    #     raise NotImplementedError()
+    @abstractmethod
+    def select_output(self, seriesDescription) -> Series:
+         raise NotImplementedError()
     
     @abstractmethod
     def find_external_location_code(self, sourceCode, location, priorityOrder: int = 0) -> str:

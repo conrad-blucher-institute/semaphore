@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesStorage.SeriesStorage.SS_Map import map_to_SS_Instance
 from DataIngestion.IDataIngestion import map_to_DI_Instance
-from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, Actual, Prediction
+from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, Actual, Prediction, Output
 from utility import log
 from traceback import format_exc
 
@@ -58,17 +58,20 @@ class SeriesProvider():
         """
         
         try:
-
-            isPrediction, seriesCode = self.__parse_series(requestDesc.series)
             
             ###Attempt to pull request from DB
-            checkedResults = []
-            if isPrediction:
-                dbSeries = self.seriesStorage.select_prediction(requestDesc)
-            else:
-                dbSeries = self.seriesStorage.select_actuals(requestDesc)
 
-            dbdata = dbSeries.data
+            #Checking which database table to pull data from
+            match requestDesc.dataClassification:
+                case 'actual': 
+                    dbSeries = self.seriesStorage.select_actuals(requestDesc)
+                case 'prediction':
+                    dbSeries = self.seriesStorage.select_prediction(requestDesc)
+                case _:
+                    log(f'Data Classification {requestDesc.dataClassification} was unable to be matched by series provider.')
+                    raise NotImplementedError
+                    
+            dbData = dbSeries.data
             
 
             ###Check contents contains the right amount of results
@@ -79,7 +82,7 @@ class SeriesProvider():
                 return self.__get_and_log_err_response(requestDesc, dbSeries, f'Could not process series, {requestDesc.series}, interval value to determin amnt of expected results in request.')
 
             #First AmountCheck
-            if len(dbdata) != amntExpected:
+            if len(dbData) != amntExpected:
 
                 #Call Data Ingestion to fetch data
                 diClass = map_to_DI_Instance(requestDesc)
@@ -90,7 +93,7 @@ class SeriesProvider():
                 diData = diResults.data
                 
                 #Merge data
-                mergedResults = self.__merge_results(dbdata, diData)
+                mergedResults = self.__merge_results(dbData, diData)
                 #Second AmountCheck
                 if(len(mergedResults) != amntExpected):
                     print(mergedResults)
@@ -98,7 +101,7 @@ class SeriesProvider():
                 else:
                     checkedResults = mergedResults
             else:
-                checkedResults = dbdata
+                checkedResults = dbData
 
             ###Generate proper response object
             responseSeries = Series(requestDesc, True)
@@ -108,6 +111,28 @@ class SeriesProvider():
         except Exception as e:
             return self.__get_and_log_err_response(requestDesc, [], f'An unknown error occurred attempting to fill request.\nRequest: {requestDesc}\nException: {format_exc()}')
     
+    def make_output_request(self, requestDesc: SemaphoreSeriesDescription) -> Series: 
+        ''' Takes a description of an output series and attempts to return it
+        :param requestDesc: SemaphoreSeriesDescription -A semaphore series description
+        :return series
+        '''
+        ###See if we can get the outputs from the database
+        dbi = map_to_SS_Instance() 
+        requestedSeries = dbi.select_output(requestDesc)
+
+        ###Do we have enough outputs? 
+        expected = self.__get_amnt_of_results_expected(requestDesc)
+        if (len(requestedSeries.data) == expected): 
+            requestedSeries.isComplete = True
+        else: 
+            requestedSeries.isComplete = False
+            error = f"This description {requestDesc} had incomplete data."
+            requestedSeries.nonCompleteReason = error
+            log(error) 
+
+        ###return that series object to the requester'
+        return requestedSeries
+        
 
     def __get_and_log_err_response(self, description: SemaphoreSeriesDescription | SeriesDescription, currentData: List, msg: str) -> Series:
         """This function logs an error message as well as generating a Response object with the same message
@@ -124,22 +149,8 @@ class SeriesProvider():
         response.data = currentData
         return response
     
-
-    def __parse_series(self, series: str) -> tuple:
-        """Parses a series object into its usable parts
-        -------
-        Parameters:
-            series: str - The series to parse.
-        Returns: (tuple)
-            bool - If it is a prediction (true) or data point (false).
-            str = A six char unique code of the series.
-        """
-        isPrediction = (True if series[0] == 'p' else False)
-        seriesCode = series[4:]
-        return isPrediction, seriesCode
     
-    
-    def __get_amnt_of_results_expected(self, seriesDescription: SeriesDescription) -> int:
+    def __get_amnt_of_results_expected(self, seriesDescription: SeriesDescription | SemaphoreSeriesDescription) -> int:
         """Calculates the amount of records we should expect given a time span and an interval code
         -------
         Parameters:
