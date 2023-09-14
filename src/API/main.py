@@ -8,7 +8,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from API.datetime_handler import parse_date
-from DataClasses import SeriesDescription
+from DataClasses import SeriesDescription, SemaphoreSeriesDescription
 from SeriesProvider.SeriesProvider import SeriesProvider
 
 load_dotenv()
@@ -66,6 +66,43 @@ async def get_input(source: str, series: str, location: str, unit: str, interval
         interval,
         fromDateTime, 
         toDateTime,
+        datum
+    )
+
+    provider = SeriesProvider()
+    responseSeries = provider.make_request(requestDesc)
+
+    return responseSeries
+
+
+@app.get('/output/ModelName={ModelName}/ModelVersion={ModelVersion}/series={series}/location={location}')
+async def get_output(ModelName: str, ModelVersion: str, series: str, location: str, datum: str = None):
+    """
+    Retrieves output series object
+
+    Args:
+
+        - `ModelName` (string): The name of the model (e.g. "test AI")
+
+        - `ModelVersion` (string): The version of the model (e.g. "1.0.0")
+
+        - `series` (string): The series name (e.g. "waterHeight")
+
+        - `location` (string): The location of the data (e.g. "packChan")
+
+        - `datum` (string): Optional. Defaults to None
+
+    Returns:
+        Series: A series object holding either the requested data or an error message with the incomplete data. (src/DataManagement/DataClasses.py)
+
+    Raises:
+        HTTPException: If the series is not found.
+    """ 
+    requestDesc = SemaphoreSeriesDescription(
+        ModelName, 
+        ModelVersion, 
+        series, 
+        location, 
         datum
     )
 
