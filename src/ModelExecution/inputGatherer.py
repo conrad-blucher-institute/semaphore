@@ -85,6 +85,7 @@ class InputGatherer:
                 input.location = inputJson["location"]
                 input.source = inputJson["source"]
                 input.series = inputJson["series"]
+                input.dataClassification = inputJson["dataClassification"]
                 input.unit = inputJson["unit"]
                 input.type = inputJson["type"]
                 input.datum = inputJson.get("datum")
@@ -120,7 +121,8 @@ class InputGatherer:
                 specifications.append((
                     SeriesDescription(
                         input.source, 
-                        input.series, 
+                        input.series,
+                        input.dataClassification, 
                         input.location, 
                         input.unit, 
                         input.interval,

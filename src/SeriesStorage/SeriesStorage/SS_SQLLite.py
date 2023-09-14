@@ -14,6 +14,7 @@
 #Imports
 import sys
 import os
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
@@ -38,6 +39,9 @@ class SS_SQLLite(ISeriesStorage):
 
     def select_prediction(self, seriesDescription) -> Series:
         return self.s_prediction_selection(seriesDescription)
+    
+    def select_output(self, seriesDescription) -> Series: 
+        return self.select_s_output(seriesDescription)
     
 
     def find_external_location_code(self, sourceCode, location, priorityOrder: int = 0) -> str:
@@ -336,6 +340,32 @@ class SS_SQLLite(ISeriesStorage):
             ))
 
         return predictions
+    
+    def __splice_output_prediction_results(self, results: List[tuple]) -> List[Prediction]:
+        """Splices up a list of dbresults, pulling out only the data that changes per point,
+        and places them in a Prediction object.
+        Parameters:
+            first list[tupleish (sqlalchemy.engine.row.Row)] - The collection of dbrows.
+        Returns:
+            List[Prediction] - The formatted objs.
+        """
+        valueIndex = 6
+        unitIndex = 7
+        leadTimeIndex = 3
+        timeGeneratedIndex = 2
+        predictions = []
+        for row in results:
+            predictions.append(Prediction(
+                row[valueIndex],
+                row[unitIndex],
+                row[leadTimeIndex],
+                row[timeGeneratedIndex],
+                0,
+                0,
+                0
+            ))
+
+        return predictions
         
 
     def __splice_actual_results(self, results: List[tuple]) -> List[Actual]:
@@ -441,6 +471,20 @@ class SS_SQLLite(ISeriesStorage):
         resultSeries.data = self.__splice_prediction_results(result) #Turn tuple objects into prediction objects
         return resultSeries
         
+    def select_s_output(self, seriesDescription) -> Series:
+
+        table = self.s_prediction_output
+        stmt = (select(table)
+                .where(table.timeGenerated == seriesDescription.timeGenerated)
+                .where(table.leadTime == seriesDescription.leadTime)
+                .where(table.ModelName == seriesDescription.modelName)
+                .where(table.ModelVersion == seriesDescription.modelVersion)
+                )
+        
+        result = self.__dbSelection(stmt).fetchall()
+        resultSeries = Series(seriesDescription, True)
+        resultSeries.data = self.__splice_output_prediction_results(result) #Turn tuple objects into prediction objects
+        return resultSeries
 
     def s_locationCode_dataSourceLocationCode_mapping_select(self, sourceCode: str, location: str, priorityOrder: int = 0) -> list[tuple]:
         """Selects a a dataSourceLocationCode given a datasource and a location. 
