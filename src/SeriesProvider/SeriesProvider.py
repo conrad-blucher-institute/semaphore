@@ -112,6 +112,10 @@ class SeriesProvider():
             return self.__get_and_log_err_response(requestDesc, [], f'An unknown error occurred attempting to fill request.\nRequest: {requestDesc}\nException: {format_exc()}')
     
     def make_output_request(self, requestDesc: SemaphoreSeriesDescription) -> Series: 
+        ''' Takes a description of an output series and attempts to return it
+        :param requestDesc: SemaphoreSeriesDescription -A semaphore series description
+        :return series
+        '''
         ###See if we can get the outputs from the database
         dbi = map_to_SS_Instance() 
         requestedSeries = dbi.select_output(requestDesc)
