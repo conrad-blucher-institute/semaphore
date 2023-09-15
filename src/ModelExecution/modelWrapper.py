@@ -97,8 +97,8 @@ class ModelWrapper:
             dspec = self.__inputGatherer.get_dspec()
             outputInfo = dspec.outputInfo
 
-            #TODO::This code will need to be reworded we we get more than one value from a mdel
-            predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
+            #TODO::This code will need to be reworded we we get more than one value from a model
+            predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.interval,  outputInfo.datum)
             prediction = Prediction(prediction, outputInfo.unit, outputInfo.leadTime, dateTime)
 
             #Instantiate the right output handler method then post process the predictions
