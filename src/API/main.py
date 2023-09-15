@@ -20,8 +20,9 @@ def read_main():
     return {'message': 'Hello World'}
 
 
-@app.get('/input/source={source}/series={series}/location={location}/unit={unit}/interval={interval}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
-async def get_input(source: str, series: str, location: str, unit: str, interval: int, 
+@app.get('/input/source={source}/series={series}/classification={classification}/location={location}/ \
+         unit={unit}/interval={interval}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
+async def get_input(source: str, series: str, classification: str, location: str, unit: str, interval: int, 
                     fromDateTime: str, toDateTime: str, datum: str = None):
     """
     Retrieves input series object
@@ -32,11 +33,13 @@ async def get_input(source: str, series: str, location: str, unit: str, interval
 
         - `series` (string): The series name (e.g. "dXWnCmp")
 
+        - `classification` (string): Actual/prediction/output identifier ("actual" or "prediction")
+
         - `location` (string): The location of the data (e.g. "packChan")
 
         - `unit` (string): The unit (e.g. 'meter')
             
-        - `interval` (int): The time step separating the data points in seconds
+        - `interval` (int): The time step separating the data points in seconds (e.g. 3600 for hourly)
 
         - `fromDateTime` (string): "YYYYMMDDHH" Date to start at
 
@@ -60,7 +63,8 @@ async def get_input(source: str, series: str, location: str, unit: str, interval
     
     requestDesc = SeriesDescription(
         source, 
-        series, 
+        series,
+        classification,
         location, 
         unit, 
         interval,
@@ -75,8 +79,10 @@ async def get_input(source: str, series: str, location: str, unit: str, interval
     return responseSeries
 
 
-@app.get('/output/ModelName={ModelName}/ModelVersion={ModelVersion}/series={series}/location={location}')
-async def get_output(ModelName: str, ModelVersion: str, series: str, location: str, datum: str = None):
+@app.get('/output/ModelName={ModelName}/ModelVersion={ModelVersion}/series={series}/location={location}/ \
+         interval={interval}/fromDateTime={fromDateTime}/toDateTime={toDateTime}/leadTime={leadTime}')
+async def get_output(ModelName: str, ModelVersion: str, series: str, location: str, interval: int, 
+                    fromDateTime: str, toDateTime: str, leadTime: float, datum: str = None):
     """
     Retrieves output series object
 
@@ -90,6 +96,14 @@ async def get_output(ModelName: str, ModelVersion: str, series: str, location: s
 
         - `location` (string): The location of the data (e.g. "packChan")
 
+        - `interval` (int): The time step separating the data points in seconds (e.g. 3600 for hourly)
+
+        - `fromDateTime` (string): "YYYYMMDDHH" Date to start at
+
+        - `toDateTime` (string): "YYYYMMDDHH" Date to end at
+
+        - `leadTime` (float): The time in hours between the generated time and verification time (e.g. 24 hours)
+
         - `datum` (string): Optional. Defaults to None
 
     Returns:
@@ -98,15 +112,28 @@ async def get_output(ModelName: str, ModelVersion: str, series: str, location: s
     Raises:
         HTTPException: If the series is not found.
     """ 
+    try:
+        fromDateTime = parse_date(fromDateTime)
+        toDateTime = parse_date(toDateTime)
+    except TypeError as e:
+        raise HTTPException(status_code=404, detail=f'{e}')
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=f'{e}')
+    
     requestDesc = SemaphoreSeriesDescription(
         ModelName, 
         ModelVersion, 
         series, 
-        location, 
+        location,
+        interval,
+        leadTime,
         datum
     )
 
+    requestDesc.fromDateTime = fromDateTime
+    requestDesc.toDateTime = toDateTime
+
     provider = SeriesProvider()
-    responseSeries = provider.make_request(requestDesc)
+    responseSeries = provider.make_output_request(requestDesc)
 
     return responseSeries
