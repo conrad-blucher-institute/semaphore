@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-#OutputManager.py
+#IDataIngestion.py
 #----------------------------------
 # Created By: Matthew Kastl
 # Created Date: 8/20/2023
-# version 1.0
+# version 2.0
 #----------------------------------
 """This is an interface for Data
-Methods.
+Methods. As well as the factory to generate the instance of the interface
  """ 
 #----------------------------------
 # 
@@ -21,6 +21,7 @@ from DataClasses import SeriesDescription, Series
 from utility import log
 
 from abc import ABC, abstractmethod
+from importlib import import_module
 
 
 
@@ -31,19 +32,16 @@ class IDataIngestion(ABC):
         raise NotImplementedError
     
 
-def map_to_DI_Instance(request: SeriesDescription) -> IDataIngestion:
-    """Maps a series description request to the proper class and method. Preforms the call and returns the result.
+def data_ingestion_factory(request: SeriesDescription) -> IDataIngestion:
+    """Uses the source atribute of a data request to dynamically import a module
     ------
     Parameters
         request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>Series)
     Returns
-        series | None - Either the series returned by the given function or None
+        IDataIngestion - An child of the IDataIngestion interface.
     """
-
-    match request.source:
-        case 'noaaT&C':
-            from DataIngestion.DataIngestion.DI_NOAATidesAndCurrents import NOAATidesAndCurrents
-            return NOAATidesAndCurrents()
-        case _:
-            log(f'Data source: {request.source}, not found in data ingestion map for request: {request}!')
-            return None
+    try:
+        return getattr(import_module(f'src.DataIngestion.DataIngestion.{request.source}'), f'{request.source}')()
+    except Exception:
+        raise ModuleNotFoundError(f'No module named {request.source} in src.DataIngestion.DataIngestion!')
+    

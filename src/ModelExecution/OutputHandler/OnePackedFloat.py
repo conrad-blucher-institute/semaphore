@@ -22,7 +22,7 @@ from ModelExecution.IOutputHandler import IOutputHandler
 
 
 
-class OH_OnePackedFloat(IOutputHandler):
+class OnePackedFloat(IOutputHandler):
 
 
     def post_process_prediction(self, prediction: Prediction) -> list[Prediction]:
