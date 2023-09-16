@@ -2,9 +2,6 @@ SQLAlchemy
 python-dotenv
 numpy
 tensorflow
-<<<<<<< HEAD
 fastapi
 uvicorn
-=======
 importlib
->>>>>>> main
