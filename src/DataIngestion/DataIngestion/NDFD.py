@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 from DataIngestion.IDataIngestion import IDataIngestion
 from DataClasses import SeriesDescription, Series
 
-class TCOON(IDataIngestion):
+class NDFD(IDataIngestion):
 
     def ingest_series(self, seriesDescription: SeriesDescription) -> Series | None:
         pass
