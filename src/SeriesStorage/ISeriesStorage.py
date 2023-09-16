@@ -20,6 +20,8 @@ from DataClasses import Series
 from utility import log
 
 from abc import ABC, abstractmethod
+from importlib import import_module
+
 class ISeriesStorage(ABC):
 
     @abstractmethod
@@ -30,10 +32,9 @@ class ISeriesStorage(ABC):
     def select_prediction(self, seriesDescription) -> Series:
         raise NotImplementedError()
     
-    #TODO::Needs to be added
-    # @abstractmethod
-    # def select_output(self, seriesDescription) -> Series:
-    #     raise NotImplementedError()
+    @abstractmethod
+    def select_output(self, seriesDescription) -> Series:
+         raise NotImplementedError()
     
     @abstractmethod
     def find_external_location_code(self, sourceCode, location, priorityOrder: int = 0) -> str:
@@ -52,4 +53,17 @@ class ISeriesStorage(ABC):
     def insert_output(self, Series) -> Series:
         raise NotImplementedError()
 
+def series_storage_factory() -> ISeriesStorage:
+    """Imports the series storage class from the environment variable ISERIESSTORAGE_INSTANCE
+    ------
+    Returns
+        ISeriesStorage - An child of the ISeriesStorage interface.
+    """
 
+    ss = os.getenv('ISERIESSTORAGE_INSTANCE')
+
+    try:
+        return getattr(import_module(f'src.SeriesStorage.SeriesStorage.{ss}'), f'{ss}')()
+    except Exception:
+        raise ModuleNotFoundError(f'No module named {ss} in src.SeriesStorage.SeriesStorage!')
+    
