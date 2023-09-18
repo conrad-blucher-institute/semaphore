@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+#datetime_handler.py
+#----------------------------------
+# Created By: Beto Estrada Jr
+# Created Date: 9/06/2023
+#----------------------------------
+"""This script handles datetime values from user input.
+ """ 
+#----------------------------------
+# 
+#
 from datetime import datetime
 
 def parse_date(date):

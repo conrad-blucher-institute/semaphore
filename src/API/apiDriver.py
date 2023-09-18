@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+#apiDriver.py
+#----------------------------------
+# Created By: Beto Estrada Jr
+# Created Date: 9/06/2023
+#----------------------------------
+"""This script acts as the driver for the FastAPI application.
+ """ 
+#----------------------------------
+# 
+#
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 
