@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  semaphore-dev-main:
+    container_name: semaphore-dev-main
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    # restart: always
+    env_file:
+      - .env
+    environment:
+      - DB_LOCATION_STRING=${DB_LOCATION_STRING}
+      - ISERIESSTORAGE_INSTANCE=${ISERIESSTORAGE_INSTANCE}
+      - DSPEC_FOLDER_PATH=${DSPEC_FOLDER_PATH}
+      - MODEL_FOLDER_PATH=${MODEL_FOLDER_PATH}
+    volumes:
+      - .:/app
+  semaphore-db:
+    container_name: semaphore-dev-psql
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root # use this to login to your database
+      POSTGRES_PASSWORD: root # use this to login to your database
+      POSTGRES_DB: semaphoredb
+      # Hostname for database (container): host.docker.internal
+      # Host port: 5432
+    ports:
+      - "5432:5432"
+    command: ["postgres", "-c", "listen_addresses=*"]
+    volumes:
+    - semaphore-pgdata:/var/lib/postgresql/data
+    - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  semaphore-pgadmin:
+    container_name: semaphore-dev-pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment: 
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com # Use this to login to pgadmin
+      PGADMIN_DEFAULT_PASSWORD: root # Use this to login to pgadmin
+    ports:
+      - "8888:80"
+    volumes:
+      - semaphore-pgadmin-data:/var/lib/pgadmin
+volumes:
+  semaphore-pgdata:
+  semaphore-pgadmin-data:
