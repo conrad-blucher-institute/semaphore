@@ -29,6 +29,13 @@ pip install -r requirements.txt
 ## Running Semaphore
 Currently, you can run Semaphore through the make_and_save_prediction and make_prediction methods in the `src/ModelExecution/modelWrapper.py`. Keep in mind the DB will need to be loaded with the proper location mappings for your ingested data. Feel free to reach out to one of the authors for help getting Semaphore up and running.
 
+## Running FastAPI Application
+1. Make sure your environment is activated! `source ./venv/vsem/Scripts/activate`
+2. `pip install -r requirements.txt` to install new dependencies (if you haven't already)
+3. From the root directory, run `uvicorn src.API.apiDriver:app`
+4. You can specify `--host` and `--port` if you so desire
+5. uvicorn will give you a link to the index page of the API. Add `/docs` to the URL to access the docs page
+
 ## Authors
 * [@Matthew Kastl](https://github.com/matdenkas) - mkastl@islander.tamucc.edu
 * [@Beto Estrada](https://github.com/bestrada33) - bestrada4@islander.tamucc.edu
