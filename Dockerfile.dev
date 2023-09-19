@@ -3,5 +3,5 @@ FROM jupyter/tensorflow-notebook:python-3.10.5
 WORKDIR /app
 COPY requirements.txt .
 RUN python3 -m venv ./venv/vsem
-RUN source ./venv/vsem/Scripts/activate
+RUN source ./venv/vsem/bin/activate
 RUN pip install -r requirements.txt
