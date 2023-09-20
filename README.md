@@ -35,7 +35,7 @@ pip install -r requirements.txt
 
 0. You will need to create a `.env` file in the root directory of the project. This file will contain the environment variables for the docker container. You can copy the contents of `env.dist` and replace the values with your own.
 1. Launch task in VSCode Debugger: `compose dev up`
-2. SSH into semaphore contianer: `docker exec -it semaphore-semaphore-dev-main bash`
+2. SSH into semaphore container: `docker exec -it semaphore-semaphore-dev-main bash` (if you decide to run the python code without the container, you can skip step 2,3)
 3. Navigate and run command from inside the container as needed
 4. Database can be access using pgAdmin container via: `http://localhost:8888/`. For first time login, you will need to register the database in pgAdmin (see screenshots below)
  hostname: `host.docker.internal`, username: `root`, password: `root`
@@ -46,8 +46,16 @@ pip install -r requirements.txt
 
 #### Using pgAdmin container:
 Login:
+URL: http://localhost:8888/
 username: `admin@admin.com`
 password: `root`
+You will need to register your db with pgAdmin to access it. See screenshots above.
+
+### Using RabbitMQ:
+URL: http://localhost:15672/
+username: `guest`
+password: `guest`
+You can create queues and specify what you parameters are needed for the payload
 
 ## Running Semaphore
 Currently, you can run Semaphore through the make_and_save_prediction and make_prediction methods in the `src/ModelExecution/modelWrapper.py`. Keep in mind the DB will need to be loaded with the proper location mappings for your ingested data. Feel free to reach out to one of the authors for help getting Semaphore up and running.

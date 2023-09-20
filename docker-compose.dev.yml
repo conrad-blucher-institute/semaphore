@@ -17,7 +17,7 @@ services:
       - .:/app
   semaphore-db:
     container_name: semaphore-dev-psql
-    image: postgres
+    image: postgres:15.4
     restart: always
     environment:
       POSTGRES_USER: root # use this to login to your database
@@ -42,6 +42,17 @@ services:
       - "8888:80"
     volumes:
       - semaphore-pgadmin-data:/var/lib/pgadmin
+  semaphore-rabbitmq:
+    image: rabbitmq:3.12.4-management
+    container_name: semaphore-dev-rabbitmq
+    restart: always
+    # ports: #  leaving it commented here since the ports will be automatically available without exposing them
+        # - 5672:5672 # amqp port
+        # - 15672:15672 # UI port (http://localhost:15672)
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+      - ./etc/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf # mount config file
 volumes:
   semaphore-pgdata:
   semaphore-pgadmin-data:
