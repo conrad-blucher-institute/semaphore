@@ -2,3 +2,5 @@ SQLAlchemy
 python-dotenv
 numpy
 tensorflow
+fastapi
+uvicorn
