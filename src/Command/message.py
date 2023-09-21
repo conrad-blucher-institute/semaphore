@@ -15,11 +15,10 @@ from datetime import datetime
 
 class Message():
     """A message is an object that we will use to communicate the schedule that should be run to the to the runner file.
-        :param dspecName: str - The name of the model's dspec file
-        :param runModelTime: datetime - The time to provide semaphore to run the model relative to (interval + offset)
-        :param runSemaphoreTime: str - The time to run the model (cron string use python package croniter)
+        :param dspecObject ____ what data type is this -A dspec object
     """
-    def __init__(self, dspecName: str, runModelTime: datetime, runSemaphoreTime: str) -> None:
-        self.dspecName = dspecName
-        self.runModelTime = runModelTime
-        self.runSemaphoreTime = runSemaphoreTime
+    def __init__(dspecObject) -> None:
+        #dspecName = (some method to get name from dspecobject)
+        #runModelTime = (method to extract time to run model from object)
+        #runSemaphoreTime = (method to extract time to run semaphore) 
+        pass
