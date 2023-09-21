@@ -11,7 +11,7 @@
 # 
 #
 #Imports
-from Message import Message 
+from message import Message 
 
 class ScheduleBuilder:
     def build_and_run_schedule() -> None: 

@@ -14,7 +14,7 @@
 from datetime import datetime
 
 class Message():
-    """An Actual is a measurement of some environment variable can be linked to a date time.
+    """A message is an object that we will use to communicate the schedule that should be run to the to the runner file.
         :param dspecName: str - The name of the model's dspec file
         :param runModelTime: datetime - The time to provide semaphore to run the model relative to (interval + offset)
         :param runSemaphoreTime: str - The time to run the model (cron string use python package croniter)
