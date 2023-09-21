@@ -30,9 +30,16 @@ class ScheduleBuilder:
         pass
     
     def build_schedule() -> list:
+        #create list objed
+
         #for each dspec file in the folder
-          #pass dspecObj and time period to should_run and get a boolean value
-          #if booleanValue is true pass dspec object to build_message and get message
+            #create dspecObj using filename (modleWrapper function?)
+            
+            #pass dspecObj and time period (is time period pulled from the dspec or is 
+            # this like, the actuall curent time that the program is running) to should_run and get a boolean value
+            
+            #if booleanValue is true pass dspec object to build_message and get message object
+            
             #append message object to list
 
         #pass list of message objects to sort_schedule and get back sorted list
@@ -42,6 +49,7 @@ class ScheduleBuilder:
     
     def should_run(dspecObj, timePeriod) -> bool:
         #calculate if the received dspecObj should run during this hour
+            #algorithm for this needs to be written
         #return boolean value
         pass
     
