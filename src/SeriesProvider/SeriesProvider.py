@@ -117,7 +117,7 @@ class SeriesProvider():
         :return series
         '''
         ###See if we can get the outputs from the database
-        dbi = map_to_SS_Instance() 
+        dbi = series_storage_factory() 
         requestedSeries = dbi.select_output(requestDesc)
 
         ###Do we have enough outputs? 

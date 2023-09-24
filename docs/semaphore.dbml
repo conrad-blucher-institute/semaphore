@@ -1,0 +1,179 @@
+
+Table "s_ref_slocation" {
+  "id" INTEGER [not null]
+  "code" VARCHAR(25) [not null]
+  "displayName" VARCHAR(30) [not null]
+  "notes" VARCHAR(250)
+  "latitude" VARCHAR(16) [not null]
+  "longitude" VARCHAR(16) [not null]
+
+Indexes {
+  id [pk]
+  (code, displayName) [unique]
+}
+}
+
+Table "s_ref_data_source" {
+  "id" INTEGER [not null]
+  "code" VARCHAR(10) [not null]
+  "displayName" VARCHAR(30) [not null]
+  "notes" VARCHAR(250)
+
+Indexes {
+  id [pk]
+  (code, displayName) [unique]
+}
+}
+
+Table "s_ref_series" {
+  "id" INTEGER [not null]
+  "code" VARCHAR(10) [not null]
+  "displayName" VARCHAR(30) [not null]
+  "notes" VARCHAR(250)
+
+Indexes {
+  id [pk]
+  (code, displayName) [unique]
+}
+}
+
+Table "s_ref_units" {
+  "id" INTEGER [not null]
+  "code" VARCHAR(10) [not null]
+  "displayName" VARCHAR(30) [not null]
+  "notes" VARCHAR(250)
+
+Indexes {
+  id [pk]
+  (code, displayName) [unique]
+}
+}
+
+Table "s_ref_datum" {
+  "id" INTEGER [not null]
+  "code" VARCHAR(10) [not null]
+  "displayName" VARCHAR(30) [not null]
+  "notes" VARCHAR(250)
+
+Indexes {
+  id [pk]
+  (code, displayName) [unique]
+}
+}
+
+Table "s_ref_resultCodeUnits" {
+  "id" INTEGER [not null]
+  "code" VARCHAR(10) [not null]
+  "displayName" VARCHAR(30) [not null]
+  "notes" VARCHAR(250)
+
+Indexes {
+  id [pk]
+  (code, displayName) [unique]
+}
+}
+
+Table "s_data_point" {
+  "id" INTEGER [not null]
+  "timeActualized" DATETIME [not null]
+  "timeAquired" DATETIME [not null]
+  "dataValue" VARCHAR(20) [not null]
+  "unitsCode" VARCHAR(10) [not null]
+  "interval" INTEGER [not null]
+  "dataSourceCode" VARCHAR(10) [not null]
+  "sLocationCode" VARCHAR(25) [not null]
+  "seriesCode" VARCHAR(10) [not null]
+  "datumCode" VARCHAR(10)
+  "latitude" VARCHAR(16)
+  "longitude" VARCHAR(16)
+
+Indexes {
+  id [pk]
+  (timeActualized, dataValue, unitsCode, interval, dataSourceCode, sLocationCode, seriesCode) [unique]
+}
+}
+
+Table "s_prediction" {
+  "id" INTEGER [not null]
+  "timeGenerated" DATETIME [not null]
+  "leadTime" FLOAT [not null]
+  "dataValue" VARCHAR(20) [not null]
+  "unitsCode" VARCHAR(10) [not null]
+  "interval" INTEGER [not null]
+  "resultCode" VARCHAR(10)
+  "dataSourceCode" VARCHAR(10) [not null]
+  "sLocationCode" VARCHAR(25) [not null]
+  "seriesCode" VARCHAR(10) [not null]
+  "datumCode" VARCHAR(10)
+  "latitude" VARCHAR(16)
+  "longitude" VARCHAR(16)
+
+Indexes {
+  id [pk]
+  (timeGenerated, leadTime, dataValue, unitsCode, interval, dataSourceCode, sLocationCode, seriesCode) [unique]
+}
+}
+
+Table "s_prediction_output" {
+  "id" INTEGER [not null]
+  "timeAquired" DATETIME [not null]
+  "timeGenerated" DATETIME [not null]
+  "leadTime" FLOAT [not null]
+  "ModelName" VARCHAR(25) [not null]
+  "ModelVersion" VARCHAR(10) [not null]
+  "dataValue" VARCHAR(20) [not null]
+  "unitsCode" VARCHAR(10) [not null]
+  "sLocationCode" VARCHAR(25) [not null]
+  "seriesCode" VARCHAR(10) [not null]
+  "datumCode" VARCHAR(10)
+
+Indexes {
+  id [pk]
+  (timeGenerated, leadTime, ModelName, ModelVersion) [unique]
+}
+}
+
+Table "s_locationCode_dataSourceLocationCode_mapping" {
+  "id" INTEGER [not null]
+  "sLocationCode" VARCHAR(25) [not null]
+  "dataSourceCode" VARCHAR(10) [not null]
+  "dataSourceLocationCode" VARCHAR(255) [not null]
+  "priorityOrder" INTEGER [not null]
+
+Indexes {
+  id [pk]
+  (sLocationCode, dataSourceCode, dataSourceLocationCode, priorityOrder) [unique]
+}
+}
+
+Ref:"s_ref_units"."code" < "s_data_point"."unitsCode"
+
+Ref:"s_ref_data_source"."code" < "s_data_point"."dataSourceCode"
+
+Ref:"s_ref_slocation"."code" < "s_data_point"."sLocationCode"
+
+Ref:"s_ref_series"."code" < "s_data_point"."seriesCode"
+
+Ref:"s_ref_datum"."code" < "s_data_point"."datumCode"
+
+Ref:"s_ref_units"."code" < "s_prediction"."unitsCode"
+
+Ref:"s_ref_data_source"."code" < "s_prediction"."dataSourceCode"
+
+Ref:"s_ref_slocation"."code" < "s_prediction"."sLocationCode"
+
+Ref:"s_ref_series"."code" < "s_prediction"."seriesCode"
+
+Ref:"s_ref_datum"."code" < "s_prediction"."datumCode"
+
+Ref:"s_ref_units"."code" < "s_prediction_output"."unitsCode"
+
+Ref:"s_ref_slocation"."code" < "s_prediction_output"."sLocationCode"
+
+Ref:"s_ref_series"."code" < "s_prediction_output"."seriesCode"
+
+Ref:"s_ref_datum"."code" < "s_prediction_output"."datumCode"
+
+Ref:"s_ref_slocation"."code" < "s_locationCode_dataSourceLocationCode_mapping"."sLocationCode"
+
+Ref:"s_ref_data_source"."code" < "s_locationCode_dataSourceLocationCode_mapping"."dataSourceCode"

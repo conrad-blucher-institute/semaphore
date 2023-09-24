@@ -22,7 +22,7 @@ from sqlalchemy import create_engine as sqlalchemy_create_engine
 from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select
 from dotenv import load_dotenv
 from os import getenv
-
+from datetime import timedelta
 
 from src.SeriesStorage.ISeriesStorage import ISeriesStorage
 
@@ -452,6 +452,13 @@ class SQLLite(ISeriesStorage):
         Returns:
             Series
         """
+
+        #offset the the time range by the lead time, as the time range is in verification time
+        #but the objects are stored by generated time
+        leadDelta = timedelta(hours= seriesDescription.leadTime)
+        fromDateTime = seriesDescription.fromDateTime - leadDelta
+        toDateTime = seriesDescription.toDateTime - leadDelta
+
         table = self.s_prediction
         stmt = (select(table)
             .where(table.c.dataSourceCode == seriesDescription.source)
@@ -459,8 +466,8 @@ class SQLLite(ISeriesStorage):
             .where(table.c.seriesCode == seriesDescription.series)
             .where(table.c.interval == seriesDescription.interval)
             .where(table.c.datumCode == seriesDescription.datum)
-            .where((table.c.timeGenerated + table.c.leadTime) >= seriesDescription.fromDateTime)
-            .where((table.c.timeGenerated + table.c.leadTime) <= seriesDescription.toDateTime)
+            .where(table.c.timeGenerated >= fromDateTime)
+            .where(table.c.timeGenerated <= toDateTime)
         )
 
         result = self.__dbSelection(stmt).fetchall()
@@ -470,15 +477,21 @@ class SQLLite(ISeriesStorage):
         
     def select_s_output(self, seriesDescription) -> Series:
 
+        #offset the the time range by the lead time, as the time range is in verification time
+        #but the objects are stored by generated time
+        leadDelta = timedelta(hours= seriesDescription.leadTime)
+        fromDateTime = seriesDescription.fromDateTime - leadDelta
+        toDateTime = seriesDescription.toDateTime - leadDelta
+
         table = self.s_prediction_output
         stmt = (select(table)
                 .where(table.c.leadTime == seriesDescription.leadTime)
                 .where(table.c.ModelName == seriesDescription.ModelName)
                 .where(table.c.ModelVersion == seriesDescription.ModelVersion)
-                .where((table.c.timeGenerated + table.c.leadTime) >= seriesDescription.fromDateTime)
-                .where((table.c.timeGenerated + table.c.leadTime) <= seriesDescription.toDateTime)
+                .where(table.c.timeGenerated >= fromDateTime)
+                .where(table.c.timeGenerated <= toDateTime)
                 )
-        
+                
         result = self.__dbSelection(stmt).fetchall()
         resultSeries = Series(seriesDescription, True)
         resultSeries.data = self.__splice_output_prediction_results(result) #Turn tuple objects into prediction objects
