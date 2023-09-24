@@ -16,7 +16,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from DataIngestion.IDataIngestion import IDataIngestion
-from DataClasses import SeriesDescription, Series
+from DataClasses import SeriesDescription, Series, Prediction
 from SeriesStorage.ISeriesStorage import series_storage_factory
 
 Time = TypeVar('Time')
@@ -46,28 +46,20 @@ class NDFD(IDataIngestion):
      
 
     def __create_url_pattern(self, request: SeriesDescription, products: str) -> str:
-        # Build data query start and end time strings based on current time
-        now = time.time()
-        print(now)
-        print(type(now))
-        t0 = now - now%3600                     # most recent hour mark
-        t1 = t0 + range*3600                      # 7 days later ...
-
         # I'm explicitly using ISO 8601 formatted time strings *without* timezone
         # information b/c the NDFD web service _seems_ to ignore UTC timezone
         # specified as 'Z' or '+00:00' ?!
         #
         # I'd have to test more to verify, but we just want at least 48 hours of
         # predictions starting w/ the closest time
-        t0_str = datetime.fromtimestamp(t0).isoformat()
-        t1_str = datetime.fromtimestamp(t1).isoformat()
+        t0_str = request.fromDateTime.isoformat()
+        t1_str = request.toDateTime.isoformat()
 
-        # NOTE:: Needs to be implemented. Must convert incoming datetime to timestamp and then to iso
-        #t0_str = datetime.fromtimestamp(request.fromDateTime).isoformat()
-        #t1_str = datetime.fromtimestamp(request.toDateTime).isoformat()
-
-        # NOTE:: Needs to be implemented
-        lat, lon = get_coordinates(request.location)
+        # NOTE:: Needs to be implemented. Also, need to confirm coordinates for SBirdIsland
+        #lat, lon = get_coordinates(request.location)
+        if(request.location == 'SBirdIsland'): # NOTE:: Temporary
+            lat = '27.4844'
+            lon = '-97.318'
 
         print("Retrieving NDFD [{}] data between {} and {} at location ({},{}) ".format(products, t0_str, t1_str, lat, lon))
 
@@ -77,7 +69,8 @@ class NDFD(IDataIngestion):
         base_url = 'https://graphical.weather.gov/xml/SOAP_server/ndfdXMLclient.php?whichClient=NDFDgen&Submit=Submit'
         # NOTE:: Could probably just be one string rather than the join
         formatted_products = '&'.join([product + '=' + product for product in products.split(',')])
-        url = '{}&lat={}&lon={}&product=time-series&begin={}&end={}&Unit=e&{}'.format(base_url,
+        # NOTE:: Unit=e for US Standard, m for metric
+        url = '{}&lat={}&lon={}&product=time-series&begin={}&end={}&Unit=m&{}'.format(base_url,
                                                                                     lat,
                                                                                     lon,
                                                                                     begin,
@@ -92,7 +85,6 @@ class NDFD(IDataIngestion):
         NOTE No date range of 31 days will be accepted! - raises Value Error
         NOTE On a bad api param, throws urlib HTTPError, code 400
         """
-       
         try:
             response = requests.get(url)
             return response.text
@@ -109,27 +101,62 @@ class NDFD(IDataIngestion):
 
         response = self.__api_request(url)
 
-        predictions: NDFDPredictions[str, str] = NDFDPredictions(response)
+        NDFD_Predictions: NDFDPredictions[str, str] = NDFDPredictions(response)
 
-        data: ZippedDataset[int, int] = predictions.map(iso8601_to_unixms, int).zipped()
+        data: ZippedDataset[int, int] = NDFD_Predictions.map(iso8601_to_unixms, int).zipped()
 
         # Finally, output data as JSON
         if len(data) == 1:
             # If there's only one product, only return the values
-            print(json.dumps(data[0][1]))
+            data_dictionary = json.loads(json.dumps(data[0][1]))
         else:
             # Otherwise, return a mapping from product name to product values
             print(json.dumps(dict(data)))
 
-        #return response
+        predictions = []
+        for row in data_dictionary:
+            prediction = Prediction(
+                value = row[1],
+                unit = NDFD_Predictions.unit,
+                leadTime = 0, # NOTE:: Need to figure out
+                generatedTime = datetime.fromtimestamp(row[0] / 1000), # NOTE:: temporary solution, also milliseconds converted to seconds
+                longitude = NDFD_Predictions.longitude,
+                latitude = NDFD_Predictions.latitude
+            )
+            predictions.append(prediction)
+
+        series = Series(request, True)
+        series.data = predictions
+
+        #insertData to DB
+        insertedRows = self.__seriesStorage.insert_predictions(series)
+        # NOTE:: added .data. Before it turned data into just the Series object
+        series.data = insertedRows.data #Rebind to only return what rows were inserted?
+
+        ''' KEEP FOR NOW
+        import pandas as pd
+        dataf = json.loads(dataf)
+        df = pd.DataFrame(dataf, columns=['date', 'data'])
+
+        # DATES ARE IN MILISECONDS. Epoch Unix Timestamps
+        df['date'] = pd.to_datetime(df['date'], unit='ms')
+
+        # Print the resulting DataFrame
+        print(df)
+        '''
+
+        return series
 
   
 class NDFDPredictions(Generic[Time, Data]):
-    
+
     def __init__(self,
                  response_text: str = None,
                  time: TimeSeries[Time] = None,
-                 data: DataSeries[Data] = None
+                 data: DataSeries[Data] = None,
+                 unit: str = None,
+                 longitude: str = None,
+                 latitude: str = None
                  ):
         if response_text is not None:
             self.tree = etree.fromstring(response_text)
@@ -144,8 +171,16 @@ class NDFDPredictions(Generic[Time, Data]):
                                             LayoutKey(dataset.get('time-layout')),
                                             [value for value in dataset.xpath('value/text()')])
                                            for dataset in self.tree.xpath('/dwml/data/parameters')[0].getchildren()]
-            # NOTE:: If we need the units from the xml
+            
             for dataset in self.tree.xpath('/dwml/data/parameters')[0].getchildren(): unit = dataset.get('units')
+            self.unit = unit.lower()
+
+            for dataset in self.tree.xpath('/dwml/data/location')[0].getchildren(): longitude = dataset.get('longitude')
+            self.longitude = longitude
+
+            for dataset in self.tree.xpath('/dwml/data/location')[0].getchildren(): latitude = dataset.get('latitude')
+            self.latitude = latitude
+
         elif time is not None and data is not None:
             self.time = time
             self.data = data
@@ -173,7 +208,7 @@ class NDFDPredictions(Generic[Time, Data]):
 
 
 def iso8601_to_unixms(timestamp: str) -> int:
-    """Convert time values.  E.g., 2019-04-11T19:00:00-05:00 → 1555027200000"""
+    """Convert iso to unix timestamp in milliseconds.  E.g., 2019-04-11T19:00:00-05:00 → 1555027200000"""
     # lol @ Python's datetime  https://bugs.python.org/issue31800#msg304486
     #
     # Anyway, regex kluge since I can't guarantee Python 3.7 and thus
