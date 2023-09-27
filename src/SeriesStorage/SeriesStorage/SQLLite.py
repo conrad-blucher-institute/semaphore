@@ -453,12 +453,6 @@ class SQLLite(ISeriesStorage):
             Series
         """
 
-        #offset the the time range by the lead time, as the time range is in verification time
-        #but the objects are stored by generated time
-        leadDelta = timedelta(hours= seriesDescription.leadTime)
-        fromDateTime = seriesDescription.fromDateTime - leadDelta
-        toDateTime = seriesDescription.toDateTime - leadDelta
-
         table = self.s_prediction
         stmt = (select(table)
             .where(table.c.dataSourceCode == seriesDescription.source)
@@ -466,8 +460,8 @@ class SQLLite(ISeriesStorage):
             .where(table.c.seriesCode == seriesDescription.series)
             .where(table.c.interval == seriesDescription.interval)
             .where(table.c.datumCode == seriesDescription.datum)
-            .where(table.c.timeGenerated >= fromDateTime)
-            .where(table.c.timeGenerated <= toDateTime)
+            .where(table.c.timeGenerated >= seriesDescription.fromDateTime)
+            .where(table.c.timeGenerated <= seriesDescription.toDateTime)
         )
 
         result = self.__dbSelection(stmt).fetchall()
