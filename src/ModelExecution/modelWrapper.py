@@ -18,9 +18,9 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from ModelExecution.inputGatherer import InputGatherer
-from ModelExecution.IOutputHandler import map_to_OH_Instance
+from ModelExecution.IOutputHandler import output_handler_factory
 from DataClasses import SemaphoreSeriesDescription, Prediction, Series
-from SeriesStorage.SeriesStorage.SS_Map import map_to_SS_Instance
+from SeriesStorage.ISeriesStorage import series_storage_factory
 
 import datetime
 from os import path, getenv
@@ -97,12 +97,12 @@ class ModelWrapper:
             dspec = self.__inputGatherer.get_dspec()
             outputInfo = dspec.outputInfo
 
-            #TODO::This code will need to be reworded we we get more than one value from a mdel
-            predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
+            #TODO::This code will need to be reworded we we get more than one value from a model
+            predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.interval,  outputInfo.datum)
             prediction = Prediction(prediction, outputInfo.unit, outputInfo.leadTime, dateTime)
 
             #Instantiate the right output handler method then post process the predictions
-            OH_Class = map_to_OH_Instance(outputInfo.outputMethod)
+            OH_Class = output_handler_factory(outputInfo.outputMethod)
             processedOutput = OH_Class.post_process_prediction(prediction)
 
             #Put the post processed predictions in a series
@@ -110,7 +110,7 @@ class ModelWrapper:
             series.data = processedOutput
 
             #Send the prediction to the database and return the result
-            SS_Class = map_to_SS_Instance()
+            SS_Class = series_storage_factory()
             result = SS_Class.insert_output(series)
             return result
 

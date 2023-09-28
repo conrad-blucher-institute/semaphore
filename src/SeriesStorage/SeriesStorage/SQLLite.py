@@ -14,6 +14,7 @@
 #Imports
 import sys
 import os
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
@@ -21,13 +22,13 @@ from sqlalchemy import create_engine as sqlalchemy_create_engine
 from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select
 from dotenv import load_dotenv
 from os import getenv
-
+from datetime import timedelta
 
 from src.SeriesStorage.ISeriesStorage import ISeriesStorage
 
 from DataClasses import *
 
-class SS_SQLLite(ISeriesStorage):
+class SQLLite(ISeriesStorage):
 
     #############################################################################################
     ################################################################################## Interface methods
@@ -38,6 +39,9 @@ class SS_SQLLite(ISeriesStorage):
 
     def select_prediction(self, seriesDescription) -> Series:
         return self.s_prediction_selection(seriesDescription)
+    
+    def select_output(self, seriesDescription) -> Series: 
+        return self.select_s_output(seriesDescription)
     
 
     def find_external_location_code(self, sourceCode, location, priorityOrder: int = 0) -> str:
@@ -336,6 +340,29 @@ class SS_SQLLite(ISeriesStorage):
             ))
 
         return predictions
+    
+    def __splice_output_prediction_results(self, results: List[tuple]) -> List[Output]:
+        """Splices up a list of dbresults, pulling out only the data that changes per point,
+        and places them in a Prediction object.
+        Parameters:
+            first list[tupleish (sqlalchemy.engine.row.Row)] - The collection of dbrows.
+        Returns:
+            List[Prediction] - The formatted objs.
+        """
+        valueIndex = 6
+        unitIndex = 7
+        leadTimeIndex = 3
+        timeGeneratedIndex = 2
+        predictions = []
+        for row in results:
+            predictions.append(Output(
+                row[valueIndex],
+                row[unitIndex],
+                row[leadTimeIndex],
+                row[timeGeneratedIndex]
+            ))
+
+        return predictions
         
 
     def __splice_actual_results(self, results: List[tuple]) -> List[Actual]:
@@ -425,6 +452,7 @@ class SS_SQLLite(ISeriesStorage):
         Returns:
             Series
         """
+
         table = self.s_prediction
         stmt = (select(table)
             .where(table.c.dataSourceCode == seriesDescription.source)
@@ -432,8 +460,8 @@ class SS_SQLLite(ISeriesStorage):
             .where(table.c.seriesCode == seriesDescription.series)
             .where(table.c.interval == seriesDescription.interval)
             .where(table.c.datumCode == seriesDescription.datum)
-            .where((table.c.timeGenerated + table.c.leadTime) >= seriesDescription.fromDateTime)
-            .where((table.c.timeGenerated + table.c.leadTime) <= seriesDescription.toDateTime)
+            .where(table.c.timeGenerated >= seriesDescription.fromDateTime)
+            .where(table.c.timeGenerated <= seriesDescription.toDateTime)
         )
 
         result = self.__dbSelection(stmt).fetchall()
@@ -441,6 +469,27 @@ class SS_SQLLite(ISeriesStorage):
         resultSeries.data = self.__splice_prediction_results(result) #Turn tuple objects into prediction objects
         return resultSeries
         
+    def select_s_output(self, seriesDescription) -> Series:
+
+        #offset the the time range by the lead time, as the time range is in verification time
+        #but the objects are stored by generated time
+        leadDelta = timedelta(hours= seriesDescription.leadTime)
+        fromDateTime = seriesDescription.fromDateTime - leadDelta
+        toDateTime = seriesDescription.toDateTime - leadDelta
+
+        table = self.s_prediction_output
+        stmt = (select(table)
+                .where(table.c.leadTime == seriesDescription.leadTime)
+                .where(table.c.ModelName == seriesDescription.ModelName)
+                .where(table.c.ModelVersion == seriesDescription.ModelVersion)
+                .where(table.c.timeGenerated >= fromDateTime)
+                .where(table.c.timeGenerated <= toDateTime)
+                )
+                
+        result = self.__dbSelection(stmt).fetchall()
+        resultSeries = Series(seriesDescription, True)
+        resultSeries.data = self.__splice_output_prediction_results(result) #Turn tuple objects into prediction objects
+        return resultSeries
 
     def s_locationCode_dataSourceLocationCode_mapping_select(self, sourceCode: str, location: str, priorityOrder: int = 0) -> list[tuple]:
         """Selects a a dataSourceLocationCode given a datasource and a location. 
