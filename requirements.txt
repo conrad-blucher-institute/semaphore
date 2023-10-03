@@ -1,4 +1,4 @@
-SQLAlchemy
+SQLAlchemy==2.0.17
 python-dotenv
 numpy
 tensorflow
