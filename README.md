@@ -70,6 +70,7 @@ Currently, you can run Semaphore through the make_and_save_prediction and make_p
 ## Authors
 * [@Matthew Kastl](https://github.com/matdenkas) - mkastl@islander.tamucc.edu
 * [@Beto Estrada](https://github.com/bestrada33) - bestrada4@islander.tamucc.edu
+* [@Savanah Stevenson](https://github.com/lovelysandlonelys) - sstephenson2@islander.tamucc.edu
 * [@Anointiyae Beasley](https://github.com/abeasley1722) - anointiyae.beasley@tamucc.edu
 * [@Florence Tissot](https://github.com/ccftissot)
 
