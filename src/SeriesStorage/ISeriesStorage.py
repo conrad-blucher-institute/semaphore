@@ -25,11 +25,7 @@ from importlib import import_module
 class ISeriesStorage(ABC):
 
     @abstractmethod
-    def select_actuals(self, seriesDescription) -> Series:
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def select_prediction(self, seriesDescription) -> Series:
+    def select_input(self, seriesDescription) -> Series:
         raise NotImplementedError()
     
     @abstractmethod
@@ -39,14 +35,14 @@ class ISeriesStorage(ABC):
     @abstractmethod
     def find_external_location_code(self, sourceCode, location, priorityOrder: int = 0) -> str:
         raise NotImplementedError()
+
+    @abstractmethod
+    def find_lat_lon_coordinates(self, sourceCode, location, priorityOrder: int = 0) -> tuple:
+        raise NotImplementedError()
     
 
     @abstractmethod
-    def insert_actuals(self, Series) -> Series:
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def insert_predictions(self, Series) -> Series:
+    def insert_input(self, Series) -> Series:
         raise NotImplementedError()
     
     @abstractmethod
