@@ -62,13 +62,12 @@ class Output():
         :param latitude: str = None
     """
    
-    #leadtime is now time object, so add from datetime import time?
-    #change 
+
     
     def __init__(self, value: str, unit: str, timeGenerated: datetime, longitude: str = None, latitude: str = None) -> None:
         self.value = value
         self.unit = unit
-        self.timeGenerated = timeGenerated#change to timeGenerated? and add longitude/lat
+        self.timeGenerated = timeGenerated
         self.latitude = latitude
         self.longitude = longitude
         
