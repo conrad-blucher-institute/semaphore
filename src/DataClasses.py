@@ -17,9 +17,9 @@ class Input():
     """An Input is a data value of some environment variable that can be linked to a date time.
         :param value: str - The actual data value
         :param unit: str - The unit of measurement of the value
-        :param timeGenerated: datetime - The datetime that the value was created
         :param timeAcquired: datetime - The datetime that the value was acquired by Semaphore
         :param timeVerified: datetime - The datetime that the value is valid
+        :param timeGenerated: datetime = None - The datetime that the value was created
         :param longitude: str = None
         :param latitude: str = None
     """
@@ -52,18 +52,13 @@ class Input():
 
 
 class Output():
-    """An output is a a predicted value created by the model semaphore is running. It has all the same things as an Actual, but it describes its time as the time the prediction
-    was made and the lead time till its verification time.
-    generatedTime + leadTime = verificationTime
+    """An output is a a predicted value created by the model semaphore is running.
         :param value: str - The actual data value
         :param unit: str - The unit of measurement of the value
         :param timeGenerated: datetime - The datetime that the value was created
         :param longitude: str = None
         :param latitude: str = None
     """
-   
-
-    
     def __init__(self, value: str, unit: str, timeGenerated: datetime, longitude: str = None, latitude: str = None) -> None:
         self.value = value
         self.unit = unit
@@ -71,7 +66,6 @@ class Output():
         self.latitude = latitude
         self.longitude = longitude
         
-
     def __str__(self) -> str:
         return f'\n[Output] -> value: {self.value}, unit: {self.unit}, timeGenerated: {self.timeGenerated}, longitude: {self.longitude},latitude: {self.latitude}'
     
@@ -124,7 +118,6 @@ class SeriesDescription():
     
     def __repr__(self) -> str:
         return f'\nSeriesDescription({self.source}, {self.series}, {self.location}, {self.datum})'
-
 
 
 class SemaphoreSeriesDescription():
