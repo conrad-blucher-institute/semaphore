@@ -18,13 +18,13 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from sqlalchemy import create_engine as sqlalchemy_create_engine
-from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select
+from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select, distinct
 from os import getenv
 from datetime import timedelta
 
 from src.SeriesStorage.ISeriesStorage import ISeriesStorage
 
-from DataClasses import *
+from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, Input, Output, TimeDescription
 
 class SQLAlchemyORM(ISeriesStorage):
  
@@ -39,13 +39,68 @@ class SQLAlchemyORM(ISeriesStorage):
     ################################################################################## Public methods
     #############################################################################################
 
+    def select_input(self, seriesDescription: SeriesDescription, timeDescription : TimeDescription) -> Series:
+        """Selects a given series given a SeriesDescription and TimeDescription"""
+
+        statement = (select(self.inputs)
+            .where(self.inputs.c.dataSource == seriesDescription.dataSource)
+            .where(self.inputs.c.dataLocation == seriesDescription.dataLocation)
+            .where(self.inputs.c.dataSeries == seriesDescription.dataSeries)
+            .where(self.inputs.c.dataDatum == seriesDescription.dataDatum)
+            .where(self.inputs.c.verifiedTime >= timeDescription.fromDateTime)
+            .where(self.inputs.c.verifiedTime <= timeDescription.toDateTime)
+            )
+        tupleishResult = self.__dbSelection(statement).fetchall()
+        inputResult = self.__splice_input(tupleishResult)
+        series = Series(seriesDescription, True, timeDescription)
+        series.data = inputResult
+        return series
+    
+    def select_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
+        
+        statement = (select(distinct(self.outputs.c.leadTime))
+                    .where(self.outputs.c.dataSource == semaphoreSeriesDescription.dataSource)
+                    .where(self.outputs.c.dataLocation == semaphoreSeriesDescription.dataLocation)
+                    .where(self.outputs.c.dataSeries == semaphoreSeriesDescription.dataSeries)
+                    .where(self.outputs.c.dataDatum == semaphoreSeriesDescription.dataDatum)
+                    )
+        leadTime = self.__dbSelection(statement).fetchall()[0]
+        fromGeneratedTime = timeDescription.fromDateTime - leadTime
+        toGeneratedTime = timeDescription.toDateTime - leadTime
+         
+        statement = (select(self.outputs)
+                    .where(self.outputs.c.dataSource == semaphoreSeriesDescription.dataSource)
+                    .where(self.outputs.c.dataLocation == semaphoreSeriesDescription.dataLocation)
+                    .where(self.outputs.c.dataSeries == semaphoreSeriesDescription.dataSeries)
+                    .where(self.outputs.c.dataDatum == semaphoreSeriesDescription.dataDatum)
+                    .where(self.outputs.c.timeGenerated >= fromGeneratedTime)
+                    .where(self.outputs.c.timeGenerated <= toGeneratedTime)
+           )
+        tupleishResult = self.__dbSelection(statement).fetchall()
+        outputResult = self.__splice_output(tupleishResult)
+        series = Series(semaphoreSeriesDescription, True, timeDescription)
+        series.data = outputResult
+        return series
+    
+    def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
+        raise NotImplementedError()
+
+    def find_lat_lon_coordinates(self, sourceCode: str, location: str, priorityOrder: int = 0) -> tuple:
+        raise NotImplementedError()
+
+    def insert_input(self, Series: Series) -> Series:
+        raise NotImplementedError()
+
+    def insert_output(self, Series: Series) -> Series:
+        raise NotImplementedError()
+
     def create_DB(self) -> None:
         """Creates the database with the tethered engine.
         Requires the engine to be created before it will create the DB.
         See: DBManager.create_engine()
         """
 
-        self._metadata.create_all(self.get_engine())
+        self._metadata.create_all(self.__get_engine())
      
 
     def drop_DB(self) -> None:
@@ -54,7 +109,7 @@ class SQLAlchemyORM(ISeriesStorage):
         See: DBManager.create_engine()
         """
 
-        self._metadata.drop_all(self.get_engine())
+        self._metadata.drop_all(self.__get_engine())
 
     #############################################################################################
     ################################################################################## DB Managment Methods
@@ -236,199 +291,47 @@ class SQLAlchemyORM(ISeriesStorage):
             result = conn.execute(stmt)
 
         return result
-    
-    def __splice_prediction_results(self, results: List[tuple]) -> List[Prediction]:
-        """Splices up a list of dbresults, pulling out only the data that changes per point,
-        and places them in a Prediction object.
-        Parameters:
-            first list[tupleish (sqlalchemy.engine.row.Row)] - The collection of dbrows.
-        Returns:
-            List[Prediction] - The formatted objs.
+
+    def __splice_input(self, results: list[tuple]) -> list[Input]:
+        """An Input is a data value of some environment variable that can be linked to a date time.
+        :param list[tupleish] -a list of selections from the table formatted in tupleish
         """
-        valueIndex = 3
-        unitIndex = 4
-        leadTimeIndex = 2
-        timeGeneratedIndex = 1
-        resultCodeIndex = 6
+        valueIndex = 4
+        unitIndex = 6
         latitudeIndex = 11
         longitudeIndex = 12
-        predictions = []
+
+        dataPoints = []
         for row in results:
-            predictions.append(Prediction(
+            dataPoints.append(Input(
                 row[valueIndex],
                 row[unitIndex],
-                row[leadTimeIndex],
+                row[latitudeIndex],
+                row[longitudeIndex]
+            ))
+
+        return dataPoints
+
+    def __splice_output(self, results: list[tuple]) -> list[Output]:
+        """Splices up a list of DB results, pulling out only the data that changes per point,
+        and places them in a Prediction object.
+        param: list[tupleish] - a list of selections from the table formatted in tupleish
+        """
+        valueIndex = 5
+        unitIndex = 6
+        timeGeneratedIndex = 1
+        leadTimeIndex = 2
+        
+        dataPoints = []
+        for row in results:
+            dataPoints.append(Output(
+                row[valueIndex],
+                row[unitIndex],
                 row[timeGeneratedIndex],
-                row[resultCodeIndex],
-                row[longitudeIndex],
-                row[latitudeIndex]
-            ))
-
-        return predictions
-    
-    def __splice_output_prediction_results(self, results: List[tuple]) -> List[Output]:
-        """Splices up a list of dbresults, pulling out only the data that changes per point,
-        and places them in a Prediction object.
-        Parameters:
-            first list[tupleish (sqlalchemy.engine.row.Row)] - The collection of dbrows.
-        Returns:
-            List[Prediction] - The formatted objs.
-        """
-        valueIndex = 6
-        unitIndex = 7
-        leadTimeIndex = 3
-        timeGeneratedIndex = 2
-        predictions = []
-        for row in results:
-            predictions.append(Output(
-                row[valueIndex],
-                row[unitIndex],
-                row[leadTimeIndex],
-                row[timeGeneratedIndex]
-            ))
-
-        return predictions
-        
-
-    def __splice_actual_results(self, results: List[tuple]) -> List[Actual]:
-        """Splices up a list of dbresults, pulling out only the data that changes per point,
-        and places them in a DataPoint object.
-        -------
-        Parameters:
-            first list[tupleish (sqlalchemy.engine.row.Row)] - The collection of dbrows.
-        Returns:
-            List[Actual] - The formatted objs.
-        """
-        valueIndex = 3
-        unitIndex = 4
-        timeActualizedIndex = 1
-        longitudeIndex = 11
-        latitudeIndex = 10
-        dataPoints = []
-        for row in results:
-            dataPoints.append(Actual(
-                row[valueIndex],
-                row[unitIndex],
-                row[timeActualizedIndex],
-                row[longitudeIndex],
-                row[latitudeIndex]
+                row[leadTimeIndex]
             ))
 
         return dataPoints
-    
-
-    def __splice_output_table_results(self, results: List[tuple]) -> List[Prediction]:
-        """Splices up a list of dbresults, pulling out only the data that changes per point,
-        and places them in a Prediction object.
-        -------
-        -------
-        Parameters:
-            first list[tupleish (sqlalchemy.engine.row.Row)] - The collection of dbrows.
-        Returns:
-            List[Prediction] - The formatted objs.
-        """
-        valueIndex = 6
-        unitIndex = 7
-        leadTimeIndex = 3
-        timeGeneratedIndex = 2
-        dataPoints = []
-        for row in results:
-            dataPoints.append(Prediction(
-                row[valueIndex],
-                row[unitIndex],
-                row[leadTimeIndex],
-                row[timeGeneratedIndex]
-            ))
-
-        return dataPoints
-
-    #############################################################################################
-    ################################################################################## Public selection methods
-    #############################################################################################
-    
-    def s_data_point_selection(self, seriesDescription: SeriesDescription) -> Series:
-        """Selects from the data point table.
-        Parameter:
-            seriesDescription
-        Returns:
-            Series
-        """
-        table = self.s_data_point
-        stmt = (select(table)
-            .where(table.c.dataSourceCode == seriesDescription.source)
-            .where(table.c.sLocationCode == seriesDescription.location)
-            .where(table.c.seriesCode == seriesDescription.series)
-            .where(table.c.interval == seriesDescription.interval)
-            .where(table.c.datumCode == seriesDescription.datum)
-            .where(table.c.timeActualized >= seriesDescription.fromDateTime)
-            .where(table.c.timeActualized <= seriesDescription.toDateTime)
-        )
-        
-        result = self.__dbSelection(stmt).fetchall()
-        resultSeries = Series(seriesDescription, True)
-        resultSeries.data = self.__splice_actual_results(result) #Turn tuple objects into prediction objects
-        return resultSeries
-    
-    
-    def s_prediction_selection(self, seriesDescription: SeriesDescription) -> Series:
-        """Selects from the prediction table.
-        Parameter:
-            seriesDescription
-        Returns:
-            Series
-        """
-
-        table = self.s_prediction
-        stmt = (select(table)
-            .where(table.c.dataSourceCode == seriesDescription.source)
-            .where(table.c.sLocationCode == seriesDescription.location)
-            .where(table.c.seriesCode == seriesDescription.series)
-            .where(table.c.interval == seriesDescription.interval)
-            .where(table.c.datumCode == seriesDescription.datum)
-            .where(table.c.timeGenerated >= seriesDescription.fromDateTime)
-            .where(table.c.timeGenerated <= seriesDescription.toDateTime)
-        )
-
-        result = self.__dbSelection(stmt).fetchall()
-        resultSeries = Series(seriesDescription, True)
-        resultSeries.data = self.__splice_prediction_results(result) #Turn tuple objects into prediction objects
-        return resultSeries
-        
-    def select_s_output(self, seriesDescription) -> Series:
-
-        #offset the the time range by the lead time, as the time range is in verification time
-        #but the objects are stored by generated time
-        leadDelta = timedelta(hours= seriesDescription.leadTime)
-        fromDateTime = seriesDescription.fromDateTime - leadDelta
-        toDateTime = seriesDescription.toDateTime - leadDelta
-
-        table = self.s_prediction_output
-        stmt = (select(table)
-                .where(table.c.leadTime == seriesDescription.leadTime)
-                .where(table.c.ModelName == seriesDescription.ModelName)
-                .where(table.c.ModelVersion == seriesDescription.ModelVersion)
-                .where(table.c.timeGenerated >= fromDateTime)
-                .where(table.c.timeGenerated <= toDateTime)
-                )
-                
-        result = self.__dbSelection(stmt).fetchall()
-        resultSeries = Series(seriesDescription, True)
-        resultSeries.data = self.__splice_output_prediction_results(result) #Turn tuple objects into prediction objects
-        return resultSeries
-
-    def s_locationCode_dataSourceLocationCode_mapping_select(self, sourceCode: str, location: str, priorityOrder: int = 0) -> list[tuple]:
-        """Selects a a dataSourceLocationCode given a datasource and a location. 
-        ----
-        Returns list[tupleish (sqlalchemy.engine.row.Row)]
-        """
-        table = self.s_locationCode_dataSourceLocationCode_mapping
-        stmt = (select(table)
-                .where(table.c.dataSourceCode == sourceCode)
-                .where(table.c.sLocationCode == location)
-                .where(table.c.priorityOrder == priorityOrder)
-                )
-
-        return self.__dbSelection(stmt).fetchall()
 
     #############################################################################################
     ################################################################################## Purblic insertion Methods
