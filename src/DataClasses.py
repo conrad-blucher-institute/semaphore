@@ -17,34 +17,24 @@ class Input():
     """An Input is a data value of some environment variable that can be linked to a date time.
         :param value: str - The actual data value
         :param unit: str - The unit of measurement of the value
-        :param timeAcquired: datetime - The datetime that the value was acquired by Semaphore
-        :param timeVerified: datetime - The datetime that the value is valid
-        :param timeGenerated: datetime = None - The datetime that the value was created
         :param longitude: str = None
         :param latitude: str = None
     """
-    def __init__(self, value: str, unit: str, timeAcquired: datetime, timeVerified: datetime, timeGenerated: datetime = None, longitude: str = None, latitude: str = None) -> None:
+    def __init__(self, value: str, unit: str, longitude: str = None, latitude: str = None) -> None:
         self.value = value
         self.unit = unit
-        self.timeAcquired = timeAcquired,
-        self.timeVerified = timeVerified,
-        self.timeGenerated = timeGenerated,
         self.longitude = longitude
         self.latitude = latitude
 
     def __str__(self) -> str:
-        return f'\n[Input] -> value: {self.value}, unit: {self.unit}, timeGenerated: {self.timeGenerated}, timeAcquired: {self.timeAcquired}, \
-            timeVerified: {self.timeVerified}. longitude: {self.longitude}. latitude: {self.latitude}'
+        return f'\n[Input] -> value: {self.value}, unit: {self.unit}, longitude: {self.longitude}. latitude: {self.latitude}'
     
     def __repr__(self) -> str:
-        return f'\nInput({self.value}, {self.unit}, {self.timeGenerated}, {self.timeAcquired}, {self.timeVerified}, {self.longitude}, {self.latitude})'
+        return f'\nInput({self.value}, {self.unit}, {self.longitude}, {self.latitude})'
     
     def __eq__(self, __value: object) -> bool:
         if (self.value == __value.value and 
             self.unit == __value.unit and 
-            self.timeGenerated == __value.timeGenerated and
-            self.timeAcquired == __value.timeAcquired and
-            self.timeVerified == __value.timeVerified and
             self.longitude == __value.longitude and 
             self.latitude == __value.latitude):
             return True
@@ -86,9 +76,9 @@ class TimeDescription():
     """A time description should describe the datetime properties of a dataset.
         :param fromDateTime: datetime - The datetime the data starts at
         :param toDateTime: datetime - The datetime the data stops at
-        :param interval: int = None - The time step separating the data points in order
+        :param interval: timedelta = None - The time step separating the data points in order
     """
-    def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: int = None) -> None:
+    def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: timedelta = None) -> None:
         self.fromDateTime = fromDateTime,
         self.toDateTime = toDateTime,
         self.interval = interval
