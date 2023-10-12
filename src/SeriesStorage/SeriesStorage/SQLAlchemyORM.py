@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-#SeriesStorage.py
+#SQLAlchemyORM.py
 #-------------------------------
 # Created By : Matthew Kastl
 # Created Date: 3/26/2023
-# version 4.0
+# version 7.0
 #-------------------------------
-""" This script defines a class that hold the Semaphore DB schema. It also has functions to 
-    manage the DB and interact with the db.
+""" This file is an implementation of the SQLAlchemy ORM geared towards Semaphore and its schema. 
  """ 
 #-------------------------------
 # 
@@ -20,7 +19,6 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from sqlalchemy import create_engine as sqlalchemy_create_engine
 from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select
-from dotenv import load_dotenv
 from os import getenv
 from datetime import timedelta
 
@@ -28,52 +26,17 @@ from src.SeriesStorage.ISeriesStorage import ISeriesStorage
 
 from DataClasses import *
 
-class SQLLite(ISeriesStorage):
-
-    #############################################################################################
-    ################################################################################## Interface methods
-    #############################################################################################
-    def select_actuals(self, seriesDescription) -> Series:
-        return self.s_data_point_selection(seriesDescription)
-    
-
-    def select_prediction(self, seriesDescription) -> Series:
-        return self.s_prediction_selection(seriesDescription)
-    
-    def select_output(self, seriesDescription) -> Series: 
-        return self.select_s_output(seriesDescription)
-    
-
-    def find_external_location_code(self, sourceCode, location, priorityOrder: int = 0) -> str:
-        return self.s_locationCode_dataSourceLocationCode_mapping_select(sourceCode, location, priorityOrder)
-
-
-    def insert_actuals(self, Series) -> Series:
-        return self.s_data_point_insert(Series)
-
-
-    def insert_predictions(self, Series) -> Series:
-        return self.s_prediction_insert(Series)
-    
-
-    def insert_output(self, Series) -> Series:
-        return self.s_prediction_output_insert(Series)
-
-    #############################################################################################
-    ################################################################################## Class start
-    #############################################################################################
-
-
+class SQLAlchemyORM(ISeriesStorage):
+ 
     def __init__(self) -> None:
         """Constructor generates an a db schema. Automatically creates the 
-        metadata object holding the defined scema.
+        metadata object holding the defined schema.
         """
         self.__create_schema()
-        load_dotenv()
-        self.create_engine(getenv('DB_LOCATION_STRING'), False)
+        self.__create_engine(getenv('DB_LOCATION_STRING'), False)
 
     #############################################################################################
-    ################################################################################## DB Managment Methods
+    ################################################################################## Public methods
     #############################################################################################
 
     def create_DB(self) -> None:
@@ -93,8 +56,11 @@ class SQLLite(ISeriesStorage):
 
         self._metadata.drop_all(self.get_engine())
 
+    #############################################################################################
+    ################################################################################## DB Managment Methods
+    #############################################################################################
 
-    def create_engine(self, parmaString: str, echo: bool ) -> None: #"sqlite+pysqlite:///:memory:"
+    def __create_engine(self, parmaString: str, echo: bool ) -> None: #"sqlite+pysqlite:///:memory:"
         """Creates an engine object and tethers it to this interface class as an atribute
 
         Parameters:
@@ -104,7 +70,7 @@ class SQLLite(ISeriesStorage):
         self._engine = sqlalchemy_create_engine(parmaString, echo=echo)
 
     
-    def get_engine(self) -> Engine:
+    def __get_engine(self) -> Engine:
         """Fetches the engine attribute. Requires the engine attribute to be created.
         See: DBManager.create_engine()
         """
@@ -113,13 +79,6 @@ class SQLLite(ISeriesStorage):
             raise Exception("An engine was requested from DBManager, but no engine has been created. See DBManager.create_engine()")
         else:
             return self._engine
-
-
-    def get_metadata(self) -> MetaData:
-        """Fetches metadata that hold the DB schema
-        """
-        return self._metadata
-
 
     def __create_schema(self) -> None:
         """Builds the db schema in the metadata.
