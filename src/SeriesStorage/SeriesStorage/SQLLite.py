@@ -128,91 +128,64 @@ class SQLLite(ISeriesStorage):
         self._metadata = MetaData()
         
         #this table stores the actual data values as retrieved or received 
-        self.s_data_point = Table(
-            "s_data_point",
+        self.inputs = Table(
+            "inputs",
             self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
 
-            Column("timeActualized", DateTime, nullable=False), #timestamp for the value in UTC GMT
-            Column("timeAquired", DateTime, nullable=False),    #When the data was inserted by us
+            Column("isActual", bool, nullable=False),
 
-            Column("dataValue", String(20), nullable=False),    #Actual value for data points
-            Column("unitsCode", String(10), ForeignKey("s_ref_units.code"), nullable=False), #unit the value is stored in
-            Column("interval", Integer, nullable=False),
-        
-            Column("dataSourceCode", String(10), ForeignKey("s_ref_data_source.code"), nullable=False), #CBI specific ID for the Location
-            Column("sLocationCode", String(25), ForeignKey("s_ref_slocation.code"), nullable=False),    #the code for the source from which the value was obtained e.g, NOAA
-            Column("seriesCode", String(10), ForeignKey("s_ref_series.code"), nullable=False),          #The code fot the type of measurment or prediction e.g, wdir
-            Column("datumCode", String(10), ForeignKey("s_ref_datum.code"), nullable=True),             #the datum(e.g., water-level, harmonic)
+            Column("generatedTime", DateTime, nullable=True),
+            Column("acquiredTime", DateTime, nullable=False),
+            Column("verifiedTime", DateTime, nullable=False), 
+
+            Column("dataUnit", String(10), ForeignKey("ref_dataUnit.code"), nullable=False),   
+            Column("dataSource", String(10), ForeignKey("ref_dataSource.code"), nullable=False),
+            Column("dataLocation", String(25), ForeignKey("ref_dataLocation.code"), nullable=False), 
+            Column("dataSeries", String(10), ForeignKey("ref_dataSeries.code"), nullable=False), 
+            Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"),  nullable=True),
             Column("latitude", String(16), nullable=True),
             Column("longitude", String(16), nullable=True),
 
-            UniqueConstraint("timeActualized", "dataValue", "unitsCode", "interval", "dataSourceCode", "sLocationCode", "seriesCode"),
-        )
-
-        self.s_prediction = Table(
-            "s_prediction",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
-
-            Column("timeGenerated", DateTime, nullable=False),  #The time at which the prediction was made
-            Column("leadTime", Float, nullable=False),          #the amount of hours till the predicted even occurs
-
-            Column("dataValue", String(20), nullable=False),    #the actual value
-            Column("unitsCode", String(10), ForeignKey("s_ref_units.code"), nullable=False), #the units the data point is stored in
-            Column("interval", Integer, nullable=False),
-
-            Column("resultCode", String(10), nullable=True), #some value that discribes the quality of the pridiction
-
-            Column("dataSourceCode", String(10), ForeignKey("s_ref_data_source.code"), nullable=False),     #CBI specific ID for the Location
-            Column("sLocationCode", String(25), ForeignKey("s_ref_slocation.code"), nullable=False),        #the code for the source from which the value was obtained e.g, NOAA
-            Column("seriesCode", String(10), ForeignKey("s_ref_series.code"), nullable=False),              #The code fot the type of measurment or prediction e.g, wdir
-            Column("datumCode", String(10), ForeignKey("s_ref_datum.code"), nullable=True),                 #the datum(e.g., water-level, harmonic)
-            Column("latitude", String(16), nullable=True),
-            Column("longitude", String(16), nullable=True),
-
-            UniqueConstraint("timeGenerated", "leadTime", "dataValue", "unitsCode", "interval", "dataSourceCode", "sLocationCode", "seriesCode"),
+            UniqueConstraint("isActual", "generatedTime", "verifiedTime", "dataUnit", "dataSource", "dataLocation", "dataSeries", "dataDatum", "latitude", "longitude"),
         )
 
         
-        self.s_prediction_output = Table(
-            "s_prediction_output",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
-            Column("timeAquired", DateTime, nullable=False),    #When the data was inserted by us
-
-            Column("timeGenerated", DateTime, nullable=False),  #The time at which the prediction was made
-            Column("leadTime", Float, nullable=False),          #the amount of hours till the predicted even occurs
-
-            Column("ModelName", String(25), nullable=False),  #The name of the Ai that generated this
-            Column("ModelVersion", String(10), nullable=False),  #The name of the Ai that generated this
-
-            Column("dataValue", String(20), nullable=False),    #the actual value
-            Column("unitsCode", String(10), ForeignKey("s_ref_units.code"), nullable=False), #the units the data point is stored in
-
-            Column("sLocationCode", String(25), ForeignKey("s_ref_slocation.code"), nullable=False),        #the code for the source from which the value was obtained e.g, NOAA
-            Column("seriesCode", String(10), ForeignKey("s_ref_series.code"), nullable=False),              #The code fot the type of measurment or prediction e.g, wdir
-            Column("datumCode", String(10), ForeignKey("s_ref_datum.code"), nullable=True),                 #the datum(e.g., water-level, harmonic)
-
-            UniqueConstraint("timeGenerated", "leadTime", "ModelName", "ModelVersion"),
-        )
-
-        #This table maps CBI location codes to location codes used by datasorces
-        self.s_locationCode_dataSourceLocationCode_mapping = Table(
-            "s_locationCode_dataSourceLocationCode_mapping",
+        self.outputs = Table(
+            "outputs",
             self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             
-            Column("sLocationCode", String(25), ForeignKey("s_ref_slocation.code"), nullable=False),    #Local term
-            Column("dataSourceCode", String(10), ForeignKey("s_ref_data_source.code"), nullable=False), #Data source
-            Column("dataSourceLocationCode", String(255), nullable=False),                              #Forien term
-            Column("priorityOrder", Integer, nullable=False),                                           #priority of use
+            Column("timeGenerated", DateTime, nullable=False),
 
-            UniqueConstraint("sLocationCode", "dataSourceCode", "dataSourceLocationCode", "priorityOrder"),
+            Column("leadTime", timedelta, nullable=False),
+
+            Column("modelName", String(25), nullable=False), 
+            Column("modelVersion", String(10), nullable=False),
+            Column("dataValue", String(20), nullable=False), 
+            Column("dataUnit", String(10), ForeignKey("ref_dataUnit.code"), nullable=False), 
+            Column("dataLocation", String(25), ForeignKey("ref_dataLocation.code"), nullable=False),   
+            Column("dataSeries", String(10), ForeignKey("ref_dataSeries.code"), nullable=False),         
+            Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"), nullable=True),
+
+            UniqueConstraint("timeGenerated", "leadTime", "modelName", "modelVersion", "dataLocation", "dataSeries", "dataDatum"),
+        )
+
+        #This table maps CBI location codes to location codes used by datasorces
+        self.dataLocation_dataSource_mapping = Table(
+            "dataLocation_dataSource_mapping",
+            self._metadata,
+
+            Column("id", Integer, autoincrement=True, primary_key=True),
+            
+            Column("dataLocationCode", String(25), ForeignKey("ref_dataLocation.code"),nullable=False),  
+            Column("dataSourceCode", String(10), ForeignKey("ref_dataSource.code"), nullable=False), 
+            Column("dataSourceLocationCode", String(255), nullable=False),                            
+            Column("priorityOrder", Integer, nullable=False),                                         
+
+            UniqueConstraint("dataLocationCode", "dataSourceCode", "dataSourceLocationCode", "priorityOrder"),
         )
 
 
@@ -221,11 +194,12 @@ class SQLLite(ISeriesStorage):
         # code - that mapped code
         # display name - a non compressed pretty name
         # notes - more information about that item
-        self.s_ref_slocation = Table(
-            "s_ref_slocation",
+        self.ref_dataLocation = Table(
+            "ref_dataLocation",
             self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
+            
             Column("code", String(25), nullable=False),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
@@ -235,11 +209,12 @@ class SQLLite(ISeriesStorage):
             UniqueConstraint("code", "displayName"),
         )
 
-        self.s_ref_data_source = Table(
-            "s_ref_data_source",
+        self.ref_dataSource = Table(
+            "ref_dataSource",
             self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
+            
             Column("code", String(10), nullable=False),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
@@ -247,11 +222,12 @@ class SQLLite(ISeriesStorage):
             UniqueConstraint("code", "displayName"),
         )
 
-        self.s_ref_series = Table(
-            "s_ref_series",
+        self.ref_dataSeries = Table(
+            "ref_dataSeries",
             self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
+            
             Column("code", String(10), nullable=False),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
@@ -259,11 +235,12 @@ class SQLLite(ISeriesStorage):
             UniqueConstraint("code", "displayName"),
         )
 
-        self.s_ref_units = Table(
-            "s_ref_units",
+        self.ref_dataUnit = Table(
+            "ref_dataUnit",
             self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
+            
             Column("code", String(10), nullable=False),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
@@ -271,23 +248,12 @@ class SQLLite(ISeriesStorage):
             UniqueConstraint("code", "displayName"),
         )
 
-        self.s_ref_datum = Table(
-            "s_ref_datum",
+        self.ref_dataDatum = Table(
+            "ref_dataDatum",
             self._metadata,
 
             Column("id", Integer, autoincrement=True, primary_key=True),
-            Column("code", String(10), nullable=False),
-            Column("displayName", String(30), nullable=False),
-            Column("notes", String(250), nullable=True),
-
-            UniqueConstraint("code", "displayName"),
-        )
-        
-        self.s_ref_resultCodeUnits = Table(
-            "s_ref_resultCodeUnits",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
+            
             Column("code", String(10), nullable=False),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
