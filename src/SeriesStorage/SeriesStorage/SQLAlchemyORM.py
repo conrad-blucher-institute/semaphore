@@ -20,7 +20,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 from sqlalchemy import create_engine as sqlalchemy_create_engine
 from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select, distinct
 from os import getenv
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from src.SeriesStorage.ISeriesStorage import ISeriesStorage
 
@@ -88,11 +88,78 @@ class SQLAlchemyORM(ISeriesStorage):
     def find_lat_lon_coordinates(self, sourceCode: str, location: str, priorityOrder: int = 0) -> tuple:
         raise NotImplementedError()
 
-    def insert_input(self, Series: Series) -> Series:
-        raise NotImplementedError()
+    def insert_input(self, series: Series) -> Series:
+        """This method inserts actual/predictions into the input table
+            :param series: Series - A series object with a time description, series description, and input data
+            :return Series - A series object that contains the actually inserted  data
+        """
+     #Construct DB row to insert
+        now = datetime.now()
+        insertionRows = []
+        for input in series.data:
+            insertionValueRow = {"generatedTime": None, "aquiredTime": None, "verifiedTime": None, "dataValue": None, "isActual": None, "dataUnit": None, "dataSource": None, "dataLocation": None, "dataDatum": None, "latitude": None, "longitude": None}
+            insertionValueRow["generatedTime"] = input.timeGenerated
+            insertionValueRow["acquiredtime"] = now
+            insertionValueRow["timeVerified"] = input.timeVerified
+            insertionValueRow["dtaaValue"] = input.dataValue
+            insertionValueRow["isActual"] = False if series.description.dataSeries[0] == 'p' else True
+            insertionValueRow["dataUnit"] = input.dataUnit
+            insertionValueRow["dataSource"] = series.description.dataSource
+            insertionValueRow["dataLocation"] = series.description.dataLocation
+            insertionValueRow["dataSeries"] = series.description.dataSeries
+            insertionValueRow["dataDatum"] = series.description.dataDatum
+            insertionValueRow["latitude"] = input.latitude
+            insertionValueRow["longitude"] = input.longitude
+            insertionRows.append(insertionValueRow)
 
-    def insert_output(self, Series: Series) -> Series:
-        raise NotImplementedError()
+        with self.get_engine().connect() as conn:
+            cursor = conn.execute(insert(self.inputs)
+                                .returning(self.inputs)
+                                .values(insertionRows)
+                                .prefix_with('OR IGNORE')
+                                )
+            result = cursor.fetchall()
+            conn.commit()
+
+        resultSeries = Series(series.description, True, series.timeDescription)
+        resultSeries.data = self.__splice_input(result) #Turn tuple objects into actual objects
+        return resultSeries
+    
+
+
+    def insert_output(self, series: Series) -> Series:
+        """This method inserts actual/predictions into the output table
+            :param series: Series - A series object with a time description,  semaphore series description, and outputdata
+            :return Series - A series object that contains the actually inserted data
+        """
+        insertionValueRow = []
+        for output in series.data:
+            insertionValueRow = {"timeGenerated": None, "leadTime": None, "modelName": None, "dataValue": None, "dataUnit": None, "dataLocation": None, "dataSeries": None, "dataDatum": None}
+            insertionValueRow["timeGenerated"] = output.timeGenerated
+            insertionValueRow["leadTime"] = output.leadTime
+            insertionValueRow["modelName"] = series.description.modelName
+            insertionValueRow["modelVersion"] = series.description.modelVersion
+            insertionValueRow["dataValue"] = output.dataValue
+            insertionValueRow["dataUnit"] = output.dataUnit
+            insertionValueRow["dataLocation"] = series.description.dataLocation
+            insertionValueRow["dataSeries"] = series.description.dataSeries
+            insertionValueRow["dataDatum"] = series.description.dataDatum
+            
+            insertionValueRow.append(insertionValueRow)
+
+        with self.get_engine().connect() as conn:
+            cursor = conn.execute(insert(self.outputs)
+                                  .returning(self.outputs)
+                                  .values(insertionValueRow)
+                                  .prefix_with('OR IGNORE')
+                                  )
+            result = cursor.fetchall()
+            conn.commit()
+
+        resultSeries = Series(series.description, True, series.timeDescription)
+        resultSeries.data = self.__splice_output(result) #Turn tuple objects into actual objects
+        return resultSeries
+    
 
     def create_DB(self) -> None:
         """Creates the database with the tethered engine.
@@ -298,6 +365,8 @@ class SQLAlchemyORM(ISeriesStorage):
         """
         valueIndex = 4
         unitIndex = 6
+        generatedTimeIndex = 1
+        verifiedTimeIndex = 3
         latitudeIndex = 11
         longitudeIndex = 12
 
@@ -306,6 +375,8 @@ class SQLAlchemyORM(ISeriesStorage):
             dataPoints.append(Input(
                 row[valueIndex],
                 row[unitIndex],
+                row[generatedTimeIndex],
+                row[verifiedTimeIndex],
                 row[latitudeIndex],
                 row[longitudeIndex]
             ))
@@ -332,293 +403,3 @@ class SQLAlchemyORM(ISeriesStorage):
             ))
 
         return dataPoints
-
-    #############################################################################################
-    ################################################################################## Purblic insertion Methods
-    #############################################################################################
-
-    def s_data_point_insert(self, series: Series) -> Series:
-        """Inserts a series into s_data_point
-        Parameter:
-            Series - The data to insert.
-        Returns:
-            Series - The data actually inserted.
-        """
-
-        #Construct DB row to insert
-        now = datetime.now()
-        insertionRows = []
-        for actual in series.data:
-            insertionValueRow = {"timeActualized": None, "timeAquired": None, "dataValue": None, "unitsCode": None, "interval": 0, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
-            insertionValueRow["timeActualized"] = actual.dateTime
-            insertionValueRow["timeAquired"] = now
-            insertionValueRow["dataValue"] = actual.value
-            insertionValueRow["unitsCode"] = actual.unit
-            insertionValueRow["interval"] = series.description.interval
-            insertionValueRow["dataSourceCode"] = series.description.source
-            insertionValueRow["sLocationCode"] = series.description.location
-            insertionValueRow["seriesCode"] = series.description.series
-            insertionValueRow["datumCode"] = series.description.datum
-            insertionValueRow["latitude"] = actual.latitude
-            insertionValueRow["longitude"] = actual.longitude
-            insertionRows.append(insertionValueRow)
-
-        with self.get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.s_data_point)
-                                  .returning(self.s_data_point)
-                                  .values(insertionRows)
-                                  .prefix_with('OR IGNORE')
-                                  )
-            result = cursor.fetchall()
-            conn.commit()
-
-        resultSeries = Series(series.description, True)
-        resultSeries.data = self.__splice_actual_results(result) #Turn tuple objects into actual objects
-        return resultSeries
-    
-
-
-    def s_prediction_insert(self, series: Series) -> Series:
-        """Inserts a series into s_prediction
-        Parameter:
-            Series - The data to insert.
-        Returns:
-            Series - The data actually inserted.
-        """
-
-        insertionRows = []
-        for prediction in series.data:
-            insertionValueRow = {"timeGenerated": None, "leadTime": None, "dataValue": None, "unitsCode": None, "interval": 0, "resultCode": None, "dataSourceCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None, "latitude": None, "longitude": None}
-            insertionValueRow["timeGenerated"] = prediction.generatedTime
-            insertionValueRow["leadTime"] = prediction.leadTime
-            insertionValueRow["dataValue"] = prediction.value
-            insertionValueRow["unitsCode"] = prediction.unit
-            insertionValueRow["interval"] = series.description.interval
-            insertionValueRow["resultCode"] = prediction.successValue
-            insertionValueRow["dataSourceCode"] = series.description.source
-            insertionValueRow["sLocationCode"] = series.description.location
-            insertionValueRow["seriesCode"] = series.description.location
-            insertionValueRow["datumCode"] = series.description.datum
-            insertionValueRow["latitude"] = prediction.latitude
-            insertionValueRow["longitude"] = prediction.longitude
-    
-            insertionRows.append(insertionValueRow)
-
-        with self.get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.s_prediction)
-                                  .returning(self.s_prediction) 
-                                  .values(insertionRows)
-                                  .prefix_with('OR IGNORE')
-                                  )
-            result = cursor.fetchall()
-            conn.commit()
-
-        resultSeries = Series(series.description, True)
-        resultSeries.description = series.description
-        resultSeries.data = self.__splice_prediction_results(result) #Turn tuple objects into prediction objects
-        return resultSeries
-    
-
-
-    def s_prediction_output_insert(self, series: Series) -> Series:
-        """Inserts a series into s_prediction_output
-        Parameter:
-            Series - The data to insert.
-        Returns:
-            Series - The data actually inserted.
-        """
-
-        now = datetime.now()
-        insertionRows = []
-        for prediction in series.data:
-
-            #Consturct DB row to insert
-            insertionValueRow = {"timeAquired": None, "timeGenerated": None, "leadTime": None, "ModelName": None, "ModelVersion": None, "dataValue": None, "unitsCode": None, "sLocationCode": None, "seriesCode": None, "datumCode": None}
-            insertionValueRow["timeAquired"] = now
-            insertionValueRow["timeGenerated"] = prediction.generatedTime
-            insertionValueRow["leadTime"] = prediction.leadTime
-            insertionValueRow["ModelName"] = series.description.ModelName
-            insertionValueRow["ModelVersion"] = series.description.ModelVersion
-            insertionValueRow["dataValue"] = str(prediction.value)
-            insertionValueRow["unitsCode"] = prediction.unit
-            insertionValueRow["sLocationCode"] = series.description.location
-            insertionValueRow["seriesCode"] = series.description.series
-            insertionValueRow["datumCode"] = series.description.datum
-            insertionRows.append(insertionValueRow)
-
-        with self.get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.s_prediction_output)
-                                  .returning(self.s_prediction_output) 
-                                  .values(insertionRows)
-                                  .prefix_with('OR IGNORE')
-                                  )
-            result = cursor.fetchall()
-            conn.commit()
-
-        resultSeries = Series(series.description, True)
-        resultSeries.description = series.description
-        resultSeries.data = self.__splice_output_table_results(result) #Turn tuple objects into prediction objects
-        return resultSeries
-    
-
-    def s_locationCode_dataSourceLocationCode_mapping_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_locationCode_dataSourceLocationCode_mapping
-
-        Dictionary reference: {"dataSourceCode", "sLocationCode", "dataSourceLocationCode", "priorityOrder"}
-
-        Parameters:
-            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-
-        Returns:
-            Returns list[tupleish (sqlalchemy.engine.row.Row)]
-        """
-
-        with self.get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.s_locationCode_dataSourceLocationCode_mapping)
-                                  .returning(self.s_locationCode_dataSourceLocationCode_mapping), 
-                                  values
-                                  )
-            result = cursor.fetchall()
-            conn.commit()
-
-        return result
-
-
-    def s_ref_slocation_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_ref_slocation
-
-        Dictionary reference: {"code", "displayName", (OP)"notes"}
-
-        Parameters:
-            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-
-        Returns:
-            Returns list[tupleish (sqlalchemy.engine.row.Row)]
-        """
-        
-        with self.get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.s_ref_slocation)
-                                  .returning(self.s_ref_slocation), 
-                                  values
-                                  )
-            result = cursor.fetchall()
-            conn.commit()
-
-        return result
-
-
-    def s_ref_data_source_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_ref_data_source
-
-        Dictionary reference: {"code", "displayName", (OP)"notes"}
-
-        Parameters:
-            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-
-        Returns:
-            Returns list[tupleish (sqlalchemy.engine.row.Row)]
-        """
-
-        with self.get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.s_ref_data_source)
-                                  .returning(self.s_ref_data_source), 
-                                  values
-                                  )
-            result = cursor.fetchall()
-            conn.commit()
-
-        return result
-
-
-    def s_ref_series_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_ref_series
-
-        Dictionary reference: {"code", "displayName", (OP)"notes"}
-
-        Parameters:
-            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-
-        Returns:
-            Returns list[tupleish (sqlalchemy.engine.row.Row)]
-        """
-
-        with self.get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.s_ref_series)
-                                  .returning(self.s_ref_series), 
-                                  values
-                                  )
-            result = cursor.fetchall()
-            conn.commit()
-
-        return result
-
-
-    def s_ref_units_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_ref_units
-
-        Dictionary reference: {"code", "displayName", (OP)"notes"}
-
-        Parameters:
-            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-
-        Returns:
-            Returns list[tupleish (sqlalchemy.engine.row.Row)]
-        """
-
-        with self.get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.s_ref_units)
-                                  .returning(self.s_ref_units), 
-                                  values
-                                  )
-            result = cursor.fetchall()
-            conn.commit()
-
-        return result
-
-
-    def s_ref_datum_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_ref_datum
-
-        Dictionary reference: {"code", "displayName", (OP)"notes"}
-
-        Parameters:
-            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-
-        Returns:
-            Returns list[tupleish (sqlalchemy.engine.row.Row)]
-        """
-
-        with self.get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.s_ref_datum)
-                                  .returning(self.s_ref_datum), 
-                                  values
-                                  )
-            result = cursor.fetchall()
-            conn.commit()
-
-        return result
-
-
-    def s_ref_resultCode_insert(self, values: dict | list[tuple]) -> list[tuple]:
-        """Inserts a row or batch into s_ref_resultCode
-
-        Dictionary reference: {"code", "displayName", (OP)"notes"}
-
-        Parameters:
-            values: dict | list[tuple] - THe dictionary containing the insertion values (see dictionary reference above). Can either be one dictionary or a list of dictionaries.
-
-        Returns:
-            Returns list[tupleish (sqlalchemy.engine.row.Row)]
-        """
-
-        with self.get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.s_ref_resultCode)
-                                  .returning(self.s_ref_resultCode), 
-                                  values
-                                  )
-            result = cursor.fetchall()
-            conn.commit()
-
-        return result
-    
-
