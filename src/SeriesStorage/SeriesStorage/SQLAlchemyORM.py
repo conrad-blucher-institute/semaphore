@@ -22,7 +22,7 @@ from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData
 from os import getenv
 from datetime import timedelta, datetime
 
-from src.SeriesStorage.ISeriesStorage import ISeriesStorage
+from SeriesStorage.ISeriesStorage import ISeriesStorage
 
 from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, Input, Output, TimeDescription
 
