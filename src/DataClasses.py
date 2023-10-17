@@ -17,24 +17,32 @@ class Input():
     """An Input is a data value of some environment variable that can be linked to a date time.
         :param dataValue: str - The actual data value
         :param dataUnit: str - The unit of measurement of the value
+        :param timeVerified: datetime 
+        :param timeGenerated: datetime
         :param longitude: str = None
         :param latitude: str = None
+
     """
-    def __init__(self, dataValue: str, dataUnit: str, longitude: str = None, latitude: str = None) -> None:
+    def __init__(self, dataValue: str, dataUnit: str, timeVerified: datetime, timeGenerated: datetime,  longitude: str = None, latitude: str = None) -> None:
         self.dataValue = dataValue
         self.dataUnit = dataUnit
+        self.timeVerified = timeVerified
+        self.timeGenerated = timeGenerated
         self.longitude = longitude
         self.latitude = latitude
+        
 
     def __str__(self) -> str:
-        return f'\n[Input] -> value: {self.dataValue}, unit: {self.dataUnit}, longitude: {self.longitude}. latitude: {self.latitude}'
+        return f'\n[Input] -> value: {self.dataValue}, unit: {self.dataUnit},timeVerified:{self.timeVerified}, timeGenerated:{self.timeGenerated}, longitude: {self.longitude}. latitude: {self.latitude}'
     
     def __repr__(self) -> str:
-        return f'\nInput({self.dataValue}, {self.dataUnit}, {self.longitude}, {self.latitude})'
+        return f'\nInput({self.dataValue}, {self.dataUnit}, {self.timeVerified},{self.timeGenerated}, {self.longitude}, {self.latitude})'
     
     def __eq__(self, __value: object) -> bool:
         if (self.dataValue == __value.dataValue and 
             self.dataUnit == __value.dataUnit and 
+            self.timeVerified == __value.timeVerified and
+            self.timeGenerated == __value.timeGenerated and
             self.longitude == __value.longitude and 
             self.latitude == __value.latitude):
             return True
