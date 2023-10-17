@@ -41,11 +41,11 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def insert_input(self, Series: Series) -> Series:
+    def insert_input(self, series: Series) -> Series:
         raise NotImplementedError()
     
     @abstractmethod
-    def insert_output(self, Series: Series) -> Series:
+    def insert_output(self, series: Series) -> Series:
         raise NotImplementedError()
 
 def series_storage_factory() -> ISeriesStorage:
