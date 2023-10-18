@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesProvider.SeriesProvider import SeriesProvider
 from DataClasses import SeriesDescription, Series, Actual, Prediction
-from ModelExecution.dspec import Dspec, OutputInfo, Input
+from ModelExecution.dspec import Dspec, OutputInfo, InputInfo
 
 
 from os import path, getenv
@@ -81,13 +81,11 @@ class InputGatherer:
             inputs = []
             
             for inputJson in inputsJson:
-                input = Input()
-                input.name = inputJson["name"]
+                input = InputInfo()
+                input.name = inputJson["_name"]
                 input.location = inputJson["location"]
                 input.source = inputJson["source"]
                 input.series = inputJson["series"]
-                input.dataClassification = inputJson["dataClassification"]
-                input.unit = inputJson["unit"]
                 input.type = inputJson["type"]
                 input.datum = inputJson.get("datum")
                 input.interval = inputJson["interval"]
@@ -118,24 +116,21 @@ class InputGatherer:
                 if (input.range[0] == input.range[1]): #isOnePoint
                     fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
 
-                #specifications is a pairing of a request and what type it should be
+                #specifications is a pairing of a request and what type it should 
+                # NOTE:: Should TimeDescription be added here using fromDateTime & toDateTime?
                 specifications.append((
                     SeriesDescription(
                         input.source, 
                         input.series,
-                        input.dataClassification, 
-                        input.location, 
-                        input.unit, 
+                        input.location,
                         input.interval,
-                        fromDateTime, 
-                        toDateTime, 
                         input.datum
                     ),
                     input.type
                     )
                 )
             except Exception as e:
-                log(f'ERROR: There was a problem in the input generating input requests.\n\n Input= {input} Error= {e}')
+                log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
         self.__specifications = specifications
         self.__specificationsConstructionTime = now
 

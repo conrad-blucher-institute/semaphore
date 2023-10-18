@@ -12,31 +12,28 @@
     },
     "inputs": [
         { 
-            "name": "Water Temp",
+            "_name": "Water Temp",
             "location": "South Bird Island",
             "source": "TCOON",
             "series": "dWaterTmp",
-            "unit": "celsius",
             "type": "float",
             "interval": 3600,
             "range": [0, -24]
         },
         { 
-            "name": "Air Temp",
+            "_name": "Air Temp",
             "location": "South Bird Island",
             "source": "TCOON",
             "series": "dAirTmp",
-            "unit": "celsius",
             "type": "float",
             "interval": 3600,
             "range": [0, -24]
         },
         { 
-            "name": "Air Temp",
+            "_name": "Air Temp",
             "location": "South Bird Island",
             "source": "NDFD",
             "series": "pAirTemp",
-            "unit": "celsius",
             "type": "float",
             "interval": 3600,
             "range": [0, 12]

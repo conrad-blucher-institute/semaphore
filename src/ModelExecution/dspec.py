@@ -46,7 +46,7 @@ class OutputInfo:
     def __repr__(self):
         return f'[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, interval: {self.interval}, fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, datum: {self.datum}, unit: {self.unit}'
 
-class Input:
+class InputInfo:
     '''input object should contain everything that could be contained
     in a dspec input object'''
     def __init__(self) -> None:
@@ -54,15 +54,13 @@ class Input:
         self.location = None
         self.source = None
         self.series = None
-        self.dataClassification = None
-        self.unit = None
         self.type = None
         self.datum = None
         self.interval = None
         self.range = None
 
     def __str__(self) -> str:
-        return f'[Input] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, dataClassification: {self.dataClassification}, unit: {self.unit}, type: {self.type}, datum: {self.datum}, range: {self.range}'
+        return f'[Input] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, type: {self.type}, datum: {self.datum}, range: {self.range}'
     
     def __repr__(self):
-        return f'[Input] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, dataClassification: {self.dataClassification}, unit: {self.unit}, type: {self.type}, datum: {self.datum}, range: {self.range}'
+        return f'[Input] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, type: {self.type}, datum: {self.datum}, range: {self.range}'
