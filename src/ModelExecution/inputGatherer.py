@@ -94,16 +94,8 @@ class InputGatherer:
                 input.type = inputJson["type"]
                 input.interval = inputJson["interval"]
                 input.range = inputJson["range"]
-
-                try:
-                    input.datum = inputJson.get("datum")
-                except KeyError:
-                    input.datum = None
-
-                try:
-                    input.unit = inputJson["unit"]
-                except KeyError:
-                    input.unit = None
+                input.datum = inputJson.get("datum")
+                input.unit = inputJson.get("unit")
 
                 inputs.append(input)
             dspec.inputs = inputs #Bind to dspec

@@ -41,10 +41,10 @@ class OutputInfo:
         self.unit = None
 
     def __str__(self) -> str:
-        return f'[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, interval: {self.interval}, fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, datum: {self.datum}, unit: {self.unit}'
+        return f'\n[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, interval: {self.interval}, fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, datum: {self.datum}, unit: {self.unit}'
     
     def __repr__(self):
-        return f'[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, interval: {self.interval}, fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, datum: {self.datum}, unit: {self.unit}'
+        return f'\nOutputInfo({self.outputMethod}, {self.leadTime}, {self.series}, {self.location}, {self.interval}, {self.fromDateTime}, {self.toDateTime}, {self.datum}, {self.unit})'
 
 class InputInfo:
     '''input object should contain everything that could be contained
@@ -61,7 +61,7 @@ class InputInfo:
         self.range = None
 
     def __str__(self) -> str:
-        return f'[Input] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, type: {self.type}, datum: {self.datum}, range: {self.range}'
+        return f'\n[InputInfo] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, type: {self.type}, datum: {self.datum}, range: {self.range}'
     
     def __repr__(self):
-        return f'[Input] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, type: {self.type}, datum: {self.datum}, range: {self.range}'
+        return f'\nInputInfo({self.name}, {self.location}, {self.source}, {self.series}, {self.unit}, {self.type}, {self.datum}, {self.range})'
