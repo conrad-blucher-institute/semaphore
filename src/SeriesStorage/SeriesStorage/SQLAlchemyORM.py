@@ -99,8 +99,8 @@ class SQLAlchemyORM(ISeriesStorage):
                      .where(self.dataLocation_dataSource_mapping.c.dataLocationCode == location)
                      .where(self.dataLocation_dataSource_mapping.c.priorityOrder == priorityOrder)
                     )
-        dataSourceLocationCode = self.__dbSelection(statement).fetchall()[0][0]
-        return dataSourceLocationCode
+        dataSourceLocationCode = self.__dbSelection(statement).fetchall()[0]
+        return dataSourceLocationCode[0]
 
     def find_lat_lon_coordinates(self, locationCode: str) -> tuple:
         """Returns lat and lon tuple
@@ -112,6 +112,7 @@ class SQLAlchemyORM(ISeriesStorage):
                      .where(self.ref_dataLocation.c.code == locationCode)
                     )
         latLon = self.__dbSelection(statement).first()
+        return (latLon[0], latLon[1])
         
 
     def insert_input(self, series: Series) -> Series:
@@ -138,7 +139,7 @@ class SQLAlchemyORM(ISeriesStorage):
             insertionValueRow["longitude"] = input.longitude
             insertionRows.append(insertionValueRow)
 
-        with self.get_engine().connect() as conn:
+        with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.inputs)
                                 .returning(self.inputs)
                                 .values(insertionRows)
@@ -173,7 +174,7 @@ class SQLAlchemyORM(ISeriesStorage):
             
             insertionValueRow.append(insertionValueRow)
 
-        with self.get_engine().connect() as conn:
+        with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.outputs)
                                   .returning(self.outputs)
                                   .values(insertionValueRow)
@@ -380,7 +381,7 @@ class SQLAlchemyORM(ISeriesStorage):
             SQLAlchemy CursorResult
         """
 
-        with self.get_engine().connect() as conn:
+        with self.__get_engine().connect() as conn:
             result = conn.execute(stmt)
 
         return result
@@ -436,7 +437,18 @@ class SQLAlchemyORM(ISeriesStorage):
         #Construct DB row to insert
         insertionValueRow = {"code": code, "displayName": displayName, "notes": notes, "latitude": latitude, "longitude": longitude}
         
-        with self.get_engine().connect() as conn:
+        with self.__get_engine().connect() as conn:
             conn.execute(insert(self.ref_dataLocation)
+                        .values(insertionValueRow))
+            conn.commit()
+
+    def insert_external_location_code(self, dataLocationCode: str, dataSourceCode: str, dataSourceLocationCode: str, priorityOrder: int):
+        """This method inserts external location code information
+        """
+        #Construct DB row to insert
+        insertionValueRow = {"dataLocationCode": dataLocationCode, "dataSourceCode": dataSourceCode, "dataSourceLocationCode": dataSourceLocationCode, "priorityOrder": priorityOrder}
+        
+        with self.__get_engine().connect() as conn:
+            conn.execute(insert(self.dataLocation_dataSource_mapping)
                         .values(insertionValueRow))
             conn.commit()

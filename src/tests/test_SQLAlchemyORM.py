@@ -41,11 +41,20 @@ def test_insert_output():
     assert True
     
 
-def test_select_lat_lon(): 
+def test_find_lat_lon():
     load_dotenv()
     sqlorm = SQLAlchemyORM()
+    sqlorm.drop_DB()
     sqlorm.create_DB()
     sqlorm.insert_lat_lon_test('2000', 'Pond', 'The coolest pond in the world, there are harpies', '-73', '32')
-    print(sqlorm.find_lat_lon_coordinates('2000'))
+    result = sqlorm.find_lat_lon_coordinates('2000')
+    assert result == ('-73', '32')
 
-test_select_lat_lon()
+def test_find_external_location_code():
+    load_dotenv()
+    sqlorm = SQLAlchemyORM()
+    sqlorm.drop_DB()
+    sqlorm.create_DB()
+    sqlorm.insert_external_location_code('PicinicBasket', 'sourceCode', 'dataSourcelocationCode', 1 )
+    result = sqlorm.find_external_location_code('sourceCode', 'PicinicBasket', 1)
+    assert result == 'dataSourcelocationCode'
