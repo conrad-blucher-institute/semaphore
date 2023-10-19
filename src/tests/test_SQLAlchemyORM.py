@@ -6,6 +6,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 from datetime import datetime, timedelta
 from DataClasses import Input, Output, Series,TimeDescription,SeriesDescription
 from SeriesStorage.SeriesStorage.SQLAlchemyORM import SQLAlchemyORM
+from dotenv import load_dotenv
 
 def test_insert_input():
     sqlorm = SQLAlchemyORM()
@@ -39,3 +40,12 @@ def test_insert_output():
     actualResults = sqlorm.insert_output(series)
     assert True
     
+
+def test_select_lat_lon(): 
+    load_dotenv()
+    sqlorm = SQLAlchemyORM()
+    sqlorm.create_DB()
+    sqlorm.insert_lat_lon_test('2000', 'Pond', 'The coolest pond in the world, there are harpies', '-73', '32')
+    print(sqlorm.find_lat_lon_coordinates('2000'))
+
+test_select_lat_lon()

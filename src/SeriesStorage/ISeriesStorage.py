@@ -37,7 +37,7 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def find_lat_lon_coordinates(self, sourceCode: str, location: str, priorityOrder: int = 0) -> tuple:
+    def find_lat_lon_coordinates(self, locationCode: str) -> tuple:
         raise NotImplementedError()
 
     @abstractmethod

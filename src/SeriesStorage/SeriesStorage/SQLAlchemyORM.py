@@ -18,7 +18,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from sqlalchemy import create_engine as sqlalchemy_create_engine
-from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select, distinct
+from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select, distinct, Boolean, Time
 from os import getenv
 from datetime import timedelta, datetime
 
@@ -40,7 +40,10 @@ class SQLAlchemyORM(ISeriesStorage):
     #############################################################################################
 
     def select_input(self, seriesDescription: SeriesDescription, timeDescription : TimeDescription) -> Series:
-        """Selects a given series given a SeriesDescription and TimeDescription"""
+        """Selects a given series given a SeriesDescription and TimeDescription
+           :param seriesDescription: SeriesDescription - A series description object
+           :param timeDescription: TimeDescription - A hydrated time description object
+        """
 
         statement = (select(self.inputs)
             .where(self.inputs.c.dataSource == seriesDescription.dataSource)
@@ -57,7 +60,10 @@ class SQLAlchemyORM(ISeriesStorage):
         return series
     
     def select_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
-        
+        """Selects an output series given a SemaphoreSeriesDescription and TimeDescription
+           :param semaphoreSeriesDescription: SemaphoreSeriesDescription - A  semaphore series description object
+           :param timeDescription: TimeDescription - A hydrated time description object
+        """
         statement = (select(distinct(self.outputs.c.leadTime))
                     .where(self.outputs.c.dataSource == semaphoreSeriesDescription.dataSource)
                     .where(self.outputs.c.dataLocation == semaphoreSeriesDescription.dataLocation)
@@ -75,7 +81,7 @@ class SQLAlchemyORM(ISeriesStorage):
                     .where(self.outputs.c.dataDatum == semaphoreSeriesDescription.dataDatum)
                     .where(self.outputs.c.timeGenerated >= fromGeneratedTime)
                     .where(self.outputs.c.timeGenerated <= toGeneratedTime)
-           )
+                    )
         tupleishResult = self.__dbSelection(statement).fetchall()
         outputResult = self.__splice_output(tupleishResult)
         series = Series(semaphoreSeriesDescription, True, timeDescription)
@@ -83,10 +89,30 @@ class SQLAlchemyORM(ISeriesStorage):
         return series
     
     def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
-        raise NotImplementedError()
+        """Returns a data source location code based off of passed parameters
+           :param sourceCode: str - the data source code (noaaT&C)
+           :param location: str - the local location name 
+           :param priorityOrder: int - priority of which locations to go to if one is unavailable 
+        """
+        statement = (select(self.dataLocation_dataSource_mapping.c.dataSourceLocationCode)
+                     .where(self.dataLocation_dataSource_mapping.c.dataSourceCode == sourceCode)
+                     .where(self.dataLocation_dataSource_mapping.c.dataLocationCode == location)
+                     .where(self.dataLocation_dataSource_mapping.c.priorityOrder == priorityOrder)
+                    )
+        dataSourceLocationCode = self.__dbSelection(statement).fetchall()[0][0]
+        return dataSourceLocationCode
 
-    def find_lat_lon_coordinates(self, sourceCode: str, location: str, priorityOrder: int = 0) -> tuple:
-        raise NotImplementedError()
+    def find_lat_lon_coordinates(self, locationCode: str) -> tuple:
+        """Returns lat and lon tuple
+           :param sourceCode: str - the data source code (noaaT&C)
+           :param location: str - the local location name 
+           :param priorityOrder: int - priority of which locations to go to if one is unavailable 
+        """
+        statement = (select(self.ref_dataLocation.c.latitude, self.ref_dataLocation.c.longitude)
+                     .where(self.ref_dataLocation.c.code == locationCode)
+                    )
+        latLon = self.__dbSelection(statement).first()
+        
 
     def insert_input(self, series: Series) -> Series:
         """This method inserts actual/predictions into the input table
@@ -215,7 +241,7 @@ class SQLAlchemyORM(ISeriesStorage):
 
             Column("id", Integer, autoincrement=True, primary_key=True),
 
-            Column("isActual", bool, nullable=False),
+            Column("isActual", Boolean, nullable=False),
 
             Column("generatedTime", DateTime, nullable=True),
             Column("acquiredTime", DateTime, nullable=False),
@@ -241,7 +267,7 @@ class SQLAlchemyORM(ISeriesStorage):
             
             Column("timeGenerated", DateTime, nullable=False),
 
-            Column("leadTime", timedelta, nullable=False),
+            Column("leadTime", Time, nullable=False),
 
             Column("modelName", String(25), nullable=False), 
             Column("modelVersion", String(10), nullable=False),
@@ -403,3 +429,14 @@ class SQLAlchemyORM(ISeriesStorage):
             ))
 
         return dataPoints
+
+    def insert_lat_lon_test(self, code: str, displayName: str, notes: str, latitude: str, longitude: str):
+        """This method inserts lat and lon information
+        """
+        #Construct DB row to insert
+        insertionValueRow = {"code": code, "displayName": displayName, "notes": notes, "latitude": latitude, "longitude": longitude}
+        
+        with self.get_engine().connect() as conn:
+            conn.execute(insert(self.ref_dataLocation)
+                        .values(insertionValueRow))
+            conn.commit()
