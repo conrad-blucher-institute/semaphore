@@ -3,7 +3,7 @@
 #-------------------------------
 # Created By : Matthew Kastl
 # Created Date: 3/26/2023
-# version 7.0
+# version 9.0
 #-------------------------------
 """ This file is an implementation of the SQLAlchemy ORM geared towards Semaphore and its schema. 
  """ 
@@ -18,7 +18,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from sqlalchemy import create_engine as sqlalchemy_create_engine
-from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select, distinct, Boolean, Time
+from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select, distinct, Boolean, Interval
 from os import getenv
 from datetime import timedelta, datetime
 
@@ -53,6 +53,7 @@ class SQLAlchemyORM(ISeriesStorage):
             .where(self.inputs.c.verifiedTime >= timeDescription.fromDateTime)
             .where(self.inputs.c.verifiedTime <= timeDescription.toDateTime)
             )
+        
         tupleishResult = self.__dbSelection(statement).fetchall()
         inputResult = self.__splice_input(tupleishResult)
         series = Series(seriesDescription, True, timeDescription)
@@ -64,18 +65,18 @@ class SQLAlchemyORM(ISeriesStorage):
            :param semaphoreSeriesDescription: SemaphoreSeriesDescription - A  semaphore series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
+
         statement = (select(distinct(self.outputs.c.leadTime))
-                    .where(self.outputs.c.dataSource == semaphoreSeriesDescription.dataSource)
                     .where(self.outputs.c.dataLocation == semaphoreSeriesDescription.dataLocation)
                     .where(self.outputs.c.dataSeries == semaphoreSeriesDescription.dataSeries)
                     .where(self.outputs.c.dataDatum == semaphoreSeriesDescription.dataDatum)
                     )
         leadTime = self.__dbSelection(statement).fetchall()[0]
-        fromGeneratedTime = timeDescription.fromDateTime - leadTime
-        toGeneratedTime = timeDescription.toDateTime - leadTime
+        fromGeneratedTime = timeDescription.fromDateTime - leadTime[0]
+        toGeneratedTime = timeDescription.toDateTime - leadTime[0]
          
+        print(leadTime)
         statement = (select(self.outputs)
-                    .where(self.outputs.c.dataSource == semaphoreSeriesDescription.dataSource)
                     .where(self.outputs.c.dataLocation == semaphoreSeriesDescription.dataLocation)
                     .where(self.outputs.c.dataSeries == semaphoreSeriesDescription.dataSeries)
                     .where(self.outputs.c.dataDatum == semaphoreSeriesDescription.dataDatum)
@@ -120,15 +121,18 @@ class SQLAlchemyORM(ISeriesStorage):
             :param series: Series - A series object with a time description, series description, and input data
             :return Series - A series object that contains the actually inserted  data
         """
-     #Construct DB row to insert
+
+        if(type(series.description).__name__ != 'SeriesDescription'): raise ValueError('Description should be type SeriesDescription')
+
+     #  Construct DB row to insert
         now = datetime.now()
         insertionRows = []
         for input in series.data:
-            insertionValueRow = {"generatedTime": None, "aquiredTime": None, "verifiedTime": None, "dataValue": None, "isActual": None, "dataUnit": None, "dataSource": None, "dataLocation": None, "dataDatum": None, "latitude": None, "longitude": None}
+            insertionValueRow = {"isActual": None, "generatedTime": None, "isActual": None,"acquiredTime": None, "verifiedTime": None, "dataValue": None, "dataUnit": None, "dataSource": None, "dataLocation": None, "dataDatum": None, "latitude": None, "longitude": None}
             insertionValueRow["generatedTime"] = input.timeGenerated
-            insertionValueRow["acquiredtime"] = now
-            insertionValueRow["timeVerified"] = input.timeVerified
-            insertionValueRow["dtaaValue"] = input.dataValue
+            insertionValueRow["acquiredTime"] = now
+            insertionValueRow["verifiedTime"] = input.timeVerified
+            insertionValueRow["dataValue"] = input.dataValue
             insertionValueRow["isActual"] = False if series.description.dataSeries[0] == 'p' else True
             insertionValueRow["dataUnit"] = input.dataUnit
             insertionValueRow["dataSource"] = series.description.dataSource
@@ -141,9 +145,9 @@ class SQLAlchemyORM(ISeriesStorage):
 
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.inputs)
-                                .returning(self.inputs)
-                                .values(insertionRows)
-                                .prefix_with('OR IGNORE')
+                                    .returning(self.inputs)
+                                    .values(insertionRows)
+                                    .prefix_with('OR IGNORE')
                                 )
             result = cursor.fetchall()
             conn.commit()
@@ -159,7 +163,10 @@ class SQLAlchemyORM(ISeriesStorage):
             :param series: Series - A series object with a time description,  semaphore series description, and outputdata
             :return Series - A series object that contains the actually inserted data
         """
-        insertionValueRow = []
+
+        if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
+
+        insertionValueRows = []
         for output in series.data:
             insertionValueRow = {"timeGenerated": None, "leadTime": None, "modelName": None, "dataValue": None, "dataUnit": None, "dataLocation": None, "dataSeries": None, "dataDatum": None}
             insertionValueRow["timeGenerated"] = output.timeGenerated
@@ -172,12 +179,12 @@ class SQLAlchemyORM(ISeriesStorage):
             insertionValueRow["dataSeries"] = series.description.dataSeries
             insertionValueRow["dataDatum"] = series.description.dataDatum
             
-            insertionValueRow.append(insertionValueRow)
+            insertionValueRows.append(insertionValueRow)
 
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.outputs)
                                   .returning(self.outputs)
-                                  .values(insertionValueRow)
+                                  .values(insertionValueRows)
                                   .prefix_with('OR IGNORE')
                                   )
             result = cursor.fetchall()
@@ -242,17 +249,21 @@ class SQLAlchemyORM(ISeriesStorage):
 
             Column("id", Integer, autoincrement=True, primary_key=True),
 
-            Column("isActual", Boolean, nullable=False),
-
             Column("generatedTime", DateTime, nullable=True),
             Column("acquiredTime", DateTime, nullable=False),
             Column("verifiedTime", DateTime, nullable=False), 
 
-            Column("dataUnit", String(10), ForeignKey("ref_dataUnit.code"), nullable=False),   
+            Column("dataValue", String(10), nullable=False), 
+
+            Column("isActual", Boolean, nullable=False),
+
+            Column("dataUnit", String(10), ForeignKey("ref_dataUnit.code"), nullable=False),  
+            
             Column("dataSource", String(10), ForeignKey("ref_dataSource.code"), nullable=False),
             Column("dataLocation", String(25), ForeignKey("ref_dataLocation.code"), nullable=False), 
             Column("dataSeries", String(10), ForeignKey("ref_dataSeries.code"), nullable=False), 
             Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"),  nullable=True),
+            
             Column("latitude", String(16), nullable=True),
             Column("longitude", String(16), nullable=True),
 
@@ -268,7 +279,7 @@ class SQLAlchemyORM(ISeriesStorage):
             
             Column("timeGenerated", DateTime, nullable=False),
 
-            Column("leadTime", Time, nullable=False),
+            Column("leadTime", Interval, nullable=False),
 
             Column("modelName", String(25), nullable=False), 
             Column("modelVersion", String(10), nullable=False),
