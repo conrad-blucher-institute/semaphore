@@ -40,7 +40,7 @@ class InputGatherer:
         self.__inputVector = None
 
         self.__parse_dspec(dspecFileName)
-        self.__seriesProvider = SeriesProvider()
+        #self.__seriesProvider = SeriesProvider()
 
     def __parse_dspec(self, dspecFileName: str) -> None:
         """Parses the JSON Dspec file into a dspec object.
@@ -72,8 +72,13 @@ class InputGatherer:
             outputInfo.series = outputJson["series"]
             outputInfo.location = outputJson["location"]
             outputInfo.interval = outputJson["interval"]
-            outputInfo.datum = outputJson.get("datum")
             outputInfo.unit = outputJson["unit"]
+
+            try:
+                outputInfo.datum = outputJson.get("datum")
+            except KeyError:
+                outputInfo.datum = None
+
             dspec.outputInfo = outputInfo #Bind to dspec
 
             #inputs
@@ -87,9 +92,19 @@ class InputGatherer:
                 input.source = inputJson["source"]
                 input.series = inputJson["series"]
                 input.type = inputJson["type"]
-                input.datum = inputJson.get("datum")
                 input.interval = inputJson["interval"]
                 input.range = inputJson["range"]
+
+                try:
+                    input.datum = inputJson.get("datum")
+                except KeyError:
+                    input.datum = None
+
+                try:
+                    input.unit = inputJson["unit"]
+                except KeyError:
+                    input.unit = None
+
                 inputs.append(input)
             dspec.inputs = inputs #Bind to dspec
 

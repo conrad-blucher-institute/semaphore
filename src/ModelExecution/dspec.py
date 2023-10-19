@@ -54,6 +54,7 @@ class InputInfo:
         self.location = None
         self.source = None
         self.series = None
+        self.unit = None
         self.type = None
         self.datum = None
         self.interval = None
