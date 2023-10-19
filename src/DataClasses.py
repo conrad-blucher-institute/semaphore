@@ -10,7 +10,7 @@
 #----------------------------------
 # 
 #
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from typing import List
 
 class Input():
@@ -84,8 +84,8 @@ class TimeDescription():
         :param interval: timedelta = None - The time step separating the data points in order
     """
     def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: timedelta = None) -> None:
-        self.fromDateTime = fromDateTime,
-        self.toDateTime = toDateTime,
+        self.fromDateTime = fromDateTime
+        self.toDateTime = toDateTime
         self.interval = interval
 
     def __str__(self) -> str:
@@ -124,19 +124,18 @@ class SemaphoreSeriesDescription():
         :param dataLocation: str - The data's location
         :param dataDatum: str = None
     """
-    def __init__(self, modelName: str, modelVersion: str, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None) -> None:
+    def __init__(self, modelName: str, modelVersion: str, dataSeries: str, dataLocation: str, dataDatum: str = None) -> None:
         self.modelName = modelName
         self.modelVersion = modelVersion
-        self.dataSource = dataSource
         self.dataSeries = dataSeries
         self.dataLocation = dataLocation
         self.dataDatum = dataDatum
 
     def __str__(self) -> str:
-        return f'\n[SemaphoreSeriesDescription] -> AIName: {self.modelName}, AIGeneratedVersion: {self.modelVersion}, DataSource: {self.dataSource}, DataSeries: {self.dataSeries}, Location: {self.dataLocation}, Datum: {self.dataDatum}'
+        return f'\n[SemaphoreSeriesDescription] -> AIName: {self.modelName}, AIGeneratedVersion: {self.modelVersion}, DataSeries: {self.dataSeries}, Location: {self.dataLocation}, Datum: {self.dataDatum}'
     
     def __repr__(self) -> str:
-        return f'\nSemaphoreSeriesDescription({self.modelName}, {self.modelVersion}, {self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum})'
+        return f'\nSemaphoreSeriesDescription({self.modelName}, {self.modelVersion}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum})'
 
 
 class Series():
