@@ -40,7 +40,7 @@ class InputGatherer:
         self.__inputVector = None
 
         self.__parse_dspec(dspecFileName)
-        #self.__seriesProvider = SeriesProvider()
+        self.__seriesProvider = SeriesProvider()
 
     def __parse_dspec(self, dspecFileName: str) -> None:
         """Parses the JSON Dspec file into a dspec object.
