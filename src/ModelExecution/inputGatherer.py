@@ -72,12 +72,8 @@ class InputGatherer:
             outputInfo.series = outputJson["series"]
             outputInfo.location = outputJson["location"]
             outputInfo.interval = outputJson["interval"]
-            outputInfo.unit = outputJson["unit"]
-
-            try:
-                outputInfo.datum = outputJson.get("datum")
-            except KeyError:
-                outputInfo.datum = None
+            outputInfo.unit = outputJson.get("unit")
+            outputInfo.datum = outputJson.get("datum")
 
             dspec.outputInfo = outputInfo #Bind to dspec
 
