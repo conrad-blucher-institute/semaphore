@@ -162,7 +162,7 @@ class InputGatherer:
         """Casts vector of data to a given type.
 
         Parameters:
-            data: Input - The data to cast.
+            data: list[Input] - The data to cast.
             dataType: str = The datatype as a string to cast to.
         ReturnsL
             list[any] - The casted data
