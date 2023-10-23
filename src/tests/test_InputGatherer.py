@@ -81,9 +81,9 @@ def test_generateInputSpecifications():
 
         inputsJson = json["inputs"]
 
-        assert seriesDescription.source == inputsJson[0]["source"]
-        assert seriesDescription.series == inputsJson[0]["series"]
-        assert seriesDescription.location == inputsJson[0]["location"]
-        assert seriesDescription.datum == inputsJson[0].get("datum")
+        assert seriesDescription.dataSource == inputsJson[0]["source"]
+        assert seriesDescription.dataSeries == inputsJson[0]["series"]
+        assert seriesDescription.dataLocation == inputsJson[0]["location"]
+        assert seriesDescription.dataDatum == inputsJson[0].get("datum")
         assert timeDescription.interval == inputsJson[0]["interval"]
         assert dataType == inputsJson[0]["type"]
