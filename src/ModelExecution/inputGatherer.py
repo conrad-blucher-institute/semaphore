@@ -146,7 +146,7 @@ class InputGatherer:
         """
         inputVector = []
         for specification in self.__specifications:
-            #unpack specifications
+            #unpack specification
             seriesDescription = specification[0]
             timeDescription = specification[1]
             dataType = specification[2]
