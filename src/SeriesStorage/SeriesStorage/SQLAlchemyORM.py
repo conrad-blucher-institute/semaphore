@@ -39,9 +39,10 @@ class SQLAlchemyORM(ISeriesStorage):
     ################################################################################## Public methods
     #############################################################################################
 
-    def select_input(self, seriesDescription: SeriesDescription, timeDescription : TimeDescription, timeIntervalConstraint: timedelta = None) -> Series:
+    def select_input(self, seriesDescription: SeriesDescription, timeDescription : TimeDescription) -> Series:
         """Selects a given series given a SeriesDescription and TimeDescription
            :param seriesDescription: SeriesDescription - A series description object
+           :param timeDescription: TimeDescription - A hydrated time description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
 
@@ -59,9 +60,9 @@ class SQLAlchemyORM(ISeriesStorage):
 
         # If an interval was provided, we will mod each verified time against it
         # any that fail we remove
-        if timeIntervalConstraint != None:
+        if timeDescription.interval != None:
             for input in inputResult:
-                if not (input.timeVerified.timestamp() % timeIntervalConstraint.total_seconds() == 0):
+                if not (input.timeVerified.timestamp() % timeDescription.interval.total_seconds() == 0):
                     inputResult.remove(input)
 
         series = Series(seriesDescription, True, timeDescription)
