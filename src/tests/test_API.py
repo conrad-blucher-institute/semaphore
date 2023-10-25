@@ -26,6 +26,8 @@ client = TestClient(apiDriver)
     ("NOAATANDC", "dXWnCmp", "packChan", "2023090411", "2023090511", "dXWnCmp"),
 ])
 def test_getInput(source: str, series: str, location: str, fromDateTime: str, toDateTime: str, expected_output: str):
+    """This function tests whether the API successfully retrieves the requested input
+    """
     response = client.get(f"/input/source={source}/series={series}/location={location}/fromDateTime={fromDateTime}/toDateTime={toDateTime}")
     assert response.status_code == 200
 
