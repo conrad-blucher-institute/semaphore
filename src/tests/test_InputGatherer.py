@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 #test_InputGatherer.py
 #-------------------------------
-# Created By : Beto Estrada
+# Created By: Beto Estrada
 # Created Date: 10/24/2023
 # version 1.0
-#-------------------------------
+#----------------------------------
+"""This file tests the InputGatherer module
+ """ 
+#----------------------------------
+# 
+#
 import sys
 import os
 from os import path, getenv
