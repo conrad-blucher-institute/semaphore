@@ -43,7 +43,6 @@ class SQLAlchemyORM(ISeriesStorage):
         """Selects a given series given a SeriesDescription and TimeDescription
            :param seriesDescription: SeriesDescription - A series description object
            :param timeDescription: TimeDescription - A hydrated time description object
-           :param timeDescription: TimeDescription - A hydrated time description object
         """
 
         statement = (select(self.inputs)
