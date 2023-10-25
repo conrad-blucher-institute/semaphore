@@ -15,6 +15,9 @@ from utility import log, construct_true_path
 from ModelExecution.inputGatherer import InputGatherer
 
 def test_parseDSPEC():
+    """This function tests whether the specified DSPEC file
+    is correctly parsed in the InputGatherer object
+    """
     dspecFileName = 'test_dspec.json'
 
     inputGatherer = InputGatherer(dspecFileName)
@@ -56,6 +59,10 @@ def test_parseDSPEC():
 
     
 def test_generateInputSpecifications():
+    """This function tests whether __generate_inputSpecifications
+    generates the correct input specifications from the specified
+    DSPEC file
+    """
     currentDate = datetime.now()
 
     dspecFileName = 'test_dspec.json'
