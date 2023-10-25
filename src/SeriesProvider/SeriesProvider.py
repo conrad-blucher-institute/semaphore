@@ -42,7 +42,7 @@ class SeriesProvider():
 
         return returningSeries
 
-    def make_request(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series:
+    def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series:
         """This method attempts to return a series matching a series description and a time description.
             It will attempt to first get the series from series storage, kicking off data ingestion if series storage
             doesn't have all the data.
