@@ -18,12 +18,8 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataIngestion.IDataIngestion import data_ingestion_factory
-from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, Actual, Prediction
-from utility import log
-from traceback import format_exc
+from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
 
-from datetime import datetime
-from typing import List, Dict
 
 
 class SeriesProvider():
@@ -31,147 +27,110 @@ class SeriesProvider():
     def __init__(self) -> None:
         self.seriesStorage = series_storage_factory()
     
-    def make_SaveRequest(self, series: Series) -> Series:
-        """Passes a series to the DBManager to be saved.
-        Parameters:
-            series: series - The series request object detailing the request
-        Returns:
-            series: A response object returning what happened 
+    def save_series(self, series: Series) -> Series:
+        """Passes a series to Series Storage to be stored.
+            :param series - The series to store.
+            :returns series - A series containing only the stored values.
         """
         returningSeries = Series(series.description, True)
 
         if not (type(series.description) == SemaphoreSeriesDescription): #Check and make sure this is actually something with the proper description to be inserted
-            self.__get_and_log_err_series([], returningSeries, f'A save Request must be provided a series with a SemaphoreSeriesDescription \n')
+            returningSeries.isComplete = False
+            returningSeries.nonCompleteReason = f'A save Request must be provided a series with a SemaphoreSeriesDescription not a Series Description'
         else:
-            self.seriesStorage.insert_output(series)
-            returningSeries.isComplete = True
+            returningSeries = self.seriesStorage.insert_output(series)
 
         return returningSeries
 
-    def make_request(self, requestDesc: SeriesDescription) -> Series:
-        """This method attempts to fill a data request either by getting the data from the DataBase or from DataIngestion. Will always return a series response.
-        ------
-        Parameters:
-            requestDesc:SeriesDescription - A SeriesDescription obj detailing the request (src/DataManagement/DataClasses.py)
-        Returns:
-            Series - A series object holding either the requested data or a error message with the incomplete data. (src/DataManagement/DataClasses.py)
+    def make_request(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series:
+        """This method attempts to return a series matching a series description and a time description.
+            It will attempt to first get the series from series storage, kicking off data ingestion if series storage
+            doesn't have all the data.
+            NOTE: If an interval is not provided in the time description, the isComplete flag will always be false and data Ingestion will always be initiated.
+            :param seriesDescription - A description of the wanted series.
+            :param timeDescription - A description of the temporal information of the wanted series. 
+            :returns series - The series containing as much data as could be found.
         """
         
         try:
+            # Create the series that will be returned
+            responseSeries = Series(seriesDescription, timeDescription, True)
             
-            ###Attempt to pull request from DB
+            # Attempt to pull request from series storage.
+            seriesStorageResults = self.seriesStorage.select_input(seriesDescription, timeDescription).data
 
-            #Checking which database table to pull data from
-            match requestDesc.dataClassification:
-                case 'actual': 
-                    dbSeries = self.seriesStorage.select_actuals(requestDesc)
-                case 'prediction':
-                    dbSeries = self.seriesStorage.select_prediction(requestDesc)
-                case _:
-                    log(f'Data Classification {requestDesc.dataClassification} was unable to be matched by series provider.')
-                    raise NotImplementedError
-                    
-            dbData = dbSeries.data
+            # Calculate how many results we are expecting
+            amountOfExpectedResults = self.__get_amount_of_results_expected(timeDescription)
+
+            # If we can validate that series storage had all the data we needed, we just return it.
+            if amountOfExpectedResults != None and len(seriesStorageResults) == amountOfExpectedResults:
+                responseSeries.data = seriesStorageResults
+                return responseSeries
             
+            else: #Else we need to call data ingestion.
 
-            ###Check contents contains the right amount of results
+                # Call Data Ingestion to fetch data
+                dataIngestion = data_ingestion_factory(seriesDescription)
+                dataIngestionSeries = dataIngestion.ingest_series(seriesDescription, timeDescription)
 
-            #Calculate the amnt of expected results
-            amntExpected = self.__get_amnt_of_results_expected(requestDesc)
-            if amntExpected is None:
-                return self.__get_and_log_err_response(requestDesc, dbSeries, f'Could not process series, {requestDesc.series}, interval value to determin amnt of expected results in request.')
-
-            #First AmountCheck
-            if len(dbData) != amntExpected:
-
-                #Call Data Ingestion to fetch data
-                diClass = data_ingestion_factory(requestDesc)
-                diResults = diClass.ingest_series(requestDesc)
-
-                if diResults is None:
-                    return self.__get_and_log_err_response(requestDesc, dbSeries, f'DB did not have data request, dataIngestion returned NONE, for request.')
-                diData = diResults.data
+                # If for some reason data ingestion fails we just return series storage results.
+                if dataIngestionSeries is None:
+                    responseSeries.isComplete = False
+                    responseSeries.nonCompleteReason = 'Series storage results could not be verified, dataIngestion returned None'
+                    responseSeries.data = seriesStorageResults
+                    return responseSeries
                 
-                #Merge data
-                mergedResults = self.__merge_results(dbData, diData)
-                #Second AmountCheck
-                if(len(mergedResults) != amntExpected):
-                    print(mergedResults)
-                    return self.__get_and_log_err_response(requestDesc, mergedResults, f'Merged Data Base Results and Data Ingestion Results failed to have the correct amount of results for request. Got:{len(mergedResults)} Expected:{amntExpected}')
-                else:
-                    checkedResults = mergedResults
-            else:
-                checkedResults = dbData
-
-            ###Generate proper response object
-            responseSeries = Series(requestDesc, True)
-            responseSeries.data = checkedResults
-            return responseSeries
-        
+                mergedResults = self.__merge_results(seriesStorageResults, dataIngestionSeries.data)
+                responseSeries.data = mergedResults # At this point this is the max possible results we can return.
+                
+                # Second AmountCheck
+                if amountOfExpectedResults == None: 
+                    responseSeries.isComplete = False
+                    responseSeries.nonCompleteReason = 'Result completeness could not be verified. (Did you forget to assign an Interval?)'
+                    return responseSeries
+                elif len(mergedResults) != amountOfExpectedResults:
+                    responseSeries.isComplete = False
+                    responseSeries.nonCompleteReason = 'Combined data ingestion and series storage results were more or less than expected.'
+                    return responseSeries
+                else: # This means the data is validated to be whole
+                    return responseSeries
+            
         except Exception as e:
-            return self.__get_and_log_err_response(requestDesc, [], f'An unknown error occurred attempting to fill request.\nRequest: {requestDesc}\nException: {format_exc()}')
+            errSeries = Series(seriesDescription, timeDescription, False)
+            errSeries.nonCompleteReason = f'An unknown exception occurred: \n {e}'
+            return errSeries
     
-    def make_output_request(self, requestDesc: SemaphoreSeriesDescription) -> Series: 
+    def request_output(self, seriesDescription: SemaphoreSeriesDescription, timeDescription: TimeDescription) -> Series: 
         ''' Takes a description of an output series and attempts to return it
-        :param requestDesc: SemaphoreSeriesDescription -A semaphore series description
-        :return series
+            :param seriesDescription: SemaphoreSeriesDescription -A semaphore series description
+            :param timeDescription: TimeDescription - A description about the temporal parts of the output series
+            :return series
         '''
+        
         ###See if we can get the outputs from the database
-        dbi = series_storage_factory() 
-        requestedSeries = dbi.select_output(requestDesc)
-
-        ###Do we have enough outputs? 
-        expected = self.__get_amnt_of_results_expected(requestDesc)
-        if (len(requestedSeries.data) == expected): 
-            requestedSeries.isComplete = True
-        else: 
-            requestedSeries.isComplete = False
-            error = f"This description {requestDesc} had incomplete data."
-            requestedSeries.nonCompleteReason = error
-            log(error) 
-
-        ###return that series object to the requester'
+        requestedSeries = self.seriesStorage.select_output(seriesDescription, timeDescription)
         return requestedSeries
         
+    
+    def __get_amount_of_results_expected(self, timeDescription: TimeDescription) -> int | None:
+        """ Calculates the amount of records we should expect give back
+            :param timeDescription: TimeDescription - The temporal part of the request
+            :return int: The amount of results expected
+        """
 
-    def __get_and_log_err_response(self, description: SemaphoreSeriesDescription | SeriesDescription, currentData: List, msg: str) -> Series:
-        """This function logs an error message as well as generating a Response object with the same message
-        -------
-        Parameters:
-            description: SemaphoreSeriesDescription | SeriesDescription - The description to pass back, either the output or input description
-            currentData: List - Any data we already have, even if its not complete
-            msg: str - The error message
-        Returns:
-            Series: A series object holding the error information and marked not complete.
-        """
-        log(msg)
-        response = Series(description, False, msg)
-        response.data = currentData
-        return response
-    
-    
-    def __get_amnt_of_results_expected(self, seriesDescription: SeriesDescription | SemaphoreSeriesDescription) -> int:
-        """Calculates the amount of records we should expect given a time span and an interval code
-        -------
-        Parameters:
-            seriesDescription: SeriesDescription
-        Returns:
-            int - Returns the amount of results
-        """
-        totalSecondsRequested = (seriesDescription.toDateTime - seriesDescription.fromDateTime).total_seconds()
-    
-        if totalSecondsRequested < seriesDescription.interval: return 1 #Only one point was requested
-        else: return int(totalSecondsRequested / seriesDescription.interval) + 1
+        if timeDescription.interval == None: return None
+
+        totalSecondsRequested = (timeDescription.toDateTime - timeDescription.fromDateTime).total_seconds()
+
+        # We add one to acount for this being an inclusive time range. A time range from 12pm - 2pm includes both 12pm and 2pm.
+        return 1 + totalSecondsRequested // timeDescription.interval
     
 
-    def __merge_results(self, first: List[Actual | Prediction], second: List[Actual | Prediction]) -> List[Dict]:
-        """Merges two lists of dictionaries together, will only keep unique results.
-        -------
-        Parameters:
-            first List[Actual | Prediction] - The first list to combine.
-            second List[Actual | Prediction] - The second list to combine.
-        Returns:
-            List[Dict] - The combined, unique List.
+    def __merge_results(self, first: list, second: list) -> list:
+        """ Merges two lists together, will only keep unique results.
+            :param first: list[any] - The first list.
+            :param second: list[any] - The second list.
+            :return list: The combined lists.
         """
 
         #TODO:: This is a very slow, it was optimized with hashing like this:    
@@ -181,6 +140,5 @@ class SeriesProvider():
 
         for actual in second:
             if not actual in first: first.append(actual)
-
         return first
     
