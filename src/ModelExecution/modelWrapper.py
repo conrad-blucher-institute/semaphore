@@ -22,7 +22,6 @@ from ModelExecution.IOutputHandler import output_handler_factory
 from DataClasses import SemaphoreSeriesDescription, Prediction, Series
 from SeriesStorage.ISeriesStorage import series_storage_factory
 
-
 import datetime
 from os import path, getenv
 from utility import log, construct_true_path
@@ -31,21 +30,11 @@ from tensorflow.keras.models import load_model
 
 class ModelWrapper:
     def __init__(self, dspecFileName: str) -> None:
-        """
-        Uses the source attribute of a data request to dynamically import a module
-        ------
-        Parameters
-        request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>Series)
-        Returns
-        IDataIngestion - An child of the IDataIngestion interface.
-        """
         """Constructor generates an InputGatherer parse the dspec file 
         and attempts to load the model.
         """
         self.__inputGatherer = InputGatherer(dspecFileName)
         self.__load_model()
-       
-        
 
 
     def __load_model(self) -> None:
@@ -102,17 +91,19 @@ class ModelWrapper:
         try:
             inputs = self.__inputGatherer.get_inputs(dateTime)
             if inputs == -1: return -1
-
+            
             shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
             prediction =  self._model.predict(shapedInputs) 
             dspec = self.__inputGatherer.get_dspec()
             outputInfo = dspec.outputInfo
 
-            predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
-    
+            #TODO::This code will need to be reworded we we get more than one value from a model
+            predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.interval,  outputInfo.datum)
+            prediction = Prediction(prediction, outputInfo.unit, outputInfo.leadTime, dateTime)
+
             #Instantiate the right output handler method then post process the predictions
             OH_Class = output_handler_factory(outputInfo.outputMethod)
-            processedOutput = OH_Class.post_process_prediction(prediction, dspec) 
+            processedOutput = OH_Class.post_process_prediction(prediction)
 
             #Put the post processed predictions in a series
             series = Series(predictionDesc, True)
