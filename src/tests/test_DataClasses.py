@@ -1,15 +1,3 @@
-# -*- coding: utf-8 -*-
-#test_DataClasses.py
-#-------------------------------
-# Created By: Beto Estrada
-# Created Date: 10/24/2023
-# version 1.0
-#----------------------------------
-"""This file tests the DataClasses module
- """ 
-#----------------------------------
-# 
-#
 import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
