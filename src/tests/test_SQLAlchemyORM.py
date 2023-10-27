@@ -81,7 +81,7 @@ def test_input_table_with_interval_Hourly():
 
     # Create needed data objects There is one row that is off the hour
     seriesDescription = SeriesDescription('apple', 'banana', 'orange', 'grape')
-    timeDescription = TimeDescription(datetime(2001, 1, 1, 1, 0, 0, 0), datetime(2001, 2, 1, 1, 0, 0, 0))
+    timeDescription = TimeDescription(datetime(2001, 1, 1, 1, 0, 0, 0), datetime(2001, 2, 1, 1, 0, 0, 0), timedelta(0, 3600))
     series = Series(seriesDescription, True, timeDescription)
     series.data = [
         Input('pear', 'cherry', datetime(2001, 1, 1, 1, 0, 0, 0), datetime(2001, 1, 1, 1, 0, 0, 0), '12', '12'),
@@ -97,7 +97,7 @@ def test_input_table_with_interval_Hourly():
 
     # Insert, select, and check
     sqlorm.insert_input(series)
-    result = sqlorm.select_input(seriesDescription, timeDescription, timedelta(0, 3600))
+    result = sqlorm.select_input(seriesDescription, timeDescription)
     
     # Remove the invalid row to check that the db removed it as well
     series.data.remove(Input('Apple', 'cherry', datetime(2001, 1, 1, 1, 0, 0, 0), datetime(2001, 1, 1, 7, 30, 0, 0), '12', '12'),)
@@ -116,7 +116,7 @@ def test_input_table_with_interval_6min():
 
     # Create needed data objects There is one row that is off the hour 
     seriesDescription = SeriesDescription('apple', 'banana', 'orange', 'grape')
-    timeDescription = TimeDescription(datetime(2001, 1, 1, 1, 0, 0, 0), datetime(2001, 2, 1, 1, 0, 0, 0))
+    timeDescription = TimeDescription(datetime(2001, 1, 1, 1, 0, 0, 0), datetime(2001, 2, 1, 1, 0, 0, 0), timedelta(0, 3600))
     series = Series(seriesDescription, True, timeDescription)
     series.data = [
         Input('pear', 'cherry', datetime(2001, 1, 1, 1, 0, 0, 0), datetime(2001, 1, 1, 1, 0, 0, 0), '12', '12'),
@@ -132,7 +132,7 @@ def test_input_table_with_interval_6min():
 
     # Insert, select, and check
     sqlorm.insert_input(series)
-    result = sqlorm.select_input(seriesDescription, timeDescription, timedelta(0, 360))
+    result = sqlorm.select_input(seriesDescription, timeDescription)
 
     # Remove the invalid row to check that the db removed it as well
     series.data.remove(Input('Apple', 'cherry', datetime(2001, 1, 1, 1, 0, 0, 0), datetime(2001, 1, 1, 8, 1, 0, 0), '12', '12'),)
