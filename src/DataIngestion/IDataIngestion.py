@@ -17,7 +17,7 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from DataClasses import SeriesDescription, Series
+from DataClasses import SeriesDescription, Series, TimeDescription
 from utility import log
 
 from abc import ABC, abstractmethod
@@ -28,7 +28,7 @@ from importlib import import_module
 class IDataIngestion(ABC):
 
     @abstractmethod
-    def ingest_series(self, seriesDescription: SeriesDescription) -> Series | None:
+    def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
         raise NotImplementedError
     
 

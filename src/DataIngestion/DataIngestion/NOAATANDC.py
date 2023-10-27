@@ -3,7 +3,9 @@
 #----------------------------------
 # Created By: Matthew Kastl
 # Created Date: 4/8/2023
-# version 3.0
+# Edited By: Savannah Stephenson
+# Edit Date: 10/26/2023
+# Version 4.0
 #----------------------------------
 """ This file is a communicator with the NOAA tides and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
 An object of this class must be initialized with a DBInterface, as fetched data is directly imported into the DB via that interface.
@@ -23,11 +25,11 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataClasses import Series, SeriesDescription, Actual, Prediction
+from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
 
-from datetime import datetime
+from datetime import datetime, timedelta, time
 from urllib.error import HTTPError
 from urllib.request import urlopen
 from math import radians, cos, sin
@@ -40,18 +42,18 @@ from typing import List, Dict
 class NOAATANDC(IDataIngestion):
 
 
-    def ingest_series(self, seriesDescription: SeriesDescription) -> Series | None:
-        match seriesDescription.series:
+    def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
+        match seriesDescription.dataSeries:
             case 'dWl':
                 return self.fetch_water_level_hourly(seriesDescription)
             case 'dXWnCmp':
-                match seriesDescription.interval:
+                match timeDescription.interval.total_seconds():
                     case 3600:
                         return self.fetch_X_wind_components_hourly(seriesDescription)
                     case 360:
                         return self.fetch_X_wind_components_6min(seriesDescription)
             case 'dYWnCmp':
-                match seriesDescription.interval:
+                match timeDescription.interval.total_seconds():
                     case 3600:
                         return self.fetch_Y_wind_components_hourly(seriesDescription)
                     case 360:
@@ -59,7 +61,7 @@ class NOAATANDC(IDataIngestion):
             case 'dSurge':
                 return self.fetch_surge_hourly(seriesDescription)
             case _:
-                log(f'Data series: {seriesDescription.series}, not found for NOAAT&C for request: {seriesDescription}')
+                log(f'Data series: {seriesDescription.dataSeries}, not found for NOAAT&C for request: {seriesDescription}')
                 return None
 
     def __init__(self):
@@ -70,11 +72,11 @@ class NOAATANDC(IDataIngestion):
     def __create_pattern1_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> str:
         return f'https://tidesandcurrents.noaa.gov/api/datagetter?product={product}&application=NOS.COOPS.TAC.MET&station={station}&time_zone=GMT&units=metric&interval=6&format=json&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&datum={datum}'
     
-    def __create_pattern2_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: str) -> str:
-        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.MET&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&time_zone=GMT&units=metric&interval={interval}&format=json'
+    def __create_pattern2_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: timedelta) -> str:
+        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.MET&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&time_zone=GMT&units=metric&interval={interval.total_seconds()}&format=json'
     
-    def __create_pattern3_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: str, datum: str) -> str:
-        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.WL&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&datum={datum}&station={station}&time_zone=GMT&units=metric&interval={interval}&format=json'
+    def __create_pattern3_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: timedelta, datum: str) -> str:
+        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.WL&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&datum={datum}&station={station}&time_zone=GMT&units=metric&interval={interval.total_seconds()}&format=json'
     
         
     
@@ -114,7 +116,7 @@ class NOAATANDC(IDataIngestion):
             return None
 
 
-    def fetch_water_level_hourly(self, request: SeriesDescription) -> Series | None:
+    def fetch_water_level_hourly(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription) -> Series | None:
         """Fetches water level data from NOAA Tides and currents. 
         -------
         Parameters:
@@ -127,11 +129,11 @@ class NOAATANDC(IDataIngestion):
         """
         
         #Get mapped location from DB then make API request, wl hardcoded
-        dataSourceCode = self.__get_station_number(request.location)
+        dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
         if dataSourceCode is None: return None
         
         #Make API request
-        url = self.__create_pattern1_url(dataSourceCode, 'hourly_height', request.fromDateTime, request.toDateTime, request.datum)
+        url = self.__create_pattern1_url(dataSourceCode, 'hourly_height', timeRequest.fromDateTime, timeRequest.toDateTime, seriesRequest.datum)
         data = self.__api_request(url)
         if data is None: return None
 
@@ -142,31 +144,32 @@ class NOAATANDC(IDataIngestion):
 
         #Iterate through data and format DB rows
         dateTimeNow = datetime.now()
-        actuals = []
+        inputs = []
         for row in data['data']:
             
-            #Construct list of actuals
-            actual = Actual(
-                value= row["v"],
-                unit= 'meter',
-                dateTime= datetime.fromisoformat(row['t']),
+            #Construct list of inputs
+            dataPoints = Input(
+                dataValue= row["v"],
+                dataUnit= 'meter',
+                timeVerified= datetime.fromisoformat(row['t']),
+                timeGenerated= datetime.fromisoformat(row['t']), 
                 longitude= lon,
                 latitude= lat
 
             )
-            actuals.append(actual)
+            inputs.append(dataPoints)
 
-        series = Series(request, True)
-        series.data = actuals
+        series = Series(seriesRequest, True)
+        series.data = inputs
 
         #insertData to DB
-        insertedRows = self.__seriesStorage.insert_actuals(series)
+        insertedRows = self.__seriesStorage.insert_input(series)
 
         series.data = insertedRows #Rebind to only return what rows were inserted?
         return series
 
 
-    def fetch_X_wind_components_6min(self, request: SeriesDescription) -> Series | None:
+    def fetch_X_wind_components_6min(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription) -> Series | None:
         """Fetches wind spd and direction and calculates the X component.
         -------
         Parameters:
@@ -179,11 +182,11 @@ class NOAATANDC(IDataIngestion):
         """
         
         #Get mapped location from DB then make API request, wl hardcoded
-        dataSourceCode = self.__get_station_number(request.location)
+        dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
         if dataSourceCode is None: return None
         
         #Make API request
-        url = self.__create_pattern2_url(dataSourceCode, 'wind', request.fromDateTime, request.toDateTime, '6')
+        url = self.__create_pattern2_url(dataSourceCode, 'wind', timeRequest.fromDateTime, timeRequest.toDateTime, '6')
         data = self.__api_request(url)
         if data is None: return None
 
@@ -208,21 +211,21 @@ class NOAATANDC(IDataIngestion):
 
         #Iterate through data and format DB rows. Makes rows for both the X components and Y components
         #They are saved as different series.
-        actuals = []
+        dataPoints = []
         for index, value in enumerate(xValues):
           
-            #Construct list of actuals
-            actual = Actual(value, 'meter', dateTimes[index], lon, lat)
-            actuals.append(actual)
+            #Construct list of dataPoints
+            dataPoint = Input(value, 'meter', dateTimes[index], dateTimes[index], lon, lat)
+            dataPoints.append(dataPoint)
 
-        series = Series(request, True)
-        series.data = actuals
+        series = Series(seriesRequest, True)
+        series.data = dataPoints
 
         #insertData to DB
-        insertedRows = self.__seriesStorage.insert_actuals(series)
+        insertedRows = self.__seriesStorage.insert_input(series)
         return series
     
-    def fetch_Y_wind_components_6min(self, request: SeriesDescription) -> Series | None:
+    def fetch_Y_wind_components_6min(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription) -> Series | None:
         """Fetches wind spd and direction and calculates the Y component.
         -------
         Parameters:
@@ -235,11 +238,11 @@ class NOAATANDC(IDataIngestion):
         """
         
         #Get mapped location from DB then make API request, wl hardcoded
-        dataSourceCode = self.__get_station_number(request.location)
+        dataSourceCode = self.__get_station_number(seriesRequest.location)
         if dataSourceCode is None: return None
         
         #Make API request
-        url = self.__create_pattern2_url(dataSourceCode, 'wind', request.fromDateTime, request.toDateTime, '6')
+        url = self.__create_pattern2_url(dataSourceCode, 'wind', timeRequest.fromDateTime, timeRequest.toDateTime, '6')
         data = self.__api_request(url)
         if data is None: return None
 
@@ -264,17 +267,17 @@ class NOAATANDC(IDataIngestion):
 
         #Iterate through data and format DB rows. Makes rows for both the X components and Y components
         #They are saved as different series.
-        actuals = []
+        dataPoints = []
         for index, value in enumerate(yValues):
-             #Construct list of actuals
-            actual = Actual(value, 'meter', dateTimes[index], lon, lat)
-            actuals.append(actual)
+             #Construct list of dataPoints
+            dataPoint = Input(value, 'meter', dateTimes[index], dateTimes[index], lon, lat)
+            dataPoints.append(dataPoint)
 
-        series = Series(request, True)
-        series.data = actuals
+        series = Series(seriesRequest, True)
+        series.data = dataPoints
 
         #insertData to DB
-        insertedRows = self.__seriesStorage.insert_actuals(series)
+        insertedRows = self.__seriesStorage.insert_input(series)
         return series  
 
 
