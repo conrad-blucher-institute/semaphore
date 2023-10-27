@@ -54,7 +54,7 @@ class SeriesProvider():
         
         try:
             # Create the series that will be returned
-            responseSeries = Series(seriesDescription, timeDescription, True)
+            responseSeries = Series(seriesDescription, True, timeDescription)
             
             # Attempt to pull request from series storage.
             seriesStorageResults = self.seriesStorage.select_input(seriesDescription, timeDescription).data
@@ -96,7 +96,7 @@ class SeriesProvider():
                     return responseSeries
             
         except Exception as e:
-            errSeries = Series(seriesDescription, timeDescription, False)
+            errSeries = Series(seriesDescription, False, timeDescription)
             errSeries.nonCompleteReason = f'An unknown exception occurred: \n {e}'
             return errSeries
     
