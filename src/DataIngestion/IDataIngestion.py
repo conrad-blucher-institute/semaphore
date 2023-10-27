@@ -32,7 +32,7 @@ class IDataIngestion(ABC):
         raise NotImplementedError
     
 
-def data_ingestion_factory(request: SeriesDescription) -> IDataIngestion:
+def data_ingestion_factory(seriesRequest: SeriesDescription, timeRequest: TimeDescription) -> IDataIngestion:
     """Uses the source atribute of a data request to dynamically import a module
     ------
     Parameters
@@ -41,7 +41,7 @@ def data_ingestion_factory(request: SeriesDescription) -> IDataIngestion:
         IDataIngestion - An child of the IDataIngestion interface.
     """
     try:
-        return getattr(import_module(f'src.DataIngestion.DataIngestion.{request.dataSource}'), f'{request.dataSource}')()
+        return getattr(import_module(f'src.DataIngestion.DataIngestion.{seriesRequest.dataSource}'), f'{seriesRequest.dataSource}')()
     except Exception:
-        raise ModuleNotFoundError(f'No module named {request.dataSource} in src.DataIngestion.DataIngestion!')
+        raise ModuleNotFoundError(f'No module named {seriesRequest.dataSource} in src.DataIngestion.DataIngestion!')
     
