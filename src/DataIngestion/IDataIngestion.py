@@ -34,11 +34,8 @@ class IDataIngestion(ABC):
 
 def data_ingestion_factory(seriesRequest: SeriesDescription, timeRequest: TimeDescription) -> IDataIngestion:
     """Uses the source atribute of a data request to dynamically import a module
-    ------
-    Parameters
-        request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
-    Returns
-        IDataIngestion - An child of the IDataIngestion interface.
+        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
+        :parm timeRequest: Time Description - a data TimeDescription object with information to pull
     """
     try:
         return getattr(import_module(f'src.DataIngestion.DataIngestion.{seriesRequest.dataSource}'), f'{seriesRequest.dataSource}')()
