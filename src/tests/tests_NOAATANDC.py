@@ -22,6 +22,7 @@ import pytest
 from datetime import datetime, timedelta, time
 from DataClasses import Input, Series, TimeDescription, SeriesDescription
 from DataIngestion.IDataIngestion import data_ingestion_factory
+from dotenv import load_dotenv
 
 @pytest.mark.parametrize("source, series, location, interval", [
     ("NOAATANDC", "dWl", "packChan", timedelta(seconds=3600)),
@@ -36,6 +37,7 @@ def test_ingest_series(source: str, series: str, location: str, interval: timede
     """This function tests whether each case in the ingest_series
         function is complete.
     """
+    load_dotenv()
 
     now = datetime.now()
     #creating objects to pass
