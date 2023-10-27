@@ -42,6 +42,7 @@ def test_ingest_series(source: str, series: str, location: str, interval: timede
     seriesDescription = SeriesDescription(source, series, location)
     timeDescription = TimeDescription(now, now, interval)
 
-    resultSeries = data_ingestion_factory(seriesDescription, timeDescription)
+    ingestSeries = data_ingestion_factory(seriesDescription)
+    resultsSeries = ingestSeries.ingest_series(seriesDescription, timeDescription)
 
-    assert resultSeries.isComplete() == True
+    assert resultsSeries.isComplete == True
