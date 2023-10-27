@@ -75,6 +75,7 @@ class SQLAlchemyORM(ISeriesStorage):
         fromGeneratedTime = timeDescription.fromDateTime - leadTime[0]
         toGeneratedTime = timeDescription.toDateTime - leadTime[0]
          
+        print(leadTime)
         statement = (select(self.outputs)
                     .where(self.outputs.c.dataLocation == semaphoreSeriesDescription.dataLocation)
                     .where(self.outputs.c.dataSeries == semaphoreSeriesDescription.dataSeries)
