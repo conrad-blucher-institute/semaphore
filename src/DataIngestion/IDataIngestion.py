@@ -36,12 +36,12 @@ def data_ingestion_factory(request: SeriesDescription) -> IDataIngestion:
     """Uses the source atribute of a data request to dynamically import a module
     ------
     Parameters
-        request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>Series)
+        request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
     Returns
         IDataIngestion - An child of the IDataIngestion interface.
     """
     try:
-        return getattr(import_module(f'src.DataIngestion.DataIngestion.{request.source}'), f'{request.source}')()
+        return getattr(import_module(f'src.DataIngestion.DataIngestion.{request.dataSource}'), f'{request.dataSource}')()
     except Exception:
-        raise ModuleNotFoundError(f'No module named {request.source} in src.DataIngestion.DataIngestion!')
+        raise ModuleNotFoundError(f'No module named {request.dataSource} in src.DataIngestion.DataIngestion!')
     
