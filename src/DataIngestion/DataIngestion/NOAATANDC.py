@@ -58,7 +58,7 @@ class NOAATANDC(IDataIngestion):
                     case 3600:
                         return self.fetch_Y_wind_components_hourly(seriesDescription, timeDescription)
                     case 360:
-                        return self.fetch_Y_wind_components_6min
+                        return self.fetch_Y_wind_components_6min(seriesDescription, timeDescription)
             case 'dSurge':
                 return self.fetch_surge_hourly(seriesDescription, timeDescription)
             case _:
@@ -66,18 +66,18 @@ class NOAATANDC(IDataIngestion):
                 return None
 
     def __init__(self):
-        self.sourceCode = "noaaT&C"
+        self.sourceCode = "NOAATANDC"
         self.__seriesStorage = series_storage_factory()
 
     #TODO:: There has to be a better way to do this!
     def __create_pattern1_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> str:
         return f'https://tidesandcurrents.noaa.gov/api/datagetter?product={product}&application=NOS.COOPS.TAC.MET&station={station}&time_zone=GMT&units=metric&interval=6&format=json&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&datum={datum}'
     
-    def __create_pattern2_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: timedelta) -> str:
-        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.MET&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&time_zone=GMT&units=metric&interval={interval.total_seconds()}&format=json'
+    def __create_pattern2_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: str) -> str:
+        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.MET&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&time_zone=GMT&units=metric&interval={interval}&format=json'
     
-    def __create_pattern3_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: timedelta, datum: str) -> str:
-        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.WL&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&datum={datum}&station={station}&time_zone=GMT&units=metric&interval={interval.total_seconds()}&format=json'
+    def __create_pattern3_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: str, datum: str) -> str:
+        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.WL&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&datum={datum}&station={station}&time_zone=GMT&units=metric&interval={interval}&format=json'
     
         
     
@@ -109,9 +109,7 @@ class NOAATANDC(IDataIngestion):
 
         dbResult = self.__seriesStorage.find_external_location_code(self.sourceCode, location)
         if dbResult:
-            resultOffset = 0
-            stationIndex = 3
-            return dbResult[resultOffset][stationIndex]
+            return dbResult
         else:
             log(f'Empty dataSource Location mapping received in NOAATidesAndCurrents for sourceCode: {self.sourceCode} AND locations: {location}')
             return None

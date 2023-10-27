@@ -19,30 +19,45 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 import pytest
 
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, date
 from DataClasses import Input, Series, TimeDescription, SeriesDescription
 from DataIngestion.IDataIngestion import data_ingestion_factory
+from SeriesStorage.ISeriesStorage import series_storage_factory
 from dotenv import load_dotenv
 
-@pytest.mark.parametrize("source, series, location, interval", [
-    ("NOAATANDC", "dWl", "packChan", timedelta(seconds=3600)),
-    ("NOAATANDC", "dXWnCmp", "packChan", timedelta(seconds=3600)), 
-    ("NOAATANDC", "dXWnCmp", "packChan", timedelta(seconds=360)), 
-    ("NOAATANDC", "dYWnCmp", "packChan", timedelta(seconds=3600)), 
-    ("NOAATANDC", "dYWnCmp", "packChan", timedelta(seconds=360)), 
-    ("NOAATANDC", "dSurge", "packChan", timedelta(seconds=3600))
+#datetime.combine(date(2023, 9, 5), time(11, 0))
+@pytest.mark.parametrize("source, series, location, interval, datum", [
+    ("NOAATANDC", "dWl", "packChan", timedelta(seconds=3600), "MHHW"),
+    ("NOAATANDC", "dXWnCmp", "packChan", timedelta(seconds=3600), "MHHW"), 
+    ("NOAATANDC", "dXWnCmp", "packChan", timedelta(seconds=360), "MHHW"), 
+    ("NOAATANDC", "dYWnCmp", "packChan", timedelta(seconds=3600), "MHHW"), 
+    ("NOAATANDC", "dYWnCmp", "packChan", timedelta(seconds=360), "MHHW"), 
+    ("NOAATANDC", "dSurge", "packChan", timedelta(seconds=3600), "MHHW")
 ])
 
-def test_ingest_series(source: str, series: str, location: str, interval: timedelta):
+def test_ingest_series(source: str, series: str, location: str, interval: timedelta, datum: str):
     """This function tests whether each case in the ingest_series
         function is complete.
     """
     load_dotenv()
 
-    now = datetime.now()
+    #Get a refrence to the ORM with factory 
+    orm = series_storage_factory()
+    
+    try:
+        orm.drop_DB()
+    except Exception as e:
+        pass
+    orm.create_DB()
+
+    #Load mappings with the insert_external_location_code method
+    orm.insert_external_location_code("packChan", "NOAATANDC", "8775792", 0)
+    
+    fromDate = datetime.combine(date(2023, 9, 5), time(11, 0))
+    toDate = datetime.combine(date(2023, 9, 5), time(17, 0))
     #creating objects to pass
-    seriesDescription = SeriesDescription(source, series, location)
-    timeDescription = TimeDescription(now, now, interval)
+    seriesDescription = SeriesDescription(source, series, location, datum)
+    timeDescription = TimeDescription(fromDate, toDate, interval)
 
     ingestSeries = data_ingestion_factory(seriesDescription)
     resultsSeries = ingestSeries.ingest_series(seriesDescription, timeDescription)
