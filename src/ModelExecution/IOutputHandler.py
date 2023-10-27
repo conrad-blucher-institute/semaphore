@@ -17,7 +17,7 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from DataClasses import  Series
+from DataClasses import SemaphoreSeriesDescription, Series
 from utility import log
 
 from abc import ABC, abstractmethod
