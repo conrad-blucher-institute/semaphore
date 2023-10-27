@@ -17,26 +17,27 @@ import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-from DataClasses import Prediction, SemaphoreSeriesDescription, Series
+from DataClasses import SemaphoreSeriesDescription, Series
 from ModelExecution.IOutputHandler import IOutputHandler
+from dspec import Dspec
 
 
 
 class OnePackedFloat(IOutputHandler):
 
 
-    def post_process_prediction(self, prediction: Prediction) -> list[Prediction]:
+    def post_process_prediction(self, prediction: list[any], dspec:Dspec) -> list[any]:
         """Unpacks the prediction value before saving them to the db
         Parameters:
-            predictionDesc: SemaphoreSeriesDescription
-            prediction: Prediction
+            prediction: list[]
+            dspec: Dspec
         Returns:
             The Response from the series provider 
         """
-        unpackedPrediction = self.__unpack(prediction.value)
+        unpackedPrediction = self.__unpack(prediction)
 
         predictions = []
-        predictions.append(Prediction(unpackedPrediction, prediction.unit, prediction.leadTime, prediction.generatedTime))
+        predictions.append(unpackedPrediction)
 
         return predictions
     
