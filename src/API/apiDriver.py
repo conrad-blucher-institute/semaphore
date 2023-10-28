@@ -18,7 +18,8 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from API.datetime_handler import parse_date
+from datetime import datetime
+
 from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription
 from SeriesProvider.SeriesProvider import SeriesProvider
 
@@ -60,9 +61,9 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
         HTTPException: If the series is not found.
     """
     try:
-        fromDateTime = parse_date(fromDateTime)
-        toDateTime = parse_date(toDateTime)
-    except ValueError as e:
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
+    except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
     
     requestDescription = SeriesDescription(
@@ -116,9 +117,9 @@ async def get_output(ModelName: str, ModelVersion: str, series: str, location: s
         HTTPException: If the series is not found.
     """ 
     try:
-        fromDateTime = parse_date(fromDateTime)
-        toDateTime = parse_date(toDateTime)
-    except ValueError as e:
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
+    except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
     
     requestDescription = SemaphoreSeriesDescription(
