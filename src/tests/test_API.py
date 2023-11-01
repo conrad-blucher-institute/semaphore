@@ -18,9 +18,9 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 import pytest
 from fastapi.testclient import TestClient
 
-from API import apiDriver
+from API.apiDriver import app
 
-client = TestClient(apiDriver)
+client = TestClient(app)
 
 @pytest.mark.parametrize("source, series, location, fromDateTime, toDateTime, expected_output", [
     ("NOAATANDC", "dXWnCmp", "packChan", "2023090411", "2023090511", "dXWnCmp"),

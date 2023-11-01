@@ -80,7 +80,7 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     )
 
     provider = SeriesProvider()
-    responseSeries = provider.make_request(requestDescription, timeDescription)
+    responseSeries = provider.request_input(requestDescription, timeDescription)
 
     return responseSeries
 
@@ -137,6 +137,6 @@ async def get_output(ModelName: str, ModelVersion: str, series: str, location: s
     )
 
     provider = SeriesProvider()
-    responseSeries = provider.make_output_request(requestDescription, timeDescription)
+    responseSeries = provider.request_output(requestDescription, timeDescription)
 
     return responseSeries
