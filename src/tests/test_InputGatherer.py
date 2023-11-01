@@ -80,8 +80,8 @@ def test_generateInputSpecifications():
     dspecFileName = 'test_dspec.json'
 
     inputGatherer = InputGatherer(dspecFileName)
-
-    inputGatherer.__generate_inputSpecifications(currentDate)
+    
+    inputGatherer._InputGatherer__generate_inputSpecifications(currentDate)
 
     inputSpecifications = inputGatherer.get_input_specifications()
 
