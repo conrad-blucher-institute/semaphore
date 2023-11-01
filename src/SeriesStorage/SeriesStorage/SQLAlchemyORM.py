@@ -25,6 +25,7 @@ from datetime import timedelta, datetime
 from SeriesStorage.ISeriesStorage import ISeriesStorage
 
 from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, Input, Output, TimeDescription
+from utility import log
 
 class SQLAlchemyORM(ISeriesStorage):
  
@@ -74,12 +75,21 @@ class SQLAlchemyORM(ISeriesStorage):
            :param timeDescription: TimeDescription - A hydrated time description object
         """
 
+        series = Series(semaphoreSeriesDescription, True, timeDescription)
+        
+
+        #Get the lead time for time calculations
         statement = (select(distinct(self.outputs.c.leadTime))
                     .where(self.outputs.c.dataLocation == semaphoreSeriesDescription.dataLocation)
                     .where(self.outputs.c.dataSeries == semaphoreSeriesDescription.dataSeries)
                     .where(self.outputs.c.dataDatum == semaphoreSeriesDescription.dataDatum)
                     )
-        leadTime = self.__dbSelection(statement).fetchall()[0]
+        leadTimes = self.__dbSelection(statement).fetchall()
+        if len(self.__dbSelection(statement).fetchall()) == 0: #If no lead time is found for some reason return nothing and log this
+            log(f'SQLAlchemyORM | select_output | No leadtime found for SemaphoreSeriesDescription:{semaphoreSeriesDescription}')
+            return series
+            
+        leadTime = leadTimes[0]
         fromGeneratedTime = timeDescription.fromDateTime - leadTime[0]
         toGeneratedTime = timeDescription.toDateTime - leadTime[0]
          
@@ -92,7 +102,6 @@ class SQLAlchemyORM(ISeriesStorage):
                     )
         tupleishResult = self.__dbSelection(statement).fetchall()
         outputResult = self.__splice_output(tupleishResult)
-        series = Series(semaphoreSeriesDescription, True, timeDescription)
         series.data = outputResult
         return series
     
