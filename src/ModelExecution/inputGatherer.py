@@ -71,7 +71,7 @@ class InputGatherer:
             outputInfo.leadTime = outputJson["leadTime"]
             outputInfo.series = outputJson["series"]
             outputInfo.location = outputJson["location"]
-            outputInfo.interval = outputJson["interval"]
+            outputInfo.interval = outputJson.get("interval")
             outputInfo.unit = outputJson.get("unit")
             outputInfo.datum = outputJson.get("datum")
 
@@ -130,7 +130,7 @@ class InputGatherer:
                     TimeDescription(
                         fromDateTime,
                         toDateTime,
-                        input.interval
+                        timedelta(seconds=input.interval)
                     ),
                     input.type
                     )
@@ -151,7 +151,7 @@ class InputGatherer:
             timeDescription = specification[1]
             dataType = specification[2]
 
-            responseSeries = self.__seriesProvider.make_request(seriesDescription, timeDescription)
+            responseSeries = self.__seriesProvider.request_input(seriesDescription, timeDescription)
             if responseSeries.isComplete:
                 [inputVector.append(dataPoint) for dataPoint in self.__cast_data(responseSeries.data, dataType)]
             else:
@@ -172,7 +172,7 @@ class InputGatherer:
         for datapoint in data:
             match dataType:
                 case 'float':
-                    castedData.append(float(datapoint.value))
+                    castedData.append(float(datapoint.dataValue))
                 case _:
                     log(f'Input gatherer has no conversion for Unit: {dataType}')
                     raise NotImplementedError

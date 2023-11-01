@@ -36,3 +36,32 @@ def test_createInput():
     assert input.timeGenerated == pastDate
     assert input.longitude == '-97.318'
     assert input.latitude == '27.4844'
+
+def test_InputEquivalence():
+    currentDate = datetime.now()
+    pastDate = currentDate - timedelta(days=7)
+
+    input1 = Input(dataValue = '1.028', 
+                  dataUnit = 'meter', 
+                  timeVerified = pastDate,
+                  timeGenerated = pastDate, 
+                  longitude = '-97.318',
+                  latitude = '27.4844')
+    
+    input2 = Input(dataValue = '1.028', 
+                  dataUnit = 'meter', 
+                  timeVerified = pastDate,
+                  timeGenerated = pastDate, 
+                  longitude = '-97.318',
+                  latitude = '27.4844')
+    
+    first = input1
+    second = [input1]
+
+    if (first in second): 
+        print('beep') 
+    else: 
+        print('eeep')
+    
+    assert False
+

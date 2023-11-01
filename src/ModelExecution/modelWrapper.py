@@ -19,8 +19,8 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from ModelExecution.inputGatherer import InputGatherer
 from ModelExecution.IOutputHandler import output_handler_factory
-from DataClasses import SemaphoreSeriesDescription, Prediction, Series
-from SeriesStorage.ISeriesStorage import series_storage_factory
+from src.DataClasses import SemaphoreSeriesDescription, Series
+from src.SeriesStorage.ISeriesStorage import series_storage_factory
 
 
 import datetime
@@ -101,7 +101,7 @@ class ModelWrapper:
         """
         try:
             inputs = self.__inputGatherer.get_inputs(dateTime)
-            if inputs == -1: return -1
+            if len(inputs) == 0: return -1
 
             shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
             prediction =  self._model.predict(shapedInputs) 
@@ -112,11 +112,11 @@ class ModelWrapper:
     
             #Instantiate the right output handler method then post process the predictions
             OH_Class = output_handler_factory(outputInfo.outputMethod)
-            processedOutput = OH_Class.post_process_prediction(prediction, dspec) 
+            processedOutputs = OH_Class.post_process_prediction(prediction, dspec) 
 
             #Put the post processed predictions in a series
             series = Series(predictionDesc, True)
-            series.data = processedOutput
+            series.data = processedOutputs
 
             #Send the prediction to the database and return the result
             SS_Class = series_storage_factory()

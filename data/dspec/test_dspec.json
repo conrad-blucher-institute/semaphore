@@ -5,7 +5,7 @@
     "modelFileName": "test_AI",
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
-        "leadTime": 24,
+        "leadTime": 86400,
         "series": "waterHeight",
         "location": "packChan",
         "interval" : 3600, 
