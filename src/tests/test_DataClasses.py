@@ -55,13 +55,5 @@ def test_InputEquivalence():
                   longitude = '-97.318',
                   latitude = '27.4844')
     
-    first = input1
-    second = [input1]
-
-    if (first in second): 
-        print('beep') 
-    else: 
-        print('eeep')
-    
-    assert False
+    assert input1 == input2
 

@@ -23,6 +23,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from datetime import timedelta
+
 from utility import log, construct_true_path
 from ModelExecution.inputGatherer import InputGatherer
 
@@ -104,5 +106,5 @@ def test_generateInputSpecifications():
         assert seriesDescription.dataSeries == inputsJson[0]["series"]
         assert seriesDescription.dataLocation == inputsJson[0]["location"]
         assert seriesDescription.dataDatum == inputsJson[0].get("datum")
-        assert timeDescription.interval == inputsJson[0]["interval"]
+        assert timeDescription.interval == timedelta(seconds=inputsJson[0]["interval"])
         assert dataType == inputsJson[0]["type"]
