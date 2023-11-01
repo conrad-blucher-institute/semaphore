@@ -56,6 +56,14 @@ class SQLAlchemyORM(ISeriesStorage):
         
         tupleishResult = self.__dbSelection(statement).fetchall()
         inputResult = self.__splice_input(tupleishResult)
+
+        # If an interval was provided, we will mod each verified time against it
+        # any that fail we remove
+        if timeDescription.interval != None:
+            for input in inputResult:
+                if not (input.timeVerified.timestamp() % timeDescription.interval.total_seconds() == 0):
+                    inputResult.remove(input)
+
         series = Series(seriesDescription, True, timeDescription)
         series.data = inputResult
         return series
