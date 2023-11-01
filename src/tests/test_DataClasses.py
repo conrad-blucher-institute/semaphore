@@ -23,12 +23,16 @@ def test_createInput():
     currentDate = datetime.now()
     pastDate = currentDate - timedelta(days=7)
 
-    input = Input(value = '1.028', 
-                  unit = 'meter', 
-                  timeGenerated = pastDate, 
-                  timeAcquired = currentDate, 
+    input = Input(dataValue = '1.028', 
+                  dataUnit = 'meter', 
                   timeVerified = pastDate,
+                  timeGenerated = pastDate, 
                   longitude = '-97.318',
                   latitude = '27.4844')
-
-    assert True
+    
+    assert input.dataValue == '1.028'
+    assert input.dataUnit == 'meter'
+    assert input.timeVerified == pastDate
+    assert input.timeGenerated == pastDate
+    assert input.longitude == '-97.318'
+    assert input.latitude == '27.4844'
