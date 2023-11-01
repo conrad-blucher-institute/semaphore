@@ -4,3 +4,4 @@ numpy
 tensorflow
 fastapi
 uvicorn
+lxml

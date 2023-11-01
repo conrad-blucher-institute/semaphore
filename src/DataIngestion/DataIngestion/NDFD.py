@@ -1,9 +1,31 @@
+# -*- coding: utf-8 -*-
+#NDFD.py
+#----------------------------------
+# Created By: Beto Estrada
+# Created Date: 9/15/2023
+# version 1.0
+#----------------------------------
+""" This file is a communicator with the National Digital Forecast Database (NDFD) Digital Weather Markup 
+Language (DWML) Generator. It will allow the ingestion of one series from NDFD. An object of this class must 
+be initialized with an ISeriesStorage interface, as fetched data is directly imported into the DB via that interface.
+
+NOTE:: Helpful NDFD links:
+        https://graphical.weather.gov/xml/
+        https://graphical.weather.gov/xml/SOAP_server/ndfdXML.htm
+
+NOTE:: Original code was taken from:
+        Created By: Brian Colburn 
+        Source: https://github.com/conrad-blucher-institute/tpw-ann/blob/master/atp-predictions-dwml.py &
+                https://github.com/conrad-blucher-institute/tpw-ann/blob/master/ndfdhandler.py
+ """ 
+#----------------------------------
+# 
+#
 from datetime import datetime
 import json
 import re
 import requests
-import time
-from typing import List, Dict, TypeVar, NewType, Tuple, Generic, Union, Callable, Optional
+from typing import List, Dict, TypeVar, NewType, Tuple, Generic, Callable
 from urllib.error import HTTPError
 import urllib.parse
 from urllib.request import urlopen
@@ -132,18 +154,6 @@ class NDFD(IDataIngestion):
         insertedRows = self.__seriesStorage.insert_predictions(series)
         # NOTE:: added .data. Before it turned data into just the Series object
         series.data = insertedRows.data #Rebind to only return what rows were inserted?
-
-        ''' KEEP FOR NOW
-        import pandas as pd
-        dataf = json.loads(dataf)
-        df = pd.DataFrame(dataf, columns=['date', 'data'])
-
-        # DATES ARE IN MILISECONDS. Epoch Unix Timestamps
-        df['date'] = pd.to_datetime(df['date'], unit='ms')
-
-        # Print the resulting DataFrame
-        print(df)
-        '''
 
         return series
 
