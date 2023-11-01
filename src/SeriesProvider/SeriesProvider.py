@@ -44,23 +44,26 @@ class SeriesProvider():
 
     def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series:
         """This method attempts to return a series matching a series description and a time description.
-            It will attempt to first get the series from series storage, kicking off data ingestion if series storage
+            It will attempt first to get the series from series storage, kicking off data ingestion if series storage
             doesn't have all the data.
-            NOTE: If an interval is not provided in the time description, the isComplete flag will always be false and data Ingestion will always be initiated.
+            NOTE: If an interval is not provided in the time description, the isComplete flag will always be false unless its a single data point (toTime = fromTime)
             :param seriesDescription - A description of the wanted series.
             :param timeDescription - A description of the temporal information of the wanted series. 
             :returns series - The series containing as much data as could be found.
         """
         
         try:
+            #if the to and from time are the same, this is a single data point
+            isSingleDataPoint = timeDescription.toDateTime == timeDescription.fromDateTime
+
             # Create the series that will be returned
             responseSeries = Series(seriesDescription, True, timeDescription)
             
             # Attempt to pull request from series storage.
             seriesStorageResults = self.seriesStorage.select_input(seriesDescription, timeDescription).data
 
-            # Calculate how many results we are expecting
-            amountOfExpectedResults = self.__get_amount_of_results_expected(timeDescription)
+            # Calculate how many results we are expecting, if this is a single value, it should only be 1 no matter if they provided and interval or not
+            amountOfExpectedResults = 1 if isSingleDataPoint else self.__get_amount_of_results_expected(timeDescription)
 
             # If we can validate that series storage had all the data we needed, we just return it.
             if amountOfExpectedResults != None and len(seriesStorageResults) == amountOfExpectedResults:
@@ -85,8 +88,10 @@ class SeriesProvider():
                 
                 # Second AmountCheck
                 if amountOfExpectedResults == None: 
-                    responseSeries.isComplete = False
-                    responseSeries.nonCompleteReason = 'Result completeness could not be verified. (Did you forget to assign an Interval?)'
+
+                    if(len(mergedResults) > 1):
+                        responseSeries.isComplete = True
+                        responseSeries.nonCompleteReason = 'Result completeness could not be verified. (Did you forget to assign an Interval?)'
                     return responseSeries
                 elif len(mergedResults) != amountOfExpectedResults:
                     responseSeries.isComplete = False
@@ -100,7 +105,7 @@ class SeriesProvider():
             errSeries.nonCompleteReason = f'An unknown exception occurred: \n {e}'
             return errSeries
     
-    def request_output(self, seriesDescription: SemaphoreSeriesDescription, timeDescription: TimeDescription) -> Series: 
+    def request_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription: TimeDescription) -> Series: 
         ''' Takes a description of an output series and attempts to return it
             :param seriesDescription: SemaphoreSeriesDescription -A semaphore series description
             :param timeDescription: TimeDescription - A description about the temporal parts of the output series
@@ -108,7 +113,7 @@ class SeriesProvider():
         '''
         
         ###See if we can get the outputs from the database
-        requestedSeries = self.seriesStorage.select_output(seriesDescription, timeDescription)
+        requestedSeries = self.seriesStorage.select_output(semaphoreSeriesDescription, timeDescription)
         return requestedSeries
         
     
@@ -123,7 +128,7 @@ class SeriesProvider():
         totalSecondsRequested = (timeDescription.toDateTime - timeDescription.fromDateTime).total_seconds()
 
         # We add one to acount for this being an inclusive time range. A time range from 12pm - 2pm includes both 12pm and 2pm.
-        return 1 + totalSecondsRequested // timeDescription.interval
+        return 1 + totalSecondsRequested // timeDescription.interval.total_seconds()
     
 
     def __merge_results(self, first: list, second: list) -> list:
