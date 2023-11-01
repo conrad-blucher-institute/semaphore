@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#test_DataClasses.py
+#test_NOAATANDC.py
 #-------------------------------
 # Created By: Savannah Stephenson
 # Created Date: 10/26/2023
@@ -25,7 +25,6 @@ from DataIngestion.IDataIngestion import data_ingestion_factory
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from dotenv import load_dotenv
 
-#datetime.combine(date(2023, 9, 5), time(11, 0))
 @pytest.mark.parametrize("source, series, location, interval, datum", [
     ("NOAATANDC", "dWl", "packChan", timedelta(seconds=3600), "MHHW"),
     ("NOAATANDC", "dXWnCmp", "packChan", timedelta(seconds=3600), "MHHW"), 
@@ -55,6 +54,7 @@ def test_ingest_series(source: str, series: str, location: str, interval: timede
     
     fromDate = datetime.combine(date(2023, 9, 5), time(11, 0))
     toDate = datetime.combine(date(2023, 9, 5), time(17, 0))
+    
     #creating objects to pass
     seriesDescription = SeriesDescription(source, series, location, datum)
     timeDescription = TimeDescription(fromDate, toDate, interval)
