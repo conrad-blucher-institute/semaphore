@@ -50,7 +50,6 @@ def test_pull_pd_endpoint_dataPoint(seriesDescription: SeriesDescription, timeDe
     if result == None:
         assert result == expected_output
     else:
-        print(result.data)
         assert len(result.data) == expected_output
 
 

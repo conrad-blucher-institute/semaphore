@@ -2,16 +2,10 @@
 #LIGHTHOUSE.py
 #----------------------------------
 # Created By: Matthew Kastl
-# Created Date: 4/8/2023
-# version 3.0
+# Created Date: 11/3/2023
+# version 1.0
 #----------------------------------
-""" This file is a communicator with the NOAA tides and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
-An object of this class must be initialized with a DBInterface, as fetched data is directly imported into the DB via that interface.
-
-NOTE:: For an Interval of 6min, no request can be longer than 31 days. A year for 1 hour.
-NOTE:: Original code was taken from:
-        Created By: Brian Colburn 
-        Source: https://github.com/conrad-blucher-institute/water-level-processing/blob/master/tides_and_currents_downloader.py#L84
+""" This file ingests data from CBI maintained Lighthouse
  """ 
 #----------------------------------
 # 
