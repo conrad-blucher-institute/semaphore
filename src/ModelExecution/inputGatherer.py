@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesProvider.SeriesProvider import SeriesProvider
 from DataClasses import SeriesDescription, TimeDescription, Input
-from ModelExecution.dspec import Dspec, OutputInfo, InputInfo
+from ModelExecution.dspec import Dspec, OutputInfo, InputInfo,TimingInfo
 
 
 from os import path, getenv
@@ -26,6 +26,7 @@ from utility import log, construct_true_path
 from json import load
 from csv import reader
 from datetime import datetime, timedelta
+
 
 from typing import List
 
@@ -62,6 +63,15 @@ class InputGatherer:
             dspec.modelVersion = json["modelVersion"]
             dspec.author = json["author"]
             dspec.modelFileName = json["modelFileName"]
+            
+            #TimingInfo
+            timingJson = json["timingInfo"]
+            
+            timingInfo = TimingInfo()
+            timingInfo.offset = timingJson["offset"]
+            timingInfo.interval = timingJson["interval"]
+            
+            dspec.timingInfo = timingInfo #Bind to dspec
             
             #OuputInfo
             outputJson = json["outputInfo"]
@@ -177,7 +187,14 @@ class InputGatherer:
                     log(f'Input gatherer has no conversion for Unit: {dataType}')
                     raise NotImplementedError
         return castedData
-
+    
+    def calculate_referenceTime(self, execution :datetime) -> datetime:
+        for timeInfo in self.__dspec.timingInfo:
+            offset = timeInfo[0]
+            interval = timeInfo[1]
+        referenceTime = datetime.utcfromtimestamp((execution.timestamp() - (execution.timestamp() % interval)) + offset)
+        return referenceTime
+    
     def get_inputs(self, dateTime: datetime) -> list[any]:
         """Getter method returns the input vector for the loaded model. Only regenerates the vector
         if its a new request or a request with a different datetime.
@@ -187,6 +204,7 @@ class InputGatherer:
             will be relative to it.
         """
 
+        
         #Only regenerate specification If its truly a new request.
         specificationIsCreated = self.__specifications != None
         requestTimeIsDifferent = dateTime != self.__specificationsConstructionTime
@@ -196,7 +214,9 @@ class InputGatherer:
             return self.__inputVector
         else:
             return self.__inputVector
-
+        
+   
+            
     def get_model_file_name(self) -> str:
         """Returns the name of the model as specified in the DSPEC file."""
         return self.__dspec.modelFileName     

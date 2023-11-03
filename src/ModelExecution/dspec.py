@@ -22,6 +22,7 @@ class Dspec:
         
         self.outputInfo = None
         self.inputs = []
+        self.timingInfo = None
 
     def __str__(self) -> str:
         return f'[Dspec] -> modelName: {self.modelName}, modelVersion: {self.modelVersion}, author: {self.author}, modelFileName: {self.modelFileName}'
@@ -65,3 +66,18 @@ class InputInfo:
     
     def __repr__(self):
         return f'\nInputInfo({self.name}, {self.location}, {self.source}, {self.series}, {self.unit}, {self.type}, {self.datum}, {self.range})'
+    
+class TimingInfo:
+    """Timing info should contain everything that could be obtained in a dspec timing info object
+    """
+    def __init__(self) -> None:
+        self.offset = None
+        self.interval = None
+        
+    def __str__(self) -> str:
+        return f'\n[TimingInfo] -> offset: {self.offset}, interval: {self.interval})'
+    
+    def __repr__(self):
+        return f'\nTimingInfo({self.offset},{self.interval})'
+    
+    

@@ -19,7 +19,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from sqlalchemy import select
 from os import path, getenv
-from src.SeriesStorage.SeriesStorage.SQLLite import SQLLite
+from src.SeriesStorage.SeriesStorage.SQLAlchemyORM import SQLAlchemyORM
 from src.ModelExecution.modelWrapper import ModelWrapper
 from src.ModelExecution.inputGatherer import InputGatherer
 from src.utility import log, construct_true_path
@@ -39,20 +39,14 @@ def run_semaphore(fileName: str, executionTime: datetime = None):
         executionTime = datetime.now()
 
         MW = ModelWrapper(fileName)
-        refrenceTime = calculate_refrence_time(executionTime, MW)
-        result = MW.make_and_save_prediction(refrenceTime)
+        result = MW.make_and_save_prediction(executionTime)
         print(result)
         print(result.data)
     else: 
         MW = ModelWrapper(fileName)
-        refrenceTime = calculate_refrence_time(executionTime, MW)
-        result = MW.make_and_save_prediction(refrenceTime)
+        result = MW.make_and_save_prediction(executionTime)
         print(result)
         print(result.data) 
-
-def calculate_refrence_time(executionTime: datetime, MW: ModelWrapper):
-    #
-    pass
 
 #argument parsing
 if __name__ == '__main__':

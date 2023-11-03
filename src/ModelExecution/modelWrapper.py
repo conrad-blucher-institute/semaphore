@@ -86,8 +86,11 @@ class ModelWrapper:
     def make_prediction(self, dateTime: datetime) -> any:
         """Public method to generate a prediction given a datetime.
         """
+        #converting execution time to reference time
+        referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
+        
         try:
-            inputs = self.__inputGatherer.get_inputs(dateTime)
+            inputs = self.__inputGatherer.get_inputs(referenceTime)
             if inputs == -1: return -1
             
             shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
@@ -99,8 +102,11 @@ class ModelWrapper:
     def make_and_save_prediction(self, dateTime: datetime) -> any:
         """Public method to generate a prediction given a datetime.
         """
+        #converting execution time to reference time
+        referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
+        
         try:
-            inputs = self.__inputGatherer.get_inputs(dateTime)
+            inputs = self.__inputGatherer.get_inputs(referenceTime)
             if len(inputs) == 0: return -1
 
             shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
