@@ -17,8 +17,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesProvider.SeriesProvider import SeriesProvider
-from DataClasses import SeriesDescription, Series, Actual, Prediction
-from ModelExecution.dspec import Dspec, OutputInfo, Input
+from DataClasses import SeriesDescription, TimeDescription, Input
+from ModelExecution.dspec import Dspec, OutputInfo, InputInfo
 
 
 from os import path, getenv
@@ -71,9 +71,10 @@ class InputGatherer:
             outputInfo.leadTime = outputJson["leadTime"]
             outputInfo.series = outputJson["series"]
             outputInfo.location = outputJson["location"]
-            outputInfo.interval = outputJson["interval"]
+            outputInfo.interval = outputJson.get("interval")
+            outputInfo.unit = outputJson.get("unit")
             outputInfo.datum = outputJson.get("datum")
-            outputInfo.unit = outputJson["unit"]
+
             dspec.outputInfo = outputInfo #Bind to dspec
 
             #inputs
@@ -81,25 +82,25 @@ class InputGatherer:
             inputs = []
             
             for inputJson in inputsJson:
-                input = Input()
-                input.name = inputJson["name"]
+                input = InputInfo()
+                input.name = inputJson["_name"]
                 input.location = inputJson["location"]
                 input.source = inputJson["source"]
                 input.series = inputJson["series"]
-                input.dataClassification = inputJson["dataClassification"]
-                input.unit = inputJson["unit"]
                 input.type = inputJson["type"]
-                input.datum = inputJson.get("datum")
                 input.interval = inputJson["interval"]
                 input.range = inputJson["range"]
+                input.datum = inputJson.get("datum")
+                input.unit = inputJson.get("unit")
+
                 inputs.append(input)
             dspec.inputs = inputs #Bind to dspec
 
             self.__dspec = dspec #Bind dspec to this obj
 
     def __generate_inputSpecifications(self, now: datetime) -> None:
-        """Generates the list of input specification. This is a request paired
-        with the expected datatype as a tuple. This list is saved as an attributes
+        """Generates the list of input specifications. This is a request paired
+        with the expected datatype as a list. This list is saved as an attribute
         on this class. Also saves the time in which this was requested. This can be 
         used to determine if the specification needs to be remade.
 
@@ -118,24 +119,24 @@ class InputGatherer:
                 if (input.range[0] == input.range[1]): #isOnePoint
                     fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
 
-                #specifications is a pairing of a request and what type it should be
+                #specifications is a pairing of a request and what type it should 
                 specifications.append((
                     SeriesDescription(
                         input.source, 
                         input.series,
-                        input.dataClassification, 
-                        input.location, 
-                        input.unit, 
-                        input.interval,
-                        fromDateTime, 
-                        toDateTime, 
+                        input.location,
                         input.datum
+                    ),
+                    TimeDescription(
+                        fromDateTime,
+                        toDateTime,
+                        timedelta(seconds=input.interval)
                     ),
                     input.type
                     )
                 )
             except Exception as e:
-                log(f'ERROR: There was a problem in the input generating input requests.\n\n Input= {input} Error= {e}')
+                log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
         self.__specifications = specifications
         self.__specificationsConstructionTime = now
 
@@ -145,22 +146,23 @@ class InputGatherer:
         """
         inputVector = []
         for specification in self.__specifications:
-            #unpack specification tuple
-            requestDesc = specification[0]
-            dataType = specification[1]
+            #unpack specification
+            seriesDescription = specification[0]
+            timeDescription = specification[1]
+            dataType = specification[2]
 
-            responseSeries = self.__seriesProvider.make_request(requestDesc)
+            responseSeries = self.__seriesProvider.request_input(seriesDescription, timeDescription)
             if responseSeries.isComplete:
                 [inputVector.append(dataPoint) for dataPoint in self.__cast_data(responseSeries.data, dataType)]
             else:
                 log(f'ERROR: There was a problem with input gatherer making requests.\n\n Response: {responseSeries}\n\n')
         self.__inputVector = inputVector
 
-    def __cast_data(self, data: list[Actual | Prediction], dataType: str) -> list[any]:
+    def __cast_data(self, data: list[Input], dataType: str) -> list[any]:
         """Casts vector of data to a given type.
 
         Parameters:
-            data: list[Actual | Prediction] - The data to cast.
+            data: list[Input] - The data to cast.
             dataType: str = The datatype as a string to cast to.
         ReturnsL
             list[any] - The casted data
@@ -170,7 +172,7 @@ class InputGatherer:
         for datapoint in data:
             match dataType:
                 case 'float':
-                    castedData.append(float(datapoint.value))
+                    castedData.append(float(datapoint.dataValue))
                 case _:
                     log(f'Input gatherer has no conversion for Unit: {dataType}')
                     raise NotImplementedError
@@ -202,3 +204,6 @@ class InputGatherer:
     def get_dspec(self) -> Dspec:
         return self.__dspec
 
+    def get_input_specifications(self) -> list:
+        """Returns list of input specifications."""
+        return self.__specifications
