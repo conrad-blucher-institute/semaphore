@@ -44,6 +44,10 @@ class NOAATANDC(IDataIngestion):
 
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
+
+        # 6min is the lowest you can sample the data so its the default if no interval
+        timeDescription.interval = timeDescription.interval if timeDescription.interval != None else timedelta(seconds=360) 
+
         match seriesDescription.dataSeries:
             case 'dWl':
                 return self.fetch_water_level_hourly(seriesDescription, timeDescription)

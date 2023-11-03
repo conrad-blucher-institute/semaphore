@@ -27,6 +27,7 @@ client = TestClient(app)
 ])
 def test_getInput(source: str, series: str, location: str, fromDateTime: str, toDateTime: str, expected_output: str):
     """This function tests whether the API successfully retrieves the requested input
+    NOTE:: This test depends on DBM.insert_external_location_code('packChan', 'NOAATANDC', '8775792', 0) pre=existing in db
     """
     response = client.get(f"/input/source={source}/series={series}/location={location}/fromDateTime={fromDateTime}/toDateTime={toDateTime}")
     assert response.status_code == 200
