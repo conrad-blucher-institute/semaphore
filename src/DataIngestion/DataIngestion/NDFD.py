@@ -38,8 +38,9 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from DataIngestion.IDataIngestion import IDataIngestion
-from DataClasses import SeriesDescription, Series, Prediction
+from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from SeriesStorage.ISeriesStorage import series_storage_factory
+from utility import log
 
 Time = TypeVar('Time')
 NewTime = TypeVar('NewTime')
@@ -56,10 +57,10 @@ ZippedDataset = List[Tuple[SeriesName, List[Tuple[Time, Data]]]]
 
 class NDFD(IDataIngestion):
 
-    def ingest_series(self, seriesDescription: SeriesDescription) -> Series | None:
-        match seriesDescription.series:
+    def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
+        match seriesDescription.dataSeries:
             case 'pAirTemp':
-                return self.fetch_predictions(seriesDescription, 'temp')
+                return self.fetch_predictions(seriesDescription, timeDescription, 'temp')
 
 
     def __init__(self):
@@ -67,26 +68,24 @@ class NDFD(IDataIngestion):
         self.__seriesStorage = series_storage_factory()
      
 
-    def __create_url_pattern(self, request: SeriesDescription, products: str) -> str:
+    def __create_url_pattern(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, products: str) -> str:
         # I'm explicitly using ISO 8601 formatted time strings *without* timezone
         # information b/c the NDFD web service _seems_ to ignore UTC timezone
         # specified as 'Z' or '+00:00' ?!
         #
         # I'd have to test more to verify, but we just want at least 48 hours of
         # predictions starting w/ the closest time
-        t0_str = request.fromDateTime.isoformat()
-        t1_str = request.toDateTime.isoformat()
+        t0_str = timeRequest.fromDateTime.isoformat()
+        t1_str = timeRequest.toDateTime.isoformat()
 
         # NOTE:: Needs to be implemented. Also, need to confirm coordinates for SBirdIsland
-        #lat, lon = get_coordinates(request.location)
-        if(request.location == 'SBirdIsland'): # NOTE:: Temporary
+        #lat, lon = get_coordinates(seriesRequest.location)
+        if(seriesRequest.dataLocation == 'SBirdIsland'): # NOTE:: Temporary
             lat = '27.4844'
             lon = '-97.318'
 
-        print("Retrieving NDFD [{}] data between {} and {} at location ({},{}) ".format(products, t0_str, t1_str, lat, lon))
-
-        begin = urllib.parse.quote(t0_str)  # e.g., '2019-04-11T23%3A00%3A00%2B00%3A00'
-        end   = urllib.parse.quote(t1_str)
+        beginDate = urllib.parse.quote(t0_str)  # e.g., '2019-04-11T23%3A00%3A00%2B00%3A00'
+        endDate   = urllib.parse.quote(t1_str)
 
         base_url = 'https://graphical.weather.gov/xml/SOAP_server/ndfdXMLclient.php?whichClient=NDFDgen&Submit=Submit'
         # NOTE:: Could probably just be one string rather than the join
@@ -95,8 +94,8 @@ class NDFD(IDataIngestion):
         url = '{}&lat={}&lon={}&product=time-series&begin={}&end={}&Unit=m&{}'.format(base_url,
                                                                                     lat,
                                                                                     lon,
-                                                                                    begin,
-                                                                                    end,
+                                                                                    beginDate,
+                                                                                    endDate,
                                                                                     formatted_products)
         
         return url
@@ -111,15 +110,15 @@ class NDFD(IDataIngestion):
             response = requests.get(url)
             return response.text
         except HTTPError as err:
-            print(f'Fetch failed, HTTPError of code: {err.status} for: {err.reason}')
+            log(f'Fetch failed, HTTPError of code: {err.status} for: {err.reason}')
             return None
         except Exception as ex:
-            print(f'Fetch failed, unhandled exceptions: {ex}')
+            log(f'Fetch failed, unhandled exceptions: {ex}')
             return None
         
 
-    def fetch_predictions(self, request: SeriesDescription, products: str) -> None | dict:
-        url = self.__create_url_pattern(request, products)
+    def fetch_predictions(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, products: str) -> None | dict:
+        url = self.__create_url_pattern(seriesRequest, products)
 
         response = self.__api_request(url)
 
@@ -131,31 +130,27 @@ class NDFD(IDataIngestion):
         if len(data) == 1:
             # If there's only one product, only return the values
             data_dictionary = json.loads(json.dumps(data[0][1]))
-        else:
-            # Otherwise, return a mapping from product name to product values
-            print(json.dumps(dict(data)))
 
-        predictions = []
+
+        inputs = []
         for row in data_dictionary:
-            prediction = Prediction(
-                value = row[1],
-                unit = NDFD_Predictions.unit,
-                leadTime = 0, # NOTE:: Need to figure out
-                generatedTime = datetime.fromtimestamp(row[0] / 1000), # NOTE:: temporary solution, also milliseconds converted to seconds
+            dataPoints = Input(
+                dataValue = row[1],
+                dataUnit = NDFD_Predictions.unit,
+                timeVerified = datetime.fromtimestamp(row[0] / 1000), # Milliseconds converted to seconds
+                generatedTime = datetime.fromtimestamp(row[0] / 1000), # NOTE:: Need to figure out
                 longitude = NDFD_Predictions.longitude,
                 latitude = NDFD_Predictions.latitude
             )
-            predictions.append(prediction)
+            inputs.append(dataPoints)
 
-        series = Series(request, True)
-        series.data = predictions
+        resultSeries = Series(seriesRequest, True)
+        resultSeries.data = inputs
 
-        #insertData to DB
-        insertedRows = self.__seriesStorage.insert_predictions(series)
-        # NOTE:: added .data. Before it turned data into just the Series object
-        series.data = insertedRows.data #Rebind to only return what rows were inserted?
+        # Insert series into DB
+        self.__seriesStorage.insert_input(resultSeries)
 
-        return series
+        return resultSeries
 
   
 class NDFDPredictions(Generic[Time, Data]):
