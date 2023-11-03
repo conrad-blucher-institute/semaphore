@@ -63,7 +63,7 @@ if __name__ == '__main__':
                        help= "The name of the DSPEC file of the model you wish Semaphore to run. Should be a .json file.")
     
     parser.add_argument("-p", "--past", type=str, required=False, default=None,
-                        help = "The time we are executing this action with Semaphore. Should be entered in YYYYMMDDHH format. Should only be provided if you intend to run Semaphore in the past.")
+                        help = "The time we are executing this action with Semaphore. Should be entered in YYYYMMDDHHMM format. Should only be provided if you intend to run Semaphore in the past.")
 
     args = parser.parse_args()
 
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     if args.past is not None: 
         #checking that the past time passed is formatted correctly (stolen from beto)
         try: 
-            execution_time = datetime.strptime(args.past, '%Y%m%d%H')
+            execution_time = datetime.strptime(args.past, '%Y%m%d%H%M')
         except:
             log('Bad datetime string given.')
             raise ValueError('The provided time was not in the correct format.')
