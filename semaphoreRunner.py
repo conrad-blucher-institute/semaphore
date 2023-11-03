@@ -33,7 +33,7 @@ def run_semaphore(fileName: str, executionTime: datetime = None):
     
     
     #should there be some method to know if this is the first time they've run 
-    #semaphore and need to create the tables??
+    #semaphore and need to create the tables?? maybe an argument?
 
     if executionTime == None: 
         executionTime = datetime.now()
@@ -54,7 +54,6 @@ if __name__ == '__main__':
     #creating argument parser
     parser = argparse.ArgumentParser(
                     prog='semaphoreRunner.py',
-                    usage = '%(prog) [-h] [-d] [-p] ',
                     description='Run semaphore from the command line.',
                     epilog='End Help')
    
