@@ -277,12 +277,12 @@ class SQLAlchemyORM(ISeriesStorage):
             Column("dataSource", String(10), ForeignKey("ref_dataSource.code"), nullable=False),
             Column("dataLocation", String(25), ForeignKey("ref_dataLocation.code"), nullable=False), 
             Column("dataSeries", String(10), ForeignKey("ref_dataSeries.code"), nullable=False), 
-            Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"),  nullable=True),
+            Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"),  nullable=False),
             
             Column("latitude", String(16), nullable=True),
             Column("longitude", String(16), nullable=True),
 
-            UniqueConstraint("isActual", "generatedTime", "verifiedTime", "dataUnit", "dataSource", "dataLocation", "dataSeries", "latitude", "longitude"),
+            UniqueConstraint("isActual", "generatedTime", "verifiedTime", "dataUnit", "dataSource", "dataLocation", "dataSeries", "dataDatum", "latitude", "longitude"),
         )
 
         
