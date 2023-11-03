@@ -122,6 +122,9 @@ class NDFD(IDataIngestion):
 
         response = self.__api_request(url)
 
+        if response is None:
+            return None
+
         NDFD_Predictions: NDFDPredictions[str, str] = NDFDPredictions(response)
 
         data: ZippedDataset[int, int] = NDFD_Predictions.map(iso8601_to_unixms, int).zipped()
