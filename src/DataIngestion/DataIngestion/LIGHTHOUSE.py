@@ -50,7 +50,6 @@ class LIGHTHOUSE(IDataIngestion):
 
     def __api_request(self, url: str) -> None | dict:
         """Given the parameters, generates and utilize a url to hit the t&C api. 
-        NOTE No date range of 31 days will be accepted! - raises Value Error
         NOTE On a bad api param, throws urlib HTTPError, code 400
         """
        
@@ -76,7 +75,11 @@ class LIGHTHOUSE(IDataIngestion):
         apiReturn = self.__api_request(url)
 
         print('\n\n\n\n\n\n\n\n\n\n\n\n')
+        print(apiReturn)
         print(apiReturn['013']['data']['atp'])
+
+        data = apiReturn['013']['data']['atp']
+        for datapoint in data
         print('\n\n\n\n\n\n\n\n\n\n\n\n')
         assert False
 
