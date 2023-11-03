@@ -161,7 +161,7 @@ class InputGatherer:
             timeDescription = specification[1]
             dataType = specification[2]
 
-            responseSeries = self.__seriesProvider.make_request(seriesDescription, timeDescription)
+            responseSeries = self.__seriesProvider.request_input(seriesDescription, timeDescription)
             if responseSeries.isComplete:
                 [inputVector.append(dataPoint) for dataPoint in self.__cast_data(responseSeries.data, dataType)]
             else:
@@ -189,10 +189,14 @@ class InputGatherer:
         return castedData
     
     def calculate_referenceTime(self, execution :datetime) -> datetime:
-        for timeInfo in self.__dspec.timingInfo:
-            offset = timeInfo[0]
-            interval = timeInfo[1]
+        '''This function calculates the refrence time that semaphore needs to use to get the correct number of inputs from execution time
+        :param execution: datetime -the execution time'''
+
+        offset = self.__dspec.timingInfo.offset
+        interval = self.__dspec.timingInfo.interval
+
         referenceTime = datetime.utcfromtimestamp((execution.timestamp() - (execution.timestamp() % interval)) + offset)
+
         return referenceTime
     
     def get_inputs(self, dateTime: datetime) -> list[any]:
@@ -203,7 +207,6 @@ class InputGatherer:
             dateTime: datetime - The datetime to base the input vector off of, the returned vector
             will be relative to it.
         """
-
         
         #Only regenerate specification If its truly a new request.
         specificationIsCreated = self.__specifications != None
