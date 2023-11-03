@@ -22,7 +22,6 @@ import pytest
 from datetime import datetime, timedelta, time, date
 from DataClasses import Input, Series, TimeDescription, SeriesDescription
 from DataIngestion.IDataIngestion import data_ingestion_factory
-from SeriesStorage.ISeriesStorage import series_storage_factory
 from dotenv import load_dotenv
 
 @pytest.mark.parametrize("source, series, location, interval, datum", [
@@ -37,20 +36,10 @@ from dotenv import load_dotenv
 def test_ingest_series(source: str, series: str, location: str, interval: timedelta, datum: str):
     """This function tests whether each case in the ingest_series
         function is complete.
+        NOTE:: This test depends on DBM.insert_external_location_code('packChan', 'NOAATANDC', '8775792', 0) pre=existing in db
     """
     load_dotenv()
 
-    #Get a refrence to the ORM with factory 
-    orm = series_storage_factory()
-    
-    try:
-        orm.drop_DB()
-    except Exception as e:
-        pass
-    orm.create_DB()
-
-    #Load mappings with the insert_external_location_code method
-    orm.insert_external_location_code("packChan", "NOAATANDC", "8775792", 0)
     
     fromDate = datetime.combine(date(2023, 9, 5), time(11, 0))
     toDate = datetime.combine(date(2023, 9, 5), time(17, 0))
