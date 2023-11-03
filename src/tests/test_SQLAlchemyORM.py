@@ -50,8 +50,7 @@ def test_input_table():
     #Load fresh DB
     load_dotenv()
     sqlorm = SQLAlchemyORM()
-    sqlorm.drop_DB()
-    sqlorm.create_DB()
+    makeFreshDb()
 
     now = datetime.now()
 
@@ -76,8 +75,7 @@ def test_input_table_with_interval_Hourly():
     #Load fresh DB
     load_dotenv()
     sqlorm = SQLAlchemyORM()
-    sqlorm.drop_DB()
-    sqlorm.create_DB()
+    makeFreshDb()
 
     # Create needed data objects There is one row that is off the hour
     seriesDescription = SeriesDescription('apple', 'banana', 'orange', 'grape')
@@ -111,8 +109,7 @@ def test_input_table_with_interval_6min():
     #Load fresh DB
     load_dotenv()
     sqlorm = SQLAlchemyORM()
-    sqlorm.drop_DB()
-    sqlorm.create_DB()
+    makeFreshDb()
 
     # Create needed data objects There is one row that is off the hour 
     seriesDescription = SeriesDescription('apple', 'banana', 'orange', 'grape')
@@ -143,10 +140,8 @@ def test_output_table():
     """This test tests the ORMs ability to insert data into the db's output table, and pull it back
     """
     #Load fresh DB
-    load_dotenv()
     sqlorm = SQLAlchemyORM()
-    sqlorm.drop_DB()
-    sqlorm.create_DB()
+    makeFreshDb()
 
     now = datetime.now()
 
@@ -170,3 +165,15 @@ def test_output_table():
 
     assert result.data == series.data
 
+
+
+def makeFreshDb():
+    load_dotenv()
+    DBM = SQLAlchemyORM()
+    DBM.drop_DB()
+    DBM.create_DB()
+    DBM.insert_external_location_code('BHP', 'NOAATANDC', '8775870', 0)
+    DBM.insert_external_location_code('packChan', 'NOAATANDC', '8775792', 0)
+    DBM.insert_external_location_code('Aransas', 'NOAATANDC', '8775241', 0)
+    DBM.insert_external_location_code('lagunamadre', 'tcoon', '48646513645', 0)
+    DBM.insert_external_location_code('SouthBirdIsland', 'LIGHTHOUSE', '013', 0)
