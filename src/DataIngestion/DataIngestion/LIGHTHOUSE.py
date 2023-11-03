@@ -67,6 +67,11 @@ class LIGHTHOUSE(IDataIngestion):
         return data
 
     def __pull_pd_endpoint_dataPoint(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
+        """This function pulls data from LIGHTHOUSE's pd endpoint
+        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull 
+        :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull 
+        :param Series | None: A series containing the imported data or none if something went wrong
+"""
         
         # Reformat and sterilize datetimes
         fromString = timeDescription.fromDateTime.strftime('%m/%d/%y').replace('/', '%2F')
