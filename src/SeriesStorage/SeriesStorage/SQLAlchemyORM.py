@@ -22,7 +22,7 @@ from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData
 from os import getenv
 from datetime import timedelta, datetime
 
-from SeriesStorage.ISeriesStorage import ISeriesStorage
+from src.SeriesStorage.ISeriesStorage import ISeriesStorage
 
 from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, Input, Output, TimeDescription
 from utility import log
@@ -54,7 +54,6 @@ class SQLAlchemyORM(ISeriesStorage):
             .where(self.inputs.c.verifiedTime >= timeDescription.fromDateTime)
             .where(self.inputs.c.verifiedTime <= timeDescription.toDateTime)
             )
-        
         tupleishResult = self.__dbSelection(statement).fetchall()
         inputResult = self.__splice_input(tupleishResult)
 
@@ -283,7 +282,7 @@ class SQLAlchemyORM(ISeriesStorage):
             Column("latitude", String(16), nullable=True),
             Column("longitude", String(16), nullable=True),
 
-            UniqueConstraint("isActual", "generatedTime", "verifiedTime", "dataUnit", "dataSource", "dataLocation", "dataSeries", "dataDatum", "latitude", "longitude"),
+            UniqueConstraint("isActual", "generatedTime", "verifiedTime", "dataUnit", "dataSource", "dataLocation", "dataSeries", "latitude", "longitude"),
         )
 
         
@@ -429,10 +428,10 @@ class SQLAlchemyORM(ISeriesStorage):
             dataPoints.append(Input(
                 row[valueIndex],
                 row[unitIndex],
-                row[generatedTimeIndex],
                 row[verifiedTimeIndex],
-                row[latitudeIndex],
-                row[longitudeIndex]
+                row[generatedTimeIndex],
+                row[longitudeIndex],
+                row[latitudeIndex]
             ))
 
         return dataPoints

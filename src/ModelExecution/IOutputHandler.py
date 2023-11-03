@@ -22,11 +22,13 @@ from utility import log
 
 from abc import ABC, abstractmethod
 from importlib import import_module
-from dspec import Dspec
+from src.ModelExecution.dspec import Dspec
+from src.DataClasses import Output
+
 class IOutputHandler(ABC):
    
     @abstractmethod
-    def post_process_prediction(self, prediction: list[any], dspec:Dspec ) -> Series:
+    def post_process_prediction(self, prediction: list[any], dspec: Dspec ) -> list[Output]:
         raise NotImplementedError()
              
        

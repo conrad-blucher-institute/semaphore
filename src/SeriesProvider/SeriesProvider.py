@@ -52,58 +52,53 @@ class SeriesProvider():
             :returns series - The series containing as much data as could be found.
         """
         
-        try:
-            #if the to and from time are the same, this is a single data point
-            isSingleDataPoint = timeDescription.toDateTime == timeDescription.fromDateTime
+        #if the to and from time are the same, this is a single data point
+        isSingleDataPoint = timeDescription.toDateTime == timeDescription.fromDateTime
 
-            # Create the series that will be returned
-            responseSeries = Series(seriesDescription, True, timeDescription)
-            
-            # Attempt to pull request from series storage.
-            seriesStorageResults = self.seriesStorage.select_input(seriesDescription, timeDescription).data
+        # Create the series that will be returned
+        responseSeries = Series(seriesDescription, True, timeDescription)
+        
+        # Attempt to pull request from series storage.
+        seriesStorageResults = self.seriesStorage.select_input(seriesDescription, timeDescription).data
 
-            # Calculate how many results we are expecting, if this is a single value, it should only be 1 no matter if they provided and interval or not
-            amountOfExpectedResults = 1 if isSingleDataPoint else self.__get_amount_of_results_expected(timeDescription)
+        # Calculate how many results we are expecting, if this is a single value, it should only be 1 no matter if they provided and interval or not
+        amountOfExpectedResults = 1 if isSingleDataPoint else self.__get_amount_of_results_expected(timeDescription)
 
-            # If we can validate that series storage had all the data we needed, we just return it.
-            if amountOfExpectedResults != None and len(seriesStorageResults) == amountOfExpectedResults:
+        # If we can validate that series storage had all the data we needed, we just return it.
+        if amountOfExpectedResults != None and len(seriesStorageResults) == amountOfExpectedResults:
+            responseSeries.data = seriesStorageResults
+            return responseSeries
+        
+        else: #Else we need to call data ingestion.
+
+            # Call Data Ingestion to fetch data
+            dataIngestion = data_ingestion_factory(seriesDescription)
+            dataIngestionSeries = dataIngestion.ingest_series(seriesDescription, timeDescription)
+
+            # If for some reason data ingestion fails we just return series storage results.
+            if dataIngestionSeries is None:
+                responseSeries.isComplete = False
+                responseSeries.nonCompleteReason = 'Series storage results could not be verified, dataIngestion returned None'
                 responseSeries.data = seriesStorageResults
                 return responseSeries
             
-            else: #Else we need to call data ingestion.
-
-                # Call Data Ingestion to fetch data
-                dataIngestion = data_ingestion_factory(seriesDescription)
-                dataIngestionSeries = dataIngestion.ingest_series(seriesDescription, timeDescription)
-
-                # If for some reason data ingestion fails we just return series storage results.
-                if dataIngestionSeries is None:
-                    responseSeries.isComplete = False
-                    responseSeries.nonCompleteReason = 'Series storage results could not be verified, dataIngestion returned None'
-                    responseSeries.data = seriesStorageResults
-                    return responseSeries
-                
-                mergedResults = self.__merge_results(seriesStorageResults, dataIngestionSeries.data)
-                responseSeries.data = mergedResults # At this point this is the max possible results we can return.
-                
-                # Second AmountCheck
-                if amountOfExpectedResults == None: 
-
-                    if(len(mergedResults) > 1):
-                        responseSeries.isComplete = True
-                        responseSeries.nonCompleteReason = 'Result completeness could not be verified. (Did you forget to assign an Interval?)'
-                    return responseSeries
-                elif len(mergedResults) != amountOfExpectedResults:
-                    responseSeries.isComplete = False
-                    responseSeries.nonCompleteReason = 'Combined data ingestion and series storage results were more or less than expected.'
-                    return responseSeries
-                else: # This means the data is validated to be whole
-                    return responseSeries
+            mergedResults = self.__merge_results(seriesStorageResults, dataIngestionSeries.data)
+            responseSeries.data = mergedResults # At this point this is the max possible results we can return.
             
-        except Exception as e:
-            errSeries = Series(seriesDescription, False, timeDescription)
-            errSeries.nonCompleteReason = f'An unknown exception occurred: \n {e}'
-            return errSeries
+            # Second AmountCheck
+            if amountOfExpectedResults == None: 
+
+                if(len(mergedResults) > 1):
+                    responseSeries.isComplete = True
+                    responseSeries.nonCompleteReason = 'Result completeness could not be verified. (Did you forget to assign an Interval?)'
+                return responseSeries
+            elif len(mergedResults) != amountOfExpectedResults:
+                responseSeries.isComplete = False
+                responseSeries.nonCompleteReason = f'Combined data ingestion and series storage results were more or less than expected. Number of Results: {len(mergedResults)} | Number of Expected: {amountOfExpectedResults}'
+                return responseSeries
+            else: # This means the data is validated to be whole
+                return responseSeries
+            
     
     def request_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription: TimeDescription) -> Series: 
         ''' Takes a description of an output series and attempts to return it
@@ -143,7 +138,10 @@ class SeriesProvider():
             # return first + list(uniqueToSecond)
         #But its not hashing properly anymore, needs to be looked into
 
-        for actual in second:
-            if not actual in first: first.append(actual)
+        for item in second:
+            if item not in first:
+                first.append(item)
         return first
+
+ 
     
