@@ -19,8 +19,8 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from ModelExecution.inputGatherer import InputGatherer
 from ModelExecution.IOutputHandler import output_handler_factory
-from src.DataClasses import SemaphoreSeriesDescription, Series
-from src.SeriesStorage.ISeriesStorage import series_storage_factory
+from DataClasses import SemaphoreSeriesDescription, Series
+from SeriesStorage.ISeriesStorage import series_storage_factory
 
 
 import datetime
