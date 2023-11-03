@@ -22,7 +22,7 @@ from utility import log
 
 from abc import ABC, abstractmethod
 from importlib import import_module
-from dspec import Dspec
+from src.ModelExecution.dspec import Dspec
 class IOutputHandler(ABC):
    
     @abstractmethod
