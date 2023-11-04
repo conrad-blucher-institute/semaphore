@@ -28,7 +28,6 @@ import requests
 from typing import List, Dict, TypeVar, NewType, Tuple, Generic, Callable
 from urllib.error import HTTPError
 import urllib.parse
-from urllib.request import urlopen
 from lxml import etree # type: ignore
                        # since lxml has no type hints
 
@@ -68,35 +67,41 @@ class NDFD(IDataIngestion):
         self.__seriesStorage = series_storage_factory()
      
 
-    def __create_url_pattern(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, products: str) -> str:
-        # I'm explicitly using ISO 8601 formatted time strings *without* timezone
-        # information b/c the NDFD web service _seems_ to ignore UTC timezone
-        # specified as 'Z' or '+00:00' ?!
-        #
-        # I'd have to test more to verify, but we just want at least 48 hours of
-        # predictions starting w/ the closest time
-        t0_str = timeRequest.fromDateTime.isoformat()
-        t1_str = timeRequest.toDateTime.isoformat()
+    def __create_url_pattern(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, product: str) -> str:
+        try:
+            # I'm explicitly using ISO 8601 formatted time strings *without* timezone
+            # information b/c the NDFD web service _seems_ to ignore UTC timezone
+            # specified as 'Z' or '+00:00' ?!
+            #
+            # I'd have to test more to verify, but we just want at least 48 hours of
+            # predictions starting w/ the closest time
+            t0_str = timeRequest.fromDateTime.isoformat()
+            t1_str = timeRequest.toDateTime.isoformat()
+        except AttributeError as e:
+            raise ValueError(f'Error converting datetime to ISO 8601 format: {e}')
 
-        # NOTE:: Needs to be implemented. Also, need to confirm coordinates for SBirdIsland
-        #lat, lon = get_coordinates(seriesRequest.location)
-        if(seriesRequest.dataLocation == 'SBirdIsland'): # NOTE:: Temporary
-            lat = '27.4844'
-            lon = '-97.318'
+        lat, lon = self.__seriesStorage.find_lat_lon_coordinates(seriesRequest.dataLocation)
 
-        beginDate = urllib.parse.quote(t0_str)  # e.g., '2019-04-11T23%3A00%3A00%2B00%3A00'
-        endDate   = urllib.parse.quote(t1_str)
+        if lat is None or lon is None:
+            raise ValueError(f'Empty latlon tuple received in NDFD for locationCode: {seriesRequest.dataLocation}')
 
+        try:
+            beginDate = urllib.parse.quote(t0_str)  # e.g., '2019-04-11T23%3A00%3A00%2B00%3A00'
+            endDate   = urllib.parse.quote(t1_str)
+        except TypeError as e:
+            raise ValueError(f'Error quoting ISO 8601 time string: {e}')
+        
         base_url = 'https://graphical.weather.gov/xml/SOAP_server/ndfdXMLclient.php?whichClient=NDFDgen&Submit=Submit'
-        # NOTE:: Could probably just be one string rather than the join
-        formatted_products = '&'.join([product + '=' + product for product in products.split(',')])
-        # NOTE:: Unit=e for US Standard, m for metric
-        url = '{}&lat={}&lon={}&product=time-series&begin={}&end={}&Unit=m&{}'.format(base_url,
-                                                                                    lat,
-                                                                                    lon,
-                                                                                    beginDate,
-                                                                                    endDate,
-                                                                                    formatted_products)
+        formatted_product = f'{product}={product}'
+        try:
+            url = '{}&lat={}&lon={}&product=time-series&begin={}&end={}&Unit=m&{}'.format(base_url,
+                                                                                        lat,
+                                                                                        lon,
+                                                                                        beginDate,
+                                                                                        endDate,
+                                                                                        formatted_product)
+        except ValueError as e:
+            raise ValueError(f'Error formatting url string: {e}')
         
         return url
     
@@ -118,30 +123,35 @@ class NDFD(IDataIngestion):
         
 
     def fetch_predictions(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, products: str) -> None | dict:
-        url = self.__create_url_pattern(seriesRequest, products)
-
+        try:
+            url = self.__create_url_pattern(seriesRequest, timeRequest, products)
+        except ValueError as err:
+            log(f'NDFD class initialization failed: {err}')
+            return None
+        
         response = self.__api_request(url)
 
         if response is None:
             return None
 
-        NDFD_Predictions: NDFDPredictions[str, str] = NDFDPredictions(response)
+        try:
+            NDFD_Predictions: NDFDPredictions[str, str] = NDFDPredictions(url, response)
+        except ValueError as err:
+            log(f'NDFD class initialization failed: {err}')
+            return None
+
 
         data: ZippedDataset[int, int] = NDFD_Predictions.map(iso8601_to_unixms, int).zipped()
 
-        # Finally, output data as JSON
-        if len(data) == 1:
-            # If there's only one product, only return the values
-            data_dictionary = json.loads(json.dumps(data[0][1]))
-
+        data_dictionary = json.loads(json.dumps(data[0][1]))
 
         inputs = []
         for row in data_dictionary:
             dataPoints = Input(
                 dataValue = row[1],
                 dataUnit = NDFD_Predictions.unit,
-                timeVerified = datetime.fromtimestamp(row[0] / 1000), # Milliseconds converted to seconds
-                generatedTime = datetime.fromtimestamp(row[0] / 1000), # NOTE:: Need to figure out
+                timeVerified = datetime.utcfromtimestamp(row[0] / 1000), # Milliseconds converted to seconds
+                timeGenerated = None,
                 longitude = NDFD_Predictions.longitude,
                 latitude = NDFD_Predictions.latitude
             )
@@ -159,6 +169,7 @@ class NDFD(IDataIngestion):
 class NDFDPredictions(Generic[Time, Data]):
 
     def __init__(self,
+                 url: str = None,
                  response_text: str = None,
                  time: TimeSeries[Time] = None,
                  data: DataSeries[Data] = None,
@@ -166,52 +177,64 @@ class NDFDPredictions(Generic[Time, Data]):
                  longitude: str = None,
                  latitude: str = None
                  ):
-        if response_text is not None:
-            self.tree = etree.fromstring(response_text)
+        try:
+            if response_text is not None:
+                self.url = url
+                self.tree = etree.fromstring(response_text)
 
-            # create a mapping from `layout-key`s to the list of times associated with that key.
-            self.time: TimeSeries[Time] = dict([(tlayout.xpath('layout-key/text()')[0],
-                                                 tlayout.xpath('start-valid-time/text()'))
-                                                for tlayout in self.tree.xpath('/dwml/data/time-layout')])
+                # Create a mapping from `layout-key`s to the list of times associated with that key.
+                self.time: TimeSeries[Time] = dict([(tlayout.xpath('layout-key/text()')[0],
+                                                     tlayout.xpath('start-valid-time/text()'))
+                                                    for tlayout in self.tree.xpath('/dwml/data/time-layout')])
 
-            # create a mapping from a product to the time-layout and values associated with that product.
-            self.data = [(SeriesName(dataset.xpath('name/text()')[0]),
-                                            LayoutKey(dataset.get('time-layout')),
-                                            [value for value in dataset.xpath('value/text()')])
-                                           for dataset in self.tree.xpath('/dwml/data/parameters')[0].getchildren()]
-            
-            for dataset in self.tree.xpath('/dwml/data/parameters')[0].getchildren(): unit = dataset.get('units')
-            self.unit = unit.lower()
+                # create a mapping from a product to the time-layout and values associated with that product.
+                self.data = [(SeriesName(dataset.xpath('name/text()')[0]),
+                                LayoutKey(dataset.get('time-layout')),
+                                [value for value in dataset.xpath('value/text()')])
+                                for dataset in self.tree.xpath('/dwml/data/parameters')[0].getchildren()]
 
-            for dataset in self.tree.xpath('/dwml/data/location')[0].getchildren(): longitude = dataset.get('longitude')
-            self.longitude = longitude
+                for dataset in self.tree.xpath('/dwml/data/parameters')[0].getchildren(): 
+                    unit = dataset.get('units')
+                if unit is None:
+                    raise ValueError("Unit not found in XML data.")
+                self.unit = unit.lower()
 
-            for dataset in self.tree.xpath('/dwml/data/location')[0].getchildren(): latitude = dataset.get('latitude')
-            self.latitude = latitude
+                for dataset in self.tree.xpath('/dwml/data/location')[0].getchildren(): 
+                    longitude = dataset.get('longitude')
+                    latitude = dataset.get('latitude')
 
-        elif time is not None and data is not None:
-            self.time = time
-            self.data = data
-        else:
-            raise ValueError('Either `response` or `time` and `data` must be supplied')
+                if longitude is None or latitude is None:
+                    raise ValueError("Longitude or latitude not found in XML data.")
+                self.longitude = longitude
+                self.latitude = latitude
+
+            elif time is not None and data is not None:
+                self.time = time
+                self.data = data
+
+            else:
+                raise ValueError('Either `response` or `time` and `data` must be supplied')
+
+        except (IndexError, AttributeError) as e:
+            raise ValueError(f"Error processing XML data: {e}")
 
     def zipped(self) -> ZippedDataset[Time, Data]:
         """Return the prediction data zipped together with the time for each series"""
-        return [(dataset[0],
-                 [(self.time[dataset[1]][ix],
-                   entry)
-                  for (ix, entry) in enumerate(dataset[2])])
-                for dataset in self.data]
+        return [(dataset[0], # SeriesName
+                 [(self.time[dataset[1]][ix], # Time
+                   entry) # Data
+                  for (ix, entry) in enumerate(dataset[2])]) # List[Data]
+                for dataset in self.data] # DataSeries[Data] 
 
     def map(self,
             time_func: Callable[[Time], NewTime],
             data_func: Callable[[Data], NewData]) -> 'NDFDPredictions':
         """Apply a function to each time and data entry"""
         new_time = dict([(layout, [time_func(t) for t in times]) for (layout, times) in self.time.items()])
-        new_data = [(dataset[0],
-                     dataset[1],
-                     [data_func(value) for value in dataset[2]])
-                    for dataset in self.data]
+        new_data = [(dataset[0], # SeriesName
+                     dataset[1], # Layout Key
+                     [data_func(value) for value in dataset[2]]) # List[Data]
+                    for dataset in self.data] # DataSeries[Data] 
         return NDFDPredictions(time=new_time, data=new_data)
 
 
