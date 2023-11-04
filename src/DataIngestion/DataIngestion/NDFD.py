@@ -91,7 +91,7 @@ class NDFD(IDataIngestion):
         except TypeError as e:
             raise ValueError(f'Error quoting ISO 8601 time string: {e}')
         
-        base_url = 'https://graphical.weather.gov/xml/SOAP_server/ndfdXMLclient.php?whichClient=NDFDgen&Submit=Submit'
+        base_url = 'https://graphical.weather.gov/xml/sample_products/browser_interface/ndfdXMLclient.php?whichClient=NDFDgen'
         formatted_product = f'{product}={product}'
         try:
             url = '{}&lat={}&lon={}&product=time-series&begin={}&end={}&Unit=m&{}'.format(base_url,
@@ -162,7 +162,6 @@ class NDFD(IDataIngestion):
 
         # Insert series into DB
         self.__seriesStorage.insert_input(resultSeries)
-
         return resultSeries
 
   
