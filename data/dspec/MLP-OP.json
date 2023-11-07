@@ -6,6 +6,7 @@
     "outputInfo": {
         "outputMethod": "one_packed_float",
         "leadTime": 12,
+        "interval": 3600,
         "series": "pWaterTmp",
         "location": "South Bird Island",
         "unit" : "celsius"
@@ -14,20 +15,22 @@
         { 
             "_name": "Water Temp",
             "location": "South Bird Island",
-            "source": "TCOON",
+            "source": "LIGHTHOUSE",
             "series": "dWaterTmp",
             "unit": "celsius",
             "type": "float",
+            "dataClassification": "actual",
             "interval": 3600,
             "range": [0, -24]
         },
         { 
             "_name": "Air Temp",
             "location": "South Bird Island",
-            "source": "TCOON",
+            "source": "LIGHTHOUSE",
             "series": "dAirTmp",
             "unit": "celsius",
             "type": "float",
+            "dataClassification": "actual",
             "interval": 3600,
             "range": [0, -24]
         },
@@ -38,6 +41,7 @@
             "series": "pAirTemp",
             "unit": "celsius",
             "type": "float",
+            "dataClassification": "prediction",
             "interval": 3600,
             "range": [0, 12]
         }
