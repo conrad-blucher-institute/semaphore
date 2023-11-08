@@ -50,7 +50,7 @@ class SQLAlchemyORM(ISeriesStorage):
             .where(self.inputs.c.dataSource == seriesDescription.dataSource)
             .where(self.inputs.c.dataLocation == seriesDescription.dataLocation)
             .where(self.inputs.c.dataSeries == seriesDescription.dataSeries)
-            .where(self.inputs.c.dataDatum == seriesDescription.dataDatum)
+            .where(self.inputs.c.dataDatum == 'None' if seriesDescription.dataDatum == None else seriesDescription.dataDatum)
             .where(self.inputs.c.verifiedTime >= timeDescription.fromDateTime)
             .where(self.inputs.c.verifiedTime <= timeDescription.toDateTime)
             )
@@ -153,7 +153,7 @@ class SQLAlchemyORM(ISeriesStorage):
             insertionValueRow["dataSource"] = series.description.dataSource
             insertionValueRow["dataLocation"] = series.description.dataLocation
             insertionValueRow["dataSeries"] = series.description.dataSeries
-            insertionValueRow["dataDatum"] = series.description.dataDatum
+            insertionValueRow["dataDatum"] = 'None' if series.description.dataDatum == None else series.description.dataDatum
             insertionValueRow["latitude"] = input.latitude
             insertionValueRow["longitude"] = input.longitude
             insertionRows.append(insertionValueRow)
