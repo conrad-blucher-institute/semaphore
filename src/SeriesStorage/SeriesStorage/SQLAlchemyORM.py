@@ -46,11 +46,14 @@ class SQLAlchemyORM(ISeriesStorage):
            :param timeDescription: TimeDescription - A hydrated time description object
         """
 
+        # Datum is stored in the db as the string 'None' if there is no datum, we need to convert it here before the query
+        datumSearchTerm = 'None' if seriesDescription.dataDatum == None else seriesDescription.dataDatum
+
         statement = (select(self.inputs)
             .where(self.inputs.c.dataSource == seriesDescription.dataSource)
             .where(self.inputs.c.dataLocation == seriesDescription.dataLocation)
             .where(self.inputs.c.dataSeries == seriesDescription.dataSeries)
-            .where(self.inputs.c.dataDatum == 'None' if seriesDescription.dataDatum == None else seriesDescription.dataDatum)
+            .where(self.inputs.c.dataDatum == datumSearchTerm)
             .where(self.inputs.c.verifiedTime >= timeDescription.fromDateTime)
             .where(self.inputs.c.verifiedTime <= timeDescription.toDateTime)
             )
