@@ -147,10 +147,16 @@ class NDFD(IDataIngestion):
 
         inputs = []
         for row in data_dictionary:
+
+            timeVerified = datetime.utcfromtimestamp(row[0] / 1000) # Milliseconds converted to seconds
+            if timeRequest.interval is not None:
+                if(timeVerified.timestamp() % timeRequest.interval != 0):
+                    continue
+
             dataPoints = Input(
                 dataValue = row[1],
                 dataUnit = NDFD_Predictions.unit,
-                timeVerified = datetime.utcfromtimestamp(row[0] / 1000), # Milliseconds converted to seconds
+                timeVerified = timeVerified,
                 timeGenerated = None,
                 longitude = NDFD_Predictions.longitude,
                 latitude = NDFD_Predictions.latitude

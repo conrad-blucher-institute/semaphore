@@ -28,6 +28,7 @@ load_dotenv()
 
 @pytest.mark.parametrize("source, series, location, interval, datum", [
     ("NDFD", "pAirTemp", "SBirdIsland", None, None),
+    ("NDFD", "pAirTemp", "SBirdIsland", 3600, None)
 ])
 def test_ingest_series(source: str, series: str, location: str, interval: timedelta, datum: str):
     """This function tests whether each case in the ingest_series
