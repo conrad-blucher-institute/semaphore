@@ -130,7 +130,7 @@ class InputGatherer:
                     TimeDescription(
                         fromDateTime,
                         toDateTime,
-                        timedelta(seconds=input.interval)
+                        None if input.interval == None else timedelta(seconds=input.interval)
                     ),
                     input.type
                     )
