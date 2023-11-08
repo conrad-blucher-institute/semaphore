@@ -60,7 +60,7 @@ class ModelWrapper:
             raise FileNotFoundError
 
         try:
-            self._model = load_model(h5FilePath)
+            self._model = load_model(h5FilePath, compile=False)
         except Exception as e:
             log(e) 
             raise e
