@@ -88,7 +88,7 @@ class InputGatherer:
                 input.source = inputJson["source"]
                 input.series = inputJson["series"]
                 input.type = inputJson["type"]
-                input.interval = inputJson["interval"]
+                input.interval = inputJson.get("interval")
                 input.range = inputJson["range"]
                 input.datum = inputJson.get("datum")
                 input.unit = inputJson.get("unit")
