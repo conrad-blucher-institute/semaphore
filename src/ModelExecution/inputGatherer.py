@@ -88,7 +88,7 @@ class InputGatherer:
                 input.source = inputJson["source"]
                 input.series = inputJson["series"]
                 input.type = inputJson["type"]
-                input.interval = inputJson.get("interval")
+                input.interval = inputJson("interval")
                 input.range = inputJson["range"]
                 input.datum = inputJson.get("datum")
                 input.unit = inputJson.get("unit")
@@ -130,13 +130,13 @@ class InputGatherer:
                     TimeDescription(
                         fromDateTime,
                         toDateTime,
-                        None if input.interval == None else timedelta(seconds=input.interval)
+                        timedelta(seconds=input.interval)
                     ),
                     input.type
                     )
                 )
             except Exception as e:
-                log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
+               log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
         self.__specifications = specifications
         self.__specificationsConstructionTime = now
 
