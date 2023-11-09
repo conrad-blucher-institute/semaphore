@@ -39,7 +39,7 @@ def run_semaphore(fileName: str, executionTime: datetime = None):
         print(result.data) 
 
 #argument parsing
-if __name__ == '__main__':
+def main(args=None):
     
     #creating argument parser
     parser = argparse.ArgumentParser(
@@ -84,3 +84,6 @@ if __name__ == '__main__':
     #if we are running semaphore now
     else: 
         run_semaphore(args.dspec)
+
+if __name__ == '__main__':
+    main()
