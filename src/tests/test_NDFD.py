@@ -38,7 +38,6 @@ def test_ingest_series(source: str, series: str, location: str, interval: timede
     fromDateTime = datetime.now()
     toDateTime = fromDateTime + timedelta(days=7)
     
-    #creating objects to pass
     seriesDescription = SeriesDescription(source, series, location, datum)
     timeDescription = TimeDescription(fromDateTime, toDateTime, interval)
 
