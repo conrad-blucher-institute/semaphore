@@ -14,16 +14,12 @@
 #
 #Imports
 import argparse
-import sys
-from typing import Optional
 from dotenv import load_dotenv
-from sqlalchemy import select
 from os import path, getenv
-from src.SeriesStorage.SeriesStorage.SQLAlchemyORM import SQLAlchemyORM
+
 from src.ModelExecution.modelWrapper import ModelWrapper
-from src.ModelExecution.inputGatherer import InputGatherer
 from src.utility import log, construct_true_path
-from datetime import datetime, date, time
+from datetime import datetime
 
 load_dotenv()
 
