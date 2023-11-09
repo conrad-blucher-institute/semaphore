@@ -6,8 +6,7 @@
 # version 1.0
 #----------------------------------
 """ A file to run semaphore from the command line. 
-    Run with: python3 src/RunSemaphore/semaphoreRunner.py -d test_dspec.json 
-    I think! I'm currently having issues!
+    Run with: python3 src/RunSemaphore/semaphoreRunner.py -d test_dspec.json to run the test dspec now!
  """ 
 #----------------------------------
 # 
@@ -57,7 +56,8 @@ if __name__ == '__main__':
     
     parser.add_argument("-p", "--past", type=str, required=False, default=None,
                         help = "The time we are executing this action with Semaphore. Should be entered in YYYYMMDDHHMM format. Should only be provided if you intend to run Semaphore in the past.")
-
+    
+    #parsing arguments
     args = parser.parse_args()
 
     #checking that dspec file passed exists in the dspec folder
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     if not path.exists(dspecFilePath):
         log(f'{dspecFilePath} not found!')
         raise FileNotFoundError
-    
+  
     #if there is past time given
     if args.past is not None: 
         #checking that the past time passed is formatted correctly (stolen from beto)
