@@ -28,12 +28,6 @@ from datetime import datetime, date, time
 load_dotenv()
 
 def run_semaphore(fileName: str, executionTime: datetime = None):
-   
-    #do i need to make the database here? the rows and stuff?
-    
-    
-    #should there be some method to know if this is the first time they've run 
-    #semaphore and need to create the tables?? maybe an argument?
 
     if executionTime == None: 
         executionTime = datetime.now()
@@ -67,8 +61,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     #checking that dspec file passed exists in the dspec folder
-    dspecFilePath = construct_true_path(getenv('DSPEC_FOLDER_PATH')) + (args.dspec if args.dspec.endswith('.json') else args.dspec + '.json')
-    print(f'This is the file path: {dspecFilePath}')
+    if not args.dspec.endswith('.json'): 
+        args.dspec = args.dspec + '.json'
+    dspecFilePath = construct_true_path(getenv('DSPEC_FOLDER_PATH')) + (args.dspec )
     
     if not path.exists(dspecFilePath):
         log(f'{dspecFilePath} not found!')
@@ -84,7 +79,7 @@ if __name__ == '__main__':
             raise ValueError('The provided time was not in the correct format.')
         
         #checking if date provided is in the past
-        if execution_time <= datetime.now(): 
+        if execution_time >= datetime.now(): 
             raise ValueError('You can only run Semaphore with a specified time if you are running it in the past.')
         
         #running semaphore, using method from demo file for now? with the arguments passed
