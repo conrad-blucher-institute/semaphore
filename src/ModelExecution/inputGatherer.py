@@ -146,7 +146,7 @@ class InputGatherer:
                     )
                 )
             except Exception as e:
-                log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
+               log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
         self.__specifications = specifications
         self.__specificationsConstructionTime = now
 
