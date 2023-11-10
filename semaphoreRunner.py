@@ -68,7 +68,7 @@ def main(args=None):
   
     #if there is past time given
     if args.past is not None: 
-        #checking that the past time passed is formatted correctly (stolen from beto)
+        #checking that the past time passed is formatted correctly (stolen from Beto)
         try: 
             execution_time = datetime.strptime(args.past, '%Y%m%d%H%M')
         except:
