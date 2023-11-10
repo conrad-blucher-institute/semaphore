@@ -11,8 +11,6 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 
-data/
-
 # C extensions
 *.so
 

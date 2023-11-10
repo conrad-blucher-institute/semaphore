@@ -35,21 +35,13 @@ pip install -r requirements.txt
 
 0. You will need to create a `.env` file in the root directory of the project. This file will contain the environment variables for the docker container. You can copy the contents of `env.dist` and replace the values with your own.
 1. Launch task in VSCode Debugger: `compose dev up`
-2. SSH into semaphore container: `docker exec -it semaphore-semaphore-dev-main bash` (if you decide to run the python code without the container, you can skip step 2,3)
+2. SSH into semaphore container: `docker exec -it semaphore-scheduler bash` (if you decide to run the python code without the container, you can skip step 2,3)
 3. Navigate and run command from inside the container as needed
-4. Database can be access using pgAdmin container via: `http://localhost:8888/`. For first time login, you will need to register the database in pgAdmin (see screenshots below)
- hostname: `host.docker.internal`, username: `root`, password: `root`
+4. Database can be access using pgAdmin or VSCode Postgresql Explorer plugin
  ![Register DB to pgAdmin](https://user-images.githubusercontent.com/7061990/268778360-2b92cdc0-19dd-48ae-853c-c52876f747d3.png)
  ![Enter your database credentials to register to pgAdmin](https://user-images.githubusercontent.com/7061990/268778380-36b907c7-da08-4ba8-a232-0c7646dfbb82.png)
 5. To stop the containers: Stop the debugger (or Shift + F5)
-***If you have problem connecting to the container postgres from semaphore-main container, try changing the environment variable `DB_LOCATION_STRING` value to `postgresql+psycopg2://root:thisisapassword\@host.docker.internal:5432/semaphore-db` (replace `localhost` with `host.docker.internal`). Similarly, use `host.docker.internal` as database hostname to login to the database from `pgAdmin`.
 
-#### Using pgAdmin container:
-Login:
-URL: http://localhost:8888/
-username: `admin@admin.com`
-password: `root`
-You will need to register your db with pgAdmin to access it. See screenshots above.
 
 ## Running Semaphore
 Currently, you can run Semaphore through the make_and_save_prediction and make_prediction methods in the `src/ModelExecution/modelWrapper.py`. Keep in mind the DB will need to be loaded with the proper location mappings for your ingested data. Feel free to reach out to one of the authors for help getting Semaphore up and running.

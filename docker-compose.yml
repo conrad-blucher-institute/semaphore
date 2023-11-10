@@ -60,7 +60,6 @@ services:
     #   - semaphore-net
     volumes:
     - psql-data:/var/lib/postgresql/data
-    # - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql # enable this when there is a need to initialize the database
 volumes:
   psql-data:
 # networks:

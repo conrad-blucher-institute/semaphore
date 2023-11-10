@@ -1,0 +1,49 @@
+{
+    "modelName": "MLP-OP",
+    "modelVersion": "1.0.0",
+    "author": "Christian Duff",
+    "modelFileName": "MLP-OP",
+    "outputInfo": {
+        "outputMethod": "one_packed_float",
+        "leadTime": 12,
+        "interval": 3600,
+        "series": "pWaterTmp",
+        "location": "South Bird Island",
+        "unit" : "celsius"
+    },
+    "inputs": [
+        { 
+            "_name": "Water Temp",
+            "location": "South Bird Island",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "type": "float",
+            "dataClassification": "actual",
+            "interval": 3600,
+            "range": [0, -24]
+        },
+        { 
+            "_name": "Air Temp",
+            "location": "South Bird Island",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "type": "float",
+            "dataClassification": "actual",
+            "interval": 3600,
+            "range": [0, -24]
+        },
+        { 
+            "_name": "Air Temp",
+            "location": "South Bird Island",
+            "source": "NDFD",
+            "series": "pAirTemp",
+            "unit": "celsius",
+            "type": "float",
+            "dataClassification": "prediction",
+            "interval": 3600,
+            "range": [0, 12]
+        }
+
+]}

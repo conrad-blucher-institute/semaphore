@@ -1,0 +1,106 @@
+    {
+    "modelName": "test AI",
+    "modelVersion": "1.0.0",
+    "author": "John Doe",
+    "modelFileName": "test_AI",
+    "outputInfo": {
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 86400,
+        "series": "waterHeight",
+        "location": "packChan",
+        "interval" : 3600, 
+        "datum": "test_datum",
+        "unit" : "meter"
+    },
+    "inputs": [
+    { 
+        "_name": "x_wind",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dXWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, 0]
+    },
+    {
+        "_name": "y_wind",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, 0]
+    },
+    {
+        "_name": "x_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dXWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "x_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dXWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "y_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "y_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "y_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "y_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "y_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -12]
+    }
+]}
