@@ -1,7 +1,7 @@
 # Start with the base image of tensorflow
 FROM tensorflow/tensorflow:2.14.0
 
-# Install Python 3.10.5
+# Install Python 3.10
 RUN apt-get update && apt-get install -y python3.10
 
 # No .pyc files created
@@ -27,4 +27,4 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Set the command to run the apiDriver.py script when the Docker container starts
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "src.API.apiDriver:app"]
+CMD ["uvicorn", "src.API.apiDriver:app", "--host", "0.0.0.0", "--port", "8000"]

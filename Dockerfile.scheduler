@@ -1,7 +1,7 @@
 # Start with the base image of tensorflow
 FROM tensorflow/tensorflow:2.14.0
 
-# Install Python 3.10.5
+# Install Python 3.10
 RUN apt-get update && apt-get install -y python3.10
 
 # No .pyc files created

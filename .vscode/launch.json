@@ -8,9 +8,9 @@
             "runtimeExecutable": "docker-compose",
             "runtimeArgs": [
                 "-f",
-                "docker-compose.dev.yml",
+                "docker-compose.yml",
                 "up",
-                // "--build",
+                "--build",
             ],
             "skipFiles": [
                 "<node_internals>/**"

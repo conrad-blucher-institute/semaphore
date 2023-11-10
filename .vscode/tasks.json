@@ -4,7 +4,7 @@
             {
                 "label": "compose_up_dev",
                 "type": "shell",
-                "command": "docker-compose -f docker-compose.dev.yml up -d --build",
+                "command": "docker-compose -f docker-compose.yml up -d --build",
                 "group": {
                     "kind": "build",
                     "isDefault": true
@@ -14,7 +14,7 @@
             {
                 "label": "compose_stop_dev",
                 "type": "shell",
-                "command": "docker-compose -f docker-compose.dev.yml stop",
+                "command": "docker-compose -f docker-compose.yml stop",
                 "group": {
                     "kind": "build",
                     "isDefault": true

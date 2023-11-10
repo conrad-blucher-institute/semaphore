@@ -5,5 +5,4 @@ numpy==1.26.1
 tensorflow==2.14.0
 fastapi==0.104.1
 uvicorn==0.24.0
-gunicorn==21.2.0
 httpx==0.25.1
