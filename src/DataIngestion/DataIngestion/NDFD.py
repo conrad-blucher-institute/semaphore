@@ -68,6 +68,12 @@ class NDFD(IDataIngestion):
      
 
     def __create_url_pattern(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, product: str) -> str:
+        """Creates the url string used to hit the NDFD server.
+        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull 
+        :param timeRequest: TimeDescription - A data TimeDescription object with the information to pull 
+        :param product: str - The input query name for the requested NDFD parameter. See https://digital.mdl.nws.noaa.gov/xml/docs/elementInputNames.php 
+        for a quick list of the NDFD elements that can be queried
+        """
         try:
             # I'm explicitly using ISO 8601 formatted time strings *without* timezone
             # information b/c the NDFD web service _seems_ to ignore UTC timezone
@@ -126,9 +132,15 @@ class NDFD(IDataIngestion):
             return None
         
 
-    def fetch_predictions(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, products: str) -> None | dict:
+    def fetch_predictions(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, product: str) -> None | dict:
+        """Fetches the requested NDFD predictions given the following parameters and inserts them into the database.
+        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull 
+        :param timeRequest: TimeDescription - A data TimeDescription object with the information to pull 
+        :param product: str - The input query name for the requested NDFD parameter. See https://digital.mdl.nws.noaa.gov/xml/docs/elementInputNames.php 
+        for a quick list of the NDFD elements that can be queried
+        """
         try:
-            url = self.__create_url_pattern(seriesRequest, timeRequest, products)
+            url = self.__create_url_pattern(seriesRequest, timeRequest, product)
         
             response = self.__api_request(url)
 
