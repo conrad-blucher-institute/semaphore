@@ -17,28 +17,30 @@ import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-from DataClasses import Prediction, SemaphoreSeriesDescription, Series
+from DataClasses import Output
 from ModelExecution.IOutputHandler import IOutputHandler
+from dspec import Dspec
 
-
+from datetime import datetime, timedelta
 
 class OnePackedFloat(IOutputHandler):
 
 
-    def post_process_prediction(self, prediction: Prediction) -> list[Prediction]:
+    def post_process_prediction(self, predictions: list[any], dspec: Dspec) -> list[Output]:
         """Unpacks the prediction value before saving them to the db
         Parameters:
-            predictionDesc: SemaphoreSeriesDescription
-            prediction: Prediction
+            prediction: list[]
+            dspec: Dspec
         Returns:
             The Response from the series provider 
         """
-        unpackedPrediction = self.__unpack(prediction.value)
 
-        predictions = []
-        predictions.append(Prediction(unpackedPrediction, prediction.unit, prediction.leadTime, prediction.generatedTime))
+        now = datetime.now()
+        outputs =[]
+        for prediction in predictions:
+            outputs.append(Output(str(self.__unpack(prediction)), dspec.outputInfo.unit, now, timedelta(seconds=dspec.outputInfo.leadTime)))
 
-        return predictions
+        return outputs
     
     def __unpack(self, packedValue: any) -> any:
         """Flattens any dimensions of array and indexes and returns the first time, unpacking it.

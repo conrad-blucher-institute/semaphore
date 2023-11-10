@@ -1,6 +1,9 @@
 SQLAlchemy==2.0.17
-python-dotenv
-numpy
-tensorflow
-fastapi
-uvicorn
+python-dotenv==1.0.0
+psycopg2-binary==2.9.9
+numpy==1.26.1
+tensorflow==2.14.0
+fastapi==0.104.1
+uvicorn==0.24.0
+gunicorn==21.2.0
+httpx==0.25.1

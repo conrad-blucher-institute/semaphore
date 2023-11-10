@@ -17,7 +17,7 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from DataClasses import SeriesDescription, Series
+from DataClasses import SeriesDescription, Series, TimeDescription
 from utility import log
 
 from abc import ABC, abstractmethod
@@ -28,20 +28,16 @@ from importlib import import_module
 class IDataIngestion(ABC):
 
     @abstractmethod
-    def ingest_series(self, seriesDescription: SeriesDescription) -> Series | None:
+    def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
         raise NotImplementedError
     
 
-def data_ingestion_factory(request: SeriesDescription) -> IDataIngestion:
+def data_ingestion_factory(seriesRequest: SeriesDescription) -> IDataIngestion:
     """Uses the source atribute of a data request to dynamically import a module
-    ------
-    Parameters
-        request: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>Series)
-    Returns
-        IDataIngestion - An child of the IDataIngestion interface.
+        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
     """
     try:
-        return getattr(import_module(f'src.DataIngestion.DataIngestion.{request.source}'), f'{request.source}')()
+        return getattr(import_module(f'src.DataIngestion.DataIngestion.{seriesRequest.dataSource}'), f'{seriesRequest.dataSource}')()
     except Exception:
-        raise ModuleNotFoundError(f'No module named {request.source} in src.DataIngestion.DataIngestion!')
+        raise ModuleNotFoundError(f'No module named {seriesRequest.dataSource} in src.DataIngestion.DataIngestion!')
     

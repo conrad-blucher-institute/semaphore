@@ -51,12 +51,6 @@ username: `admin@admin.com`
 password: `root`
 You will need to register your db with pgAdmin to access it. See screenshots above.
 
-### Using RabbitMQ:
-URL: http://localhost:15672/
-username: `guest`
-password: `guest`
-You can create queues and specify what you parameters are needed for the payload
-
 ## Running Semaphore
 Currently, you can run Semaphore through the make_and_save_prediction and make_prediction methods in the `src/ModelExecution/modelWrapper.py`. Keep in mind the DB will need to be loaded with the proper location mappings for your ingested data. Feel free to reach out to one of the authors for help getting Semaphore up and running.
 

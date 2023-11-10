@@ -1,11 +1,33 @@
 version: '3.8'
 services:
-  semaphore-dev-main:
-    container_name: semaphore-dev-main
+  semaphore-dev-core:
+    container_name: semaphore-dev-core
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.dev.core
     # restart: always
+    # command: ["python3", "src/init_db.py"]
+    env_file:
+      - .env
+    platform: linux/amd64
+    environment:
+      - DB_LOCATION_STRING=${DB_LOCATION_STRING}
+      - ISERIESSTORAGE_INSTANCE=${ISERIESSTORAGE_INSTANCE}
+      - DSPEC_FOLDER_PATH=${DSPEC_FOLDER_PATH}
+      - MODEL_FOLDER_PATH=${MODEL_FOLDER_PATH}
+    depends_on:
+      - semaphore-dev-db
+    # networks:
+    #   - semaphore-dev-net
+    volumes:
+      - .:/app
+  semaphore-dev-api:
+    container_name: semaphore-dev-api
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.dev.api
+    restart: always
     env_file:
       - .env
     environment:
@@ -13,9 +35,13 @@ services:
       - ISERIESSTORAGE_INSTANCE=${ISERIESSTORAGE_INSTANCE}
       - DSPEC_FOLDER_PATH=${DSPEC_FOLDER_PATH}
       - MODEL_FOLDER_PATH=${MODEL_FOLDER_PATH}
-    volumes:
-      - .:/app
-  semaphore-db:
+    ports: 
+      - "8000:8000"
+    # networks:
+    #   - semaphore-dev-net
+    depends_on:
+      - semaphore-dev-db
+  semaphore-dev-db:
     container_name: semaphore-dev-psql
     image: postgres:15.4
     restart: always
@@ -28,31 +54,13 @@ services:
     ports:
       - "5432:5432"
     command: ["postgres", "-c", "listen_addresses=*"]
+    # networks:
+    #   - semaphore-dev-net
     volumes:
-    - semaphore-pgdata:/var/lib/postgresql/data
-    - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-  semaphore-pgadmin:
-    container_name: semaphore-dev-pgadmin
-    image: dpage/pgadmin4
-    restart: always
-    environment: 
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com # Use this to login to pgadmin
-      PGADMIN_DEFAULT_PASSWORD: root # Use this to login to pgadmin
-    ports:
-      - "8888:80"
-    volumes:
-      - semaphore-pgadmin-data:/var/lib/pgadmin
-  semaphore-rabbitmq:
-    image: rabbitmq:3.12.4-management
-    container_name: semaphore-dev-rabbitmq
-    restart: always
-    # ports: #  leaving it commented here since the ports will be automatically available without exposing them
-        # - 5672:5672 # amqp port
-        # - 15672:15672 # UI port (http://localhost:15672)
-    volumes:
-      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
-      - ./etc/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf # mount config file
+    - psql-data:/var/lib/postgresql/data
+    # - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql # enable this when there is a need to initialize the database
 volumes:
-  semaphore-pgdata:
-  semaphore-pgadmin-data:
+  psql-data:
+# networks:
+#   semaphore-dev-net:
+
