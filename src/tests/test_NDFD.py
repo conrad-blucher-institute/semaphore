@@ -33,7 +33,7 @@ load_dotenv()
 def test_ingest_series(source: str, series: str, location: str, interval: timedelta, datum: str):
     """This function tests whether each case in the ingest_series
         function is complete.
-        NOTE:: This test depends on DBM.insert_lat_lon_test('SBirdIsland', 'South Bird Island', None, '27.4844', '-97.318') pre=existing in db
+        NOTE:: This test depends on DBM.insert_lat_lon_test('SBirdIsland', 'South Bird Island', None, '27.4844', '-97.318') pre-existing in db
     """
     fromDateTime = datetime.now()
     toDateTime = fromDateTime + timedelta(days=7)
