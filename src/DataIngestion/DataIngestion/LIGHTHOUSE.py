@@ -129,5 +129,5 @@ class LIGHTHOUSE(IDataIngestion):
         resultSeries.data = inputs
         
         #Insert series into DB
-        self.seriesStorage.insert_input(resultSeries).data
+        self.seriesStorage.insert_input(resultSeries)
         return resultSeries
