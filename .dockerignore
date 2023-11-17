@@ -1,6 +1,7 @@
 **/*.pyc
 docs
 db
+data/
 
 # VSCode
 .vscode
