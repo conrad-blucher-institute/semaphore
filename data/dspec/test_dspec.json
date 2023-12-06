@@ -6,7 +6,7 @@
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
         "leadTime": 86400,
-        "series": "waterHeight",
+        "series": "testSeries",
         "location": "packChan",
         "interval" : 3600, 
         "datum": "test_datum",
