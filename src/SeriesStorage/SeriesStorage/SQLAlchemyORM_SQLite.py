@@ -27,7 +27,7 @@ from src.SeriesStorage.ISeriesStorage import ISeriesStorage
 from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, Input, Output, TimeDescription
 from utility import log
 
-class SQLAlchemyORM(ISeriesStorage):
+class SQLAlchemyORM_SQLite(ISeriesStorage):
  
     def __init__(self) -> None:
         """Constructor generates an a db schema. Automatically creates the 
@@ -213,6 +213,104 @@ class SQLAlchemyORM(ISeriesStorage):
         return resultSeries
     
 
+
+    def insert_ref_dataDatum(self, rows: list[dict]) -> list[tuple]:
+        """This method inserts reference rows
+            :param rows: A list of dictionaries. The dict can be found in NOTE 1
+            :return Series - SQLALCHEMY tupleish rows
+            NOTE:: {"code": None, "displayName": None, "notes": None}
+        """
+        with self.__get_engine().connect() as conn:
+            cursor = conn.execute(insert(self.ref_dataDatum)
+                                  .returning(self.ref_dataDatum)
+                                  .values(rows)
+                                  )
+            result = cursor.fetchall()
+            conn.commit()
+            return result
+
+    
+    def insert_ref_dataLocation(self, rows: list[dict]) -> list[tuple]:
+        """This method inserts reference rows
+            :param rows: A list of dictionaries. The dict can be found in NOTE 1
+            :return Series - SQLALCHEMY tupleish rows
+            NOTE:: {"code": None, "displayName": None, "notes": None, "latitude": None, "longitude": None}
+        """
+        with self.__get_engine().connect() as conn:
+            cursor = conn.execute(insert(self.ref_dataLocation)
+                                  .returning(self.ref_dataLocation)
+                                  .values(rows)
+                                  )
+            result = cursor.fetchall()
+            conn.commit()
+            return result
+    
+
+    def insert_ref_dataSeries(self, rows: list[dict]) -> list[tuple]:
+        """This method inserts reference rows
+            :param rows: A list of dictionaries. The dict can be found in NOTE 1
+            :return Series - SQLALCHEMY tupleish rows
+            NOTE:: {"code": None, "displayName": None, "notes": None}
+        """
+        
+        with self.__get_engine().connect() as conn:
+            cursor = conn.execute(insert(self.ref_dataSeries)
+                                  .returning(self.ref_dataSeries)
+                                  .values(rows)
+                                  )
+            result = cursor.fetchall()
+            conn.commit()
+            return result
+    
+
+    def insert_ref_dataSource(self, rows: list[dict]) -> list[tuple]:
+        """This method inserts reference rows
+            :param rows: A list of dictionaries. The dict can be found in NOTE 1
+            :return Series - SQLALCHEMY tupleish rows
+            NOTE:: {"code": None, "displayName": None, "notes": None}
+        """
+        
+        with self.__get_engine().connect() as conn:
+            cursor = conn.execute(insert(self.ref_dataSource)
+                                  .returning(self.ref_dataSource)
+                                  .values(rows)
+                                  )
+            result = cursor.fetchall()
+            conn.commit()
+        return result
+    
+
+    def insert_ref_dataUnit(self, rows: list[dict]) -> list[tuple]:
+        """This method inserts reference rows
+            :param rows: A list of dictionaries. The dict can be found in NOTE 1
+            :return Series - SQLALCHEMY tupleish rows
+            NOTE:: {"code": None, "displayName": None, "notes": None}
+        """
+        
+        with self.__get_engine().connect() as conn:
+            cursor = conn.execute(insert(self.ref_dataUnit)
+                                  .returning(self.ref_dataUnit)
+                                  .values(rows)
+                                  )
+            result = cursor.fetchall()
+            conn.commit()
+        return result
+    
+    def insert_data_mapping(self, rows: list[dict]) -> list[tuple]:
+        """This method inserts reference rows
+            :param rows: A list of dictionaries.
+            :return Series - SQLALCHEMY tupleish rows
+        """
+        
+        with self.__get_engine().connect() as conn:
+            cursor = conn.execute(insert(self.dataLocation_dataSource_mapping)
+                                  .returning(self.dataLocation_dataSource_mapping)
+                                  .values(rows)
+                                  )
+            result = cursor.fetchall()
+            conn.commit()
+        return result
+
     def create_DB(self) -> None:
         """Creates the database with the tethered engine.
         Requires the engine to be created before it will create the DB.
@@ -241,7 +339,7 @@ class SQLAlchemyORM(ISeriesStorage):
             permaString: str - An sqlalchemy string that defines the location the engine should point to: (e.g. "sqlite+pysqlite:///:memory:")
             echo: str - Weather or not the engine should echo to stdout
         """
-        self._engine = sqlalchemy_create_engine(parmaString, echo=echo)
+        self._engine = sqlalchemy_create_engine(parmaString, echo=echo) #, pool_pre_ping=True
 
     
     def __get_engine(self) -> Engine:
@@ -284,7 +382,7 @@ class SQLAlchemyORM(ISeriesStorage):
             
             Column("latitude", String(16), nullable=True),
             Column("longitude", String(16), nullable=True),
-
+            #
             UniqueConstraint("isActual", "generatedTime", "verifiedTime", "dataUnit", "dataSource", "dataLocation", "dataSeries", "dataDatum", "latitude", "longitude"),
         )
 
@@ -337,13 +435,12 @@ class SQLAlchemyORM(ISeriesStorage):
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             
-            Column("code", String(25), nullable=False),
+            Column("code", String(25), nullable=False, unique=True),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
             Column("latitude", String(16), nullable=False),
             Column("longitude", String(16), nullable=False),
 
-            UniqueConstraint("code", "displayName"),
         )
 
         self.ref_dataSource = Table(
@@ -352,11 +449,10 @@ class SQLAlchemyORM(ISeriesStorage):
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             
-            Column("code", String(10), nullable=False),
+            Column("code", String(10), nullable=False, unique=True),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
 
-            UniqueConstraint("code", "displayName"),
         )
 
         self.ref_dataSeries = Table(
@@ -365,11 +461,9 @@ class SQLAlchemyORM(ISeriesStorage):
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             
-            Column("code", String(10), nullable=False),
+            Column("code", String(10), nullable=False, unique=True),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
-
-            UniqueConstraint("code", "displayName"),
         )
 
         self.ref_dataUnit = Table(
@@ -378,11 +472,9 @@ class SQLAlchemyORM(ISeriesStorage):
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             
-            Column("code", String(10), nullable=False),
+            Column("code", String(10), nullable=False, unique=True),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
-
-            UniqueConstraint("code", "displayName"),
         )
 
         self.ref_dataDatum = Table(
@@ -391,11 +483,9 @@ class SQLAlchemyORM(ISeriesStorage):
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             
-            Column("code", String(10), nullable=False),
+            Column("code", String(10), nullable=False, unique=True),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
-
-            UniqueConstraint("code", "displayName"),
         )
 
     #############################################################################################
