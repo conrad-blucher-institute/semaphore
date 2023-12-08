@@ -6,7 +6,7 @@
 # version 1.0
 #----------------------------------
 """ A file to run semaphore from the command line. 
-    Run with: python3 src/RunSemaphore/semaphoreRunner.py -d test_dspec.json to run
+    Run with: python3 src/semaphoreRunner.py -d test_dspec.json to run
     Assumes that the user has the database and the correct rows loaded.
  """ 
 #----------------------------------
@@ -17,15 +17,15 @@ import argparse
 from dotenv import load_dotenv
 from os import path, getenv
 
-from src.ModelExecution.modelWrapper import ModelWrapper
-from src.utility import log, construct_true_path
+from ModelExecution.modelWrapper import ModelWrapper
+from utility import log, construct_true_path
 from datetime import datetime
 
 load_dotenv()
 
 def run_semaphore(fileName: str, executionTime: datetime = None):
 
-    if executionTime == None: 
+    if executionTime is None: 
         executionTime = datetime.now()
 
         MW = ModelWrapper(fileName)
@@ -38,7 +38,7 @@ def run_semaphore(fileName: str, executionTime: datetime = None):
     log(f'{result.data}')
 
 #argument parsing
-def main(args=None):
+def main():
     
     #creating argument parser
     parser = argparse.ArgumentParser(
@@ -78,7 +78,7 @@ def main(args=None):
         if execution_time >= datetime.now(): 
             raise ValueError('You can only run Semaphore with a specified time if you are running it in the past.')
         
-        #running semaphore, using method from demo file for now? with the arguments passed
+        #running semaphore
         run_semaphore(args.dspec, execution_time)
     #if we are running semaphore now
     else: 
