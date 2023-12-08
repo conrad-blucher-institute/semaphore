@@ -60,7 +60,7 @@ class ModelWrapper:
             raise FileNotFoundError
 
         try:
-            self._model = load_model(h5FilePath)
+            self._model = load_model(h5FilePath, compile=False)
         except Exception as e:
             log(e) 
             raise e
@@ -107,9 +107,16 @@ class ModelWrapper:
         
         try:
             inputs = self.__inputGatherer.get_inputs(referenceTime)
-            if len(inputs) == 0: return -1
+            if len(inputs) == 0: 
+                log('No inputs received for model.')
+                return -1
 
-            shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
+            try:
+                shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
+            except:
+                log('Shaping failure, likely caused by not receiving enough inputs.')
+                return -1
+
             prediction =  self._model.predict(shapedInputs) 
             dspec = self.__inputGatherer.get_dspec()
             outputInfo = dspec.outputInfo
@@ -131,4 +138,4 @@ class ModelWrapper:
 
         except Exception as e:
             log(e)
-            raise e
+            return -1
