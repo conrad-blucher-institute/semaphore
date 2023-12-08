@@ -1,0 +1,95 @@
+{
+    "modelName": "ThermalRefuge",
+    "modelVersion": "1.0.0",
+    "author": "Andrew DeSimone",
+    "modelFileName": "thermalrefugemodel",
+    "outputInfo": {
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 0,
+        "interval": 3600,
+        "series": "pWaterTmp",
+        "location": "South Bird Island",
+        "unit" : "celsius"
+    },
+    "inputs": [
+        { 
+            "_name": "Water Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "type": "float",
+            "interval": 3600,
+            "range": [-1, -1]
+        },
+        { 
+            "_name": "Air Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "type": "float",
+            "interval": 3600,
+            "range": [-1, -1]
+        },
+        { 
+            "_name": "Water Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "type": "float",
+            "interval": 3600,
+            "range": [-2, -2]
+        },
+        { 
+            "_name": "Air Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "type": "float",
+            "interval": 3600,
+            "range": [-2, -2]
+        },
+        { 
+            "_name": "Water Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "type": "float",
+            "interval": 3600,
+            "range": [-3, -3]
+        },
+        { 
+            "_name": "Air Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "type": "float",
+            "interval": 3600,
+            "range": [-3, -3]
+        },
+        { 
+            "_name": "Water Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "type": "float",
+            "interval": 3600,
+            "range": [-4, -4]
+        },
+        { 
+            "_name": "Air Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "type": "float",
+            "interval": 3600,
+            "range": [-5, -5]
+        }
+]}
