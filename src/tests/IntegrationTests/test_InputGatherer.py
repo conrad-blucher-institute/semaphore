@@ -25,8 +25,8 @@ load_dotenv()
 
 from datetime import timedelta
 
-from utility import log, construct_true_path
-from ModelExecution.inputGatherer import InputGatherer
+from src.utility import log, construct_true_path
+from src.ModelExecution.inputGatherer import InputGatherer
 
 def test_parseDSPEC():
     """This function tests whether the specified DSPEC file

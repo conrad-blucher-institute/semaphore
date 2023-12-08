@@ -20,8 +20,8 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 import pytest
 
 from datetime import datetime, timedelta, time, date
-from DataClasses import Input, Series, TimeDescription, SeriesDescription
-from DataIngestion.IDataIngestion import data_ingestion_factory
+from src.DataClasses import Input, Series, TimeDescription, SeriesDescription
+from src.DataIngestion.IDataIngestion import data_ingestion_factory
 from dotenv import load_dotenv
 
 @pytest.mark.parametrize("source, series, location, interval, datum", [

@@ -20,9 +20,9 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 import pytest
 
 from datetime import datetime, timedelta, time, date
-from DataClasses import TimeDescription, SeriesDescription
-from DataIngestion.IDataIngestion import data_ingestion_factory
-from DataIngestion.DataIngestion.LIGHTHOUSE import LIGHTHOUSE
+from src.DataClasses import TimeDescription, SeriesDescription
+from src.DataIngestion.IDataIngestion import data_ingestion_factory
+from src.DataIngestion.DataIngestion.LIGHTHOUSE import LIGHTHOUSE
 from dotenv import load_dotenv
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [

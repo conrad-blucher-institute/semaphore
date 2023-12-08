@@ -17,7 +17,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from datetime import datetime, timedelta
 
-from DataClasses import Input
+from src.DataClasses import Input
 
 def test_createInput():
     currentDate = datetime.now()

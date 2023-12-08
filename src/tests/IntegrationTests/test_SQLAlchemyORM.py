@@ -17,8 +17,8 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 from datetime import datetime, timedelta, time
-from DataClasses import Input, Output, Series, TimeDescription, SeriesDescription, SemaphoreSeriesDescription
-from SeriesStorage.SeriesStorage.SQLAlchemyORM import SQLAlchemyORM
+from src.DataClasses import Input, Output, Series, TimeDescription, SeriesDescription, SemaphoreSeriesDescription
+from src.SeriesStorage.SeriesStorage.SQLAlchemyORM import SQLAlchemyORM
 from dotenv import load_dotenv
     
 
