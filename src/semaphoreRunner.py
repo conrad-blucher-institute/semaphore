@@ -30,13 +30,12 @@ def run_semaphore(fileName: str, executionTime: datetime = None):
 
         MW = ModelWrapper(fileName)
         result = MW.make_and_save_prediction(executionTime)
-        print(result)
-        print(result.data)
     else: 
         MW = ModelWrapper(fileName)
         result = MW.make_and_save_prediction(executionTime)
-        print(result)
-        print(result.data) 
+
+    log(f'{result}')
+    log(f'{result.data}')
 
 #argument parsing
 def main(args=None):
