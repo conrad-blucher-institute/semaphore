@@ -121,7 +121,7 @@ class ModelWrapper:
     
             #Instantiate the right output handler method then post process the predictions
             OH_Class = output_handler_factory(outputInfo.outputMethod)
-            processedOutputs = OH_Class.post_process_prediction(prediction, dspec) 
+            processedOutputs = OH_Class.post_process_prediction(prediction, dspec, dateTime) 
 
             #Put the post processed predictions in a series
             series = Series(predictionDesc, True)
