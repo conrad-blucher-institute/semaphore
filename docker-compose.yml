@@ -6,7 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile.scheduler
     # restart: always
-    command: ["python3", "tools/init_db.py"]
+    # command: ["python3", "tools/init_db.py"]
+    command: ["tail", "-f", "/dev/null"]
     # command: ["python3", "-m", "pytest"]
     env_file:
       - .env
