@@ -18,7 +18,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from sqlalchemy import create_engine as sqlalchemy_create_engine
-from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, CursorResult, Select, select, distinct, Boolean, Interval
+from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, CursorResult, Select, select, distinct, Boolean, Interval, text
 from sqlalchemy.dialects.postgresql import insert
 from os import getenv
 from datetime import timedelta, datetime
@@ -316,6 +316,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
 
         self._metadata.create_all(self.__get_engine())
+        self.__create_constraints()
      
 
     def drop_DB(self) -> None:
@@ -380,8 +381,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             
             Column("latitude", String(16), nullable=True),
             Column("longitude", String(16), nullable=True),
-            #
-            UniqueConstraint("isActual", "generatedTime", "verifiedTime", "dataUnit", "dataSource", "dataLocation", "dataSeries", "dataDatum", "latitude", "longitude", name='inputs_AK00'),
+            # UniqueConstraint is made __create_constraints method
         )
 
         
@@ -403,7 +403,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             Column("dataSeries", String(10), ForeignKey("ref_dataSeries.code"), nullable=False),         
             Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"), nullable=True),
 
-            UniqueConstraint("timeGenerated", "leadTime", "modelName", "modelVersion", "dataLocation", "dataSeries", "dataDatum", name='outputs_AK00'),
+            # UniqueConstraint is made __create_constraints method
         )
 
         #This table maps CBI location codes to location codes used by datasorces
@@ -485,6 +485,17 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
         )
+
+    def __create_constraints(self) -> None:
+        """Creates the special unique constraints for input and output
+        """
+        inputs_AK00_stmt = text("""ALTER TABLE inputs ADD CONSTRAINT "inputs_AK00" UNIQUE NULLS NOT DISTINCT ("isActual", "generatedTime", "verifiedTime", "dataUnit", "dataSource", "dataLocation", "dataSeries", "dataDatum", "latitude", "longitude")""")
+        outputs_AK00_stmt = text("""ALTER TABLE outputs ADD CONSTRAINT "outputs_AK00" UNIQUE NULLS NOT DISTINCT ("timeGenerated", "leadTime", "modelName", "modelVersion", "dataLocation", "dataSeries", "dataDatum")""")
+
+        with self.__get_engine().connect() as conn:
+            conn.execute(inputs_AK00_stmt)
+            conn.execute(outputs_AK00_stmt)
+            conn.commit()
 
     #############################################################################################
     ################################################################################## DB Interaction private methods
