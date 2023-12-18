@@ -108,7 +108,11 @@ class LIGHTHOUSE(IDataIngestion):
                 epochTimeStamp = dataPoint[dataTimestampIndex]/1000
                 if timeDescription.interval != None:
                     if epochTimeStamp % timeDescription.interval.total_seconds() != 0:
-                        continue
+                        continue    
+
+                # Lighthouse over returns data, so we just clip any data that is before or after our requested date range.
+                if epochTimeStamp > timeDescription.toDateTime.timestamp() or epochTimeStamp < timeDescription.fromDateTime.timestamp():
+                    continue
 
                 dt = datetime.utcfromtimestamp(epochTimeStamp)
                 inputs.append(Input(
