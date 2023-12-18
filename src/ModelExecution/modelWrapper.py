@@ -19,8 +19,8 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from ModelExecution.inputGatherer import InputGatherer
 from ModelExecution.IOutputHandler import output_handler_factory
-from src.DataClasses import SemaphoreSeriesDescription, Series
-from src.SeriesStorage.ISeriesStorage import series_storage_factory
+from DataClasses import SemaphoreSeriesDescription, Series
+from SeriesStorage.ISeriesStorage import series_storage_factory
 
 
 import datetime
@@ -86,8 +86,11 @@ class ModelWrapper:
     def make_prediction(self, dateTime: datetime) -> any:
         """Public method to generate a prediction given a datetime.
         """
+        #converting execution time to reference time
+        referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
+        
         try:
-            inputs = self.__inputGatherer.get_inputs(dateTime)
+            inputs = self.__inputGatherer.get_inputs(referenceTime)
             if inputs == -1: return -1
             
             shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
@@ -99,8 +102,11 @@ class ModelWrapper:
     def make_and_save_prediction(self, dateTime: datetime) -> any:
         """Public method to generate a prediction given a datetime.
         """
+        #converting execution time to reference time
+        referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
+        
         try:
-            inputs = self.__inputGatherer.get_inputs(dateTime)
+            inputs = self.__inputGatherer.get_inputs(referenceTime)
             if len(inputs) == 0: 
                 log('No inputs received for model.')
                 return -1
@@ -110,8 +116,6 @@ class ModelWrapper:
             except:
                 log('Shaping failure, likely caused by not receiving enough inputs.')
                 return -1
-
-
 
             prediction =  self._model.predict(shapedInputs) 
             dspec = self.__inputGatherer.get_dspec()
