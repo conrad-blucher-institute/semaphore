@@ -32,12 +32,12 @@ def main():
     sqlorm = series_storage_factory()
 
 
-    dbEists = sqlorm.DB_exists()
-    if dbEists == -1: # Clear out all data if some tables but not all tables are found
+    dbExists = sqlorm.DB_exists()
+    if dbExists == -1: # Clear out all data if some tables but not all tables are found
         sqlorm.drop_DB()
-        dbEists = 0
+        dbExists = 0
 
-    if dbEists == 0: # Make the DB
+    if dbExists == 0: # Make the DB
         sqlorm.create_DB()
 
         # Insert reference and mapping data
