@@ -5,11 +5,10 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 import csv
 from os import getenv
-
 from dotenv import load_dotenv
-
 from src.SeriesStorage.ISeriesStorage import series_storage_factory
 from src.utility import construct_true_path
+from sqlalchemy import dialects
 
 load_dotenv()
 
@@ -31,16 +30,23 @@ def readInitCSV(csvFileName: str) -> list:
 
 def main():
     sqlorm = series_storage_factory()
-    # sqlorm.drop_DB()
-    sqlorm.create_DB()
 
-    # Insert reference and mapping data
-    sqlorm.insert_ref_dataDatum(readInitCSV('dataDatum.csv'))
-    sqlorm.insert_ref_dataLocation(readInitCSV('dataLocation.csv'))
-    sqlorm.insert_ref_dataSeries(readInitCSV('dataSeries.csv'))
-    sqlorm.insert_ref_dataSource(readInitCSV('dataSource.csv'))
-    sqlorm.insert_ref_dataUnit(readInitCSV('dataUnit.csv'))
-    sqlorm.insert_data_mapping(readInitCSV('dataMapping.csv'))
+
+    dbExists = sqlorm.DB_exists()
+    if dbExists == -1: # Clear out all data if some tables but not all tables are found
+        sqlorm.drop_DB()
+        dbExists = 0
+
+    if dbExists == 0: # Make the DB
+        sqlorm.create_DB()
+
+        # Insert reference and mapping data
+        sqlorm.insert_ref_dataDatum(readInitCSV('dataDatum.csv'))
+        sqlorm.insert_ref_dataLocation(readInitCSV('dataLocation.csv'))
+        sqlorm.insert_ref_dataSeries(readInitCSV('dataSeries.csv'))
+        sqlorm.insert_ref_dataSource(readInitCSV('dataSource.csv'))
+        sqlorm.insert_ref_dataUnit(readInitCSV('dataUnit.csv'))
+        sqlorm.insert_data_mapping(readInitCSV('dataMapping.csv'))
 
 if __name__ == "__main__":
     main()

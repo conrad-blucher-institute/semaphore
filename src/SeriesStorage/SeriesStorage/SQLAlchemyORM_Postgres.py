@@ -19,6 +19,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from sqlalchemy import create_engine as sqlalchemy_create_engine
 from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, CursorResult, Select, select, distinct, Boolean, Interval, text
+from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
 from os import getenv
 from datetime import timedelta, datetime
@@ -326,6 +327,34 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
 
         self._metadata.drop_all(self.__get_engine())
+
+    def DB_exists(self) -> Boolean:
+        """Tests the Inputs table table to see if it exists, returns:
+        1 : all tables exist
+        0 : No tables exist
+        -1 : Some tables exist
+        """
+
+        TOTAL_TABLES = 8
+        existing_tables = 0
+        inspection = inspect(self.__get_engine())
+        if inspection.has_table('inputs'): existing_tables += 1
+        if inspection.has_table('outputs'): existing_tables += 1
+        if inspection.has_table('dataLocation_dataSource_mapping'): existing_tables += 1
+        if inspection.has_table('ref_dataLocation'): existing_tables += 1
+        if inspection.has_table('ref_dataSource'): existing_tables += 1
+        if inspection.has_table('ref_dataSeries'): existing_tables += 1
+        if inspection.has_table('ref_dataUnit'): existing_tables += 1
+        if inspection.has_table('ref_dataDatum'): existing_tables += 1
+
+        if existing_tables == 0:
+            log('DB engine detected no tables!')
+            return 0
+        elif existing_tables == TOTAL_TABLES:
+            return 1
+        else:
+            log('DB engine detected some but not all tables!')
+            return -1
 
     #############################################################################################
     ################################################################################## DB Managment Methods
