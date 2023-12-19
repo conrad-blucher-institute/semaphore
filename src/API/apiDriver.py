@@ -18,7 +18,7 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription
 from SeriesProvider.SeriesProvider import SeriesProvider
@@ -34,7 +34,7 @@ def read_main():
 
 @app.get('/input/source={source}/series={series}/location={location}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
 async def get_input(source: str, series: str, location: str, fromDateTime: str, toDateTime: str, 
-                    datum: str = None, interval: int = None):
+                    datum: str = None, interval: timedelta = None):
     """
     Retrieves input series object
 
@@ -88,7 +88,7 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
 @app.get('/output/ModelName={ModelName}/ModelVersion={ModelVersion}/series={series}/location={location}/ \
          /fromDateTime={fromDateTime}/toDateTime={toDateTime}')
 async def get_output(ModelName: str, ModelVersion: str, series: str, location: str, fromDateTime: str, 
-                     toDateTime: str, datum: str = None, interval: int = None):
+                     toDateTime: str, datum: str = None, interval: timedelta = None):
     """
     Retrieves output series object
 

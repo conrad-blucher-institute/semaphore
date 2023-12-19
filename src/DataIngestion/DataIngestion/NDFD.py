@@ -145,6 +145,7 @@ class NDFD(IDataIngestion):
             response = self.__api_request(url)
 
             if response is None:
+                log(f'NDFD | fetch_predictions | For unknown reason fetch failed for {seriesRequest}{timeRequest}')
                 return None
 
             NDFD_Predictions: NDFDPredictions[str, str] = NDFDPredictions(url, response)
@@ -153,22 +154,27 @@ class NDFD(IDataIngestion):
 
             data_dictionary = json.loads(json.dumps(data[0][1]))
 
+            dataValueIndex = 1
+
             inputs = []
             for row in data_dictionary:
-                timeVerified = datetime.utcfromtimestamp(row[0] / 1000) # Milliseconds converted to seconds
+                timeVerified = datetime.fromtimestamp(row[0] / 1000) # Milliseconds converted to seconds
                 if timeRequest.interval is not None:
-                    if(timeVerified.timestamp() % timeRequest.interval != 0):
+                    if(timeVerified.timestamp() % timeRequest.interval.total_seconds() != 0):
                         continue
 
-                dataPoints = Input(
-                    dataValue = row[1],
-                    dataUnit = NDFD_Predictions.unit,
-                    timeVerified = timeVerified,
-                    timeGenerated = None,
-                    longitude = NDFD_Predictions.longitude,
-                    latitude = NDFD_Predictions.latitude
-                )
-                inputs.append(dataPoints)
+                # NDFD over returns data, so we just clip any data that is before or after our requested date range.
+                if timeVerified > timeRequest.toDateTime or timeVerified < timeRequest.fromDateTime:
+                    continue
+
+                inputs.append(Input(
+                    row[dataValueIndex],
+                    NDFD_Predictions.unit,
+                    timeVerified,
+                    None,
+                    NDFD_Predictions.longitude,
+                    NDFD_Predictions.latitude
+                ))
 
             resultSeries = Series(seriesRequest, True)
             resultSeries.data = inputs
