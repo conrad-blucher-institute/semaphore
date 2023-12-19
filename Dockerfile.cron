@@ -1,0 +1,19 @@
+# Pulling Ubuntu image
+FROM tensorflow/tensorflow:2.14.0
+
+# Install cron
+RUN apt-get update && apt-get install -y cron
+
+WORKDIR /app
+
+# Copy the cron file to the Docker image
+COPY cronfile .
+
+# Give execution rights on the cron job
+RUN chmod 0644 ./cronfile
+
+# Apply the cron job
+RUN crontab ./cronfile
+
+# Start the cron daemon in the foreground
+CMD ["cron", "-f"]

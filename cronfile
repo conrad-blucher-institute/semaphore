@@ -1,0 +1,2 @@
+# Cronfile for schedualing when semaphore will run
+10 * * * * docker exec -d core python3 src/semaphoreRunner.py -d test_dspec.json
