@@ -26,7 +26,7 @@ from datetime import datetime, timedelta
 class OnePackedFloat(IOutputHandler):
 
 
-    def post_process_prediction(self, predictions: list[any], dspec: Dspec) -> list[Output]:
+    def post_process_prediction(self, predictions: list[any], dspec: Dspec, referenceTime: datetime) -> list[Output]:
         """Unpacks the prediction value before saving them to the db
         Parameters:
             prediction: list[]
@@ -34,11 +34,9 @@ class OnePackedFloat(IOutputHandler):
         Returns:
             The Response from the series provider 
         """
-
-        now = datetime.now()
         outputs =[]
         for prediction in predictions:
-            outputs.append(Output(str(self.__unpack(prediction)), dspec.outputInfo.unit, now, timedelta(seconds=dspec.outputInfo.leadTime)))
+            outputs.append(Output(str(self.__unpack(prediction)), dspec.outputInfo.unit, referenceTime, timedelta(seconds=dspec.outputInfo.leadTime)))
 
         return outputs
     

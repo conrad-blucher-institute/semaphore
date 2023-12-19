@@ -14,7 +14,7 @@
     "inputs": [
         { 
             "_name": "Water Temp",
-            "location": "South Bird Island",
+            "location": "NPSBI",
             "source": "LIGHTHOUSE",
             "series": "dWaterTmp",
             "unit": "celsius",
@@ -25,7 +25,7 @@
         },
         { 
             "_name": "Air Temp",
-            "location": "South Bird Island",
+            "location": "PACKER",
             "source": "LIGHTHOUSE",
             "series": "dAirTmp",
             "unit": "celsius",

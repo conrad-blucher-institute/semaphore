@@ -169,3 +169,5 @@ def makeFreshDb():
     DBM.insert_external_location_code('Aransas', 'NOAATANDC', '8775241', 0)
     DBM.insert_external_location_code('lagunamadre', 'tcoon', '48646513645', 0)
     DBM.insert_external_location_code('SouthBirdIsland', 'LIGHTHOUSE', '013', 0)
+    DBM.insert_external_location_code('NPSBI', 'LIGHTHOUSE', '171', 0)
+    DBM.insert_external_location_code('PACKER', 'LIGHTHOUSE', '005', 0)
