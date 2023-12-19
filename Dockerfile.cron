@@ -1,5 +1,5 @@
 # Pulling Ubuntu image
-FROM tensorflow/tensorflow:2.14.0
+FROM ubuntu:20.04
 
 # Install cron
 RUN apt-get update && apt-get install -y cron
