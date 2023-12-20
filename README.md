@@ -5,7 +5,8 @@
 Semaphore is a student-built and maintained Python application that semi-automates the process of operationalizing AI models. Semaphore downloads data, runs models, post-process outputs, and saves outputs. Semaphore currently takes model data in the form of .H5 files and input specifications and a DSPEC JSON. Examples of both are included in this repository.
 
 ## Dependency
-Right now the only external dependency that is not included in the requirements file, is some version of SQLite as this is the only Database system currently supported.
+- Python version >= 3.10
+- Some version of SQLite as this is the only Database system currently supported.
 [SQLite Download Page](https://www.sqlite.org/download.html)
     
 ## Deployment
