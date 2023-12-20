@@ -1,0 +1,76 @@
+version: '3.8'
+services:
+  core:
+    container_name: semaphore-core
+    build:
+      context: .
+      dockerfile: Dockerfile.core
+    # restart: always
+    # command: ["python3", "tools/init_db.py"]
+    command: ["tail", "-f", "/dev/null"]
+    # command: ["python3", "-m", "pytest"]
+    env_file:
+      - .env
+    platform: linux/amd64
+    environment:
+      - DB_LOCATION_STRING=${DB_LOCATION_STRING}
+      - ISERIESSTORAGE_INSTANCE=${ISERIESSTORAGE_INSTANCE}
+      - DSPEC_FOLDER_PATH=${DSPEC_FOLDER_PATH}
+      - MODEL_FOLDER_PATH=${MODEL_FOLDER_PATH}
+    depends_on:
+      db:
+        condition: service_healthy
+    # networks:
+    #   - semaphore-net
+    volumes:
+      - ./data:/app/data
+  api:
+    container_name: semaphore-api
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - DB_LOCATION_STRING=${DB_LOCATION_STRING}
+      - ISERIESSTORAGE_INSTANCE=${ISERIESSTORAGE_INSTANCE}
+      - DSPEC_FOLDER_PATH=${DSPEC_FOLDER_PATH}
+      - MODEL_FOLDER_PATH=${MODEL_FOLDER_PATH}
+    ports: 
+      - "${API_HOST_PORT}:8000"
+    depends_on:
+      - db
+    # networks:
+    #   - semaphore-net
+    volumes:
+      - ./data:/app/data
+  db:
+    container_name: semaphore-db
+    image: postgres:15.4
+    restart: always
+    environment:
+      POSTGRES_USER: root # use this to login to your database
+      POSTGRES_PASSWORD: root # use this to login to your database
+      POSTGRES_DB: semaphoredb
+    # expose:
+    #   - "5432"
+    ports:
+      - "${DB_HOST_PORT}:5432"
+    command: ["postgres", "-c", "listen_addresses=*"]
+    # networks:
+    #   - semaphore-net
+    volumes:
+      - psql-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+volumes:
+  psql-data:
+# networks:
+  # semaphore-net:
+  #   driver: bridge
+

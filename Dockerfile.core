@@ -1,0 +1,28 @@
+# Start with the base image of tensorflow
+FROM tensorflow/tensorflow:2.14.0
+
+# Install Python 3.10
+RUN apt-get update && apt-get install -y python3.10
+
+# No .pyc files created
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# stdout and stderr sent to terminal
+ENV PYTHONUNBUFFERED 1   
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the requirements.txt file to the Docker image
+COPY requirements.txt .
+
+# Create a virtual environment and activate it
+RUN python3 -m venv ./venv/vsem
+RUN /bin/bash -c "source ./venv/vsem/bin/activate"
+
+# Install the requirements using pip
+RUN pip install -r requirements.txt
+
+# Copy the source code from ./src to the Docker image
+COPY . .
+
