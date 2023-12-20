@@ -21,7 +21,7 @@ NOTE:: Original code was taken from:
 #----------------------------------
 # 
 #
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import re
 import requests
@@ -75,6 +75,12 @@ class NDFD(IDataIngestion):
         for a quick list of the NDFD elements that can be queried
         """
         try:
+            # NDFD does not give data for the fromDateTime that you request (e.g. you ask for 12:00-15:00, you will not get data for 12:00).
+            # So subtracting by 1 hour such that the fromDateTime is included. If the code is ever updated to use the
+            # new NDFD server this may need to be changed, but for now it is necessary
+            timeRequest.fromDateTime = timeRequest.fromDateTime - timedelta(hours=1)
+
+
             # I'm explicitly using ISO 8601 formatted time strings *without* timezone
             # information b/c the NDFD web service _seems_ to ignore UTC timezone
             # specified as 'Z' or '+00:00' ?!
@@ -160,6 +166,8 @@ class NDFD(IDataIngestion):
             for row in data_dictionary:
                 timeVerified = datetime.fromtimestamp(row[0] / 1000) # Milliseconds converted to seconds
                 if timeRequest.interval is not None:
+                    log(type(timeRequest.interval))
+                    log(timeRequest.interval)
                     if(timeVerified.timestamp() % timeRequest.interval.total_seconds() != 0):
                         continue
 
