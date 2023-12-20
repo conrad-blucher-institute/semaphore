@@ -3,10 +3,14 @@
     "modelVersion": "1.0.0",
     "author": "Christian Duff",
     "modelFileName": "MLP-OP",
+    "timingInfo":{
+        "offset": 600,
+        "interval": 10800
+
+    },
     "outputInfo": {
-        "outputMethod": "one_packed_float",
-        "leadTime": 48,
-        "interval": 10800,
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 172800,
         "series": "pWaterTmp",
         "location": "SouthBirdIsland",
         "unit" : "celsius"
