@@ -166,8 +166,6 @@ class NDFD(IDataIngestion):
             for row in data_dictionary:
                 timeVerified = datetime.fromtimestamp(row[0] / 1000) # Milliseconds converted to seconds
                 if timeRequest.interval is not None:
-                    log(type(timeRequest.interval))
-                    log(timeRequest.interval)
                     if(timeVerified.timestamp() % timeRequest.interval.total_seconds() != 0):
                         continue
 

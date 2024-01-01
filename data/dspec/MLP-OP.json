@@ -47,7 +47,7 @@
             "type": "float",
             "dataClassification": "prediction",
             "interval": 10800,
-            "range": [0, 16]
+            "range": [16, 0]
         }
 
 ]}
