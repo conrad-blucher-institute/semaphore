@@ -25,7 +25,7 @@
             "type": "float",
             "dataClassification": "actual",
             "interval": 3600,
-            "range": [0, -24]
+            "range": [0, -23]
         },
         { 
             "_name": "Air Temp",
@@ -36,7 +36,7 @@
             "type": "float",
             "dataClassification": "actual",
             "interval": 3600,
-            "range": [0, -24]
+            "range": [0, -23]
         },
         { 
             "_name": "Air Temp",
