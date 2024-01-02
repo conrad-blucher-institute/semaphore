@@ -78,7 +78,7 @@ class NDFD(IDataIngestion):
             # NDFD does not give data for the fromDateTime that you request (e.g. you ask for 12:00-15:00, you will not get data for 12:00).
             # So subtracting by 1 hour such that the fromDateTime is included. If the code is ever updated to use the
             # new NDFD server this may need to be changed, but for now it is necessary
-            timeRequest.fromDateTime = timeRequest.fromDateTime - timedelta(hours=1)
+            updated_fromDateTime = timeRequest.fromDateTime - timedelta(hours=1)
 
 
             # I'm explicitly using ISO 8601 formatted time strings *without* timezone
@@ -87,7 +87,7 @@ class NDFD(IDataIngestion):
             #
             # I'd have to test more to verify, but we just want at least 48 hours of
             # predictions starting w/ the closest time
-            t0_str = timeRequest.fromDateTime.isoformat()
+            t0_str = updated_fromDateTime.isoformat()
             t1_str = timeRequest.toDateTime.isoformat()
         except AttributeError as e:
             raise ValueError(f'Error converting datetime to ISO 8601 format: {e}')
