@@ -34,7 +34,7 @@ def read_main():
 
 @app.get('/input/source={source}/series={series}/location={location}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
 async def get_input(source: str, series: str, location: str, fromDateTime: str, toDateTime: str, 
-                    datum: str = None, interval: timedelta = None):
+                    datum: str = None, interval: int = None):
     """
     Retrieves input series object
 
@@ -66,6 +66,9 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
     
+    if interval is not None:
+        interval = timedelta(seconds=interval)
+    
     requestDescription = SeriesDescription(
         source, 
         series,
@@ -88,7 +91,7 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
 @app.get('/output/ModelName={ModelName}/ModelVersion={ModelVersion}/series={series}/location={location}/ \
          /fromDateTime={fromDateTime}/toDateTime={toDateTime}')
 async def get_output(ModelName: str, ModelVersion: str, series: str, location: str, fromDateTime: str, 
-                     toDateTime: str, datum: str = None, interval: timedelta = None):
+                     toDateTime: str, datum: str = None, interval: int = None):
     """
     Retrieves output series object
 
@@ -121,6 +124,9 @@ async def get_output(ModelName: str, ModelVersion: str, series: str, location: s
         toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
     except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
+    
+    if interval is not None:
+        interval = timedelta(seconds=interval)
     
     requestDescription = SemaphoreSeriesDescription(
         ModelName, 
