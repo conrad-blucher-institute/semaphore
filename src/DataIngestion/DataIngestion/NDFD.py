@@ -147,7 +147,7 @@ class NDFD(IDataIngestion):
         """
         try:
             url = self.__create_url_pattern(seriesRequest, timeRequest, product)
-        
+
             response = self.__api_request(url)
 
             if response is None:
@@ -164,7 +164,7 @@ class NDFD(IDataIngestion):
 
             inputs = []
             for row in data_dictionary:
-                timeVerified = datetime.fromtimestamp(row[0] / 1000) # Milliseconds converted to seconds
+                timeVerified = datetime.fromtimestamp(row[0])
                 if timeRequest.interval is not None:
                     if(timeVerified.timestamp() % timeRequest.interval.total_seconds() != 0):
                         continue
@@ -291,9 +291,9 @@ def iso8601_to_unixms(timestamp: str) -> int:
     # presence of date.fromisoformat() and I'm a hardass who doesn't want
     # to use dateutil when I think I _shouldn't_ have to
     try:
-        time_str = re.sub(r':(\d\d)$', r'\1', timestamp)
-        ms = int(datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S%z').timestamp()) * 1000
-        return ms
+        timestamp_utc = timestamp[:-6]
+        date = int(datetime.fromisoformat(timestamp_utc).timestamp())
+        return date
     
     except (ValueError, TypeError, AttributeError, OSError) as e:
         raise ValueError(f"Error converting timestamp to milliseconds: {e}")
