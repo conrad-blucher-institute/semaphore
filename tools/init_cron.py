@@ -16,9 +16,9 @@ def main():
         # construct shell text ex:  10 * * * * docker exec -d core python3 src/semaphoreRunner.py -d test_dspec.json
 
     # Clear out the cron file SAFELY
-    subprocess.run('crontab', '-r')
+    subprocess.run(['crontab', '-r'])
     # Make a new cron file
     print(f"{construct_true_path(getenv('CRON_FOLDER_PATH'))}/semaphore.cron")
-    subprocess.run('crontab', f"{construct_true_path(getenv('CRON_FOLDER_PATH'))}/semaphore.cron")
+    subprocess.run(['crontab', f"{construct_true_path(getenv('CRON_FOLDER_PATH'))}/semaphore.cron"])
 
 main()
