@@ -24,6 +24,8 @@ services:
     #   - semaphore-net
     volumes:
       - ./data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   api:
     container_name: semaphore-api
     platform: linux/amd64
