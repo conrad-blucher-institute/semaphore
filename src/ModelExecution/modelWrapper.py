@@ -75,46 +75,42 @@ class ModelWrapper:
         #Get only first and last layers
         firstLayer, *_, lastLayer = self._model.layers 
 
+        shape = firstLayer.input_shape
+        if type(shape) == list:
+            shape = shape[0]
+
+        if type(shape) != tuple:
+            raise TypeError(f'First layer input shape was not a tuple, instead: {type(shape)}')
+        
+        if int(shape[-1]) != len(inputs):
+            raise ValueError(f'Incorrect amount of inputs to shape. Desired: {shape[-1]} Received: {len(inputs)}')
+
         #Karas reports the Batch size as None in the shape; Convert None -> 1, 
         #We only want one prediction as opposed to a batch.
-        shapeTarget = [int(1 if value is None else value) for value in firstLayer.input_shape]
+        shapeTarget = [int(1 if value is None else value) for value in shape]
 
         #Reshape and return the data.
         return reshape(inputs, shapeTarget) 
     
 
     def make_prediction(self, dateTime: datetime) -> any:
-        """Public method to generate a prediction given a datetime.
-        """
+        """Computes a prediction but does not save it to persistent storage"""
         #converting execution time to reference time
         referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
-        
-        try:
-            inputs = self.__inputGatherer.get_inputs(referenceTime)
-            if inputs == -1: return -1
             
-            shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
-            return self._model.predict(shapedInputs) 
-        except Exception as e:
-            log(e)
-            raise e
-        
-    def make_and_save_prediction(self, dateTime: datetime) -> any:
-        """Public method to generate a prediction given a datetime.
-        """
-        #converting execution time to reference time
-        referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
-        
         try:
             inputs = self.__inputGatherer.get_inputs(referenceTime)
+
+            if inputs == -1: return -1
+  
             if len(inputs) == 0: 
                 log('No inputs received for model.')
                 return -1
 
             try:
                 shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
-            except:
-                log('Shaping failure, likely caused by not receiving enough inputs.')
+            except Exception as e:
+                log(e)
                 return -1
 
             prediction =  self._model.predict(shapedInputs) 
@@ -131,11 +127,45 @@ class ModelWrapper:
             series = Series(predictionDesc, True)
             series.data = processedOutputs
 
-            #Send the prediction to the database and return the result
-            SS_Class = series_storage_factory()
-            result = SS_Class.insert_output(series)
-            return result
+            return series
 
         except Exception as e:
             log(e)
             return -1
+        
+    def make_and_save_prediction(self, dateTime: datetime) -> any:
+        """Public method to generate a prediction given a datetime.
+        """
+        #converting execution time to reference time
+        referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
+        
+
+        inputs = self.__inputGatherer.get_inputs(referenceTime)
+        if len(inputs) == 0: 
+            log('No inputs received for model.')
+            return -1
+
+        try:
+            shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
+        except Exception as e:
+            log(e)
+            return -1
+
+        prediction =  self._model.predict(shapedInputs) 
+        dspec = self.__inputGatherer.get_dspec()
+        outputInfo = dspec.outputInfo
+
+        predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
+
+        #Instantiate the right output handler method then post process the predictions
+        OH_Class = output_handler_factory(outputInfo.outputMethod)
+        processedOutputs = OH_Class.post_process_prediction(prediction, dspec, dateTime) 
+
+        #Put the post processed predictions in a series
+        series = Series(predictionDesc, True)
+        series.data = processedOutputs
+
+        #Send the prediction to the database and return the result
+        SS_Class = series_storage_factory()
+        result = SS_Class.insert_output(series)
+        return result

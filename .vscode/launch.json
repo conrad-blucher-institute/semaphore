@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "compose dev up",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "docker-compose",
+            "runtimeArgs": [
+                "-f",
+                "docker-compose.yml",
+                "up",
+                "--build",
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "openOnFirstSessionStart",
+            // "timeout": 9999999,
+            "postDebugTask": "compose_stop_dev"
+        },
+    ],
+    "compounds": []
+}

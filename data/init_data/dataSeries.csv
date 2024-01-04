@@ -1,0 +1,9 @@
+code,displayName,notes
+dXWnCmp,Wind Speed X,"Actual Wind Speed, X Componant"
+dYWnCmp,Wind Speed Y,"Actual Wind Speed, Y Componant"
+dWaterTmp,Water Tempature,"Actual Water Tempature"
+dAirTmp,Water Tempature,"Actual Water Tempature"
+pAirTemp,Water Tempature,"Predictive Water Tempature"
+dSurge,Surge,"Water Surge"
+dWl,Water Level,"Actual water height"
+testSeries,TEST SERIES,"PLEASE IGNORE"

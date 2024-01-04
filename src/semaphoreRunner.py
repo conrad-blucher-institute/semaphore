@@ -27,16 +27,18 @@ from datetime import datetime
 
 load_dotenv()
 
-def run_semaphore(fileName: str, executionTime: datetime = None):
+def run_semaphore(fileName: str, executionTime: datetime = None, toss: bool = False):
 
     if executionTime is None: 
         executionTime = datetime.now()
 
-        MW = ModelWrapper(fileName)
+    MW = ModelWrapper(fileName)
+
+    if toss:
+        result = MW.make_prediction(executionTime)
+    else:
         result = MW.make_and_save_prediction(executionTime)
-    else: 
-        MW = ModelWrapper(fileName)
-        result = MW.make_and_save_prediction(executionTime)
+
 
     log(f'{result}')
     log(f'{result.data}')
@@ -57,6 +59,9 @@ def main():
     parser.add_argument("-p", "--past", type=str, required=False, default=None,
                         help = "The time we are executing this action with Semaphore. Should be entered in YYYYMMDDHHMM format. Should only be provided if you intend to run Semaphore in the past.")
     
+    parser.add_argument("-t", "--toss", action='store_true', required=False,
+                        help = "This flag will prevent the computed prediction from actually being saved in the database")
+
     #parsing arguments
     args = parser.parse_args()
 
@@ -82,11 +87,10 @@ def main():
         if execution_time >= datetime.now(): 
             raise ValueError('You can only run Semaphore with a specified time if you are running it in the past.')
         
-        #running semaphore
-        run_semaphore(args.dspec, execution_time)
-    #if we are running semaphore now
-    else: 
-        run_semaphore(args.dspec)
+    else:
+        execution_time = None
+    
+    run_semaphore(args.dspec, execution_time, args.toss)
 
 if __name__ == '__main__':
     main()
