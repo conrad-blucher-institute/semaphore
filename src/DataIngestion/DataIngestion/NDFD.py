@@ -21,7 +21,7 @@ NOTE:: Original code was taken from:
 #----------------------------------
 # 
 #
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import re
 import requests
@@ -75,13 +75,19 @@ class NDFD(IDataIngestion):
         for a quick list of the NDFD elements that can be queried
         """
         try:
+            # NDFD does not give data for the fromDateTime that you request (e.g. you ask for 12:00-15:00, you will not get data for 12:00).
+            # So subtracting by 1 hour such that the fromDateTime is included. If the code is ever updated to use the
+            # new NDFD server this may need to be changed, but for now it is necessary
+            updated_fromDateTime = timeRequest.fromDateTime - timedelta(hours=1)
+
+
             # I'm explicitly using ISO 8601 formatted time strings *without* timezone
             # information b/c the NDFD web service _seems_ to ignore UTC timezone
             # specified as 'Z' or '+00:00' ?!
             #
             # I'd have to test more to verify, but we just want at least 48 hours of
             # predictions starting w/ the closest time
-            t0_str = timeRequest.fromDateTime.isoformat()
+            t0_str = updated_fromDateTime.isoformat()
             t1_str = timeRequest.toDateTime.isoformat()
         except AttributeError as e:
             raise ValueError(f'Error converting datetime to ISO 8601 format: {e}')
@@ -141,10 +147,11 @@ class NDFD(IDataIngestion):
         """
         try:
             url = self.__create_url_pattern(seriesRequest, timeRequest, product)
-        
+
             response = self.__api_request(url)
 
             if response is None:
+                log(f'NDFD | fetch_predictions | For unknown reason fetch failed for {seriesRequest}{timeRequest}')
                 return None
 
             NDFD_Predictions: NDFDPredictions[str, str] = NDFDPredictions(url, response)
@@ -153,22 +160,27 @@ class NDFD(IDataIngestion):
 
             data_dictionary = json.loads(json.dumps(data[0][1]))
 
+            dataValueIndex = 1
+
             inputs = []
             for row in data_dictionary:
-                timeVerified = datetime.utcfromtimestamp(row[0] / 1000) # Milliseconds converted to seconds
+                timeVerified = datetime.fromtimestamp(row[0])
                 if timeRequest.interval is not None:
-                    if(timeVerified.timestamp() % timeRequest.interval != 0):
+                    if(timeVerified.timestamp() % timeRequest.interval.total_seconds() != 0):
                         continue
 
-                dataPoints = Input(
-                    dataValue = row[1],
-                    dataUnit = NDFD_Predictions.unit,
-                    timeVerified = timeVerified,
-                    timeGenerated = None,
-                    longitude = NDFD_Predictions.longitude,
-                    latitude = NDFD_Predictions.latitude
-                )
-                inputs.append(dataPoints)
+                # NDFD over returns data, so we just clip any data that is before or after our requested date range.
+                if timeVerified > timeRequest.toDateTime or timeVerified < timeRequest.fromDateTime:
+                    continue
+
+                inputs.append(Input(
+                    row[dataValueIndex],
+                    NDFD_Predictions.unit,
+                    timeVerified,
+                    None,
+                    NDFD_Predictions.longitude,
+                    NDFD_Predictions.latitude
+                ))
 
             resultSeries = Series(seriesRequest, True)
             resultSeries.data = inputs
@@ -279,9 +291,9 @@ def iso8601_to_unixms(timestamp: str) -> int:
     # presence of date.fromisoformat() and I'm a hardass who doesn't want
     # to use dateutil when I think I _shouldn't_ have to
     try:
-        time_str = re.sub(r':(\d\d)$', r'\1', timestamp)
-        ms = int(datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S%z').timestamp()) * 1000
-        return ms
+        timestamp_utc = timestamp[:-6]
+        date = int(datetime.fromisoformat(timestamp_utc).timestamp())
+        return date
     
     except (ValueError, TypeError, AttributeError, OSError) as e:
         raise ValueError(f"Error converting timestamp to milliseconds: {e}")

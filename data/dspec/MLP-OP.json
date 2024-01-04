@@ -3,12 +3,16 @@
     "modelVersion": "1.0.0",
     "author": "Christian Duff",
     "modelFileName": "MLP-OP",
+    "timingInfo":{
+        "offset": 600,
+        "interval": 10800
+
+    },
     "outputInfo": {
-        "outputMethod": "one_packed_float",
-        "leadTime": 12,
-        "interval": 3600,
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 172800,
         "series": "pWaterTmp",
-        "location": "South Bird Island",
+        "location": "SouthBirdIsland",
         "unit" : "celsius"
     },
     "inputs": [
@@ -21,7 +25,7 @@
             "type": "float",
             "dataClassification": "actual",
             "interval": 3600,
-            "range": [0, -24]
+            "range": [0, -23]
         },
         { 
             "_name": "Air Temp",
@@ -32,18 +36,18 @@
             "type": "float",
             "dataClassification": "actual",
             "interval": 3600,
-            "range": [0, -24]
+            "range": [0, -23]
         },
         { 
             "_name": "Air Temp",
-            "location": "South Bird Island",
+            "location": "SBirdIsland",
             "source": "NDFD",
             "series": "pAirTemp",
             "unit": "celsius",
             "type": "float",
             "dataClassification": "prediction",
-            "interval": 3600,
-            "range": [0, 12]
+            "interval": 10800,
+            "range": [12, 1]
         }
 
 ]}

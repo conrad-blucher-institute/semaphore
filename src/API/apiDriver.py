@@ -18,7 +18,7 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription
 from SeriesProvider.SeriesProvider import SeriesProvider
@@ -65,6 +65,9 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
         toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
     except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
+    
+    if interval is not None:
+        interval = timedelta(seconds=interval)
     
     requestDescription = SeriesDescription(
         source, 
@@ -121,6 +124,9 @@ async def get_output(ModelName: str, ModelVersion: str, series: str, location: s
         toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
     except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
+    
+    if interval is not None:
+        interval = timedelta(seconds=interval)
     
     requestDescription = SemaphoreSeriesDescription(
         ModelName, 

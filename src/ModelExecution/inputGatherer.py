@@ -108,22 +108,22 @@ class InputGatherer:
 
             self.__dspec = dspec #Bind dspec to this obj
 
-    def __generate_inputSpecifications(self, now: datetime) -> None:
+    def __generate_inputSpecifications(self, referenceTime: datetime) -> None:
         """Generates the list of input specifications. This is a request paired
         with the expected datatype as a list. This list is saved as an attribute
         on this class. Also saves the time in which this was requested. This can be 
         used to determine if the specification needs to be remade.
 
         Parameters:
-            now: datetime - The time to generate the specification of
+            referenceTime: datetime - The time to generate the specification of
             The data requests will be relative to this time.
         """
         specifications = []
         for input in self.__dspec.inputs:
             try:
                 #Calculate the to and from time from the interval and range
-                toDateTime = now + timedelta(seconds= input.range[0] * input.interval)
-                fromDateTime = now + timedelta(seconds= input.range[1] * input.interval)
+                toDateTime = referenceTime + timedelta(seconds= input.range[0] * input.interval)
+                fromDateTime = referenceTime + timedelta(seconds= input.range[1] * input.interval)
                 
                 #TODO:: Create better logic to properly analyse a given input
                 if (input.range[0] == input.range[1]): #isOnePoint
@@ -148,7 +148,7 @@ class InputGatherer:
             except Exception as e:
                log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
         self.__specifications = specifications
-        self.__specificationsConstructionTime = now
+        self.__specificationsConstructionTime = referenceTime
 
     def __generate_inputVector(self) -> None:
         """This method fills input specifications. It queries the system
@@ -195,7 +195,7 @@ class InputGatherer:
         offset = self.__dspec.timingInfo.offset
         interval = self.__dspec.timingInfo.interval
 
-        referenceTime = datetime.utcfromtimestamp((execution.timestamp() - (execution.timestamp() % interval)) + offset)
+        referenceTime = datetime.utcfromtimestamp(execution.timestamp() - (execution.timestamp() % interval))
 
         return referenceTime
     

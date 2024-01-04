@@ -92,8 +92,8 @@ class LIGHTHOUSE(IDataIngestion):
             return None
 
         # Parse Meta Data
-        lat = apiReturn['013']['lat']
-        lon = apiReturn['013']['lon']
+        lat = apiReturn[lighthouseLocationCode]['lat']
+        lon = apiReturn[lighthouseLocationCode]['lon']
         data = apiReturn[lighthouseLocationCode]['data'][sim[SIMSeriesCodeIndex]]
 
         ### Convert data to a list of inputs
@@ -127,7 +127,6 @@ class LIGHTHOUSE(IDataIngestion):
         ### Build Series, send data to DB, return data
         resultSeries = Series(seriesDescription, timeDescription)
         resultSeries.data = inputs
-        
         #Insert series into DB
         self.seriesStorage.insert_input(resultSeries)
         return resultSeries
