@@ -33,10 +33,6 @@ def main():
 
 
     dbExists = sqlorm.DB_exists()
-    if dbExists == -1: # Clear out all data if some tables but not all tables are found
-        sqlorm.drop_DB()
-        dbExists = 0
-
     if dbExists == 0: # Make the DB
         sqlorm.create_DB()
 
