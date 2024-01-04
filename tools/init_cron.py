@@ -4,24 +4,20 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 import subprocess
-
+from dotenv import load_dotenv
+from os import getenv
+from src.utility import construct_true_path
 load_dotenv()
 
 def main():
-    #read the dspec folder to create a cron job for each model 
-    #checking that dspec file passed exists in the dspec folder
-    dspecFilePath = construct_true_path(getenv('DSPEC_FOLDER_PATH'))
-
-
         # until no more dspec files 
         # find interval and convert to cron time
         # find despec file name 
         # construct shell text ex:  10 * * * * docker exec -d core python3 src/semaphoreRunner.py -d test_dspec.json
 
-    #if not create a cron file on the machine
-    subprocess.run('crontab', '-l', 'mycron')
+    # Clear out the cron file SAFELY
+    subprocess.run('crontab', '-r')
+    # Make a new cron file
+    print(f"{construct_true_path(getenv('CRON_FOLDER_PATH'))}/semaphore.cron")
+    subprocess.run('crontab', f"{construct_true_path(getenv('CRON_FOLDER_PATH'))}/semaphore.cron")
 
-    #add all shell text to the cron file
-    subprocess.run('echo', '"" >> mycron')
-    subprocess.run('crontab', 'mycron')
-    subprocess.run('rm', 'mycron')
