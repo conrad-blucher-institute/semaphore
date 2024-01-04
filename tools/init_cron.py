@@ -18,7 +18,6 @@ def main():
     # Clear out the cron file SAFELY
     subprocess.run(['crontab', '-r'])
     # Make a new cron file
-    print(f"{construct_true_path(getenv('CRON_FOLDER_PATH'))}/semaphore.cron")
-    subprocess.run(['crontab', f"{construct_true_path(getenv('CRON_FOLDER_PATH'))}/semaphore.cron"])
+    subprocess.run(['crontab', './data/cron/semaphore.cron'])
 
 main()

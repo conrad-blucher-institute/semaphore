@@ -1,1 +1,1 @@
-* * * * * docker exec -d core python3 src/semaphoreRunner.py -d test_dspec.json
+* * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d test_dspec.json >> log.txt
