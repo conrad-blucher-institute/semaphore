@@ -1,1 +1,2 @@
-* * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d test_dspec.json >> log.txt
+10 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d test_dspec.json >> log.txt
+10 */3 * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d MLP-OP.json >> log.txt
