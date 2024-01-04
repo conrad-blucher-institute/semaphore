@@ -21,3 +21,4 @@ def main():
     print(f"{construct_true_path(getenv('CRON_FOLDER_PATH'))}/semaphore.cron")
     subprocess.run('crontab', f"{construct_true_path(getenv('CRON_FOLDER_PATH'))}/semaphore.cron")
 
+main()
