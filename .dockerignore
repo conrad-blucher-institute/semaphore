@@ -1,8 +1,14 @@
-.vscode/settings.json
-!.vscode/launch.json
-!.vscode/tasks.json
+**/*.pyc
+docs
+db
+data/dspec
+
+# VSCode
+.vscode
+
+# .env files
 *.env
-demo.py
+
 # Ignore virtual enviroment root
 venv/
 
@@ -33,32 +39,5 @@ var/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Unit test / coverage reports
-.tox/
-.coverage
-.cache
-nosetests.xml
-coverage.xml
-
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-# Rope
-.ropeproject
-
-# Django stuff:
-*.log
-*.pot
-
-# Sphinx documentation
-docs/_build/
-
-
 # Logs
-
 log.txt

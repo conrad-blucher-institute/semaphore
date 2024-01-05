@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from SeriesProvider.SeriesProvider import SeriesProvider
 from DataClasses import SeriesDescription, TimeDescription, Input
-from ModelExecution.dspec import Dspec, OutputInfo, InputInfo
+from ModelExecution.dspec import Dspec, OutputInfo, InputInfo,TimingInfo
 
 
 from os import path, getenv
@@ -26,6 +26,7 @@ from utility import log, construct_true_path
 from json import load
 from csv import reader
 from datetime import datetime, timedelta
+
 
 from typing import List
 
@@ -63,6 +64,15 @@ class InputGatherer:
             dspec.author = json["author"]
             dspec.modelFileName = json["modelFileName"]
             
+            #TimingInfo
+            timingJson = json["timingInfo"]
+            
+            timingInfo = TimingInfo()
+            timingInfo.offset = timingJson["offset"]
+            timingInfo.interval = timingJson["interval"]
+            
+            dspec.timingInfo = timingInfo #Bind to dspec
+            
             #OuputInfo
             outputJson = json["outputInfo"]
             
@@ -98,22 +108,22 @@ class InputGatherer:
 
             self.__dspec = dspec #Bind dspec to this obj
 
-    def __generate_inputSpecifications(self, now: datetime) -> None:
+    def __generate_inputSpecifications(self, referenceTime: datetime) -> None:
         """Generates the list of input specifications. This is a request paired
         with the expected datatype as a list. This list is saved as an attribute
         on this class. Also saves the time in which this was requested. This can be 
         used to determine if the specification needs to be remade.
 
         Parameters:
-            now: datetime - The time to generate the specification of
+            referenceTime: datetime - The time to generate the specification of
             The data requests will be relative to this time.
         """
         specifications = []
         for input in self.__dspec.inputs:
             try:
                 #Calculate the to and from time from the interval and range
-                toDateTime = now + timedelta(seconds= input.range[0] * input.interval)
-                fromDateTime = now + timedelta(seconds= input.range[1] * input.interval)
+                toDateTime = referenceTime + timedelta(seconds= input.range[0] * input.interval)
+                fromDateTime = referenceTime + timedelta(seconds= input.range[1] * input.interval)
                 
                 #TODO:: Create better logic to properly analyse a given input
                 if (input.range[0] == input.range[1]): #isOnePoint
@@ -138,7 +148,7 @@ class InputGatherer:
             except Exception as e:
                log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
         self.__specifications = specifications
-        self.__specificationsConstructionTime = now
+        self.__specificationsConstructionTime = referenceTime
 
     def __generate_inputVector(self) -> None:
         """This method fills input specifications. It queries the system
@@ -177,7 +187,18 @@ class InputGatherer:
                     log(f'Input gatherer has no conversion for Unit: {dataType}')
                     raise NotImplementedError
         return castedData
+    
+    def calculate_referenceTime(self, execution :datetime) -> datetime:
+        '''This function calculates the refrence time that semaphore needs to use to get the correct number of inputs from execution time
+        :param execution: datetime -the execution time'''
 
+        offset = self.__dspec.timingInfo.offset
+        interval = self.__dspec.timingInfo.interval
+
+        referenceTime = datetime.utcfromtimestamp(execution.timestamp() - (execution.timestamp() % interval))
+
+        return referenceTime
+    
     def get_inputs(self, dateTime: datetime) -> list[any]:
         """Getter method returns the input vector for the loaded model. Only regenerates the vector
         if its a new request or a request with a different datetime.
@@ -186,7 +207,7 @@ class InputGatherer:
             dateTime: datetime - The datetime to base the input vector off of, the returned vector
             will be relative to it.
         """
-
+        
         #Only regenerate specification If its truly a new request.
         specificationIsCreated = self.__specifications != None
         requestTimeIsDifferent = dateTime != self.__specificationsConstructionTime
@@ -196,7 +217,9 @@ class InputGatherer:
             return self.__inputVector
         else:
             return self.__inputVector
-
+        
+   
+            
     def get_model_file_name(self) -> str:
         """Returns the name of the model as specified in the DSPEC file."""
         return self.__dspec.modelFileName     

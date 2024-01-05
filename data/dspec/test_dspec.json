@@ -3,10 +3,15 @@
     "modelVersion": "1.0.0",
     "author": "John Doe",
     "modelFileName": "test_AI",
+    "timingInfo":{
+        "offset": 0,
+        "interval": 3600
+
+    },
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
         "leadTime": 86400,
-        "series": "waterHeight",
+        "series": "testSeries",
         "location": "packChan",
         "interval" : 3600, 
         "datum": "test_datum",
