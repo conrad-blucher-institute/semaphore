@@ -40,6 +40,7 @@ from DataIngestion.IDataIngestion import IDataIngestion
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from utility import log
+import traceback
 
 Time = TypeVar('Time')
 NewTime = TypeVar('NewTime')
@@ -110,11 +111,11 @@ class NDFD(IDataIngestion):
             endDate   = urllib.parse.quote(t1_str)
         except TypeError as e:
             raise ValueError(f'Error quoting ISO 8601 time string: {e}')
-        
-        base_url = 'https://graphical.weather.gov/xml/sample_products/browser_interface/ndfdXMLclient.php?whichClient=NDFDgen'
+
+        base_url = 'https://digital.mdl.nws.noaa.gov/xml/sample_products/browser_interface/ndfdXMLclient.php?whichClient=NDFDgen'
         formatted_product = f'{product}={product}'
         try:
-            url = '{}&lat={}&lon={}&product=time-series&begin={}&end={}&Unit=m&{}'.format(base_url,
+            url = '{}&lat={}&lon={}&product=time-series&XMLformat=DWML&begin={}&end={}&Unit=m&{}&Submit=Submit'.format(base_url,
                                                                                         lat,
                                                                                         lon,
                                                                                         beginDate,
@@ -134,7 +135,7 @@ class NDFD(IDataIngestion):
         """
         try:
             response = requests.get(url)
-            return response.text
+            return response.content
         except HTTPError as err:
             log(f'Fetch failed, HTTPError of code: {err.status} for: {err.reason}')
             return None
@@ -195,7 +196,7 @@ class NDFD(IDataIngestion):
                     continue
 
                 inputs.append(Input(
-                    row[dataValueIndex],
+                    str(row[dataValueIndex]),
                     NDFD_Predictions.unit,
                     timeVerified,
                     None,
@@ -213,6 +214,10 @@ class NDFD(IDataIngestion):
 
         except ValueError as err:
             log(f'Trouble fetching data: {err}')
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno) 
+            traceback.print_exc() 
             return None
         
         except Exception as err:
