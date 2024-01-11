@@ -30,7 +30,7 @@ class ISeriesStorage(ABC):
     
     @abstractmethod
     def select_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
-         raise NotImplementedError()
+        raise NotImplementedError()
     
     @abstractmethod
     def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
