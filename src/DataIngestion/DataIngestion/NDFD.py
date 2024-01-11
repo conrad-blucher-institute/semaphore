@@ -165,19 +165,21 @@ class NDFD(IDataIngestion):
 
             data_dictionary = json.loads(json.dumps(data[0][1]))
 
+            toDateTimestamp = int(timeRequest.toDateTime.timestamp())
+
             # Sometimes, you can request a certain date range from NDFD and the toDateTime will be missing since the interval
             # has changed from 3 hours to 6 hours. A good example is you ask for 2024-01-04 12:00:00 as your toDateTime, but
             # the interval changed to 6 hours at 2024-01-04 09:00:00 so the next datetime available after 2024-01-04 09:00:00
             # is 2024-01-04 15:00:00. Well the code below checks for this and finds the average of the two surrounding datetimes
             # and sets that as the value for the desired toDateTime
-            toDateTime_exists = any(timestamp[0] == int(timeRequest.toDateTime.timestamp()) for timestamp in data_dictionary)
+            toDateTime_exists = any(timestamp[0] == toDateTimestamp for timestamp in data_dictionary)
             if not toDateTime_exists:
-                closest_average = self.find_closest_average(data_dictionary, timeRequest.toDateTime)
+                closest_average = self.find_closest_average(data_dictionary, toDateTimestamp)
 
                 if closest_average is None: return None
                 
-                # Add toDateTime and averaged data point to data_dictionary
-                data_dictionary.append([int(timeRequest.toDateTime.timestamp()), closest_average])
+                # Add toDateTimestamp and averaged data point to data_dictionary
+                data_dictionary.append([toDateTimestamp, closest_average])
             
             dataValueIndex = 1
 
@@ -218,15 +220,16 @@ class NDFD(IDataIngestion):
             return None
     
 
-    def find_closest_average(self, data_dictionary: list, toDateTime: datetime) -> None | int:
+    def find_closest_average(self, data_dictionary: list, toDateTimestamp: int) -> None | int:
         """If toDateTime does not exist in the series request, find the average of the data point before
         and the data point after toDateTime. If one of those points cannot be found, use the found data point
         as the average. If both cannot be found, return None. 
-        :param data_dictionary: list - The nested list of timestamps and data from NDFD
-        :param toDateTime: datetime - The missing datetime to find the average for.
+        :param data_dictionary: list - Nested list of timestamps and data from NDFD
+        :param toDateTimestamp: int - Missing datetime to find the average for. Converted to POSIX timestamp as an int
         """
-        closest_before = max((timestamp for timestamp in data_dictionary if timestamp[0] < int(toDateTime.timestamp())), key=lambda x: x[0], default=None)
-        closest_after = min((timestamp for timestamp in data_dictionary if timestamp[0] > int(toDateTime.timestamp())), key=lambda x: x[0], default=None)
+        # The key argument is set to the timestamp so that it knows what to look for when comparing. Defaults to None if no results found.
+        closest_before = max((timestamp for timestamp in data_dictionary if timestamp[0] < toDateTimestamp), key=lambda x: x[0], default=None)
+        closest_after = min((timestamp for timestamp in data_dictionary if timestamp[0] > toDateTimestamp), key=lambda x: x[0], default=None)
 
         if closest_before is not None and closest_after is not None:
             average = int((closest_after[1] + closest_before[1]) / 2)
