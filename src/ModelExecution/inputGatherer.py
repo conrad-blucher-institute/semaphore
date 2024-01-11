@@ -192,7 +192,6 @@ class InputGatherer:
         '''This function calculates the refrence time that semaphore needs to use to get the correct number of inputs from execution time
         :param execution: datetime -the execution time'''
 
-        offset = self.__dspec.timingInfo.offset
         interval = self.__dspec.timingInfo.interval
 
         referenceTime = datetime.utcfromtimestamp(execution.timestamp() - (execution.timestamp() % interval))
