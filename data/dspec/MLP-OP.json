@@ -23,7 +23,6 @@
             "series": "dWaterTmp",
             "unit": "celsius",
             "type": "float",
-            "dataClassification": "actual",
             "interval": 3600,
             "range": [0, -23]
         },
@@ -34,7 +33,6 @@
             "series": "dAirTmp",
             "unit": "celsius",
             "type": "float",
-            "dataClassification": "actual",
             "interval": 3600,
             "range": [0, -23]
         },
@@ -45,7 +43,6 @@
             "series": "pAirTemp",
             "unit": "celsius",
             "type": "float",
-            "dataClassification": "prediction",
             "interval": 10800,
             "range": [16, 1]
         }
