@@ -48,6 +48,8 @@ services:
     #   - semaphore-net
     volumes:
       - ./data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   db:
     container_name: semaphore-db
     image: postgres:15.4
