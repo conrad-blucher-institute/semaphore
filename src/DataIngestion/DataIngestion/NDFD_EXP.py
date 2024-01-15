@@ -53,7 +53,7 @@ Dataset = Tuple[SeriesName, LayoutKey, List[Data]]
 DataSeries = List[Dataset[Data]]
 ZippedDataset = List[Tuple[SeriesName, List[Tuple[Time, Data]]]]
 
-class NDFD(IDataIngestion):
+class NDFD_EXP(IDataIngestion):
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
         match seriesDescription.dataSeries:
