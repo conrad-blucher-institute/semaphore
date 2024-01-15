@@ -41,7 +41,7 @@
         { 
             "_name": "Air Temp",
             "location": "SBirdIsland",
-            "source": "NDFD",
+            "source": "NDFD_EXP",
             "series": "pAirTemp",
             "unit": "celsius",
             "type": "float",
