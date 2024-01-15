@@ -195,7 +195,7 @@ class NDFD(IDataIngestion):
                     continue
 
                 inputs.append(Input(
-                    row[dataValueIndex],
+                    str(row[dataValueIndex]),
                     NDFD_Predictions.unit,
                     timeVerified,
                     None,
