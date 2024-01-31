@@ -11,11 +11,6 @@
 # 
 #
 #Imports
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataIngestion.IDataIngestion import data_ingestion_factory
 from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription

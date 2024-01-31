@@ -11,16 +11,11 @@
 # 
 #
 #Imports
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
 from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
-from utility import log
 
 from abc import ABC, abstractmethod
 from importlib import import_module
+from os import getenv
 
 class ISeriesStorage(ABC):
 
@@ -76,7 +71,8 @@ def series_storage_factory() -> ISeriesStorage:
         ISeriesStorage - An child of the ISeriesStorage interface.
     """
 
-    ss = os.getenv('ISERIESSTORAGE_INSTANCE')
+    ss = getenv('ISERIESSTORAGE_INSTANCE')
+   
 
     try:
         return getattr(import_module(f'src.SeriesStorage.SeriesStorage.{ss}'), f'{ss}')()
