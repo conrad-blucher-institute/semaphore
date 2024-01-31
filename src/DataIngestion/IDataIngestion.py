@@ -33,5 +33,5 @@ def data_ingestion_factory(seriesRequest: SeriesDescription) -> IDataIngestion:
     try:
         return getattr(import_module(f'src.DataIngestion.DI_Classes.{seriesRequest.dataSource}'), f'{seriesRequest.dataSource}')()
     except Exception:
-        raise ModuleNotFoundError(f'No module named {seriesRequest.dataSource} in src.DataIngestion.DataIngestion!')
+        raise ModuleNotFoundError(f'No module named {seriesRequest.dataSource} in src.DataIngestion.DI_Classes!')
     

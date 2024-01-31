@@ -39,5 +39,5 @@ def output_handler_factory(method: str) -> IOutputHandler:
     try:
         return getattr(import_module(f'src.ModelExecution.OH_Classes.{method}'), f'{method}')()
     except Exception:
-        raise ModuleNotFoundError(f'No module named {method} in src.DataIngestion.DataIngestion!')
+        raise ModuleNotFoundError(f'No module named {method} in src.ModelExecution.OH_Classes!')
     
