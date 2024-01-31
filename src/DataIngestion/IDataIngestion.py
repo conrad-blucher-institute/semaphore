@@ -31,7 +31,7 @@ def data_ingestion_factory(seriesRequest: SeriesDescription) -> IDataIngestion:
         :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
     """
     try:
-        return getattr(import_module(f'src.DataIngestion.DataIngestion.{seriesRequest.dataSource}'), f'{seriesRequest.dataSource}')()
+        return getattr(import_module(f'src.DataIngestion.DI_Classes.{seriesRequest.dataSource}'), f'{seriesRequest.dataSource}')()
     except Exception:
         raise ModuleNotFoundError(f'No module named {seriesRequest.dataSource} in src.DataIngestion.DataIngestion!')
     
