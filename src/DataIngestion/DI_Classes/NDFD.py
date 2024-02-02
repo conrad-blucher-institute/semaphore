@@ -23,18 +23,12 @@ NOTE:: Original code was taken from:
 #
 from datetime import datetime, timedelta
 import json
-import re
 import requests
 from typing import List, Dict, TypeVar, NewType, Tuple, Generic, Callable
 from urllib.error import HTTPError
 import urllib.parse
 from lxml import etree # type: ignore
                        # since lxml has no type hints
-
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from DataIngestion.IDataIngestion import IDataIngestion
 from DataClasses import Series, SeriesDescription, Input, TimeDescription

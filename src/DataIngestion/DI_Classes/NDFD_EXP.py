@@ -29,11 +29,6 @@ import urllib.parse
 from lxml import etree # type: ignore
                        # since lxml has no type hints
 
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
 from DataIngestion.IDataIngestion import IDataIngestion
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from SeriesStorage.ISeriesStorage import series_storage_factory

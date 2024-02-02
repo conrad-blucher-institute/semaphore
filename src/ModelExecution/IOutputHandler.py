@@ -37,7 +37,7 @@ def output_handler_factory(method: str) -> IOutputHandler:
         IOutputHandler - An child of the IOutputHandler interface.
     """
     try:
-        return getattr(import_module(f'src.ModelExecution.OH_Classes.{method}'), f'{method}')()
+        return getattr(import_module(f'.OH_Classes.{method}', 'ModelExecution'), f'{method}')()
     except Exception:
-        raise ModuleNotFoundError(f'No module named {method} in src.ModelExecution.OH_Classes!')
+        raise ModuleNotFoundError(f'Failed to import {method} from OH_Classes! Does it exist in the directory?')
     

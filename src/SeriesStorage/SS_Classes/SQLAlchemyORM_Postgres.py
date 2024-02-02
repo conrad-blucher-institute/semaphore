@@ -11,12 +11,6 @@
 # 
 #
 #Imports
-import sys
-import os
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
 from sqlalchemy import create_engine as sqlalchemy_create_engine
 from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, CursorResult, Select, select, distinct, Boolean, Interval, text
 from sqlalchemy import inspect
@@ -24,7 +18,7 @@ from sqlalchemy.dialects.postgresql import insert
 from os import getenv
 from datetime import timedelta, datetime
 
-from src.SeriesStorage.ISeriesStorage import ISeriesStorage
+from SeriesStorage.ISeriesStorage import ISeriesStorage
 
 from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, Input, Output, TimeDescription
 from utility import log

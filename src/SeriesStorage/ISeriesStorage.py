@@ -75,7 +75,7 @@ def series_storage_factory() -> ISeriesStorage:
    
 
     try:
-        return getattr(import_module(f'src.SeriesStorage.SS_Classes.{ss}'), f'{ss}')()
-    except Exception:
-        raise ModuleNotFoundError(f'No module named {ss} in src.SeriesStorage.SS_Classes!')
+        return getattr(import_module(f'.SS_Classes.{ss}', 'SeriesStorage'), f'{ss}')()
+    except Exception as e:
+       raise ModuleNotFoundError(f'No module named {ss} in .SS_Classes!')
     
