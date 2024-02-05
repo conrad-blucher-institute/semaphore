@@ -26,6 +26,7 @@ RUN pip install -r requirements.txt
 # Copy the source code from ./src to the Docker image
 COPY . .
 
+# Set the work directory to SRC such that imports work correctly
 WORKDIR /app/src
 
 # Set the command to run the apiDriver.py script when the Docker container starts
