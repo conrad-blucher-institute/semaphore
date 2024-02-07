@@ -1,14 +1,25 @@
+# -*- coding: utf-8 -*-
+#init_db.py
+#----------------------------------
+# Created By: Team
+# Created Date: 2/07/2023
+# version 2.0
+#----------------------------------
+"""This file instantiates a db schema over a db connection.
+ """ 
+#----------------------------------
+# 
+#
+#Static Path declaration for sibling directory
+#https://stackoverflow.com/questions/10272879/how-do-i-import-a-python-script-from-a-sibling-directory
 import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
+sys.path.append('/app/src')
+from SeriesStorage.ISeriesStorage import series_storage_factory
+from utility import construct_true_path
 
 import csv
 from os import getenv
 from dotenv import load_dotenv
-from src.SeriesStorage.ISeriesStorage import series_storage_factory
-from src.utility import construct_true_path
-from sqlalchemy import dialects
 
 load_dotenv()
 

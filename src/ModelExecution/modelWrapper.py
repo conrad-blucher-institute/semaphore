@@ -12,20 +12,16 @@ Tenserflow related actions allowing us to run models from .H5
 # 
 #
 #Imports
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from ModelExecution.inputGatherer import InputGatherer
-from ModelExecution.IOutputHandler import output_handler_factory
+
+from .inputGatherer import InputGatherer
+from .IOutputHandler import output_handler_factory
 from DataClasses import SemaphoreSeriesDescription, Series
 from SeriesStorage.ISeriesStorage import series_storage_factory
-
+from utility import log, construct_true_path
 
 import datetime
 from os import path, getenv
-from utility import log, construct_true_path
 from numpy import array, reshape
 from tensorflow.keras.models import load_model
 

@@ -1,12 +1,18 @@
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
+# -*- coding: utf-8 -*-
+#init_db.py
+#----------------------------------
+# Created By: Team
+# Created Date: 2/07/2023
+# version 2.0
+#----------------------------------
+"""This file will update the local cronfile with jobs found in ./data/cron/semaphore.cron
+ """ 
+#----------------------------------
+# 
+#
 
 import subprocess
 from dotenv import load_dotenv
-from os import getenv
-from src.utility import construct_true_path
 load_dotenv()
 
 def main():

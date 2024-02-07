@@ -11,24 +11,16 @@
 # 
 #
 #Imports
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
+
 
 from SeriesProvider.SeriesProvider import SeriesProvider
 from DataClasses import SeriesDescription, TimeDescription, Input
-from ModelExecution.dspec import Dspec, OutputInfo, InputInfo,TimingInfo
-
+from .dspec import Dspec, OutputInfo, InputInfo,TimingInfo
+from utility import log, construct_true_path
 
 from os import path, getenv
-from utility import log, construct_true_path
 from json import load
-from csv import reader
 from datetime import datetime, timedelta
-
-
-from typing import List
 
 
 class InputGatherer:

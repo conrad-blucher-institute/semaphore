@@ -16,14 +16,11 @@
 import argparse
 from dotenv import load_dotenv
 from os import path, getenv
-import sys
-import os
+from datetime import datetime
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
 from ModelExecution.modelWrapper import ModelWrapper
 from utility import log, construct_true_path
-from datetime import datetime
+
 
 load_dotenv()
 
