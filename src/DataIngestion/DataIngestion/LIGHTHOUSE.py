@@ -86,7 +86,6 @@ class LIGHTHOUSE(IDataIngestion):
         ### Get LIGHTHOUSE data
         # Build the URL to hit
         url = f'http://lighthouse.tamucc.edu/pd?stnlist={lighthouseLocationCode}&serlist={sim[SIMSeriesCodeIndex]}&when={fromString}%2C{toString}&whentz=UTC0&-action=app_json&unit=metric&elev=stnd'
-        print(url)
         apiReturn = self.__api_request(url)
         if apiReturn == None:
             log(f'LIGHTHOUSE | __pull_pd_endpoint_dataPoint | For unknown reason fetch failed for {seriesDescription}{timeDescription}')
