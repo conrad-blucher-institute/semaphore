@@ -95,6 +95,8 @@ class SeriesProvider():
                 log(seriesStorageResults)
                 log('-------dataIngestionSeries-------')
                 log(dataIngestionSeries.data)
+                log('-------mergedResults-------')
+                log(mergedResults)
                 return responseSeries
             else: # This means the data is validated to be whole
                 return responseSeries
