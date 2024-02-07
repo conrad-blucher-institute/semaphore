@@ -14,6 +14,7 @@
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataIngestion.IDataIngestion import data_ingestion_factory
 from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
+from utility import log
 
 
 
@@ -90,6 +91,10 @@ class SeriesProvider():
             elif len(mergedResults) != amountOfExpectedResults:
                 responseSeries.isComplete = False
                 responseSeries.nonCompleteReason = f'Combined data ingestion and series storage results were more or less than expected. Number of Results: {len(mergedResults)} | Number of Expected: {amountOfExpectedResults}'
+                log('-------seriesStorageResults-------')
+                log(seriesStorageResults)
+                log('-------dataIngestionSeries-------')
+                log(dataIngestionSeries.data)
                 return responseSeries
             else: # This means the data is validated to be whole
                 return responseSeries
