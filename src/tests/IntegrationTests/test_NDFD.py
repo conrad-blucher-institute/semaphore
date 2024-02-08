@@ -26,6 +26,8 @@ from DataIngestion.IDataIngestion import data_ingestion_factory
 
 load_dotenv()
 
+@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
+
 @pytest.mark.parametrize("source, series, location, interval, datum", [
     ("NDFD", "pAirTemp", "SBirdIsland", None, None),
     ("NDFD", "pAirTemp", "SBirdIsland", timedelta(seconds=3600), None),

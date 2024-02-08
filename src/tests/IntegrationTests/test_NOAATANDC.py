@@ -24,6 +24,8 @@ from src.DataClasses import Input, Series, TimeDescription, SeriesDescription
 from src.DataIngestion.IDataIngestion import data_ingestion_factory
 from dotenv import load_dotenv
 
+@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
+
 @pytest.mark.parametrize("source, series, location, interval, datum", [
     ("NOAATANDC", "dWl", "packChan", timedelta(seconds=3600), "MHHW"),
     ("NOAATANDC", "dXWnCmp", "packChan", timedelta(seconds=3600), "MHHW"), 

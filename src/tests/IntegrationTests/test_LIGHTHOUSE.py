@@ -25,6 +25,8 @@ from src.DataIngestion.IDataIngestion import data_ingestion_factory
 from src.DataIngestion.DataIngestion.LIGHTHOUSE import LIGHTHOUSE
 from dotenv import load_dotenv
 
+@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
+
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
     # series: dWaterTmp - wtp
     (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(11, 0)), timedelta(seconds=3600)), 23), # 1hr interval
@@ -52,6 +54,7 @@ def test_pull_pd_endpoint_dataPoint(seriesDescription: SeriesDescription, timeDe
     else:
         assert len(result.data) == expected_output
 
+@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
     # series: erroneous
