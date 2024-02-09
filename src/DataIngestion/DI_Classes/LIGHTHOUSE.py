@@ -11,12 +11,7 @@
 # 
 #
 #Input
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
-from src.SeriesStorage.ISeriesStorage import series_storage_factory
+from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
@@ -124,9 +119,13 @@ class LIGHTHOUSE(IDataIngestion):
                     lat
                 ))
 
-        ### Build Series, send data to DB, return data
-        resultSeries = Series(seriesDescription, timeDescription)
-        resultSeries.data = inputs
-        #Insert series into DB
-        self.seriesStorage.insert_input(resultSeries)
-        return resultSeries
+        if(len(inputs) > 0):
+            ### Build Series, send data to DB, return data
+            resultSeries = Series(seriesDescription, timeDescription)
+            resultSeries.data = inputs
+            #Insert series into DB
+            self.seriesStorage.insert_input(resultSeries)
+            return resultSeries
+        else:
+            log("Lighthouse returned no non null inputs")
+            return None

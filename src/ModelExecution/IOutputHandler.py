@@ -12,18 +12,12 @@ Methods. And Factory to get instance
 # 
 #
 #Imports
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from DataClasses import  Series
-from utility import log
+from .dspec import Dspec
+from DataClasses import Output
 
 from abc import ABC, abstractmethod
 from importlib import import_module
-from src.ModelExecution.dspec import Dspec
-from src.DataClasses import Output
 
 class IOutputHandler(ABC):
    
@@ -43,7 +37,7 @@ def output_handler_factory(method: str) -> IOutputHandler:
         IOutputHandler - An child of the IOutputHandler interface.
     """
     try:
-        return getattr(import_module(f'src.ModelExecution.OutputHandler.{method}'), f'{method}')()
+        return getattr(import_module(f'.OH_Classes.{method}', 'ModelExecution'), f'{method}')()
     except Exception:
-        raise ModuleNotFoundError(f'No module named {method} in src.DataIngestion.DataIngestion!')
+        raise ModuleNotFoundError(f'Failed to import {method} from OH_Classes! Does it exist in the directory?')
     

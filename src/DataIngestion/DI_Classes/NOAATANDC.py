@@ -20,11 +20,6 @@ NOTE:: Original code was taken from:
 # 
 #
 #Input
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
@@ -36,7 +31,6 @@ from urllib.request import urlopen
 from math import radians, cos, sin
 import json
 
-from typing import List, Dict
 
 
 
