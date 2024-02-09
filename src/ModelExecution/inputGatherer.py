@@ -13,10 +13,10 @@
 #Imports
 
 
-from ..SeriesProvider.SeriesProvider import SeriesProvider
-from ..DataClasses import SeriesDescription, TimeDescription, Input
+from src.SeriesProvider.SeriesProvider import SeriesProvider
+from src.DataClasses import SeriesDescription, TimeDescription, Input
 from .dspec import Dspec, OutputInfo, InputInfo,TimingInfo
-from ..utility import log, construct_true_path
+from src.utility import log, construct_true_path
 
 from os import path, getenv
 from json import load

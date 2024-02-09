@@ -21,8 +21,8 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import pytest
 
-from DataClasses import TimeDescription, SeriesDescription
-from DataIngestion.DI_Classes.NDFD import NDFD
+from src.DataClasses import TimeDescription, SeriesDescription
+from src.DataIngestion.DI_Classes.NDFD import NDFD
 
 load_dotenv()
 

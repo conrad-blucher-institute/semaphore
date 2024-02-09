@@ -30,10 +30,10 @@ import urllib.parse
 from lxml import etree # type: ignore
                        # since lxml has no type hints
 
-from DataIngestion.IDataIngestion import IDataIngestion
-from DataClasses import Series, SeriesDescription, Input, TimeDescription
-from SeriesStorage.ISeriesStorage import series_storage_factory
-from utility import log
+from src.DataIngestion.IDataIngestion import IDataIngestion
+from src.DataClasses import Series, SeriesDescription, Input, TimeDescription
+from src.SeriesStorage.ISeriesStorage import series_storage_factory
+from src.utility import log
 
 Time = TypeVar('Time')
 NewTime = TypeVar('NewTime')
