@@ -12,17 +12,14 @@
 #
 #Imports
 import sys
-import os
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
+sys.path.append('/app/src')
 
 import pytest
 
 from datetime import datetime, timedelta, time, date
 from src.DataClasses import TimeDescription, SeriesDescription
 from src.DataIngestion.IDataIngestion import data_ingestion_factory
-from src.DataIngestion.DataIngestion.LIGHTHOUSE import LIGHTHOUSE
+from src.DataIngestion.DI_Classes.LIGHTHOUSE import LIGHTHOUSE
 from dotenv import load_dotenv
 
 @pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
