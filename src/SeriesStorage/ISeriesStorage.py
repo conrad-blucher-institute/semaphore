@@ -11,16 +11,11 @@
 # 
 #
 #Imports
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
 from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
-from utility import log
 
 from abc import ABC, abstractmethod
 from importlib import import_module
+from os import getenv
 
 class ISeriesStorage(ABC):
 
@@ -30,7 +25,7 @@ class ISeriesStorage(ABC):
     
     @abstractmethod
     def select_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
-         raise NotImplementedError()
+        raise NotImplementedError()
     
     @abstractmethod
     def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
@@ -76,10 +71,11 @@ def series_storage_factory() -> ISeriesStorage:
         ISeriesStorage - An child of the ISeriesStorage interface.
     """
 
-    ss = os.getenv('ISERIESSTORAGE_INSTANCE')
+    ss = getenv('ISERIESSTORAGE_INSTANCE')
+   
 
     try:
-        return getattr(import_module(f'src.SeriesStorage.SeriesStorage.{ss}'), f'{ss}')()
-    except Exception:
-        raise ModuleNotFoundError(f'No module named {ss} in src.SeriesStorage.SeriesStorage!')
+        return getattr(import_module(f'.SS_Classes.{ss}', 'SeriesStorage'), f'{ss}')()
+    except Exception as e:
+       raise ModuleNotFoundError(f'No module named {ss} in .SS_Classes!')
     

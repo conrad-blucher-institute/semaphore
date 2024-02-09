@@ -17,11 +17,11 @@ Semaphore is a student-built and maintained Python application that semi-automat
     - (Optional) DSPEC_FOLDER_PATH & MODEL_FOLDER_PATH can either be relative paths from the working directory(default) or you can override with absolute paths.
 2. Create virtual environment & install required Python dependencies
 ```python
-python3 -m venv ./venv/vsem
+python3.11 -m venv ./venv/vsem
 source ./venv/vsem/Scripts/activate
 pip install -r requirements.txt
 ```
-(*NOTE:: depends on the python version, you may want to use `source ./venv/vsem/bin/activate)` instead)
+(*NOTE:: If on Linux, you may want to use `source ./venv/vsem/bin/activate)` instead)
 
 (**NOTE:: You might want to use git bash if your terminal isn't recognizing `source`)
 

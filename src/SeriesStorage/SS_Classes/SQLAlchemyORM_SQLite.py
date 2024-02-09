@@ -11,25 +11,17 @@
 # 
 #
 #Imports
-import sys
-import os
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
 from sqlalchemy import create_engine as sqlalchemy_create_engine
-from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, CursorResult, Select, select, distinct, Boolean, Interval, text
-from sqlalchemy import inspect
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import Table, Column, Integer, String, DateTime, Float, MetaData, UniqueConstraint, Engine, ForeignKey, insert, CursorResult, Select, select, distinct, Boolean, Interval
 from os import getenv
 from datetime import timedelta, datetime
 
-from src.SeriesStorage.ISeriesStorage import ISeriesStorage
+from SeriesStorage.ISeriesStorage import ISeriesStorage
 
 from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, Input, Output, TimeDescription
 from utility import log
 
-class SQLAlchemyORM_Postgres(ISeriesStorage):
+class SQLAlchemyORM_SQLite(ISeriesStorage):
  
     def __init__(self) -> None:
         """Constructor generates an a db schema. Automatically creates the 
@@ -48,11 +40,14 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param timeDescription: TimeDescription - A hydrated time description object
         """
 
+        # Datum is stored in the db as the string 'None' if there is no datum, we need to convert it here before the query
+        datumSearchTerm = 'None' if seriesDescription.dataDatum == None else seriesDescription.dataDatum
+
         statement = (select(self.inputs)
             .where(self.inputs.c.dataSource == seriesDescription.dataSource)
             .where(self.inputs.c.dataLocation == seriesDescription.dataLocation)
             .where(self.inputs.c.dataSeries == seriesDescription.dataSeries)
-            .where(self.inputs.c.dataDatum == seriesDescription.dataDatum)
+            .where(self.inputs.c.dataDatum == datumSearchTerm)
             .where(self.inputs.c.verifiedTime >= timeDescription.fromDateTime)
             .where(self.inputs.c.verifiedTime <= timeDescription.toDateTime)
             )
@@ -155,16 +150,16 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             insertionValueRow["dataSource"] = series.description.dataSource
             insertionValueRow["dataLocation"] = series.description.dataLocation
             insertionValueRow["dataSeries"] = series.description.dataSeries
-            insertionValueRow["dataDatum"] = series.description.dataDatum
+            insertionValueRow["dataDatum"] = 'None' if series.description.dataDatum == None else series.description.dataDatum
             insertionValueRow["latitude"] = input.latitude
             insertionValueRow["longitude"] = input.longitude
             insertionRows.append(insertionValueRow)
 
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.inputs)
-                                    .on_conflict_do_nothing('inputs_AK00')
                                     .returning(self.inputs)
                                     .values(insertionRows)
+                                    .prefix_with('OR IGNORE')
                                 )
             result = cursor.fetchall()
             conn.commit()
@@ -200,9 +195,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.outputs)
-                                  .on_conflict_do_nothing('outputs_AK00')
                                   .returning(self.outputs)
                                   .values(insertionValueRows)
+                                  .prefix_with('OR IGNORE')
                                   )
             result = cursor.fetchall()
             conn.commit()
@@ -317,7 +312,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
 
         self._metadata.create_all(self.__get_engine())
-        self.__create_constraints()
      
 
     def drop_DB(self) -> None:
@@ -327,34 +321,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
 
         self._metadata.drop_all(self.__get_engine())
-
-    def DB_exists(self) -> Boolean:
-        """Tests the Inputs table table to see if it exists, returns:
-        1 : all tables exist
-        0 : No tables exist
-        -1 : Some tables exist
-        """
-
-        TOTAL_TABLES = 8
-        existing_tables = 0
-        inspection = inspect(self.__get_engine())
-        if inspection.has_table('inputs'): existing_tables += 1
-        if inspection.has_table('outputs'): existing_tables += 1
-        if inspection.has_table('dataLocation_dataSource_mapping'): existing_tables += 1
-        if inspection.has_table('ref_dataLocation'): existing_tables += 1
-        if inspection.has_table('ref_dataSource'): existing_tables += 1
-        if inspection.has_table('ref_dataSeries'): existing_tables += 1
-        if inspection.has_table('ref_dataUnit'): existing_tables += 1
-        if inspection.has_table('ref_dataDatum'): existing_tables += 1
-
-        if existing_tables == 0:
-            log('DB engine detected no tables!')
-            return 0
-        elif existing_tables == TOTAL_TABLES:
-            return 1
-        else:
-            log('DB engine detected some but not all tables!')
-            return -1
 
     #############################################################################################
     ################################################################################## DB Managment Methods
@@ -397,7 +363,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             Column("acquiredTime", DateTime, nullable=False),
             Column("verifiedTime", DateTime, nullable=False), 
 
-            Column("dataValue", String(25), nullable=False), 
+            Column("dataValue", String(10), nullable=False), 
 
             Column("isActual", Boolean, nullable=False),
 
@@ -406,11 +372,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             Column("dataSource", String(10), ForeignKey("ref_dataSource.code"), nullable=False),
             Column("dataLocation", String(25), ForeignKey("ref_dataLocation.code"), nullable=False), 
             Column("dataSeries", String(10), ForeignKey("ref_dataSeries.code"), nullable=False), 
-            Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"),  nullable=True),
+            Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"),  nullable=False),
             
             Column("latitude", String(16), nullable=True),
             Column("longitude", String(16), nullable=True),
-            # UniqueConstraint is made __create_constraints method
+            #
+            UniqueConstraint("isActual", "generatedTime", "verifiedTime", "dataUnit", "dataSource", "dataLocation", "dataSeries", "dataDatum", "latitude", "longitude"),
         )
 
         
@@ -426,13 +393,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
             Column("modelName", String(25), nullable=False), 
             Column("modelVersion", String(10), nullable=False),
-            Column("dataValue", String(25), nullable=False), 
+            Column("dataValue", String(20), nullable=False), 
             Column("dataUnit", String(10), ForeignKey("ref_dataUnit.code"), nullable=False), 
             Column("dataLocation", String(25), ForeignKey("ref_dataLocation.code"), nullable=False),   
             Column("dataSeries", String(10), ForeignKey("ref_dataSeries.code"), nullable=False),         
             Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"), nullable=True),
 
-            # UniqueConstraint is made __create_constraints method
+            UniqueConstraint("timeGenerated", "leadTime", "modelName", "modelVersion", "dataLocation", "dataSeries", "dataDatum"),
         )
 
         #This table maps CBI location codes to location codes used by datasorces
@@ -447,7 +414,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             Column("dataSourceLocationCode", String(255), nullable=False),                            
             Column("priorityOrder", Integer, nullable=False),                                         
 
-            UniqueConstraint("dataLocationCode", "dataSourceCode", "dataSourceLocationCode", "priorityOrder", name='dataLocation_dataSource_mapping_AK00'),
+            UniqueConstraint("dataLocationCode", "dataSourceCode", "dataSourceLocationCode", "priorityOrder"),
         )
 
 
@@ -514,17 +481,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
         )
-
-    def __create_constraints(self) -> None:
-        """Creates the special unique constraints for input and output
-        """
-        inputs_AK00_stmt = text("""ALTER TABLE inputs ADD CONSTRAINT "inputs_AK00" UNIQUE NULLS NOT DISTINCT ("isActual", "generatedTime", "verifiedTime", "dataUnit", "dataSource", "dataLocation", "dataSeries", "dataDatum", "latitude", "longitude")""")
-        outputs_AK00_stmt = text("""ALTER TABLE outputs ADD CONSTRAINT "outputs_AK00" UNIQUE NULLS NOT DISTINCT ("timeGenerated", "leadTime", "modelName", "modelVersion", "dataLocation", "dataSeries", "dataDatum")""")
-
-        with self.__get_engine().connect() as conn:
-            conn.execute(inputs_AK00_stmt)
-            conn.execute(outputs_AK00_stmt)
-            conn.commit()
 
     #############################################################################################
     ################################################################################## DB Interaction private methods

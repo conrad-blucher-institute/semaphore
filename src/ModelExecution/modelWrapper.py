@@ -12,20 +12,16 @@ Tenserflow related actions allowing us to run models from .H5
 # 
 #
 #Imports
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from ModelExecution.inputGatherer import InputGatherer
-from ModelExecution.IOutputHandler import output_handler_factory
+
+from .inputGatherer import InputGatherer
+from .IOutputHandler import output_handler_factory
 from DataClasses import SemaphoreSeriesDescription, Series
 from SeriesStorage.ISeriesStorage import series_storage_factory
-
+from utility import log, construct_true_path
 
 import datetime
 from os import path, getenv
-from utility import log, construct_true_path
 from numpy import array, reshape
 from tensorflow.keras.models import load_model
 
@@ -98,40 +94,38 @@ class ModelWrapper:
         #converting execution time to reference time
         referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
             
+        
+        inputs = self.__inputGatherer.get_inputs(referenceTime)
+
+        if inputs == -1: return -1
+
+        if len(inputs) == 0: 
+            log('No inputs received for model.')
+            return -1
+
         try:
-            inputs = self.__inputGatherer.get_inputs(referenceTime)
-
-            if inputs == -1: return -1
-  
-            if len(inputs) == 0: 
-                log('No inputs received for model.')
-                return -1
-
-            try:
-                shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
-            except Exception as e:
-                log(e)
-                return -1
-
-            prediction =  self._model.predict(shapedInputs) 
-            dspec = self.__inputGatherer.get_dspec()
-            outputInfo = dspec.outputInfo
-
-            predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
-    
-            #Instantiate the right output handler method then post process the predictions
-            OH_Class = output_handler_factory(outputInfo.outputMethod)
-            processedOutputs = OH_Class.post_process_prediction(prediction, dspec, dateTime) 
-
-            #Put the post processed predictions in a series
-            series = Series(predictionDesc, True)
-            series.data = processedOutputs
-
-            return series
-
+            shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
         except Exception as e:
             log(e)
             return -1
+
+        prediction =  self._model.predict(shapedInputs) 
+        dspec = self.__inputGatherer.get_dspec()
+        outputInfo = dspec.outputInfo
+
+        predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
+
+        #Instantiate the right output handler method then post process the predictions
+        OH_Class = output_handler_factory(outputInfo.outputMethod)
+        processedOutputs = OH_Class.post_process_prediction(prediction, dspec, dateTime) 
+
+        #Put the post processed predictions in a series
+        series = Series(predictionDesc, True)
+        series.data = processedOutputs
+
+        return series
+
+
         
     def make_and_save_prediction(self, dateTime: datetime) -> any:
         """Public method to generate a prediction given a datetime.
@@ -159,7 +153,7 @@ class ModelWrapper:
 
         #Instantiate the right output handler method then post process the predictions
         OH_Class = output_handler_factory(outputInfo.outputMethod)
-        processedOutputs = OH_Class.post_process_prediction(prediction, dspec, dateTime) 
+        processedOutputs = OH_Class.post_process_prediction(prediction, dspec, referenceTime) 
 
         #Put the post processed predictions in a series
         series = Series(predictionDesc, True)

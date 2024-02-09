@@ -3,6 +3,11 @@
     "modelVersion": "1.0.0",
     "author": "Andrew DeSimone",
     "modelFileName": "thermalrefugemodel",
+    "timingInfo":{
+        "offset": 0,
+        "interval": 3600
+
+    },
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
         "leadTime": 0,

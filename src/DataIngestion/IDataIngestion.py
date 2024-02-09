@@ -12,13 +12,7 @@ Methods. As well as the factory to generate the instance of the interface
 # 
 #
 #Imports
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
 from DataClasses import SeriesDescription, Series, TimeDescription
-from utility import log
 
 from abc import ABC, abstractmethod
 from importlib import import_module
@@ -37,7 +31,7 @@ def data_ingestion_factory(seriesRequest: SeriesDescription) -> IDataIngestion:
         :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
     """
     try:
-        return getattr(import_module(f'src.DataIngestion.DataIngestion.{seriesRequest.dataSource}'), f'{seriesRequest.dataSource}')()
+        return getattr(import_module(f'.DI_Classes.{seriesRequest.dataSource}', 'DataIngestion'), f'{seriesRequest.dataSource}')()
     except Exception:
-        raise ModuleNotFoundError(f'No module named {seriesRequest.dataSource} in src.DataIngestion.DataIngestion!')
+        raise ModuleNotFoundError(f'No module named {seriesRequest.dataSource} in DI_Classes!')
     

@@ -12,14 +12,7 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 
-import os
-import sys
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
 from datetime import datetime, timedelta
-
 from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription
 from SeriesProvider.SeriesProvider import SeriesProvider
 

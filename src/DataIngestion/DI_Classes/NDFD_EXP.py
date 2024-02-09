@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
-#NDFD.py
+#NDFD_EXP.py
 #----------------------------------
 # Created By: Beto Estrada
-# Created Date: 9/15/2023
+# Created Date: 1/11/2024
 # version 1.0
 #----------------------------------
-""" This file is a communicator with the National Digital Forecast Database (NDFD) Digital Weather Markup 
+""" This file is a communicator with the National Digital Forecast Database (NDFD) Experimental Server Digital Weather Markup 
 Language (DWML) Generator. It will allow the ingestion of one series from NDFD. An object of this class must 
 be initialized with an ISeriesStorage interface, as fetched data is directly imported into the DB via that interface.
 
 NOTE:: Helpful NDFD links:
-        https://graphical.weather.gov/xml/
-        https://graphical.weather.gov/xml/SOAP_server/ndfdXML.htm
+        https://digital.mdl.nws.noaa.gov/xml/rest.php
 
 NOTE:: Original code was taken from:
         Created By: Brian Colburn 
@@ -23,7 +22,6 @@ NOTE:: Original code was taken from:
 #
 from datetime import datetime, timedelta
 import json
-import re
 import requests
 from typing import List, Dict, TypeVar, NewType, Tuple, Generic, Callable
 from urllib.error import HTTPError
@@ -31,15 +29,13 @@ import urllib.parse
 from lxml import etree # type: ignore
                        # since lxml has no type hints
 
-import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
 from DataIngestion.IDataIngestion import IDataIngestion
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from utility import log
+import traceback
+import os
+import sys
 
 Time = TypeVar('Time')
 NewTime = TypeVar('NewTime')
@@ -54,7 +50,7 @@ Dataset = Tuple[SeriesName, LayoutKey, List[Data]]
 DataSeries = List[Dataset[Data]]
 ZippedDataset = List[Tuple[SeriesName, List[Tuple[Time, Data]]]]
 
-class NDFD(IDataIngestion):
+class NDFD_EXP(IDataIngestion):
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
         match seriesDescription.dataSeries:
@@ -80,6 +76,11 @@ class NDFD(IDataIngestion):
             # new NDFD server this may need to be changed, but for now it is necessary
             updated_fromDateTime = timeRequest.fromDateTime - timedelta(hours=1)
 
+            # Here we want to try to ensure that the next closest datetime to toDateTime is available in case toDateTime does not
+            # exist in the series request. This is explained more below in fetch_predictions. Any dates outside the original
+            # requested date range are filtered out below anyways
+            updated_toDateTime = timeRequest.toDateTime + timedelta(hours=3)
+
 
             # I'm explicitly using ISO 8601 formatted time strings *without* timezone
             # information b/c the NDFD web service _seems_ to ignore UTC timezone
@@ -88,7 +89,7 @@ class NDFD(IDataIngestion):
             # I'd have to test more to verify, but we just want at least 48 hours of
             # predictions starting w/ the closest time
             t0_str = updated_fromDateTime.isoformat()
-            t1_str = timeRequest.toDateTime.isoformat()
+            t1_str = updated_toDateTime.isoformat()
         except AttributeError as e:
             raise ValueError(f'Error converting datetime to ISO 8601 format: {e}')
 
@@ -105,11 +106,11 @@ class NDFD(IDataIngestion):
             endDate   = urllib.parse.quote(t1_str)
         except TypeError as e:
             raise ValueError(f'Error quoting ISO 8601 time string: {e}')
-        
-        base_url = 'https://graphical.weather.gov/xml/sample_products/browser_interface/ndfdXMLclient.php?whichClient=NDFDgen'
+
+        base_url = 'https://digital.mdl.nws.noaa.gov/xml/sample_products/browser_interface/ndfdXMLclient.php?whichClient=NDFDgen'
         formatted_product = f'{product}={product}'
         try:
-            url = '{}&lat={}&lon={}&product=time-series&begin={}&end={}&Unit=m&{}'.format(base_url,
+            url = '{}&lat={}&lon={}&product=time-series&XMLformat=DWML&begin={}&end={}&Unit=m&{}&Submit=Submit'.format(base_url,
                                                                                         lat,
                                                                                         lon,
                                                                                         beginDate,
@@ -129,7 +130,7 @@ class NDFD(IDataIngestion):
         """
         try:
             response = requests.get(url)
-            return response.text
+            return response.content
         except HTTPError as err:
             log(f'Fetch failed, HTTPError of code: {err.status} for: {err.reason}')
             return None
@@ -160,6 +161,22 @@ class NDFD(IDataIngestion):
 
             data_dictionary = json.loads(json.dumps(data[0][1]))
 
+            toDateTimestamp = int(timeRequest.toDateTime.timestamp())
+
+            # Sometimes, you can request a certain date range from NDFD and the toDateTime will be missing since the interval
+            # has changed from 3 hours to 6 hours. A good example is you ask for 2024-01-04 12:00:00 as your toDateTime, but
+            # the interval changed to 6 hours at 2024-01-04 09:00:00 so the next datetime available after 2024-01-04 09:00:00
+            # is 2024-01-04 15:00:00. Well the code below checks for this and finds the average of the two surrounding datetimes
+            # and sets that as the value for the desired toDateTime
+            toDateTime_exists = any(timestamp[0] == toDateTimestamp for timestamp in data_dictionary)
+            if not toDateTime_exists:
+                closest_average = self.find_closest_average(data_dictionary, toDateTimestamp)
+
+                if closest_average is None: return None
+                
+                # Add toDateTimestamp and averaged data point to data_dictionary
+                data_dictionary.append([toDateTimestamp, closest_average])
+            
             dataValueIndex = 1
 
             inputs = []
@@ -174,7 +191,7 @@ class NDFD(IDataIngestion):
                     continue
 
                 inputs.append(Input(
-                    row[dataValueIndex],
+                    str(row[dataValueIndex]),
                     NDFD_Predictions.unit,
                     timeVerified,
                     None,
@@ -192,11 +209,39 @@ class NDFD(IDataIngestion):
 
         except ValueError as err:
             log(f'Trouble fetching data: {err}')
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno) 
+            traceback.print_exc() 
             return None
         
         except Exception as err:
             log(f'Uncaught error: {err}')
             return None
+    
+
+    def find_closest_average(self, data_dictionary: list, toDateTimestamp: int) -> None | int:
+        """If toDateTime does not exist in the series request, find the average of the data point before
+        and the data point after toDateTime. If one of those points cannot be found, use the found data point
+        as the average. If both cannot be found, return None. 
+        :param data_dictionary: list - Nested list of timestamps and data from NDFD
+        :param toDateTimestamp: int - Missing datetime to find the average for. Converted to POSIX timestamp as an int
+        """
+        # The key argument is set to the timestamp so that it knows what to look for when comparing. Defaults to None if no results found.
+        closest_before = max((timestamp for timestamp in data_dictionary if timestamp[0] < toDateTimestamp), key=lambda x: x[0], default=None)
+        closest_after = min((timestamp for timestamp in data_dictionary if timestamp[0] > toDateTimestamp), key=lambda x: x[0], default=None)
+
+        if closest_before is not None and closest_after is not None:
+            average = int((closest_after[1] + closest_before[1]) / 2)
+        elif closest_before is not None:
+            average = closest_before[1]
+        elif closest_after is not None:
+            average = closest_after[1]
+        else:
+            log('Series request can not be fulfilled! toDateTime could not be found in series and average of two closest dates could not be calculated')
+            return None
+        
+        return average
 
   
 class NDFDPredictions(Generic[Time, Data]):

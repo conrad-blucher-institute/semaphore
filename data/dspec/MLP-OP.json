@@ -1,6 +1,6 @@
 {
     "modelName": "MLP-OP",
-    "modelVersion": "1.0.0",
+    "modelVersion": "2.0.0",
     "author": "Christian Duff",
     "modelFileName": "MLP-OP",
     "timingInfo":{
@@ -23,7 +23,6 @@
             "series": "dWaterTmp",
             "unit": "celsius",
             "type": "float",
-            "dataClassification": "actual",
             "interval": 3600,
             "range": [0, -23]
         },
@@ -34,20 +33,18 @@
             "series": "dAirTmp",
             "unit": "celsius",
             "type": "float",
-            "dataClassification": "actual",
             "interval": 3600,
             "range": [0, -23]
         },
         { 
             "_name": "Air Temp",
             "location": "SBirdIsland",
-            "source": "NDFD",
+            "source": "NDFD_EXP",
             "series": "pAirTemp",
             "unit": "celsius",
             "type": "float",
-            "dataClassification": "prediction",
             "interval": 10800,
-            "range": [12, 1]
+            "range": [16, 1]
         }
 
 ]}
