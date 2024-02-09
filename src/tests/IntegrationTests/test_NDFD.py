@@ -61,7 +61,7 @@ def test_find_closest_average(data_dictionary: list, toDateTime: datetime):
     """
     ingestSeries = NDFD()
 
-    closest_average = ingestSeries.find_closest_average(data_dictionary, toDateTime)
+    closest_average = ingestSeries.find_closest_average(data_dictionary, int(toDateTime.timestamp()))
 
     if closest_average is None: 
         raise ValueError('Error calculating average. Test should not return None based on given parameters. However, None was returned!')
