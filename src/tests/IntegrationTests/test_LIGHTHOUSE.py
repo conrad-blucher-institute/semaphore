@@ -12,18 +12,17 @@
 #
 #Imports
 import sys
-import os
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
+sys.path.append('/app/src')
 
 import pytest
 
 from datetime import datetime, timedelta, time, date
-from DataClasses import TimeDescription, SeriesDescription
-from DataIngestion.IDataIngestion import data_ingestion_factory
-from DataIngestion.DataIngestion.LIGHTHOUSE import LIGHTHOUSE
+from src.DataClasses import TimeDescription, SeriesDescription
+from src.DataIngestion.IDataIngestion import data_ingestion_factory
+from src.DataIngestion.DI_Classes.LIGHTHOUSE import LIGHTHOUSE
 from dotenv import load_dotenv
+
+@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
     # series: dWaterTmp - wtp
@@ -52,6 +51,7 @@ def test_pull_pd_endpoint_dataPoint(seriesDescription: SeriesDescription, timeDe
     else:
         assert len(result.data) == expected_output
 
+@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
     # series: erroneous

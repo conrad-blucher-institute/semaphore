@@ -11,13 +11,11 @@
 # 
 #
 import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
+sys.path.append('/app/src')
 
 from datetime import datetime, timedelta
 
-from DataClasses import Input
+from src.DataClasses import Input
 
 def test_createInput():
     currentDate = datetime.now()

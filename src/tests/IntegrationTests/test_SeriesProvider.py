@@ -12,15 +12,12 @@
 #
 #Imports
 import sys
-import os
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
+sys.path.append('/app/src')
 from dotenv import load_dotenv
     
 import pytest
 from datetime import datetime, timedelta
-from SeriesProvider.SeriesProvider import SeriesProvider, TimeDescription, Series, SeriesDescription, SemaphoreSeriesDescription
+from src.SeriesProvider.SeriesProvider import SeriesProvider, TimeDescription, Series, SeriesDescription, SemaphoreSeriesDescription
 
 
 def test_save_series():

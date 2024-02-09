@@ -11,9 +11,7 @@
 # 
 #
 import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
+sys.path.append('/app/src')
 
 from datetime import datetime
 from json import load
@@ -25,8 +23,8 @@ load_dotenv()
 
 from datetime import timedelta
 
-from utility import log, construct_true_path
-from ModelExecution.inputGatherer import InputGatherer
+from src.utility import log, construct_true_path
+from src.ModelExecution.inputGatherer import InputGatherer
 
 def test_parseDSPEC():
     """This function tests whether the specified DSPEC file

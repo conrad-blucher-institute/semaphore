@@ -12,9 +12,7 @@
 #
 
 import sys
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
+sys.path.append('/app/src')
 
 from datetime import datetime
 from json import load
@@ -24,8 +22,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from utility import log, construct_true_path
-from ModelExecution.inputGatherer import InputGatherer
+from src.utility import log, construct_true_path
+from src.ModelExecution.inputGatherer import InputGatherer
 
 def test_parseDSPEC():
     dspecFileName = 'test_dspec.json'
