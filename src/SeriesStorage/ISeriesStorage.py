@@ -11,7 +11,7 @@
 # 
 #
 #Imports
-from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
+from ..DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
 
 from abc import ABC, abstractmethod
 from importlib import import_module

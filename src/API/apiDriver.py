@@ -13,8 +13,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 
 from datetime import datetime, timedelta
-from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription
-from SeriesProvider.SeriesProvider import SeriesProvider
+from ..DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription
+from ..SeriesProvider.SeriesProvider import SeriesProvider
 
 load_dotenv()
 

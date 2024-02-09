@@ -16,9 +16,9 @@ Tenserflow related actions allowing us to run models from .H5
 
 from .inputGatherer import InputGatherer
 from .IOutputHandler import output_handler_factory
-from DataClasses import SemaphoreSeriesDescription, Series
-from SeriesStorage.ISeriesStorage import series_storage_factory
-from utility import log, construct_true_path
+from ..DataClasses import SemaphoreSeriesDescription, Series
+from ..SeriesStorage.ISeriesStorage import series_storage_factory
+from ..utility import log, construct_true_path
 
 import datetime
 from os import path, getenv

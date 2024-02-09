@@ -11,9 +11,9 @@
 # 
 #
 #Imports
-from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataIngestion.IDataIngestion import data_ingestion_factory
-from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
+from ..SeriesStorage.ISeriesStorage import series_storage_factory
+from ..DataIngestion.IDataIngestion import data_ingestion_factory
+from ..DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
 
 
 

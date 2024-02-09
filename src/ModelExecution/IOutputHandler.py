@@ -14,7 +14,7 @@ Methods. And Factory to get instance
 #Imports
 
 from .dspec import Dspec
-from DataClasses import Output
+from ..DataClasses import Output
 
 from abc import ABC, abstractmethod
 from importlib import import_module

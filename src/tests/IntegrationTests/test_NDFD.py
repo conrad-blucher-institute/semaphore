@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 import pytest
 
 from DataClasses import TimeDescription, SeriesDescription
-from DataIngestion.DataIngestion.NDFD import NDFD
+from DataIngestion.DI_Classes.NDFD import NDFD
 
 load_dotenv()
 
