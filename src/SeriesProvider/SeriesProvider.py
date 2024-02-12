@@ -169,9 +169,8 @@ class SeriesProvider():
         # GenerateTimeStamp will calculate a timestamp an amount of steps away from the initial time
         generateTimestamp = lambda initial_time, idx, interval : initial_time + (interval * idx)
 
-        # Preform list comprehension to generate a list of all the time steps we need
+        # Preform list comprehension to generate a list of all the time steps we need plus another list of the same size this is all None
         keys = [generateTimestamp(initial_time, idx, timeDescription.interval) for idx in range(steps)]
-        # Generate a list of nones the same length
         values = [None] * len(keys)
 
         # zip both lists in a dictionary and return the result
