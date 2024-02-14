@@ -12,9 +12,6 @@
 #
 
 import subprocess
-from dotenv import load_dotenv
-load_dotenv()
-
 def main():
         # until no more dspec files 
         # find interval and convert to cron time
