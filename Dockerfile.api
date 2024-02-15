@@ -31,3 +31,8 @@ WORKDIR /app/src
 
 # Set the command to run the apiDriver.py script when the Docker container starts
 CMD ["uvicorn", "API.apiDriver:app", "--host", "0.0.0.0", "--port", "8000"]
+
+#Adding a healthcheck so that we know if the API container is healthy
+#healthcheck in docker automatically runs every 30 seconds
+
+HEALTHCHECK CMD curl --fail http://localhost:8000 || exit 1
