@@ -94,22 +94,23 @@ class ModelWrapper:
         #converting execution time to reference time
         referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
             
-        
+        log('Init get inputs....')
         inputs = self.__inputGatherer.get_inputs(referenceTime)
 
-        if inputs == -1: return -1
+        if inputs == -1: return None
 
         if len(inputs) == 0: 
             log('No inputs received for model.')
-            return -1
+            return None
+        
 
-        try:
-            shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
-        except Exception as e:
-            log(e)
-            return -1
+        log('Init shape inputs....')
+        shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
 
+        log('Init compute prediction....')
         prediction =  self._model.predict(shapedInputs) 
+
+        log('Init prediction post process....')
         dspec = self.__inputGatherer.get_dspec()
         outputInfo = dspec.outputInfo
 
@@ -133,19 +134,19 @@ class ModelWrapper:
         #converting execution time to reference time
         referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
         
-
+        log('Init get inputs....')
         inputs = self.__inputGatherer.get_inputs(referenceTime)
         if len(inputs) == 0: 
             log('No inputs received for model.')
-            return -1
+            return None
 
-        try:
-            shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
-        except Exception as e:
-            log(e)
-            return -1
+        log('Init shape inputs....')
+        shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
 
+        log('Init compute prediction....')
         prediction =  self._model.predict(shapedInputs) 
+
+        log('Init prediction post process....')
         dspec = self.__inputGatherer.get_dspec()
         outputInfo = dspec.outputInfo
 
@@ -158,6 +159,8 @@ class ModelWrapper:
         #Put the post processed predictions in a series
         series = Series(predictionDesc, True)
         series.data = processedOutputs
+
+        log('Init save post processed prediction....')
 
         #Send the prediction to the database and return the result
         SS_Class = series_storage_factory()
