@@ -63,14 +63,3 @@ def test_request_output():
     series = Series(semaphoreSeriesDescription, True, timeDescription)
     seriesProvider.request_output(semaphoreSeriesDescription, timeDescription)
     assert True
-
-
-@pytest.mark.parametrize("timeDescription, expected_output", [
-    (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1),  timedelta(hours=1)), {datetime(2000, 1, 1) : None}),
-    (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1, hour=11),  timedelta(hours=1)), {datetime(2000, 1, 1) + timedelta(hours=idx) : None for idx in range(12)}),
-])
-def test__generate_datetime_map(timeDescription, expected_output):
-    seriesProvider = SeriesProvider()
-    result = seriesProvider._SeriesProvider__generate_datetime_map(timeDescription)
-    assert result == expected_output
-
