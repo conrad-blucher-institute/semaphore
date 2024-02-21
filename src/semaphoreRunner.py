@@ -3,7 +3,7 @@
 #----------------------------------
 # Created By : Savannah Stephenson
 # Created Date: 10/02/2023
-# version 1.0
+# version 2.0
 #----------------------------------
 """ A file to run semaphore from the command line. 
     Run with: python3 src/semaphoreRunner.py -d test_dspec.json to run
@@ -17,6 +17,8 @@ import argparse
 from dotenv import load_dotenv
 from os import path, getenv
 from datetime import datetime
+import traceback
+import sys
 
 from ModelExecution.modelWrapper import ModelWrapper
 from utility import log, construct_true_path
@@ -26,19 +28,35 @@ load_dotenv()
 
 def run_semaphore(fileName: str, executionTime: datetime = None, toss: bool = False):
 
-    if executionTime is None: 
-        executionTime = datetime.now()
+    try:
+        log('Init Semaphore...')
 
-    MW = ModelWrapper(fileName)
-
-    if toss:
-        result = MW.make_prediction(executionTime)
-    else:
-        result = MW.make_and_save_prediction(executionTime)
+        if executionTime is None: 
+            executionTime = datetime.now()
 
 
-    log(f'{result}')
-    log(f'{result.data}')
+        MW = ModelWrapper(fileName)
+
+        log(f'----Running {fileName} for {executionTime}! Toss: {toss}----')
+
+        if toss:
+            result = MW.make_prediction(executionTime)
+        else:
+            result = MW.make_and_save_prediction(executionTime)
+
+
+        log(f'{result}')
+        log(f'{result.data if result != None else ' '}')
+
+        
+    except Exception as e:
+            log(f'Semaphore ran into an error: {e}')
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno) 
+            traceback.print_exc() 
+    finally:
+        log('Semaphore fin!')
 
 #argument parsing
 def main():
