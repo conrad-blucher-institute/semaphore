@@ -46,7 +46,7 @@ def run_semaphore(fileName: str, executionTime: datetime = None, toss: bool = Fa
 
 
         log(f'{result}')
-        log(f'{result.data if result != None else ' '}')
+        log(f'{result.data if result != None else ""}')
 
         
     except Exception as e:
