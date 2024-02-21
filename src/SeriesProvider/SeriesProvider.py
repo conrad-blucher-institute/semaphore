@@ -13,7 +13,7 @@
 #Imports
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataIngestion.IDataIngestion import data_ingestion_factory
-from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
+from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription, Input
 from utility import log
 
 from datetime import timedelta
@@ -55,7 +55,7 @@ class SeriesProvider():
         
         # Pull data from series storage and validate it, if valid return it
         series_storage_results = self.seriesStorage.select_input(seriesDescription, timeDescription)
-        validated_series_storage_results = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results)
+        validated_series_storage_results = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data)
         if(validated_series_storage_results.isComplete):
             return validated_series_storage_results
 
@@ -63,7 +63,7 @@ class SeriesProvider():
         # Pull data ingestion validate it with the series storage results, if valid return it
         data_ingestion_class = data_ingestion_factory(seriesDescription)
         data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
-        validated_merged_result = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results, data_ingestion_results)
+        validated_merged_result = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data, data_ingestion_results.data)
         if(validated_merged_result.isComplete):
             return validated_merged_result
         
@@ -92,14 +92,14 @@ class SeriesProvider():
         return requestedSeries
 
 
-    def __generate_resulting_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, DBSeries: Series, DISeries: Series = None) -> Series: 
+    def __generate_resulting_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, DBList: list[Input], DIList: list[Input] | None = None) -> Series: 
         """This function validates a set of results against a request. It will generate a list of every expected time stamp and 
         attempt to match inputs to those timestamps. If both a database and data ingestion series are provided it will merge them
         prioritizing results from data ingestion when they conflict with results from the database.
         :param seriesDescription: SemaphoreSeriesDescription - The request description
         :param timeDescription: TimeDescription - The description of the temporal information of the request 
-        :param DBSeries: Series - A series of results to validate from the DB
-        :param DISeries: Series - A series of results to validate from data ingestion
+        :param DBSeries: Series - A list of results to validate from the DB
+        :param DISeries: Series - A list of results to validate from data ingestion
         :return a validated series: Series
 
         """
@@ -111,11 +111,11 @@ class SeriesProvider():
         datetimeDict =  { k:v for (k, v) in zip(datetimeList, values)}
 
         # Construct a dictionary for the db results
-        database_results = { input.timeGenerated : input for input in DBSeries.data}
+        database_results = { input.timeVerified : input for input in DBList}
 
         # If there are data ingestion results construct a dictionary for that oo
-        if DISeries != None:
-            ingestion_results = { input.timeGenerated : input for input in DISeries.data}
+        if DIList != None:
+            ingestion_results = { input.timeVerified : input for input in DIList}
 
 
         # Iterate over every timestamp we are expecting 
@@ -123,7 +123,7 @@ class SeriesProvider():
             
             # If there are results we prioritize the DI result as thats always freshly acquired
             # If there are no results from either DB or DI, that is missing
-            if DISeries != None and ingestion_results.get(datetime):
+            if DIList != None and ingestion_results.get(datetime):
                 datetimeDict[datetime] = ingestion_results.get(datetime)
             elif database_results.get(datetime):
                 datetimeDict[datetime] = database_results.get(datetime)
@@ -137,6 +137,11 @@ class SeriesProvider():
         if missing_results > 0:
             isComplete = False
             reason_string = f'There were {missing_results} missing results!'
+
+            # If there were missing values, that cause's some None's to remain. We clear them out in this step
+            datetimeDict_filtered = {k: v for k, v in datetimeDict.items() if v is not None}
+            datetimeDict.clear()
+            datetimeDict.update(datetimeDict_filtered)
 
         result = Series(
             description= seriesDescription, 
