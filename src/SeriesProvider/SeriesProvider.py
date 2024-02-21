@@ -55,7 +55,7 @@ class SeriesProvider():
         
         # Pull data from series storage and validate it, if valid return it
         series_storage_results = self.seriesStorage.select_input(seriesDescription, timeDescription)
-        validated_series_storage_results = self.__validate_results(seriesDescription, timeDescription, series_storage_results)
+        validated_series_storage_results = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results)
         if(validated_series_storage_results.isComplete):
             return validated_series_storage_results
 
@@ -63,7 +63,7 @@ class SeriesProvider():
         # Pull data ingestion validate it with the series storage results, if valid return it
         data_ingestion_class = data_ingestion_factory(seriesDescription)
         data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
-        validated_merged_result = self.__validate_results(seriesDescription, timeDescription, series_storage_results, data_ingestion_results)
+        validated_merged_result = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results, data_ingestion_results)
         if(validated_merged_result.isComplete):
             return validated_merged_result
         
@@ -92,7 +92,7 @@ class SeriesProvider():
         return requestedSeries
 
 
-    def __validate_results(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, DBSeries: Series, DISeries: Series = None) -> Series: 
+    def __generate_resulting_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, DBSeries: Series, DISeries: Series = None) -> Series: 
         """This function validates a set of results against a request. It will generate a list of every expected time stamp and 
         attempt to match inputs to those timestamps. If both a database and data ingestion series are provided it will merge them
         prioritizing results from data ingestion when they conflict with results from the database.
@@ -104,33 +104,31 @@ class SeriesProvider():
 
         """
         missing_results = 0
-        datetimeDict = self.__generate_datetime_map(timeDescription) # A dict with every time stamp we expect, with a value of none
+        datetimeList = self.__generate_datetime_list(timeDescription) # A dict with every time stamp we expect, with a value of none
+        
+        # Construct a dictionary of the required date times
+        values = [None] * len(datetimeList)
+        datetimeDict =  { k:v for (k, v) in zip(datetimeList, values)}
+
+        # Construct a dictionary for the db results
+        database_results = { input.timeGenerated : input for input in DBSeries.data}
+
+        # If there are data ingestion results construct a dictionary for that oo
+        if DISeries != None:
+            ingestion_results = { input.timeGenerated : input for input in DISeries.data}
+
 
         # Iterate over every timestamp we are expecting 
         for datetime in datetimeDict.keys():
             
-            # Search the DB results for every input that matches that timestamp
-            valid_database_results = [input for input in DBSeries.data if input.timeGenerated == datetime]
-            if len(valid_database_results) > 1:
-                log(f'Warning: DB results returned multiple results for the same datetime \n{DBSeries}\n{valid_database_results}')
-
-            # Search the DI results for every input that matches that timestamp if there are DI results
-            if DISeries != None:
-                valid_ingestion_results = [input for input in DISeries.data if input.timeGenerated == datetime]
-                if len(valid_ingestion_results) > 1:
-                    log(f'Warning: DataIngestion results returned multiple results for the same datetime \n{DISeries}\n{valid_ingestion_results}')
-
-            # If there are no results from either DB or DI thats missing, 
-            # if there are results we prioritize the DI result as thats assumed to be more accurate
-            DB_result_exists = len(valid_database_results) > 0
-            DI_result_exits = DISeries != None and len(valid_ingestion_results) > 0
-
-            if not DB_result_exists and not DI_result_exits:
+            # If there are results we prioritize the DI result as thats always freshly acquired
+            # If there are no results from either DB or DI, that is missing
+            if DISeries != None and ingestion_results.get(datetime):
+                datetimeDict[datetime] = ingestion_results.get(datetime)
+            elif database_results.get(datetime):
+                datetimeDict[datetime] = database_results.get(datetime)
+            else:
                 missing_results = missing_results + 1
-            elif DI_result_exits:
-                datetimeDict[datetime] = valid_ingestion_results[0]
-            else: 
-                datetimeDict[datetime] = valid_database_results[0]
 
         # If there were missing results we assign as such in the series
         # No log here, as this method will be used to also detect if Data Ingestion should be kicked off
@@ -143,19 +141,19 @@ class SeriesProvider():
         result = Series(
             description= seriesDescription, 
             isComplete= isComplete,
-            timeDescription=timeDescription,
-            nonCompleteReason=reason_string
+            timeDescription= timeDescription,
+            nonCompleteReason= reason_string
         )
         result.data = list(datetimeDict.values())
         return result
                 
  
-    def __generate_datetime_map(self, timeDescription: TimeDescription) -> dict:
-        """This function creates a dictionary of expected time stamps between a from time and a two time at some interval.
+    def __generate_datetime_list(self, timeDescription: TimeDescription) -> dict:
+        """This function creates a list of expected time stamps between a from time and a two time at some interval.
         The keys are the time steps and the values are always set to None.
         If to time and from time are equal, its only a single pair is returned as that describes a single input.
         :param timeDescription: TimeDescription - The description of the temporal information of the request 
-        :return dict{datetime : None}
+        :return list[datetime]
         """
         # If to time == from time this is a request for a single point
         if timeDescription.fromDateTime == timeDescription.toDateTime:
@@ -170,9 +168,6 @@ class SeriesProvider():
         generateTimestamp = lambda initial_time, idx, interval : initial_time + (interval * idx)
 
         # Preform list comprehension to generate a list of all the time steps we need plus another list of the same size this is all None
-        keys = [generateTimestamp(initial_time, idx, timeDescription.interval) for idx in range(steps)]
-        values = [None] * len(keys)
-
-        # zip both lists in a dictionary and return the result
-        return { k:v for (k, v) in zip(keys, values)}
+        return [generateTimestamp(initial_time, idx, timeDescription.interval) for idx in range(steps)]
+        
     
