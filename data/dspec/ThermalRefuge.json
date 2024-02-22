@@ -13,7 +13,7 @@
         "leadTime": 0,
         "interval": 3600,
         "series": "pWaterTmp",
-        "location": "South Bird Island",
+        "location": "SouthBirdIsland",
         "unit" : "celsius"
     },
     "inputs": [

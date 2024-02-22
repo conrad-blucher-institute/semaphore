@@ -44,7 +44,7 @@ class SeriesProvider():
         """This method attempts to return a series matching a series description and a time description.
             It will attempt first to get the series from series storage, kicking off data ingestion if series storage
             doesn't have all the data.
-            NOTE: If an interval is not provided in the time description, the interval will be assumed to be 6 minuets
+            NOTE: If an interval is not provided in the time description, the interval will be assumed to be 6 minutes
             :param seriesDescription - A description of the wanted series.
             :param timeDescription - A description of the temporal information of the wanted series. 
             :returns series - The series containing as much data as could be found.
@@ -62,7 +62,7 @@ class SeriesProvider():
             return validated_series_storage_results
 
         # If series storage results weren't valid
-        # Pull data ingestion validate it with the series storage results, if valid return it
+        # Pull data ingestion, validate it with the series storage results, if valid return it
         log('Init DI Query....')
         data_ingestion_class = data_ingestion_factory(seriesDescription)
         data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
@@ -116,7 +116,7 @@ class SeriesProvider():
         # Construct a dictionary for the db results
         database_results = { input.timeVerified : input for input in DBList}
 
-        # If there are data ingestion results construct a dictionary for that oo
+        # If there are data ingestion results construct a dictionary for that too
         if DIList != None:
             ingestion_results = { input.timeVerified : input for input in DIList}
 
@@ -141,7 +141,7 @@ class SeriesProvider():
             isComplete = False
             reason_string = f'There were {missing_results} missing results!'
 
-            # If there were missing values, that cause's some None's to remain. We clear them out in this step
+            # If a result was missing, an input was not mapped to that key. Thus its mapped to None. We remove the whole k:v pair as to not pollute the results with None.
             datetimeDict_filtered = {k: v for k, v in datetimeDict.items() if v is not None}
             datetimeDict.clear()
             datetimeDict.update(datetimeDict_filtered)
