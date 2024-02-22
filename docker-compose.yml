@@ -22,6 +22,11 @@ services:
     #   - semaphore-net
     volumes:
       - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python3", "tools/HEALTHCHECK_CORE.py"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     extra_hosts:
       - "host.docker.internal:host-gateway"
   api:
