@@ -49,11 +49,13 @@ class SeriesProvider():
             :param timeDescription - A description of the temporal information of the wanted series. 
             :returns series - The series containing as much data as could be found.
         """
-
+        log('Init input request....')
+        
         # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 6 minuets
         timeDescription.interval = timedelta(minutes=6) if timeDescription.interval == None else timeDescription.interval
         
         # Pull data from series storage and validate it, if valid return it
+        log('Init DB Query....')
         series_storage_results = self.seriesStorage.select_input(seriesDescription, timeDescription)
         validated_series_storage_results = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data)
         if(validated_series_storage_results.isComplete):
@@ -61,6 +63,7 @@ class SeriesProvider():
 
         # If series storage results weren't valid
         # Pull data ingestion, validate it with the series storage results, if valid return it
+        log('Init DI Query....')
         data_ingestion_class = data_ingestion_factory(seriesDescription)
         data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
         validated_merged_result = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data, data_ingestion_results.data)
