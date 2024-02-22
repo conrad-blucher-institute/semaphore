@@ -13,7 +13,10 @@
 #Imports
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataIngestion.IDataIngestion import data_ingestion_factory
-from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
+from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription, Input
+from utility import log
+
+from datetime import timedelta
 
 
 
@@ -41,58 +44,40 @@ class SeriesProvider():
         """This method attempts to return a series matching a series description and a time description.
             It will attempt first to get the series from series storage, kicking off data ingestion if series storage
             doesn't have all the data.
-            NOTE: If an interval is not provided in the time description, the isComplete flag will always be false unless its a single data point (toTime = fromTime)
+            NOTE: If an interval is not provided in the time description, the interval will be assumed to be 6 minutes
             :param seriesDescription - A description of the wanted series.
             :param timeDescription - A description of the temporal information of the wanted series. 
             :returns series - The series containing as much data as could be found.
         """
+
+        # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 6 minuets
+        timeDescription.interval = timedelta(minutes=6) if timeDescription.interval == None else timeDescription.interval
         
-        #if the to and from time are the same, this is a single data point
-        isSingleDataPoint = timeDescription.toDateTime == timeDescription.fromDateTime
+        # Pull data from series storage and validate it, if valid return it
+        series_storage_results = self.seriesStorage.select_input(seriesDescription, timeDescription)
+        validated_series_storage_results = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data)
+        if(validated_series_storage_results.isComplete):
+            return validated_series_storage_results
 
-        # Create the series that will be returned
-        responseSeries = Series(seriesDescription, True, timeDescription)
+        # If series storage results weren't valid
+        # Pull data ingestion, validate it with the series storage results, if valid return it
+        data_ingestion_class = data_ingestion_factory(seriesDescription)
+        data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
+        validated_merged_result = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data, data_ingestion_results.data)
+        if(validated_merged_result.isComplete):
+            return validated_merged_result
         
-        # Attempt to pull request from series storage.
-        seriesStorageResults = self.seriesStorage.select_input(seriesDescription, timeDescription).data
+        # If neither were valid then we log this occurrence. We still return the best result we have, which is the merged result 
+        log(f'''Request input failure, 
+                    Reason: {validated_merged_result.nonCompleteReason} \n 
+                    {seriesDescription} \n 
+                    {timeDescription} \n 
+                    Series Storage Result: {series_storage_results.data} \n 
+                    Data Ingestion Result: {None if data_ingestion_results == None else data_ingestion_results.data} \n
+                    Merged Result: {validated_merged_result.data}
+            ''')
+        return validated_merged_result
 
-        # Calculate how many results we are expecting, if this is a single value, it should only be 1 no matter if they provided and interval or not
-        amountOfExpectedResults = 1 if isSingleDataPoint else self.__get_amount_of_results_expected(timeDescription)
-
-        # If we can validate that series storage had all the data we needed, we just return it.
-        if amountOfExpectedResults != None and len(seriesStorageResults) == amountOfExpectedResults:
-            responseSeries.data = seriesStorageResults
-            return responseSeries
-        
-        else: #Else we need to call data ingestion.
-
-            # Call Data Ingestion to fetch data
-            dataIngestion = data_ingestion_factory(seriesDescription)
-            dataIngestionSeries = dataIngestion.ingest_series(seriesDescription, timeDescription)
-
-            # If for some reason data ingestion fails we just return series storage results.
-            if dataIngestionSeries is None:
-                responseSeries.isComplete = False
-                responseSeries.nonCompleteReason = 'Series storage results could not be verified, dataIngestion returned None'
-                responseSeries.data = seriesStorageResults
-                return responseSeries
-            
-            mergedResults = self.__merge_results(seriesStorageResults, dataIngestionSeries.data)
-            responseSeries.data = mergedResults # At this point this is the max possible results we can return.
-            
-            # Second AmountCheck
-            if amountOfExpectedResults == None: 
-
-                if(len(mergedResults) > 1):
-                    responseSeries.isComplete = True
-                    responseSeries.nonCompleteReason = 'Result completeness could not be verified. (Did you forget to assign an Interval?)'
-                return responseSeries
-            elif len(mergedResults) != amountOfExpectedResults:
-                responseSeries.isComplete = False
-                responseSeries.nonCompleteReason = f'Combined data ingestion and series storage results were more or less than expected. Number of Results: {len(mergedResults)} | Number of Expected: {amountOfExpectedResults}'
-                return responseSeries
-            else: # This means the data is validated to be whole
-                return responseSeries
             
     
     def request_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription: TimeDescription) -> Series: 
@@ -105,38 +90,89 @@ class SeriesProvider():
         ###See if we can get the outputs from the database
         requestedSeries = self.seriesStorage.select_output(semaphoreSeriesDescription, timeDescription)
         return requestedSeries
+
+
+    def __generate_resulting_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, DBList: list[Input], DIList: list[Input] | None = None) -> Series: 
+        """This function validates a set of results against a request. It will generate a list of every expected time stamp and 
+        attempt to match inputs to those timestamps. If both a database and data ingestion series are provided it will merge them
+        prioritizing results from data ingestion when they conflict with results from the database.
+        :param seriesDescription: SemaphoreSeriesDescription - The request description
+        :param timeDescription: TimeDescription - The description of the temporal information of the request 
+        :param DBSeries: Series - A list of results to validate from the DB
+        :param DISeries: Series - A list of results to validate from data ingestion
+        :return a validated series: Series
+
+        """
+        missing_results = 0
+        datetimeList = self.__generate_datetime_list(timeDescription) # A dict with every time stamp we expect, with a value of none
         
-    
-    def __get_amount_of_results_expected(self, timeDescription: TimeDescription) -> int | None:
-        """ Calculates the amount of records we should expect give back
-            :param timeDescription: TimeDescription - The temporal part of the request
-            :return int: The amount of results expected
-        """
+        # Construct a dictionary of the required date times
+        values = [None] * len(datetimeList)
+        datetimeDict =  { k:v for (k, v) in zip(datetimeList, values)}
 
-        if timeDescription.interval == None: return None
+        # Construct a dictionary for the db results
+        database_results = { input.timeVerified : input for input in DBList}
 
-        totalSecondsRequested = (timeDescription.toDateTime - timeDescription.fromDateTime).total_seconds()
+        # If there are data ingestion results construct a dictionary for that too
+        if DIList != None:
+            ingestion_results = { input.timeVerified : input for input in DIList}
 
-        # We add one to acount for this being an inclusive time range. A time range from 12pm - 2pm includes both 12pm and 2pm.
-        return 1 + totalSecondsRequested // timeDescription.interval.total_seconds()
-    
 
-    def __merge_results(self, first: list, second: list) -> list:
-        """ Merges two lists together, will only keep unique results.
-            :param first: list[any] - The first list.
-            :param second: list[any] - The second list.
-            :return list: The combined lists.
-        """
+        # Iterate over every timestamp we are expecting 
+        for datetime in datetimeDict.keys():
+            
+            # If there are results we prioritize the DI result as thats always freshly acquired
+            # If there are no results from either DB or DI, that is missing
+            if DIList != None and ingestion_results.get(datetime):
+                datetimeDict[datetime] = ingestion_results.get(datetime)
+            elif database_results.get(datetime):
+                datetimeDict[datetime] = database_results.get(datetime)
+            else:
+                missing_results = missing_results + 1
 
-        #TODO:: This is a very slow, it was optimized with hashing like this:    
-            # uniqueToSecond = set(second) - set(first)
-            # return first + list(uniqueToSecond)
-        #But its not hashing properly anymore, needs to be looked into
+        # If there were missing results we assign as such in the series
+        # No log here, as this method will be used to also detect if Data Ingestion should be kicked off
+        isComplete = True
+        reason_string = ''
+        if missing_results > 0:
+            isComplete = False
+            reason_string = f'There were {missing_results} missing results!'
 
-        for item in second:
-            if item not in first:
-                first.append(item)
-        return first
+            # If a result was missing, an input was not mapped to that key. Thus its mapped to None. We remove the whole k:v pair as to not pollute the results with None.
+            datetimeDict_filtered = {k: v for k, v in datetimeDict.items() if v is not None}
+            datetimeDict.clear()
+            datetimeDict.update(datetimeDict_filtered)
 
+        result = Series(
+            description= seriesDescription, 
+            isComplete= isComplete,
+            timeDescription= timeDescription,
+            nonCompleteReason= reason_string
+        )
+        result.data = list(datetimeDict.values())
+        return result
+                
  
+    def __generate_datetime_list(self, timeDescription: TimeDescription) -> dict:
+        """This function creates a list of expected time stamps between a from time and a two time at some interval.
+        The keys are the time steps and the values are always set to None.
+        If to time and from time are equal, its only a single pair is returned as that describes a single input.
+        :param timeDescription: TimeDescription - The description of the temporal information of the request 
+        :return list[datetime]
+        """
+        # If to time == from time this is a request for a single point
+        if timeDescription.fromDateTime == timeDescription.toDateTime:
+            return {timeDescription.fromDateTime : None}
+        
+        # Define the initial time and how many time steps their are.
+        initial_time = timeDescription.fromDateTime
+        steps = int((timeDescription.toDateTime - timeDescription.fromDateTime) / timeDescription.interval)
+        steps = steps + 1 # We increment here as we are inclusive on both sides of the range of datetimes [from time, to time]
+        
+        # GenerateTimeStamp will calculate a timestamp an amount of steps away from the initial time
+        generateTimestamp = lambda initial_time, idx, interval : initial_time + (interval * idx)
+
+        # Preform list comprehension to generate a list of all the time steps we need plus another list of the same size this is all None
+        return [generateTimestamp(initial_time, idx, timeDescription.interval) for idx in range(steps)]
+        
     

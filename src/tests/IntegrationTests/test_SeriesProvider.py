@@ -63,34 +63,3 @@ def test_request_output():
     series = Series(semaphoreSeriesDescription, True, timeDescription)
     seriesProvider.request_output(semaphoreSeriesDescription, timeDescription)
     assert True
-
-
-@pytest.mark.parametrize("fromTime, toTime, interval, expected_output", [
-    (datetime(2001, 12, 28), datetime(2001, 12, 28) + timedelta(hours=24), timedelta(hours=1), 25), # interval < fromTime - toTime
-    (datetime(2001, 12, 28), datetime(2001, 12, 28) + timedelta(hours=24), timedelta(hours=24), 2), # Time range = fromTime - toTime
-    (datetime(2001, 12, 28), datetime(2001, 12, 28), timedelta(hours=24), 1) # single point interval > fromTime - toTime
-    ])
-def test__get_amount_of_results_expected(fromTime: datetime, toTime: datetime, interval: timedelta, expected_output: int):
-    """Tests the get amount of results expected that it is correctly calculating correct amount
-    of expected results given a to time and from time and some interval
-    """
-    load_dotenv()
-    seriesProvider = SeriesProvider()
-
-    timeDescription = TimeDescription(fromTime, toTime, interval)
-
-    result = seriesProvider._SeriesProvider__get_amount_of_results_expected(timeDescription)
-    assert result == expected_output
-
-def test__merge_results():
-    """Tests the merge results method ensuring that the resulting list is a list 
-    unique non duplicated values.
-    """
-    load_dotenv()
-    seriesProvider = SeriesProvider()
-
-    list1 = [1, 2, 3, 4, 5]
-    list2 = [5, 6]
-
-    result = seriesProvider._SeriesProvider__merge_results(list1, list2)
-    assert result == [1, 2, 3, 4, 5, 6]
