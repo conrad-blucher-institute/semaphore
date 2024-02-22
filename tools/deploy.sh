@@ -25,6 +25,9 @@ python3 tools/init_cron.py
 # initialize the db in the containers
 docker exec semaphore-core python3 tools/init_db.py 
 
+# Sleep to give HELATHCHECKS time to run
+sleep 10
+
 # Inspect each container and check if its status is heathy
 core_status=$(docker inspect semaphore-core | grep -o '"Status": "healthy"')
 api_status=$(docker inspect semaphore-api | grep -o '"Status": "healthy"')
@@ -37,3 +40,4 @@ if [[ $core_status == $healthy_status ]] && [[ $api_status == $healthy_status ]]
 else
     exit 1
 fi
+
