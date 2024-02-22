@@ -53,7 +53,7 @@ def run_semaphore(fileName: str, executionTime: datetime = None, toss: bool = Fa
             log(f'Semaphore ran into an error: {e}')
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            log(exc_type, fname, exc_tb.tb_lineno) 
+            print(exc_type, fname, exc_tb.tb_lineno) 
             traceback.print_exc() 
     finally:
         log('Semaphore fin!')
