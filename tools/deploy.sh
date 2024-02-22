@@ -9,6 +9,9 @@
 # Lower active containers
 docker-compose down
 
+# Fetch origin
+git fetch origin --tags $1
+
 # Pull latest code 
 git pull
 
@@ -21,3 +24,16 @@ python3 tools/init_cron.py
 
 # initialize the db in the containers
 docker exec semaphore-core python3 tools/init_db.py 
+
+# Inspect each container and check if its status is heathy
+core_status=$(docker inspect semaphore-core | grep -o '"Status": "healthy"')
+api_status=$(docker inspect semaphore-api | grep -o '"Status": "healthy"')
+db_status=$(docker inspect semaphore-db | grep -o '"Status": "healthy"')
+
+# Check that each status is healthy. 
+healthy_status='"Status": "healthy"'
+if [[ $core_status == $healthy_status ]] && [[ $api_status == $healthy_status ]] && [[ $db_status == $healthy_status ]]; then
+    exit 0
+else
+    exit 1
+fi
