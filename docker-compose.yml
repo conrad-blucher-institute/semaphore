@@ -47,19 +47,10 @@ services:
     volumes:
       - ./data:/app/data
     healthcheck:
-      #So, when i was just using the curl function inside of the yml file it didn't want 
-      #to use the external name? for the api: localhost:8888/whatever
-      #but when you run the curl command in terminal it returns what it should return
-      #so i'm trying to find a way to run a shell file for the healthcheck that ill run the
-      #curl command and then maybe we could mess around and find a way to dynamically
-      #put the url in that shell file / maybe change it to a python file? but 
-      #just from preliminary research its kinda difficult to get the full url form fast api
-      #HOWEVER i just can't get it to run this shell script ;-; it keeps saying it can't open the
-      #file or that there is no such file and i'm sure it's a path thing but-
-      test: ["CMD", "sh", "./apiHealthCheck.sh"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD-SHELL", "curl -f host.docker.internal:8888/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     extra_hosts:
       - "host.docker.internal:host-gateway"
   db:
