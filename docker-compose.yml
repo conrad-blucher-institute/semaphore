@@ -46,6 +46,11 @@ services:
     #   - semaphore-net
     volumes:
       - ./data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f host.docker.internal:8888/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     extra_hosts:
       - "host.docker.internal:host-gateway"
   db:

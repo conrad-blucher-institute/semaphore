@@ -139,3 +139,7 @@ async def get_output(ModelName: str, ModelVersion: str, series: str, location: s
     responseSeries = provider.request_output(requestDescription, timeDescription)
 
     return responseSeries
+
+@app.get("/health")
+def health_check():
+    return {"status": "up"}
