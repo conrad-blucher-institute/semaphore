@@ -66,7 +66,7 @@ class SeriesProvider():
         log('Init DI Query....')
         data_ingestion_class = data_ingestion_factory(seriesDescription)
         data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
-        validated_merged_result = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data, data_ingestion_results.data)
+        validated_merged_result = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data, data_ingestion_results.data if data_ingestion_results != None else None)
         if(validated_merged_result.isComplete):
             return validated_merged_result
         
