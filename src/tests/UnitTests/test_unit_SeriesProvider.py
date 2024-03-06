@@ -22,7 +22,7 @@ from src.SeriesProvider.SeriesProvider import SeriesProvider, TimeDescription, S
 
 
 @pytest.mark.parametrize("timeDescription, expected_output", [
-    (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1),  timedelta(hours=1)), {datetime(2000, 1, 1) : None}), # I single data point
+    (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1),  timedelta(hours=1)), [datetime(2000, 1, 1)]), # I single data point
     (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1, hour=11),  timedelta(hours=1)), [datetime(2000, 1, 1) + timedelta(hours=idx) for idx in range(12)]), # A 12 hour long data series
 ])
 def test__generate_datetime_list(timeDescription, expected_output):
