@@ -101,20 +101,19 @@ class SeriesProvider():
         prioritizing results from data ingestion when they conflict with results from the database.
         :param seriesDescription: SemaphoreSeriesDescription - The request description
         :param timeDescription: TimeDescription - The description of the temporal information of the request 
-        :param DBSeries: Series - A list of results to validate from the DB
-        :param DISeries: Series - A list of results to validate from data ingestion
+        :param DBList: list[Input] - A list of results to validate from the DB
+        :param DIList: list[Input] - A list of results to validate from data ingestion
         :return a validated series: Series
 
         """
         missing_results = 0
-        datetimeList = self.__generate_datetime_list(timeDescription) # A dict with every time stamp we expect, with a value of none
+        datetimeList = self.__generate_datetime_list(timeDescription) # A list with every time stamp we expect, with a value of none
         
         # Construct a dictionary of the required date times
-        values = [None] * len(datetimeList)
-        datetimeDict =  { k:v for (k, v) in zip(datetimeList, values)}
+        datetimeDict =  { dateTime : None for dateTime in datetimeList }
 
         # Construct a dictionary for the db results
-        database_results = { input.timeVerified : input for input in DBList}
+        database_results = { input.timeVerified : input for input in DBList }
 
         # If there are data ingestion results construct a dictionary for that too
         if DIList != None:
@@ -142,9 +141,7 @@ class SeriesProvider():
             reason_string = f'There were {missing_results} missing results!'
 
             # If a result was missing, an input was not mapped to that key. Thus its mapped to None. We remove the whole k:v pair as to not pollute the results with None.
-            datetimeDict_filtered = {k: v for k, v in datetimeDict.items() if v is not None}
-            datetimeDict.clear()
-            datetimeDict.update(datetimeDict_filtered)
+            datetimeDict = {k : v for k, v in datetimeDict.items() if v is not None}
 
         result = Series(
             description= seriesDescription, 
@@ -156,7 +153,7 @@ class SeriesProvider():
         return result
                 
  
-    def __generate_datetime_list(self, timeDescription: TimeDescription) -> dict:
+    def __generate_datetime_list(self, timeDescription: TimeDescription) -> list:
         """This function creates a list of expected time stamps between a from time and a two time at some interval.
         The keys are the time steps and the values are always set to None.
         If to time and from time are equal, its only a single pair is returned as that describes a single input.
@@ -165,7 +162,7 @@ class SeriesProvider():
         """
         # If to time == from time this is a request for a single point
         if timeDescription.fromDateTime == timeDescription.toDateTime:
-            return {timeDescription.fromDateTime : None}
+            return [timeDescription.fromDateTime]
         
         # Define the initial time and how many time steps their are.
         initial_time = timeDescription.fromDateTime
