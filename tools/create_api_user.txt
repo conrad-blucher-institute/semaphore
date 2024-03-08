@@ -1,0 +1,44 @@
+-- Role: api
+-- DROP ROLE IF EXISTS api;
+
+CREATE ROLE api WITH
+  LOGIN
+  SUPERUSER
+  INHERIT
+  CREATEDB
+  CREATEROLE
+  REPLICATION
+  PASSWORD 'api_2024';
+  
+
+GRANT SELECT, UPDATE ON SEQUENCE public."dataLocation_dataSource_mapping_id_seq" TO api;
+
+GRANT SELECT, UPDATE ON SEQUENCE public.inputs_id_seq TO api;
+
+GRANT SELECT, UPDATE ON SEQUENCE public.outputs_id_seq TO api;
+
+GRANT SELECT, UPDATE ON SEQUENCE public."ref_dataDatum_id_seq" TO api;
+
+GRANT SELECT, UPDATE ON SEQUENCE public."ref_dataLocation_id_seq" TO api;
+
+GRANT SELECT, UPDATE ON SEQUENCE public."ref_dataSeries_id_seq" TO api;
+
+GRANT SELECT, UPDATE ON SEQUENCE public."ref_dataSource_id_seq" TO api;
+
+GRANT SELECT, UPDATE ON SEQUENCE public."ref_dataUnit_id_seq" TO api;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."dataLocation_dataSource_mapping" TO api;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public.inputs TO api;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public.outputs TO api;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."ref_dataDatum" TO api;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."ref_dataLocation" TO api;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."ref_dataSeries" TO api;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."ref_dataSource" TO api;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."ref_dataUnit" TO api;

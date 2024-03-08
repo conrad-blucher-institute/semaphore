@@ -1,0 +1,44 @@
+-- Role: core
+-- DROP ROLE IF EXISTS core;
+
+CREATE ROLE core WITH
+  LOGIN
+  SUPERUSER
+  INHERIT
+  CREATEDB
+  CREATEROLE
+  REPLICATION
+  PASSWORD 'core_2024';
+  
+
+GRANT SELECT, UPDATE ON SEQUENCE public."dataLocation_dataSource_mapping_id_seq" TO core;
+
+GRANT SELECT, UPDATE ON SEQUENCE public.inputs_id_seq TO core;
+
+GRANT SELECT, UPDATE ON SEQUENCE public.outputs_id_seq TO core;
+
+GRANT SELECT, UPDATE ON SEQUENCE public."ref_dataDatum_id_seq" TO core;
+
+GRANT SELECT, UPDATE ON SEQUENCE public."ref_dataLocation_id_seq" TO core;
+
+GRANT SELECT, UPDATE ON SEQUENCE public."ref_dataSeries_id_seq" TO core;
+
+GRANT SELECT, UPDATE ON SEQUENCE public."ref_dataSource_id_seq" TO core;
+
+GRANT SELECT, UPDATE ON SEQUENCE public."ref_dataUnit_id_seq" TO core;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."dataLocation_dataSource_mapping" TO core;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public.inputs TO core;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public.outputs TO core;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."ref_dataDatum" TO core;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."ref_dataLocation" TO core;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."ref_dataSeries" TO core;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."ref_dataSource" TO core;
+
+GRANT SELECT, UPDATE, INSERT ON TABLE public."ref_dataUnit" TO core;

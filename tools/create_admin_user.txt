@@ -1,0 +1,44 @@
+-- Role: [admin_user_here]
+-- DROP ROLE IF EXISTS [admin_user_here];
+
+CREATE ROLE [admin_user_here] WITH
+  LOGIN
+  SUPERUSER
+  INHERIT
+  CREATEDB
+  CREATEROLE
+  REPLICATION
+  PASSWORD '[admin_password_here]';
+  
+
+GRANT ALL ON SEQUENCE public."dataLocation_dataSource_mapping_id_seq" TO admin_user_here;
+
+GRANT ALL ON SEQUENCE public.inputs_id_seq TO admin_user_here;
+
+GRANT ALL ON SEQUENCE public.outputs_id_seq TO admin_user_here;
+
+GRANT ALL ON SEQUENCE public."ref_dataDatum_id_seq" TO admin_user_here;
+
+GRANT ALL ON SEQUENCE public."ref_dataLocation_id_seq" TO admin_user_here;
+
+GRANT ALL ON SEQUENCE public."ref_dataSeries_id_seq" TO admin_user_here;
+
+GRANT ALL ON SEQUENCE public."ref_dataSource_id_seq" TO admin_user_here;
+
+GRANT ALL ON SEQUENCE public."ref_dataUnit_id_seq" TO admin_user_here;
+
+GRANT ALL ON TABLE public."dataLocation_dataSource_mapping" TO admin_user_here;
+
+GRANT ALL ON TABLE public.inputs TO admin_user_here;
+
+GRANT ALL ON TABLE public.outputs TO admin_user_here;
+
+GRANT ALL ON TABLE public."ref_dataDatum" TO admin_user_here;
+
+GRANT ALL ON TABLE public."ref_dataLocation" TO admin_user_here;
+
+GRANT ALL ON TABLE public."ref_dataSeries" TO admin_user_here;
+
+GRANT ALL ON TABLE public."ref_dataSource" TO admin_user_here;
+
+GRANT ALL ON TABLE public."ref_dataUnit" TO admin_user_here;

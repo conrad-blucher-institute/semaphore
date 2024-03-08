@@ -1,0 +1,38 @@
+CREATE ROLE [civillian_user_here] WITH
+  LOGIN
+  INHERIT
+  REPLICATION
+  PASSWORD '[civillian_user_password_here]';
+
+GRANT SELECT ON SEQUENCE public."dataLocation_dataSource_mapping_id_seq" TO  civillian_user_here;
+
+GRANT SELECT ON SEQUENCE public.inputs_id_seq TO civillian_user_here;
+
+GRANT SELECT ON SEQUENCE public.outputs_id_seq TO civillian_user_here;
+
+GRANT SELECT ON SEQUENCE public."ref_dataDatum_id_seq" TO civillian_user_here;
+
+GRANT SELECT ON SEQUENCE public."ref_dataLocation_id_seq" TO civillian_user_here;
+
+GRANT SELECT ON SEQUENCE public."ref_dataSeries_id_seq" TO civillian_user_here;
+
+GRANT SELECT ON SEQUENCE public."ref_dataSource_id_seq" TO civillian_user_here;
+
+GRANT SELECT ON SEQUENCE public."ref_dataUnit_id_seq" TO civillian_user_here;
+
+GRANT SELECT ON TABLE public."dataLocation_dataSource_mapping" TO civillian_user_here;
+
+GRANT SELECT ON TABLE public.inputs TO civillian_user_here;
+
+GRANT SELECT ON TABLE public.outputs TO civillian_user_here;
+
+GRANT SELECT ON TABLE public."ref_dataDatum" TO civillian_user_here;
+
+GRANT SELECT ON TABLE public."ref_dataLocation" TO civillian_user_here;
+
+GRANT SELECT ON TABLE public."ref_dataSeries" TO civillian_user_here;
+
+GRANT SELECT ON TABLE public."ref_dataSource" TO civillian_user_here;
+
+GRANT SELECT ON TABLE public."ref_dataUnit" TO civillian_user_here;
+
