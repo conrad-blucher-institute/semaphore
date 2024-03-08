@@ -26,3 +26,4 @@ RUN pip install -r requirements.txt
 # Copy the source code from ./src to the Docker image
 COPY . .
 
+CMD [["python3", "tools\monitoring.py"]]
