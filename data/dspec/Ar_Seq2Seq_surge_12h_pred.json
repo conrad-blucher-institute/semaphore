@@ -1,0 +1,110 @@
+    {
+    "modelName": "Aransas Pass Seq2Seq surge 12h predictions",
+    "modelVersion": "1.0.0",
+    "author": "Marina VicensMiquel",
+    "modelFileName": "Seq2Seq_WL_12h_pred",
+    "timingInfo":{
+        "offset": 60,
+        "interval": 360
+    },
+    "outputInfo": {
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 43200,
+        "series": "pSurge",
+        "location": "packChan",
+        "interval" : 3600, 
+        "datum": "test_datum",
+        "unit" : "meter"
+    },
+    "inputs": [
+    { 
+        "_name": "x_wind",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dXWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, 0]
+    },
+    {
+        "_name": "y_wind",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, 0]
+    },
+    {
+        "_name": "x_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dXWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "x_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dXWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "y_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "y_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "y_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "y_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -11]
+    },
+    {
+        "_name": "y_wind_prev",
+        "location": "packChan",
+        "source": "NOAATANDC",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 3600,
+        "range": [0, -12]
+    }
+]}
