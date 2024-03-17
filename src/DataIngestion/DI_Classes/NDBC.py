@@ -43,7 +43,7 @@ class NDBC(IDataIngestion):
         if seriesDescription.dataSeries in self.fourMaxMeanConversionDict.keys():
             return self.__get_mean_four_max(seriesDescription, timeDescription)
         else: 
-            return self.__get_NDBC(seriesDescription, timeDescription)
+            raise NotImplementedError(f'NDBC has not implemented request: {seriesDescription}')
     
 
     def __fetch(self, url):
@@ -66,7 +66,6 @@ class NDBC(IDataIngestion):
 
         # Fetch from the API
         request_results = self.__fetch(f'https://www.ndbc.noaa.gov/data/realtime2/{station_id}.txt')
-        print(f'https://www.ndbc.noaa.gov/data/realtime2/{station_id}.txt')
         # We need to parse the resulting text
         rgx = ' +' # 1 or more spaces
 
@@ -116,7 +115,6 @@ class NDBC(IDataIngestion):
 
         df_inTimeRange = df.loc[timeDescription.toDateTime:timeDescription.fromDateTime]
 
-        print(timeDescription)
         inputs = []
         for dt_idx, row in df_inTimeRange.iterrows():
             dataValue = row[seriesDescription.dataSeries]
@@ -146,7 +144,6 @@ class NDBC(IDataIngestion):
         :param timeDescription: TimeDescription - A data TimeDescription object with the information to pull 
         :param Series | None: A series containing the imported data or none if something went wrong
         """
-
         # We convert to the NDBC series name when we request the data, then back again when we finish the data
         four_max_series_name = seriesDescription.dataSeries # save old name
         seriesDescription.dataSeries = self.fourMaxMeanConversionDict[seriesDescription.dataSeries] # query the NDBC name

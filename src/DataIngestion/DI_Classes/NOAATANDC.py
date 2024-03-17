@@ -127,7 +127,7 @@ class NOAATANDC(IDataIngestion):
         if dataSourceCode is None: return None
         
         #Make API request
-        url = self.__create_pattern1_url(dataSourceCode, 'hourly_height', timeRequest.fromDateTime, timeRequest.toDateTime, seriesRequest.dataDatum)
+        url = self.__create_pattern1_url(dataSourceCode, 'water_level', timeRequest.fromDateTime, timeRequest.toDateTime, seriesRequest.dataDatum)
         data = self.__api_request(url)
         if data is None: return None
 
