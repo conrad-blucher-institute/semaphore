@@ -66,7 +66,7 @@ class NDBC(IDataIngestion):
 
         # Fetch from the API
         request_results = self.__fetch(f'https://www.ndbc.noaa.gov/data/realtime2/{station_id}.txt')
-
+        print(f'https://www.ndbc.noaa.gov/data/realtime2/{station_id}.txt')
         # We need to parse the resulting text
         rgx = ' +' # 1 or more spaces
 
@@ -115,6 +115,8 @@ class NDBC(IDataIngestion):
         df, units = self.__download_NDBC_data(NDBC_location_code)
 
         df_inTimeRange = df.loc[timeDescription.toDateTime:timeDescription.fromDateTime]
+
+        print(timeDescription)
         inputs = []
         for dt_idx, row in df_inTimeRange.iterrows():
             dataValue = row[seriesDescription.dataSeries]
@@ -167,7 +169,7 @@ class NDBC(IDataIngestion):
 
         series = Series(seriesDescription, True, timeDescription)
         series.data = [input]
-        insertedRows = self.__seriesStorage.insert_input(series)
+        insertedRows = self.seriesStorage.insert_input(series)
         return series
 
 

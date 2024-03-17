@@ -423,10 +423,8 @@ class NOAATANDC(IDataIngestion):
         # putting miss-labled data in the DB
         # We have to change the interval too
         four_max_series_name = seriesDescription.dataSeries
-        timeDescription.interval = timedelta(seconds=3600)
         seriesDescription.dataSeries= 'dWl'
         full_series_inputs = self.fetch_water_level_hourly(seriesDescription, timeDescription).data
-        timeDescription.interval = timedelta(seconds=0)
         seriesDescription.dataSeries = four_max_series_name
 
         # We convert the data from strings to float, sort it, take the four highest, and take their mean
