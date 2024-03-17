@@ -106,6 +106,37 @@ class SeriesProvider():
         :return a validated series: Series
 
         """
+        # If there is a verification Override we handle that first and return before the rest of the logic
+        if seriesDescription.verificationOverride != None:
+
+            DBList_valid = len(DBList) == seriesDescription.verificationOverride
+            DIList_valid = DIList != None and len(DIList) == seriesDescription.verificationOverride
+
+            valid_list = None
+            if DIList_valid: 
+                valid_list = DIList
+            elif DBList_valid:
+                valid_list = DBList
+
+            if valid_list != None:
+                result = Series(
+                description= seriesDescription, 
+                isComplete= True,
+                timeDescription= timeDescription,
+                )
+                result.data = valid_list
+                return result
+            else:
+                result = Series(
+                description= seriesDescription, 
+                isComplete= False,
+                timeDescription= timeDescription,
+                nonCompleteReason= 'Failed the verification override check.'
+                )
+                return result
+
+        # Default logic
+
         missing_results = 0
         datetimeList = self.__generate_datetime_list(timeDescription) # A list with every time stamp we expect, with a value of none
         
