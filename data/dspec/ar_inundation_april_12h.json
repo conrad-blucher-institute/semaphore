@@ -18,7 +18,6 @@
     "inputs": [
         { 
             "_name": "4 Max Mean DPD",
-            "_note": "b/c 4 max mean is a average over a range, thus interval is zero",
             "location": "Freeport",
             "source": "NDBC",
             "series": "d4mm_DPD",
@@ -30,7 +29,6 @@
         },
         { 
             "_name": "4 Max Mean APD",
-            "_note": "b/c 4 max mean is a average over a range, thus interval is zero",
             "location": "Freeport",
             "source": "NDBC",
             "series": "d4mm_APD",
@@ -42,7 +40,6 @@
         },
         { 
             "_name": "4 Max Mean WVHT",
-            "_note": "b/c 4 max mean is a average over a range, thus interval is zero",
             "location": "Freeport",
             "source": "NDBC",
             "series": "d4mm_WVHT",
@@ -54,7 +51,6 @@
         },
         { 
             "_name": "4 Max Mean Water Level",
-            "_note": "b/c 4 max mean is a average over a range, thus interval is zero",
             "location": "Aransas",
             "source": "NOAATANDC",
             "series": "d4mm_wl",
