@@ -144,7 +144,12 @@ class NDBC(IDataIngestion):
         :param timeDescription: TimeDescription - A data TimeDescription object with the information to pull 
         :param Series | None: A series containing the imported data or none if something went wrong
         """
-        # We convert to the NDBC series name when we request the data, then back again when we finish the data
+
+        # We expoct the lower method __get_NDBC to save the data in ingests into the database. Then we use that data
+        # to compute the four max mean. The issue is the seriesDescription is loaded with the series name as 4mm_XXX
+        # and we dont want the lower method to store its data into the db under that name. That would be false.
+        #Thus the lines below switch the name in the seriesDescription, then switch it back after the lower method has run
+
         four_max_series_name = seriesDescription.dataSeries # save old name
         seriesDescription.dataSeries = self.fourMaxMeanConversionDict[seriesDescription.dataSeries] # query the NDBC name
         full_series_inputs = self.__get_NDBC(seriesDescription, timeDescription).data # request the data
