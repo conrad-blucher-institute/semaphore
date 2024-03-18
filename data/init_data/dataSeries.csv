@@ -8,7 +8,16 @@ dSurge,Surge,"Water Surge"
 dWl,Water Level,"Actual water height"
 testSeries,TEST SERIES,"PLEASE IGNORE"
 pWaterTmp, Water Temperature,"Predictive Water Temperature"
-d4mm_WVHT,4 max mean WVHT,Mean of the four max of wave height
-d4mm_DPD,4 max mean DPD,Mean of the four max of wave Dominant Wave Period 
-d4mm_APD,4 max mean APD,Mean of the four max of the Average Period 
-d4mm_wl,4 max mean water level,Mean of the four max of the Water Level
+d_48h_4mm_WVHT,4 max mean WVHT,Mean of the four max of wave height of the last 48 hours
+d_24h_4mm_WVHT,4 max mean WVHT,Mean of the four max of wave height of the last 24 hours
+d_12h_4mm_WVHT,4 max mean WVHT,Mean of the four max of wave height of the last 12 hours
+d_48h_4mm_DPD,4 max mean DPD,Mean of the four max of wave Dominant Wave Period of the last 48 hours 
+d_24h_4mm_DPD,4 max mean DPD,Mean of the four max of wave Dominant Wave Period of the last 24 hours 
+d_12h_4mm_DPD,4 max mean DPD,Mean of the four max of wave Dominant Wave Period of the last 12 hours 
+d_48h_4mm_APD,4 max mean APD,Mean of the four max of the Average Period of the last 48 hours 
+d_24h_4mm_APD,4 max mean APD,Mean of the four max of the Average Period of the last 24 hours 
+d_12h_4mm_APD,4 max mean APD,Mean of the four max of the Average Period of the last 12 hours 
+d_48h_4mm_wl,4 max mean water level,Mean of the four max of the Water Level of the last 48 hours
+d_24h_4mm_wl,4 max mean water level,Mean of the four max of the Water Level of the last 24 hours
+d_12h_4mm_wl,4 max mean water level,Mean of the four max of the Water Level of the last 12 hours
+pInundation, Predictive Inundation, Inundation is how far the water comes up on land in meters.

@@ -31,9 +31,15 @@ class NDBC(IDataIngestion):
                                     'm/s': 'mps'
                                 }
         self.fourMaxMeanConversionDict = {
-                                    'd4mm_WVHT' : 'WVHT',
-                                    'd4mm_DPD' : 'DPD',
-                                    'd4mm_APD' : 'APD'
+                                    'd_48h_4mm_WVHT' : 'WVHT',
+                                    'd_24h_4mm_WVHT' : 'WVHT',
+                                    'd_12h_4mm_WVHT' : 'WVHT',
+                                    'd_48h_4mm_DPD' : 'DPD',
+                                    'd_24h_4mm_DPD' : 'DPD',
+                                    'd_12h_4mm_DPD' : 'DPD',
+                                    'd_48h_4mm_APD' : 'APD',
+                                    'd_24h_4mm_APD' : 'APD',
+                                    'd_12h_4mm_APD' : 'APD'
                                 }
 
 

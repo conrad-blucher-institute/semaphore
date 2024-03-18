@@ -45,7 +45,7 @@ class NOAATANDC(IDataIngestion):
         match seriesDescription.dataSeries:
             case 'dWl':
                 return self.fetch_water_level_hourly(seriesDescription, timeDescription)
-            case 'd4mm_wl':
+            case 'd_48h_4mm_wl'|'d_24h_4mm_wl'|'d_12h_4mm_wl':
                 return self.fetch_4_max_mean_water_level(seriesDescription, timeDescription)
             case 'dXWnCmp':
                 match timeDescription.interval.total_seconds():
