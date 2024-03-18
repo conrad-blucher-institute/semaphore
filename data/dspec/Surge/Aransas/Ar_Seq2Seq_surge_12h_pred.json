@@ -1,8 +1,8 @@
     {
-    "modelName": "Aransas Pass Seq2Seq surge 12h predictions",
+    "modelName": "Aransas Pass Seq2Seq surge 12h",
     "modelVersion": "1.0.0",
     "author": "Marina VicensMiquel",
-    "modelFileName": "Seq2Seq_WL_12h_pred",
+    "modelFileName": "./Surge/Aransas/bhp_12h.h5",
     "timingInfo":{
         "offset": 60,
         "interval": 360
@@ -11,71 +11,80 @@
         "outputMethod": "OnePackedFloat",
         "leadTime": 43200,
         "series": "pSurge",
-        "location": "packChan",
-        "interval" : 3600, 
-        "datum": "test_datum",
+        "location": "Aransas",
         "unit" : "meter"
     },
     "inputs": [
     { 
-        "_name": "x_wind",
-        "location": "packChan",
+        "_name": "surge_now",
+        "location": "Aransas",
         "source": "NOAATANDC",
-        "series": "dXWnCmp",
+        "series": "dSurge",
         "unit": "meter",
         "type": "float",
-        "interval": 3600,
+        "interval": 360,
         "range": [0, 0]
     },
     {
-        "_name": "y_wind",
-        "location": "packChan",
+        "_name": "now_X_wind_component",
+        "location": "Aransas",
         "source": "NOAATANDC",
-        "series": "dYWnCmp",
+        "series": "dXWnCmp",
         "unit": "meter",
         "type": "float",
-        "interval": 3600,
+        "interval": 360,
         "range": [0, 0]
     },
     {
-        "_name": "x_wind_prev",
-        "location": "packChan",
-        "source": "NOAATANDC",
-        "series": "dXWnCmp",
-        "unit": "meter",
-        "type": "float",
-        "interval": 3600,
-        "range": [0, -11]
-    },
-    {
-        "_name": "x_wind_prev",
-        "location": "packChan",
-        "source": "NOAATANDC",
-        "series": "dXWnCmp",
-        "unit": "meter",
-        "type": "float",
-        "interval": 3600,
-        "range": [0, -11]
-    },
-    {
-        "_name": "y_wind_prev",
-        "location": "packChan",
+        "_name": "now_Y_wind_component",
+        "location": "Aransas",
         "source": "NOAATANDC",
         "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
-        "interval": 3600,
-        "range": [0, -11]
+        "interval": 360,
+        "range": [0, 0]
     },
     {
-        "_name": "y_wind_prev",
-        "location": "packChan",
+        "_name": "surge",
+        "location": "Aransas",
+        "source": "NOAATANDC",
+        "series": "dSurge",
+        "unit": "meter",
+        "type": "float",
+        "interval": 360,
+        "range": [-1, -12]
+    },
+    {
+        "_name": "past_X_wind_component",
+        "location": "Aransas",
+        "source": "NOAATANDC",
+        "series": "dXWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 360,
+        "range": [-1, -12]
+    },
+    {
+        "_name": "past_Y_wind_component",
+        "location": "Aransas",
         "source": "NOAATANDC",
         "series": "dYWnCmp",
         "unit": "meter",
         "type": "float",
-        "interval": 3600,
-        "range": [0, -11]
+        "interval": 360,
+        "range": [-1, -12]
+    },
+    {
+        from here we done stopped
+        "_name": "y_wind_prev",
+        "location": "Aransas",
+        "source": "NDFD_EXP",
+        "series": "dYWnCmp",
+        "unit": "meter",
+        "type": "float",
+        "interval": 360,
+        "range": [1, 12]
     },
     {
         "_name": "y_wind_prev",
