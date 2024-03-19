@@ -1,6 +1,8 @@
 code,displayName,notes
-dXWnCmp,Wind Speed X,"Actual Wind Speed, X Componant"
-dYWnCmp,Wind Speed Y,"Actual Wind Speed, Y Componant"
+dXWnCmp030D,Wind Speed X,"Actual Wind Speed, X Componant, Offset by xxD where 00D would be minus 0 degrees"
+dYWnCmp030D,Wind Speed Y,"Actual Wind Speed, Y Componant, Offset by xxD where 00D would be minus 0 degrees"
+pXWnCmp030D,Wind Speed X,"Predictive Wind Speed, X Componant, Offset by xxD where 00D would be minus 0 degrees"
+pYWnCmp030D,Wind Speed Y,"Predictive Wind Speed, Y Componant, Offset by xxD where 00D would be minus 0 degrees"
 dWaterTmp,Water Tempature,"Actual Water Tempature"
 dAirTmp,Water Tempature,"Actual Water Tempature"
 pAirTemp,Water Tempature,"Predictive Water Tempature"
