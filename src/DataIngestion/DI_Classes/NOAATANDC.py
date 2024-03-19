@@ -203,7 +203,7 @@ class NOAATANDC(IDataIngestion):
         for index, value in enumerate(xValues):
           
             #Construct list of dataPoints
-            dataPoint = Input(value, 'meter', dateTimes[index], dateTimes[index], lon, lat)
+            dataPoint = Input(value, 'mps', dateTimes[index], dateTimes[index], lon, lat)
             dataPoints.append(dataPoint)
 
         series = Series(seriesRequest, True)
@@ -254,7 +254,7 @@ class NOAATANDC(IDataIngestion):
         dataPoints = []
         for index, value in enumerate(yValues):
              #Construct list of dataPoints
-            dataPoint = Input(value, 'meter', dateTimes[index], dateTimes[index], lon, lat)
+            dataPoint = Input(value, 'mps', dateTimes[index], dateTimes[index], lon, lat)
             dataPoints.append(dataPoint)
 
         series = Series(seriesRequest, True)
@@ -306,7 +306,7 @@ class NOAATANDC(IDataIngestion):
         dataPoints = []
         for index, value in enumerate(xValues):
             #Construct list of dataPoints
-            dataPoint = Input(value, 'meter', dateTimes[index], dateTimes[index], lon, lat)
+            dataPoint = Input(value, 'mps', dateTimes[index], dateTimes[index], lon, lat)
             dataPoints.append(dataPoint)
 
         series = Series(seriesRequest, True)
@@ -358,7 +358,7 @@ class NOAATANDC(IDataIngestion):
         dataPoints = []
         for index, value in enumerate(yValues):
             #Construct list of dataPoints
-            dataPoint = Input(value, 'meter', dateTimes[index], dateTimes[index], lon, lat)
+            dataPoint = Input(value, 'mps', dateTimes[index], dateTimes[index], lon, lat)
             dataPoints.append(dataPoint)
 
         series = Series(seriesRequest, True)
