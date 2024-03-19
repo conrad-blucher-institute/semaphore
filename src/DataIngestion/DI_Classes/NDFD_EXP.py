@@ -256,6 +256,8 @@ class NDFD_EXP(IDataIngestion):
         :param timeRequest: TimeDescription - A data TimeDescription object with the information to pull 
         :param isXWindCmp: Bool - A boolean value to determine if we are returning the X or Y wind components
         """
+        #Getting the degree to which the vector should be rotated so that the components are respectivly parallel and perpendicular to shore
+        offset = float(seriesDescription.dataSeries[-4:-2])
         #Step One: Get the wind direction and the wind speed for the requested time period
         #Note: changing the name to be saved in the database to what the series actually is at retreval time
         seriesDescription.dataSeries = "dWnDir"
@@ -279,7 +281,7 @@ class NDFD_EXP(IDataIngestion):
         yCompInputs = []
         
         for idx in range(len(windDirection)): 
-            xComp = float(windSpeed[idx].dataValue)  * cos(radians(float(windDirection[idx].dataValue)))
+            xComp = float(windSpeed[idx].dataValue)  * cos(radians(float(windDirection[idx].dataValue) - offset))
             xCompInputs.append(Input(
                     str(xComp),
                     "mps",
@@ -288,7 +290,7 @@ class NDFD_EXP(IDataIngestion):
                     windDirection[idx].longitude,
                     windDirection[idx].latitude
                 ))
-            yComp = float(windSpeed[idx].dataValue)  * sin(radians(float(windDirection[idx].dataValue)))
+            yComp = float(windSpeed[idx].dataValue)  * sin(radians(float(windDirection[idx].dataValue) - offset))
             yCompInputs.append(Input(
                     str(yComp),
                     "mps",

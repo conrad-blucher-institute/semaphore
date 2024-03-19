@@ -219,37 +219,15 @@ class NDFD(IDataIngestion):
         except Exception as err:
             log(f'Uncaught error: {err}')
             return None
-    
-
-    def find_closest_average(self, data_dictionary: list, toDateTimestamp: int) -> None | int:
-        """If toDateTime does not exist in the series request, find the average of the data point before
-        and the data point after toDateTime. If one of those points cannot be found, use the found data point
-        as the average. If both cannot be found, return None. 
-        :param data_dictionary: list - Nested list of timestamps and data from NDFD
-        :param toDateTimestamp: int - Missing datetime to find the average for. Converted to POSIX timestamp as an int
-        """
-        # The key argument is set to the timestamp so that it knows what to look for when comparing. Defaults to None if no results found.
-        closest_before = max((timestamp for timestamp in data_dictionary if timestamp[0] < toDateTimestamp), key=lambda x: x[0], default=None)
-        closest_after = min((timestamp for timestamp in data_dictionary if timestamp[0] > toDateTimestamp), key=lambda x: x[0], default=None)
-
-        if closest_before is not None and closest_after is not None:
-            average = int((closest_after[1] + closest_before[1]) / 2)
-        elif closest_before is not None:
-            average = closest_before[1]
-        elif closest_after is not None:
-            average = closest_after[1]
-        else:
-            log('Series request can not be fulfilled! toDateTime could not be found in series and average of two closest dates could not be calculated')
-            return None
         
-        return average
-    
     def fetch_wind_component_predictions(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, isXWindCmp: bool)-> Series | None:
         """Calculating the wind component predictions using wind direction and wind speeds fetched from NDFD
         :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull 
         :param timeRequest: TimeDescription - A data TimeDescription object with the information to pull 
         :param isXWindCmp: Bool - A boolean value to determine if we are returning the X or Y wind components
         """
+        #Getting the degree to which the vector should be rotated so that the components are respectivly parallel and perpendicular to shore
+        offset = float(seriesDescription.dataSeries[-4:-2])
         #Step One: Get the wind direction and the wind speed for the requested time period
         #Note: changing the name to be saved in the database to what the series actually is at retreval time
         seriesDescription.dataSeries = "dWnDir"
@@ -273,7 +251,7 @@ class NDFD(IDataIngestion):
         yCompInputs = []
         
         for idx in range(len(windDirection)): 
-            xComp = float(windSpeed[idx].dataValue)  * cos(radians(float(windDirection[idx].dataValue)))
+            xComp = float(windSpeed[idx].dataValue)  * cos(radians(float(windDirection[idx].dataValue) - offset))
             xCompInputs.append(Input(
                     str(xComp),
                     "mps",
@@ -282,7 +260,7 @@ class NDFD(IDataIngestion):
                     windDirection[idx].longitude,
                     windDirection[idx].latitude
                 ))
-            yComp = float(windSpeed[idx].dataValue)  * sin(radians(float(windDirection[idx].dataValue)))
+            yComp = float(windSpeed[idx].dataValue)  * sin(radians(float(windDirection[idx].dataValue) - offset))
             yCompInputs.append(Input(
                     str(yComp),
                     "mps",
@@ -307,8 +285,7 @@ class NDFD(IDataIngestion):
         self.__seriesStorage.insert_input(yCompSeries)
         
         #Step three: Return it
-        return xCompSeries if isXWindCmp else yCompSeries
-
+        return xCompSeries if isXWindCmp else yCompSeries  
   
 class NDFDPredictions(Generic[Time, Data]):
 
