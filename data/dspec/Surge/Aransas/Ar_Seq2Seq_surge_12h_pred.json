@@ -21,6 +21,7 @@
         "source": "NOAATANDC",
         "series": "dSurge",
         "unit": "meter",
+        "datum": "NAVD",
         "type": "float",
         "interval": 3600,
         "range": [0, 0]
@@ -51,6 +52,7 @@
         "source": "NOAATANDC",
         "series": "dSurge",
         "unit": "meter",
+        "datum": "NAVD",
         "type": "float",
         "interval": 3600,
         "range": [-1, -12]
