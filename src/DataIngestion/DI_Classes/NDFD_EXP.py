@@ -301,8 +301,8 @@ class NDFD_EXP(IDataIngestion):
                 ))
             
         #Changing the series description name back to what we will be saving in the database after calculations
-        xCompDesc = SeriesDescription(seriesDescription.dataSource, "pXWnCmp", seriesDescription.dataLocation, seriesDescription.dataDatum)
-        yCompDesc = SeriesDescription(seriesDescription.dataSource, "pYWnCmp", seriesDescription.dataLocation, seriesDescription.dataDatum)
+        xCompDesc = SeriesDescription(seriesDescription.dataSource, f'pXWnCmp{str(offset).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
+        yCompDesc = SeriesDescription(seriesDescription.dataSource, f'pYWnCmp{str(offset).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
 
         #Creating series opjects with correct description information and inputs
         xCompSeries = Series(xCompDesc, True, timeDescription)
