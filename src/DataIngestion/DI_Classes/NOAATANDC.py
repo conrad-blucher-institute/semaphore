@@ -45,6 +45,8 @@ class NOAATANDC(IDataIngestion):
         match seriesDescription.dataSeries:
             case 'dWl':
                 return self.fetch_water_level_hourly(seriesDescription, timeDescription)
+            case 'd_48h_4mm_wl'|'d_24h_4mm_wl'|'d_12h_4mm_wl':
+                return self.fetch_4_max_mean_water_level(seriesDescription, timeDescription)
             case 'dXWnCmp':
                 match timeDescription.interval.total_seconds():
                     case 3600:
@@ -125,7 +127,7 @@ class NOAATANDC(IDataIngestion):
         if dataSourceCode is None: return None
         
         #Make API request
-        url = self.__create_pattern1_url(dataSourceCode, 'hourly_height', timeRequest.fromDateTime, timeRequest.toDateTime, seriesRequest.dataDatum)
+        url = self.__create_pattern1_url(dataSourceCode, 'water_level', timeRequest.fromDateTime, timeRequest.toDateTime, seriesRequest.dataDatum)
         data = self.__api_request(url)
         if data is None: return None
 
@@ -156,8 +158,6 @@ class NOAATANDC(IDataIngestion):
 
         #insertData to DB
         insertedRows = self.__seriesStorage.insert_input(series)
-
-        series.data = insertedRows #Rebind to only return what rows were inserted?
         return series
 
 
@@ -416,8 +416,40 @@ class NOAATANDC(IDataIngestion):
         return series
 
 
+    def fetch_4_max_mean_water_level(self, seriesDescription, timeDescription):
+        """This function calculates the engineered feature of 4max__mean_water_level
+        :param seriesDescription: SeriesDescription - A data SeriesDescription object with the information to pull 
+        :param timeDescription: TimeDescription - A data TimeDescription object with the information to pull 
+        :param Series | None: A series containing the imported data or none if something went wrong
+        """
 
+        # We swap the series with the water level series to prevent
+        # putting miss-labled data in the DB
+        # We have to change the interval too
+        four_max_series_name = seriesDescription.dataSeries
+        seriesDescription.dataSeries= 'dWl'
+        full_series_inputs = self.fetch_water_level_hourly(seriesDescription, timeDescription).data
+        seriesDescription.dataSeries = four_max_series_name
 
+        # We convert the data from strings to float, sort it, take the four highest, and take their mean
+        input_data = [float(input.dataValue) for input in full_series_inputs]
+        four_highest = sorted(input_data)[-4:] # Get the four highest values
+        mean_four_max = sum(four_highest) / 4.0
+
+        # we return a series with a single input
+        last_input = full_series_inputs[-1]
+        input = Input(
+            dataValue= str(mean_four_max),
+            dataUnit= last_input.dataUnit,
+            timeGenerated= timeDescription.toDateTime,
+            timeVerified= timeDescription.toDateTime,
+        )
+
+        series = Series(seriesDescription, True, timeDescription)
+        series.data = [input]
+
+        insertedRows = self.__seriesStorage.insert_input(series)
+        return series
 
 
 
