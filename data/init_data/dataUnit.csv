@@ -1,3 +1,5 @@
 code,displayName,notes
 meter,Metric Meter,""
 celsius,Metric Celsius,""
+seconds,Seconds,""
+mps,Meters per Seconds,""

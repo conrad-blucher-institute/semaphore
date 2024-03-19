@@ -162,7 +162,10 @@ class SeriesProvider():
         """
         # If to time == from time this is a request for a single point
         if timeDescription.fromDateTime == timeDescription.toDateTime:
-            return [timeDescription.fromDateTime]
+            return [timeDescription.toDateTime]
+        
+        if timeDescription.interval.total_seconds() == 0:
+            return [timeDescription.toDateTime]
         
         # Define the initial time and how many time steps their are.
         initial_time = timeDescription.fromDateTime

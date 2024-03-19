@@ -55,7 +55,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         # If an interval was provided, we will mod each verified time against it
         # any that fail we remove
-        if timeDescription.interval != None:
+        if timeDescription.interval != None and timeDescription.interval.total_seconds() != 0:
             for input in inputResult:
                 if not (input.timeVerified.timestamp() % timeDescription.interval.total_seconds() == 0):
                     inputResult.remove(input)
