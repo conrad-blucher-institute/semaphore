@@ -3,7 +3,7 @@
 #----------------------------------
 # Created By: Beto Estrada
 # Created Date: 9/15/2023
-# version 1.0
+# version 1.1
 #----------------------------------
 """ This file is a communicator with the National Digital Forecast Database (NDFD) Digital Weather Markup 
 Language (DWML) Generator. It will allow the ingestion of one series from NDFD. An object of this class must 
@@ -21,6 +21,7 @@ NOTE:: Original code was taken from:
 #----------------------------------
 # 
 #
+from math import cos, sin, radians
 from datetime import datetime, timedelta
 import json
 import requests
@@ -54,6 +55,12 @@ class NDFD(IDataIngestion):
         match seriesDescription.dataSeries:
             case 'pAirTemp':
                 return self.fetch_predictions(seriesDescription, timeDescription, 'temp')
+            case 'pXWnCmp': 
+                return self.fetch_wind_component_predictions(seriesDescription, timeDescription, True)
+            case 'pYWnCmp': 
+                return self.fetch_wind_component_predictions(seriesDescription, timeDescription, False)
+            case _ : 
+                raise NotImplementedError(f'NDFD_EXP received request {seriesDescription} but could not map it to a series')
 
 
     def __init__(self):
@@ -236,6 +243,71 @@ class NDFD(IDataIngestion):
             return None
         
         return average
+    
+    def fetch_wind_component_predictions(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, isXWindCmp: bool)-> Series | None:
+        """Calculating the wind component predictions using wind direction and wind speeds fetched from NDFD
+        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull 
+        :param timeRequest: TimeDescription - A data TimeDescription object with the information to pull 
+        :param isXWindCmp: Bool - A boolean value to determine if we are returning the X or Y wind components
+        """
+        #Step One: Get the wind direction and the wind speed for the requested time period
+        #Note: changing the name to be saved in the database to what the series actually is at retreval time
+        seriesDescription.dataSeries = "dWnDir"
+        windDirection = self.fetch_predictions(seriesDescription, timeDescription, "wdir")
+        seriesDescription.dataSeries = "dWnSpd"
+        windSpeed = self.fetch_predictions(seriesDescription, timeDescription, "wspd")
+        
+        #Step Two: Calculate the Component 
+        if (not windDirection or not windSpeed): 
+            log('Fetch wind component predictions failed as wind directions or wind speed was none.')
+            return None
+        
+        if (len(windDirection.data) != len(windSpeed.data)): 
+            log('Fetch wind component predictions failed as wind direction and wind speed series were different lengths.')
+            return None
+        
+        windDirection = windDirection.data
+        windSpeed = windSpeed.data
+
+        xCompInputs = []
+        yCompInputs = []
+        
+        for idx in range(len(windDirection)): 
+            xComp = float(windSpeed[idx].dataValue)  * cos(radians(float(windDirection[idx].dataValue)))
+            xCompInputs.append(Input(
+                    str(xComp),
+                    "mps",
+                    windDirection[idx].timeVerified,
+                    None,
+                    windDirection[idx].longitude,
+                    windDirection[idx].latitude
+                ))
+            yComp = float(windSpeed[idx].dataValue)  * sin(radians(float(windDirection[idx].dataValue)))
+            yCompInputs.append(Input(
+                    str(yComp),
+                    "mps",
+                    windDirection[idx].timeVerified,
+                    None,
+                    windDirection[idx].longitude,
+                    windDirection[idx].latitude
+                ))
+            
+        #Changing the series description name back to what we will be saving in the database after calculations
+        xCompDesc = SeriesDescription(seriesDescription.dataSource, "pXWnCmp", seriesDescription.dataLocation, seriesDescription.dataDatum)
+        yCompDesc = SeriesDescription(seriesDescription.dataSource, "pYWnCmp", seriesDescription.dataLocation, seriesDescription.dataDatum)
+
+        #Creating series opjects with correct description information and inputs
+        xCompSeries = Series(xCompDesc, True, timeDescription)
+        xCompSeries.data = xCompInputs
+        yCompSeries = Series(yCompDesc, True, timeDescription)
+        yCompSeries.data = yCompInputs
+
+        #Saving the series in the database
+        self.__seriesStorage.insert_input(xCompSeries)
+        self.__seriesStorage.insert_input(yCompSeries)
+        
+        #Step three: Return it
+        return xCompSeries if isXWindCmp else yCompSeries
 
   
 class NDFDPredictions(Generic[Time, Data]):
