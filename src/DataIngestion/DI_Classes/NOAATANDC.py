@@ -167,6 +167,8 @@ class NOAATANDC(IDataIngestion):
         :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull (src/DataManagment/DataClasses>TimeDescription)
         NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
         """
+        #Getting the degree to which the vector should be rotated so that the components are respectivly parallel and perpendicular to shore
+        offset = float(seriesRequest.dataSeries[-4:-2])
         
         #Get mapped location from DB then make API request, wl hardcoded
         dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
@@ -190,8 +192,7 @@ class NOAATANDC(IDataIngestion):
             winSpd = float(row['s'])
             time = datetime.fromisoformat(row['t'])
 
-            winDirRad = radians(winDirDeg)
-            winDir_X = winSpd * cos(winDirRad - 30)
+            winDir_X = winSpd * cos(radians(winDirDeg - offset))
 
             xValues.append(str(winDir_X))
             dateTimes.append(time)
@@ -218,6 +219,8 @@ class NOAATANDC(IDataIngestion):
         :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull (src/DataManagment/DataClasses>TimeDescription)
         NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
         """
+        #Getting the degree to which the vector should be rotated so that the components are respectivly parallel and perpendicular to shore
+        offset = float(seriesRequest.dataSeries[-4:-2])
         
         #Get mapped location from DB then make API request, wl hardcoded
         dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
@@ -241,8 +244,7 @@ class NOAATANDC(IDataIngestion):
             winSpd = float(row['s'])
             time = datetime.fromisoformat(row['t'])
 
-            winDirRad = radians(winDirDeg)
-            winDir_Y = winSpd * cos(winDirRad - 30)
+            winDir_Y = winSpd * sin(radians(winDirDeg - offset))
 
             yValues.append(str(winDir_Y))
             dateTimes.append(time)
@@ -269,7 +271,9 @@ class NOAATANDC(IDataIngestion):
         :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull (src/DataManagment/DataClasses>TimeDescription)
         NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
         """
-        
+        #Getting the degree to which the vector should be rotated so that the components are respectivly parallel and perpendicular to shore
+        offset = float(seriesRequest.dataSeries[-4:-2])
+
         #Get mapped location from DB then make API request, wl hardcoded
         dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
         if dataSourceCode is None: return None
@@ -292,8 +296,7 @@ class NOAATANDC(IDataIngestion):
             winSpd = float(row['s'])
             time = datetime.fromisoformat(row['t'])
 
-            winDirRad = radians(winDirDeg)
-            winDir_X = winSpd * cos(winDirRad - 30)
+            winDir_X = winSpd * cos(radians(winDirDeg - offset))
 
             xValues.append(str(winDir_X))
             dateTimes.append(time)
@@ -320,7 +323,9 @@ class NOAATANDC(IDataIngestion):
         :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull (src/DataManagment/DataClasses>TimeDescription)
         NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
         """
-        
+        #Getting the degree to which the vector should be rotated so that the components are respectivly parallel and perpendicular to shore
+        offset = float(seriesRequest.dataSeries[-4:-2])
+
         #Get mapped location from DB then make API request, wl hardcoded
         dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
         if dataSourceCode is None: return None
@@ -343,8 +348,7 @@ class NOAATANDC(IDataIngestion):
             winSpd = float(row['s'])
             time = datetime.fromisoformat(row['t'])
 
-            winDirRad = radians(winDirDeg)
-            winDir_Y = winSpd * cos(winDirRad - 30)
+            winDir_Y = winSpd * sin(radians(winDirDeg - offset))
 
             yValues.append(str(winDir_Y))
             dateTimes.append(time)
