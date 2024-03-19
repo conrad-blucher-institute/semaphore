@@ -94,6 +94,7 @@ class InputGatherer:
                 input.range = inputJson["range"]
                 input.datum = inputJson.get("datum")
                 input.unit = inputJson.get("unit")
+                input.verificationOverride = inputJson.get("verificationOverride")
 
                 inputs.append(input)
             dspec.inputs = inputs #Bind to dspec
@@ -127,7 +128,8 @@ class InputGatherer:
                         input.source, 
                         input.series,
                         input.location,
-                        input.datum
+                        input.datum,
+                        input.verificationOverride
                     ),
                     TimeDescription(
                         fromDateTime,

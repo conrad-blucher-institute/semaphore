@@ -399,7 +399,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             
             Column("dataSource", String(10), ForeignKey("ref_dataSource.code"), nullable=False),
             Column("dataLocation", String(25), ForeignKey("ref_dataLocation.code"), nullable=False), 
-            Column("dataSeries", String(10), ForeignKey("ref_dataSeries.code"), nullable=False), 
+            Column("dataSeries", String(25), ForeignKey("ref_dataSeries.code"), nullable=False), 
             Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"),  nullable=True),
             
             Column("latitude", String(16), nullable=True),
@@ -423,7 +423,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             Column("dataValue", String(25), nullable=False), 
             Column("dataUnit", String(10), ForeignKey("ref_dataUnit.code"), nullable=False), 
             Column("dataLocation", String(25), ForeignKey("ref_dataLocation.code"), nullable=False),   
-            Column("dataSeries", String(10), ForeignKey("ref_dataSeries.code"), nullable=False),         
+            Column("dataSeries", String(25), ForeignKey("ref_dataSeries.code"), nullable=False),         
             Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"), nullable=True),
 
             # UniqueConstraint is made __create_constraints method
@@ -482,7 +482,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
             Column("id", Integer, autoincrement=True, primary_key=True),
             
-            Column("code", String(10), nullable=False, unique=True),
+            Column("code", String(25), nullable=False, unique=True),
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
         )

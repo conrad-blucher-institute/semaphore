@@ -102,17 +102,18 @@ class SeriesDescription():
         :param dataLocation: str - The location of the data ('packChan')
         :param dataDatum: str = None
     """
-    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None) -> None:
+    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None, verificationOverride: int = None) -> None:
         self.dataSource = dataSource
         self.dataSeries = dataSeries
         self.dataLocation = dataLocation
         self.dataDatum = dataDatum
+        self.verificationOverride = verificationOverride
 
     def __str__(self) -> str:
-        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}. datum {self.dataDatum}'
+        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, verificationOverride: {self.verificationOverride}'
     
     def __repr__(self) -> str:
-        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum})'
+        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum}, {self.verificationOverride})'
 
 
 class SemaphoreSeriesDescription():
