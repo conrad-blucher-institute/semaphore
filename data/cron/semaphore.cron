@@ -12,4 +12,11 @@
 5 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/April/ar_inundation_april_24h.json >> log.txt
 5 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/April/ar_inundation_april_12h.json >> log.txt
 #Running the surge models every hour and five minutes
-5 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Aransas/Ar_Seq2Seq_surge_12h_pred.json >> log.txt
+10 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Aransas/ar_mlp_surge_24h_pred.json >> log.txt
+10 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Aransas/ar_mlp_surge_12h_pred.json >> log.txt
+10 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/North_Jetty/ar_mlp_surge_24h_pred.json >> log.txt
+10 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/North_Jetty/ar_mlp_surge_12h_pred.json >> log.txt
+10 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Port_Isabel/ar_mlp_surge_24h_pred.json >> log.txt
+10 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Port_Isabel/ar_mlp_surge_12h_pred.json >> log.txt
+10 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Rockport/ar_mlp_surge_24h_pred.json >> log.txt
+10 * * * * docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Rockport/ar_mlp_surge_12h_pred.json >> log.txt
