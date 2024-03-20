@@ -89,6 +89,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         toGeneratedTime = timeDescription.toDateTime - leadTime[0]
          
         statement = (select(self.outputs)
+                    .where(self.outputs.c.modelName == semaphoreSeriesDescription.modelName)
                     .where(self.outputs.c.dataLocation == semaphoreSeriesDescription.dataLocation)
                     .where(self.outputs.c.dataSeries == semaphoreSeriesDescription.dataSeries)
                     .where(self.outputs.c.dataDatum == semaphoreSeriesDescription.dataDatum)
