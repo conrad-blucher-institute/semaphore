@@ -19,10 +19,10 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO public."ref_dataSeries"("code","displayName","notes")
 VALUES
-('dXWnCmp000D','Wind Speed X','Actual Wind Speed, X Componant, Offset by xxD where 00D would be minus 0 degrees'),
-('dYWnCmp000D','Wind Speed Y','Actual Wind Speed, Y Componant, Offset by xxD where 00D would be minus 0 degrees'),
-('pXWnCmp000D','Wind Speed X','Predictive Wind Speed, X Componant, Offset by xxD where 00D would be minus 0 degrees'),
-('pYWnCmp000D','Wind Speed Y','Predictive Wind Speed, Y Componant, Offset by xxD where 00D would be minus 0 degrees'),
+('dXWnCmp000D','Wind Speed X','Actual Wind Speed, X Component, Offset by xxD where 00D would be minus 0 degrees'),
+('dYWnCmp000D','Wind Speed Y','Actual Wind Speed, Y Component, Offset by xxD where 00D would be minus 0 degrees'),
+('pXWnCmp000D','Wind Speed X','Predictive Wind Speed, X Component, Offset by xxD where 00D would be minus 0 degrees'),
+('pYWnCmp000D','Wind Speed Y','Predictive Wind Speed, Y Component, Offset by xxD where 00D would be minus 0 degrees'),
 ('pSurge','Surge','Predictive Water Surge'),
 ('pWl','Water Level','Predictive water height'),
 ('d_48h_4mm_WVHT','4 max mean WVHT','Mean of the four max of wave height of the last 48 hours'),
