@@ -1,3 +1,4 @@
+---Temporary SQL queries to add rows to the database
 ALTER TABLE outputs 
 ALTER COLUMN "dataSeries" TYPE VARCHAR(25)
 ALTER TABLE inputs 
