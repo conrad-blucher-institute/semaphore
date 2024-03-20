@@ -1,5 +1,5 @@
     {
-    "modelName": "Rp_S2S_surge_12h",
+    "modelName": "rp_S2S_surge_12h",
     "modelVersion": "1.0.0",
     "author": "Marina VicensMiquel",
     "modelFileName": "./Surge/Rockport/rockport_12h.h5",

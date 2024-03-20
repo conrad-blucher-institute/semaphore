@@ -9,7 +9,7 @@
     },
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
-        "leadTime": 89640,
+        "leadTime": 86400,
         "series": "pSurge",
         "location": "Aransas",
         "datum": "NA",

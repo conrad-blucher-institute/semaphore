@@ -1,10 +1,10 @@
     {
-    "modelName": "Rp_S2S_surge_48h",
+    "modelName": "rp_S2S_surge_48h",
     "modelVersion": "1.0.0",
     "author": "Marina VicensMiquel",
     "modelFileName": "./Surge/Rockport/rockport_48h.h5",
     "timingInfo":{
-        "offset": 300,
+        "offset": 600,
         "interval": 3600
     },
     "outputInfo": {

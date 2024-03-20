@@ -9,7 +9,7 @@
     },
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
-        "leadTime": 179280,
+        "leadTime": 172800,
         "series": "pSurge",
         "location": "NorthJetty",
         "datum": "NA",
