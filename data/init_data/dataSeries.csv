@@ -1,14 +1,15 @@
 code,displayName,notes
-dXWnCmp030D,Wind Speed X,"Actual Wind Speed, X Componant, Offset by xxD where 00D would be minus 0 degrees"
-dYWnCmp030D,Wind Speed Y,"Actual Wind Speed, Y Componant, Offset by xxD where 00D would be minus 0 degrees"
-pXWnCmp030D,Wind Speed X,"Predictive Wind Speed, X Componant, Offset by xxD where 00D would be minus 0 degrees"
-pYWnCmp030D,Wind Speed Y,"Predictive Wind Speed, Y Componant, Offset by xxD where 00D would be minus 0 degrees"
+dXWnCmp000D,Wind Speed X,"Actual Wind Speed, X Componant, Offset by xxD where 00D would be minus 0 degrees"
+dYWnCmp000D,Wind Speed Y,"Actual Wind Speed, Y Componant, Offset by xxD where 00D would be minus 0 degrees"
+pXWnCmp000D,Wind Speed X,"Predictive Wind Speed, X Componant, Offset by xxD where 00D would be minus 0 degrees"
+pYWnCmp000D,Wind Speed Y,"Predictive Wind Speed, Y Componant, Offset by xxD where 00D would be minus 0 degrees"
 dWaterTmp,Water Tempature,"Actual Water Tempature"
 dAirTmp,Water Tempature,"Actual Water Tempature"
 pAirTemp,Water Tempature,"Predictive Water Tempature"
 dSurge,Surge,"Water Surge"
 pSurge,Surge,"Predictive Water Surge"
 dWl,Water Level,"Actual water height"
+pWl,Water Level,"Predictive water height"
 testSeries,TEST SERIES,"PLEASE IGNORE"
 pWaterTmp, Water Temperature,"Predictive Water Temperature"
 d_48h_4mm_WVHT,4 max mean WVHT,Mean of the four max of wave height of the last 48 hours
@@ -23,4 +24,6 @@ d_12h_4mm_APD,4 max mean APD,Mean of the four max of the Average Period of the l
 d_48h_4mm_wl,4 max mean water level,Mean of the four max of the Water Level of the last 48 hours
 d_24h_4mm_wl,4 max mean water level,Mean of the four max of the Water Level of the last 24 hours
 d_12h_4mm_wl,4 max mean water level,Mean of the four max of the Water Level of the last 12 hours
-pInundation, Predictive Inundation, Inundation is how far the water comes up on land in meters.
+pInundation, Predictive Inundation,Inundation is how far the water comes up on land in meters.
+dWnDir,Wind Direction,Wind Direction
+dWnSpd,Wind Speed,Wind Speed
