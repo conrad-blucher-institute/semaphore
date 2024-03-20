@@ -27,3 +27,5 @@ d_12h_4mm_wl,4 max mean water level,Mean of the four max of the Water Level of t
 pInundation, Predictive Inundation,Inundation is how far the water comes up on land in meters.
 dWnDir,Wind Direction,Wind Direction
 dWnSpd,Wind Speed,Wind Speed
+pWnDir,Predicted Wind Direction,Wind Direction
+pWnSpd,Predicted Wind Speed,Wind Speed
