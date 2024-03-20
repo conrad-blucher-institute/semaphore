@@ -11,10 +11,7 @@
 """ This file is a communicator with the NOAA tides and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
 An object of this class must be initialized with a DBInterface, as fetched data is directly imported into the DB via that interface.
 
-NOTE:: For an Interval of 6min, no request can be longer than 31 days. A year for 1 hour.
-NOTE:: Original code was taken from:
-        Created By: Brian Colburn 
-        Source: https://github.com/conrad-blucher-institute/water-level-processing/blob/master/tides_and_currents_downloader.py#L84
+https://api.tidesandcurrents.noaa.gov/api/prod/
  """ 
 #----------------------------------
 # 
@@ -24,12 +21,9 @@ from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
-
-from datetime import datetime, timedelta, time
-from urllib.error import HTTPError
-from urllib.request import urlopen
-from math import radians, cos, sin
-import json
+from math import cos, sin
+from noaa_coops import Station
+import re
 
 
 
@@ -39,28 +33,22 @@ class NOAATANDC(IDataIngestion):
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
 
-        # 6min is the lowest you can sample the data so its the default if no interval
-        timeDescription.interval = timeDescription.interval if timeDescription.interval != None else timedelta(seconds=360) 
+        # Remove digits 
+        processed_series = re.sub('\d', '', seriesDescription.dataSeries)
+        match processed_series:
+            case 'dXWnCmpD':
+                return self.__fetch_WnCmp(seriesDescription, timeDescription, True)
+            case 'dYWnCmpD':
+                return self.__fetch_WnCmp(seriesDescription, timeDescription, False)
+
 
         match seriesDescription.dataSeries:
             case 'dWl':
-                return self.fetch_water_level_hourly(seriesDescription, timeDescription)
+                return self.__fetch_dWl(seriesDescription, timeDescription)
             case 'd_48h_4mm_wl'|'d_24h_4mm_wl'|'d_12h_4mm_wl':
-                return self.fetch_4_max_mean_water_level(seriesDescription, timeDescription)
-            case 'dXWnCmp':
-                match timeDescription.interval.total_seconds():
-                    case 3600:
-                        return self.fetch_X_wind_components_hourly(seriesDescription, timeDescription)
-                    case 360:
-                        return self.fetch_X_wind_components_6min(seriesDescription, timeDescription)
-            case 'dYWnCmp':
-                match timeDescription.interval.total_seconds():
-                    case 3600:
-                        return self.fetch_Y_wind_components_hourly(seriesDescription, timeDescription)
-                    case 360:
-                        return self.fetch_Y_wind_components_6min(seriesDescription, timeDescription)
+                return self.__fetch_4_max_mean_dWl(seriesDescription, timeDescription)
             case 'dSurge':
-                return self.fetch_surge_hourly(seriesDescription, timeDescription)
+                return self.__fetch_dSurge(seriesDescription, timeDescription)
             case _:
                 log(f'Data series: {seriesDescription.dataSeries}, not found for NOAAT&C for request: {seriesDescription}')
                 return None
@@ -68,38 +56,6 @@ class NOAATANDC(IDataIngestion):
     def __init__(self):
         self.sourceCode = "NOAATANDC"
         self.__seriesStorage = series_storage_factory()
-
-    #TODO:: There has to be a better way to do this!
-    def __create_pattern1_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, datum: str) -> str:
-        return f'https://tidesandcurrents.noaa.gov/api/datagetter?product={product}&application=NOS.COOPS.TAC.MET&station={station}&time_zone=GMT&units=metric&interval=6&format=json&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&datum={datum}'
-    
-    def __create_pattern2_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: str) -> str:
-        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.MET&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&time_zone=GMT&units=metric&interval={interval}&format=json'
-    
-    def __create_pattern3_url(self, station: str, product: str, startDateTime: datetime, endDateTime: datetime, interval: str, datum: str) -> str:
-        return f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product={product}&application=NOS.COOPS.TAC.WL&begin_date={startDateTime.strftime("%Y%m%d")}%20{startDateTime.strftime("%H:%M")}&end_date={endDateTime.strftime("%Y%m%d")}%20{endDateTime.strftime("%H:%M")}&station={station}&datum={datum}&station={station}&time_zone=GMT&units=metric&interval={interval}&format=json'
-    
-        
-    
-    def __api_request(self, url: str) -> None | dict:
-        """Given the parameters, generates and utilize a url to hit the t&C api. 
-        NOTE No date range of 31 days will be accepted! - raises Value Error
-        NOTE On a bad api param, throws urlib HTTPError, code 400
-        """
-       
-        try: #Attempt download
-            with urlopen(url) as response:
-                data = json.loads(''.join([line.decode() for line in response.readlines()])) #Download and parse
-
-        except HTTPError as err:
-            log(f'Fetch failed, HTTPError of code: {err.status} for: {err.reason}')
-            return None
-        except Exception as ex:
-            log(f'Fetch failed, unhandled exceptions: {ex}')
-            return None
-        return data
-
-
 
     def __get_station_number(self, location: str) -> str | None:
         """Given a semaphor specific location, tries to grab the mapped location from the s_locationCode_dataSorceLocationCode_mapping table
@@ -114,338 +70,198 @@ class NOAATANDC(IDataIngestion):
             log(f'Empty dataSource Location mapping received in NOAATidesAndCurrents for sourceCode: {self.sourceCode} AND locations: {location}')
             return None
 
+    
+    def __fetch_NOAA_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, NOAAProduct: str) -> None | Series:
+        
+        stationID = self.__get_station_number(seriesDescription.dataLocation)
+        if stationID == None: return None
 
-    def fetch_water_level_hourly(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription) -> Series | None:
-        """Fetches water level data from NOAA Tides and currents. 
-        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
-        :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull (src/DataManagment/DataClasses>TimeDescription)
-        NOTE Hits: https://tidesandcurrents.noaa.gov/waterlevels.html?id=8775870&units=metric&bdate=20000101&edate=20000101&timezone=GMT&datum=MLLW&interval=h&action=data
-        """
+
+        toTime = timeDescription.toDateTime
+        fromTime = timeDescription.fromDateTime
         
-        #Get mapped location from DB then make API request, wl hardcoded
-        dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
-        if dataSourceCode is None: return None
+        # Some NOAA products dont allow the selection of 1 point. So here we detect
+        # if we are wanting a single point, and artificially expanding the to time 
+        isSinglePoint = timeDescription.toDateTime == timeDescription.fromDateTime
+        if isSinglePoint:
+            toTime = toTime + timeDescription.interval
+
+        try:
+            station = Station(id=stationID)
+            lat_lon = (station.lat_lon['lat'], station.lat_lon['lon'])
+            data = station.get_data(
+                begin_date= fromTime.strftime("%Y%m%d %H:%M"),
+                end_date= toTime.strftime("%Y%m%d %H:%M"),
+                product= NOAAProduct,
+                units= 'metric',
+                time_zone= 'gmt',
+                datum= seriesDescription.dataDatum
+            )
+        except ValueError as e:
+            log(f'NOAA COOPS invalid request error: {e}')
+            return None
         
-        #Make API request
-        url = self.__create_pattern1_url(dataSourceCode, 'water_level', timeRequest.fromDateTime, timeRequest.toDateTime, seriesRequest.dataDatum)
-        data = self.__api_request(url)
+        # If a single point was requested we make sure only the right point is returned
+        if isSinglePoint:
+            data = data.loc[[fromTime]]
+
+        return data, lat_lon
+
+
+    def __fetch_dWl(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
+
+        data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'water_level')
         if data is None: return None
 
-        #Parse metadata
-        metaData = data['metadata']
-        lat = metaData['lat']
-        lon = metaData['lon']
-
-        #Iterate through data and format DB rows
-        dateTimeNow = datetime.now()
         inputs = []
-        for row in data['data']:
-            
-            #Construct list of inputs
-            dataPoints = Input(
-                dataValue= row["v"],
-                dataUnit= 'meter',
-                timeVerified= datetime.fromisoformat(row['t']),
-                timeGenerated= datetime.fromisoformat(row['t']), 
-                longitude= lon,
-                latitude= lat
+        for idx in data.index:
 
+            # parse
+            dt = idx.to_pydatetime()
+            value = data['v'][idx]
+
+            # If value is not on interval we ignore it
+            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
+                continue
+
+            dataPoints = Input(
+                dataValue= value,
+                dataUnit= 'meter',
+                timeVerified= dt,
+                timeGenerated= dt, 
+                longitude= lat_lon[1],
+                latitude= lat_lon[0]
             )
             inputs.append(dataPoints)
 
-        series = Series(seriesRequest, True)
+        series = Series(seriesDescription, True, timeDescription)
         series.data = inputs
 
-        #insertData to DB
-        insertedRows = self.__seriesStorage.insert_input(series)
-        return series
-
-
-    def fetch_X_wind_components_6min(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription) -> Series | None:
-        """Fetches wind spd and direction and calculates the X component.
-        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
-        :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull (src/DataManagment/DataClasses>TimeDescription)
-        NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
-        """
-        
-        #Get mapped location from DB then make API request, wl hardcoded
-        dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
-        if dataSourceCode is None: return None
-        
-        #Make API request
-        url = self.__create_pattern2_url(dataSourceCode, 'wind', timeRequest.fromDateTime, timeRequest.toDateTime, '6')
-        data = self.__api_request(url)
-        if data is None: return None
-
-        #Parse metadata
-        metaData = data['metadata']
-        lat = metaData['lat']
-        lon = metaData['lon']
-
-        #Split the 
-        xValues = []
-        dateTimes = []
-        for row in data['data']:
-            winDirDeg = float(row['d'])
-            winSpd = float(row['s'])
-            time = datetime.fromisoformat(row['t'])
-
-            winDirRad = radians(winDirDeg)
-            winDir_X = winSpd * cos(winDirRad - 30)
-
-            xValues.append(str(winDir_X))
-            dateTimes.append(time)
-
-        #Iterate through data and format DB rows. Makes rows for both the X components and Y components
-        #They are saved as different series.
-        dataPoints = []
-        for index, value in enumerate(xValues):
-          
-            #Construct list of dataPoints
-            dataPoint = Input(value, 'meter', dateTimes[index], dateTimes[index], lon, lat)
-            dataPoints.append(dataPoint)
-
-        series = Series(seriesRequest, True)
-        series.data = dataPoints
-
-        #insertData to DB
-        insertedRows = self.__seriesStorage.insert_input(series)
+        self.__seriesStorage.insert_input(series)
         return series
     
-    def fetch_Y_wind_components_6min(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription) -> Series | None:
-        """Fetches wind spd and direction and calculates the Y component.
-        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
-        :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull (src/DataManagment/DataClasses>TimeDescription)
-        NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
-        """
-        
-        #Get mapped location from DB then make API request, wl hardcoded
-        dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
-        if dataSourceCode is None: return None
-        
-        #Make API request
-        url = self.__create_pattern2_url(dataSourceCode, 'wind', timeRequest.fromDateTime, timeRequest.toDateTime, '6')
-        data = self.__api_request(url)
-        if data is None: return None
 
-        #Parse metadata
-        metaData = data['metadata']
-        lat = metaData['lat']
-        lon = metaData['lon']
+    def __fetch_dSurge(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
 
-        #Split the 
-        yValues = []
-        dateTimes = []
-        for row in data['data']:
-            winDirDeg = float(row['d'])
-            winSpd = float(row['s'])
-            time = datetime.fromisoformat(row['t'])
+        surgeSeriesName = seriesDescription.dataSeries
+        seriesDescription.dataSeries = 'pWl'
+        pData, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'predictions')
+        seriesDescription.dataSeries = 'dWl'
+        wlData, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'water_level')
+        seriesDescription.dataSeries = surgeSeriesName
+        if pData is None: return None
+        if wlData is None: return None
 
-            winDirRad = radians(winDirDeg)
-            winDir_Y = winSpd * cos(winDirRad - 30)
+        inputs = []
+        for idx in wlData.index:
 
-            yValues.append(str(winDir_Y))
-            dateTimes.append(time)
+            # parse
+            dt = idx.to_pydatetime()
+            water_level = wlData['v'][idx]
+            predictive_water_level = pData['v'][idx]
+            surge = str(float(water_level) - float(predictive_water_level))
 
-        #Iterate through data and format DB rows. Makes rows for both the X components and Y components
-        #They are saved as different series.
-        dataPoints = []
-        for index, value in enumerate(yValues):
-             #Construct list of dataPoints
-            dataPoint = Input(value, 'meter', dateTimes[index], dateTimes[index], lon, lat)
-            dataPoints.append(dataPoint)
+            # If value is not on interval we ignore it
+            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
+                continue
 
-        series = Series(seriesRequest, True)
-        series.data = dataPoints
-
-        #insertData to DB
-        insertedRows = self.__seriesStorage.insert_input(series)
-        return series  
-
-
-    def fetch_X_wind_components_hourly(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription) -> Series | None:
-        """Fetches wind spd and direction and calculates the X component. 
-        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
-        :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull (src/DataManagment/DataClasses>TimeDescription)
-        NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
-        """
-        
-        #Get mapped location from DB then make API request, wl hardcoded
-        dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
-        if dataSourceCode is None: return None
-        
-        #Make API request
-        url = self.__create_pattern2_url(dataSourceCode, 'wind', timeRequest.fromDateTime, timeRequest.toDateTime, 'h')
-        data = self.__api_request(url)
-        if data is None: return None
-
-        #Parse metadata
-        metaData = data['metadata']
-        lat = metaData['lat']
-        lon = metaData['lon']
-
-        #Split the 
-        xValues = []
-        dateTimes = []
-        for row in data['data']:
-            winDirDeg = float(row['d'])
-            winSpd = float(row['s'])
-            time = datetime.fromisoformat(row['t'])
-
-            winDirRad = radians(winDirDeg)
-            winDir_X = winSpd * cos(winDirRad - 30)
-
-            xValues.append(str(winDir_X))
-            dateTimes.append(time)
-
-        #Iterate through data and format DB rows. Makes rows for both the X components and Y components
-        #They are saved as different series.
-        dataPoints = []
-        for index, value in enumerate(xValues):
-            #Construct list of dataPoints
-            dataPoint = Input(value, 'meter', dateTimes[index], dateTimes[index], lon, lat)
-            dataPoints.append(dataPoint)
-
-        series = Series(seriesRequest, True)
-        series.data = dataPoints
-
-        #insertData to DB
-        insertedRows = self.__seriesStorage.insert_input(series)
-        return series 
-
-
-    def fetch_Y_wind_components_hourly(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription) -> Series | None:
-        """Fetches wind spd and direction and calculates the Y component.. 
-        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
-        :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull (src/DataManagment/DataClasses>TimeDescription)
-        NOTE Hits: https://tidesandcurrents.noaa.gov/met.html?bdate=20221109&edate=20221110&units=metric&timezone=GMT&id=8775792&interval=h&action=data
-        """
-        
-        #Get mapped location from DB then make API request, wl hardcoded
-        dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
-        if dataSourceCode is None: return None
-        
-        #Make API request
-        url = self.__create_pattern2_url(dataSourceCode, 'wind', timeRequest.fromDateTime, timeRequest.toDateTime, 'h')
-        data = self.__api_request(url)
-        if data is None: return None
-
-        #Parse metadata
-        metaData = data['metadata']
-        lat = metaData['lat']
-        lon = metaData['lon']
-
-        #Split the 
-        yValues = []
-        dateTimes = []
-        for row in data['data']:
-            winDirDeg = float(row['d'])
-            winSpd = float(row['s'])
-            time = datetime.fromisoformat(row['t'])
-
-            winDirRad = radians(winDirDeg)
-            winDir_Y = winSpd * cos(winDirRad - 30)
-
-            yValues.append(str(winDir_Y))
-            dateTimes.append(time)
-
-        #Iterate through data and format DB rows. Makes rows for both the X components and Y components
-        #They are saved as different series.
-        dataPoints = []
-        for index, value in enumerate(yValues):
-            #Construct list of dataPoints
-            dataPoint = Input(value, 'meter', dateTimes[index], dateTimes[index], lon, lat)
-            dataPoints.append(dataPoint)
-
-        series = Series(seriesRequest, True)
-        series.data = dataPoints
-
-        #insertData to DB
-        insertedRows = self.__seriesStorage.insert_input(series)
-        return series 
-
-    
-    def fetch_surge_hourly(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription) -> Series | None:
-        """Fetches water level data and predicted wl to calculate serge. 
-        :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
-        :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull (src/DataManagment/DataClasses>TimesDescription)
-        NOTE Hits: https://tidesandcurrents.noaa.gov/waterlevels.html?id=8775870&units=metric&bdate=20000101&edate=20000101&timezone=GMT&datum=MLLW&interval=h&action=data
-        """
-        
-        #Get mapped location from DB then make API request, wl hardcoded
-        dataSourceCode = self.__get_station_number(seriesRequest.dataLocation)
-        if dataSourceCode is None: return None
-        
-        #Make API request, get wl and predictions
-        wlurl = self.__create_pattern1_url(dataSourceCode, 'hourly_height', timeRequest.fromDateTime, timeRequest.toDateTime, seriesRequest.dataDatum)
-        wlData = self.__api_request(wlurl)
-        predUrl = self.__create_pattern3_url(dataSourceCode, 'predictions', timeRequest.fromDateTime, timeRequest.toDateTime, 'h', seriesRequest.dataDatum)
-        predData = self.__api_request(predUrl)
-        if (wlData is None) or (predData is None): return None
-
-        #Parse metadata
-        metaData = wlData['metadata']
-        lat = metaData['lat']
-        lon = metaData['lon']
-
-        #Iterate through data and format DB rows
-        dataPoints = []
-        #Waterlevels are returned as a complex JSOn with a meta header, but pred is just a list of objs named predictions
-        for wlRow, predRow in zip(wlData['data'], predData['predictions']):
-
-            #Construct list of dataPoints
-            dataPoint = Input(
-                dataValue= str(float(wlRow['v']) - float(predRow['v'])),
+            dataPoints = Input(
+                dataValue= surge,
                 dataUnit= 'meter',
-                timeVerified= datetime.fromisoformat(wlRow['t']),
-                timeGenerated= datetime.fromisoformat(wlRow['t']),
-                latitude= lat,
-                longitude= lon
+                timeVerified= dt,
+                timeGenerated= dt, 
+                longitude= lat_lon[1],
+                latitude= lat_lon[0]
             )
-            dataPoints.append(dataPoint)
+            inputs.append(dataPoints)
 
-        series = Series(seriesRequest, True)
-        series.data = dataPoints
+        # Surge is datum-less. A datum is required for ingesting water level but we remove it here
+        seriesDescription.dataDatum = 'NA'
 
-        #insertData to DB
-        insertedRows = self.__seriesStorage.insert_input(series)
+        series = Series(seriesDescription, True, timeDescription)
+        series.data = inputs
+
+        self.__seriesStorage.insert_input(series)
         return series
+    
+
+    def __fetch_WnCmp(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, isXWnCmp: bool) -> None | Series:
+
+        offset = float(seriesDescription.dataSeries[-4:-2])
+        
+        seriesDescription.dataSeries = 'dWind'
+        data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'wind')
+        if data is None: return None
+
+        x_inputs = []
+        y_inputs = []
+        for idx in data.index:
+
+            # parse
+            dt = idx.to_pydatetime()
+            wind_speed = float(data['s'][idx])
+            wind_dir = float(data['d'][idx])
+            x_comp = wind_speed * cos(wind_dir - offset)
+            y_comp = wind_speed * sin(wind_dir - offset)
+
+            # If value is not on interval we ignore it
+            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
+                continue
+
+            dataPoints = Input(
+                dataValue= x_comp,
+                dataUnit= 'mps',
+                timeVerified= dt,
+                timeGenerated= dt, 
+                longitude= lat_lon[1],
+                latitude= lat_lon[0]
+            )
+            x_inputs.append(dataPoints)
+
+            dataPoints = Input(
+                dataValue= y_comp,
+                dataUnit= 'mps',
+                timeVerified= dt,
+                timeGenerated= dt, 
+                longitude= lat_lon[1],
+                latitude= lat_lon[0]
+            )
+            y_inputs.append(dataPoints)
 
 
-    def fetch_4_max_mean_water_level(self, seriesDescription, timeDescription):
-        """This function calculates the engineered feature of 4max__mean_water_level
-        :param seriesDescription: SeriesDescription - A data SeriesDescription object with the information to pull 
-        :param timeDescription: TimeDescription - A data TimeDescription object with the information to pull 
-        :param Series | None: A series containing the imported data or none if something went wrong
-        """
+        seriesDescription.dataSeries = f'dXWnCmp{str(int(offset)).zfill(3)}D'
+        x_series = Series(seriesDescription, True, timeDescription)
+        x_series.data = x_inputs
+        self.__seriesStorage.insert_input(x_series)
 
-        # We swap the series with the water level series to prevent
-        # putting miss-labled data in the DB
-        # We have to change the interval too
-        four_max_series_name = seriesDescription.dataSeries
-        seriesDescription.dataSeries= 'dWl'
-        full_series_inputs = self.fetch_water_level_hourly(seriesDescription, timeDescription).data
-        seriesDescription.dataSeries = four_max_series_name
+        seriesDescription.dataSeries = f'dYWnCmp{str(int(offset)).zfill(3)}D'
+        y_series = Series(seriesDescription, True, timeDescription)
+        y_series.data = y_inputs
+        self.__seriesStorage.insert_input(y_series)
 
-        # We convert the data from strings to float, sort it, take the four highest, and take their mean
-        input_data = [float(input.dataValue) for input in full_series_inputs]
-        four_highest = sorted(input_data)[-4:] # Get the four highest values
+        return x_series if isXWnCmp else y_series
+    
+
+    def __fetch_4_max_mean_dWl(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
+        
+        data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'water_level')
+        if data is None: return None
+
+        data = data['v'].values
+        four_highest = sorted(data)[-4:]
         mean_four_max = sum(four_highest) / 4.0
 
-        # we return a series with a single input
-        last_input = full_series_inputs[-1]
         input = Input(
-            dataValue= str(mean_four_max),
-            dataUnit= last_input.dataUnit,
-            timeGenerated= timeDescription.toDateTime,
+            dataValue= mean_four_max,
+            dataUnit= 'meter',
             timeVerified= timeDescription.toDateTime,
+            timeGenerated= timeDescription.toDateTime, 
+            longitude= lat_lon[1],
+            latitude= lat_lon[0]
         )
 
         series = Series(seriesDescription, True, timeDescription)
         series.data = [input]
 
-        insertedRows = self.__seriesStorage.insert_input(series)
+        self.__seriesStorage.insert_input(series)
         return series
-
-
-
