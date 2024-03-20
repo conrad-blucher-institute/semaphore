@@ -12,6 +12,7 @@
         "leadTime": 43200,
         "series": "pSurge",
         "location": "Aransas",
+        "datum": "NA",
         "unit" : "meter"
     },
     "inputs": [
