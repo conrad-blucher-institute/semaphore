@@ -34,6 +34,7 @@ from DataIngestion.IDataIngestion import IDataIngestion
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from utility import log
+import re
 import traceback
 import os
 import sys
@@ -54,20 +55,29 @@ ZippedDataset = List[Tuple[SeriesName, List[Tuple[Time, Data]]]]
 class NDFD_EXP(IDataIngestion):
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
+        
+        # Remove digits 
+        processed_series = re.sub('\d', '', seriesDescription.dataSeries)
+        match processed_series:
+            case 'pXWnCmpD': 
+                return self.fetch_wind_component_predictions(seriesDescription, timeDescription, True)
+            case 'pYWnCmpD': 
+                return self.fetch_wind_component_predictions(seriesDescription, timeDescription, False)
+            
         match seriesDescription.dataSeries:
             case 'pAirTemp':
                 return self.fetch_predictions(seriesDescription, timeDescription, 'temp')
-            case 'pXWnCmp': 
-                return self.fetch_wind_component_predictions(seriesDescription, timeDescription, True)
-            case 'pYWnCmp': 
-                return self.fetch_wind_component_predictions(seriesDescription, timeDescription, False)
             case _ : 
                 raise NotImplementedError(f'NDFD_EXP received request {seriesDescription} but could not map it to a series')
-
 
     def __init__(self):
         self.sourceCode = "NDFD"
         self.__seriesStorage = series_storage_factory()
+        self.__unitMappingDict = {
+            'degrees true' : 'degrees',
+            'meters/second' : 'mps',
+            'celsius' : 'celsius'
+        }
      
 
     def __create_url_pattern(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, product: str) -> str:
@@ -199,7 +209,7 @@ class NDFD_EXP(IDataIngestion):
 
                 inputs.append(Input(
                     str(row[dataValueIndex]),
-                    NDFD_Predictions.unit,
+                    self.__unitMappingDict[NDFD_Predictions.unit],
                     timeVerified,
                     None,
                     NDFD_Predictions.longitude,
@@ -301,10 +311,10 @@ class NDFD_EXP(IDataIngestion):
                 ))
             
         #Changing the series description name back to what we will be saving in the database after calculations
-        xCompDesc = SeriesDescription(seriesDescription.dataSource, f'pXWnCmp{str(offset).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
-        yCompDesc = SeriesDescription(seriesDescription.dataSource, f'pYWnCmp{str(offset).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
+        xCompDesc = SeriesDescription(seriesDescription.dataSource, f'pXWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
+        yCompDesc = SeriesDescription(seriesDescription.dataSource, f'pYWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
 
-        #Creating series opjects with correct description information and inputs
+        #Creating series objects with correct description information and inputs
         xCompSeries = Series(xCompDesc, True, timeDescription)
         xCompSeries.data = xCompInputs
         yCompSeries = Series(yCompDesc, True, timeDescription)

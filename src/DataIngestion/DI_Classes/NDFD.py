@@ -35,6 +35,7 @@ from DataIngestion.IDataIngestion import IDataIngestion
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from utility import log
+import re
 
 Time = TypeVar('Time')
 NewTime = TypeVar('NewTime')
@@ -52,21 +53,29 @@ ZippedDataset = List[Tuple[SeriesName, List[Tuple[Time, Data]]]]
 class NDFD(IDataIngestion):
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
+        
+        # Remove digits 
+        processed_series = re.sub('\d', '', seriesDescription.dataSeries)
+        match processed_series:
+            case 'pXWnCmpD': 
+                return self.fetch_wind_component_predictions(seriesDescription, timeDescription, True)
+            case 'pYWnCmpD': 
+                return self.fetch_wind_component_predictions(seriesDescription, timeDescription, False)
+            
         match seriesDescription.dataSeries:
             case 'pAirTemp':
                 return self.fetch_predictions(seriesDescription, timeDescription, 'temp')
-            case 'pXWnCmp': 
-                return self.fetch_wind_component_predictions(seriesDescription, timeDescription, True)
-            case 'pYWnCmp': 
-                return self.fetch_wind_component_predictions(seriesDescription, timeDescription, False)
             case _ : 
                 raise NotImplementedError(f'NDFD_EXP received request {seriesDescription} but could not map it to a series')
-
 
     def __init__(self):
         self.sourceCode = "NDFD"
         self.__seriesStorage = series_storage_factory()
-     
+        self.__unitMappingDict = {
+            'degrees true' : 'degrees',
+            'meters/second' : 'mps',
+            'celsius' : 'celsius'
+        }
 
     def __create_url_pattern(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, product: str) -> str:
         """Creates the url string used to hit the NDFD server.
@@ -197,7 +206,7 @@ class NDFD(IDataIngestion):
 
                 inputs.append(Input(
                     str(row[dataValueIndex]),
-                    NDFD_Predictions.unit,
+                    self.__unitMappingDict[NDFD_Predictions.unit],
                     timeVerified,
                     None,
                     NDFD_Predictions.longitude,
@@ -220,6 +229,31 @@ class NDFD(IDataIngestion):
             log(f'Uncaught error: {err}')
             return None
         
+    
+    def find_closest_average(self, data_dictionary: list, toDateTimestamp: int) -> None | int:
+        """If toDateTime does not exist in the series request, find the average of the data point before
+        and the data point after toDateTime. If one of those points cannot be found, use the found data point
+        as the average. If both cannot be found, return None. 
+        :param data_dictionary: list - Nested list of timestamps and data from NDFD
+        :param toDateTimestamp: int - Missing datetime to find the average for. Converted to POSIX timestamp as an int
+        """
+        # The key argument is set to the timestamp so that it knows what to look for when comparing. Defaults to None if no results found.
+        closest_before = max((timestamp for timestamp in data_dictionary if timestamp[0] < toDateTimestamp), key=lambda x: x[0], default=None)
+        closest_after = min((timestamp for timestamp in data_dictionary if timestamp[0] > toDateTimestamp), key=lambda x: x[0], default=None)
+
+        if closest_before is not None and closest_after is not None:
+            average = int((closest_after[1] + closest_before[1]) / 2)
+        elif closest_before is not None:
+            average = closest_before[1]
+        elif closest_after is not None:
+            average = closest_after[1]
+        else:
+            log('Series request can not be fulfilled! toDateTime could not be found in series and average of two closest dates could not be calculated')
+            return None
+
+        return average
+    
+    
     def fetch_wind_component_predictions(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, isXWindCmp: bool)-> Series | None:
         """Calculating the wind component predictions using wind direction and wind speeds fetched from NDFD
         :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull 
@@ -271,10 +305,10 @@ class NDFD(IDataIngestion):
                 ))
             
         #Changing the series description name back to what we will be saving in the database after calculations
-        xCompDesc = SeriesDescription(seriesDescription.dataSource, "pXWnCmp", seriesDescription.dataLocation, seriesDescription.dataDatum)
-        yCompDesc = SeriesDescription(seriesDescription.dataSource, "pYWnCmp", seriesDescription.dataLocation, seriesDescription.dataDatum)
+        xCompDesc = SeriesDescription(seriesDescription.dataSource, f'pXWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
+        yCompDesc = SeriesDescription(seriesDescription.dataSource, f'pYWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
 
-        #Creating series opjects with correct description information and inputs
+        #Creating series objects with correct description information and inputs
         xCompSeries = Series(xCompDesc, True, timeDescription)
         xCompSeries.data = xCompInputs
         yCompSeries = Series(yCompDesc, True, timeDescription)
@@ -285,7 +319,8 @@ class NDFD(IDataIngestion):
         self.__seriesStorage.insert_input(yCompSeries)
         
         #Step three: Return it
-        return xCompSeries if isXWindCmp else yCompSeries  
+        return xCompSeries if isXWindCmp else yCompSeries      
+  
   
 class NDFDPredictions(Generic[Time, Data]):
 
