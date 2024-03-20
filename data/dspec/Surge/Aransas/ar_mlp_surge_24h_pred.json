@@ -1,15 +1,15 @@
     {
-    "modelName": "Ar_S2S_surge_12h",
+    "modelName": "ar_mlp_surge_24h",
     "modelVersion": "1.0.0",
     "author": "Marina VicensMiquel",
-    "modelFileName": "./Surge/Aransas/bhp_12h.h5",
+    "modelFileName": "./Surge/Aransas/bhp_24h.h5",
     "timingInfo":{
-        "offset": 300,
+        "offset": 600,
         "interval": 3600
     },
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
-        "leadTime": 43200,
+        "leadTime": 86400,
         "series": "pSurge",
         "location": "Aransas",
         "datum": "NA",
@@ -86,7 +86,7 @@
         "unit": "mps",
         "type": "float",
         "interval": 3600,
-        "range": [12, 1]
+        "range": [24, 1]
     },
     {
         "_name": "future_Y_wind_component",
@@ -96,6 +96,6 @@
         "unit": "mps",
         "type": "float",
         "interval": 3600,
-        "range": [12, 1]
+        "range": [24, 1]
     }
 ]}
