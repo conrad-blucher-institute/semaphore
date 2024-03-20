@@ -270,9 +270,9 @@ class NDFD_EXP(IDataIngestion):
         offset = float(seriesDescription.dataSeries[-4:-2])
         #Step One: Get the wind direction and the wind speed for the requested time period
         #Note: changing the name to be saved in the database to what the series actually is at retreval time
-        seriesDescription.dataSeries = "dWnDir"
+        seriesDescription.dataSeries = "pWnDir"
         windDirection = self.fetch_predictions(seriesDescription, timeDescription, "wdir")
-        seriesDescription.dataSeries = "dWnSpd"
+        seriesDescription.dataSeries = "pWnSpd"
         windSpeed = self.fetch_predictions(seriesDescription, timeDescription, "wspd")
         
         #Step Two: Calculate the Component 
