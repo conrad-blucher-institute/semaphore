@@ -21,7 +21,7 @@ from src.API.apiDriver import app
 client = TestClient(app)
 
 @pytest.mark.parametrize("source, series, location, fromDateTime, toDateTime, expected_output", [
-    ("NOAATANDC", "dXWnCmp", "packChan", "2023090411", "2023090511", "dXWnCmp"),
+    ("NOAATANDC", "dXWnCmp000D", "packChan", "2023090411", "2023090511", "dXWnCmp"),
 ])
 def test_getInput(source: str, series: str, location: str, fromDateTime: str, toDateTime: str, expected_output: str):
     """This function tests whether the API successfully retrieves the requested input
