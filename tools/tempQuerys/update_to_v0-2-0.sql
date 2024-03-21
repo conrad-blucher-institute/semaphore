@@ -1,9 +1,12 @@
+---Temporary SQL queries to add rows to the database
 ALTER TABLE outputs 
 ALTER COLUMN "dataSeries" TYPE VARCHAR(25)
 ALTER TABLE inputs 
 ALTER COLUMN "dataSeries" TYPE VARCHAR(25)
 ALTER TABLE ref_dataSeries 
 ALTER COLUMN "code" TYPE VARCHAR(25)
+
+---03/19/2024
 
 INSERT INTO public."ref_dataDatum"("code","displayName","notes")
 VALUES
@@ -60,4 +63,29 @@ VALUES
 ('Freeport','NOAATANDC','8772471','0'),
 ('Aransas','NOAATANDC','8775241','0'),
 ('Aransas','NDFD','0','0')
+ON CONFLICT DO NOTHING;
+
+---03/20/2024
+
+INSERT INTO public."ref_dataLocation"("code","displayName","notes","latitude","longitude")
+VALUES
+('PortIsabel', 'Port Isabel','Port Isabel TX','26.05194444','-97.20250000'),
+('NorthJetty','North Jetty','Galveston Bay Entrance North Jetty TX','29.35111111','-94.71805556'),
+('Rockport', 'Rockport Texas', 'Rockport Texas', '28.01750000','-97.03555556')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public."dataLocation_dataSource_mapping"("dataLocationCode","dataSourceCode","dataSourceLocationCode","priorityOrder")
+VALUES
+('PortIsabel','NOAATANDC','8779770','0'),
+('PortIsabel','NDFD','0','0'),
+('NorthJetty','NOAATANDC','8771341','0'),
+('NorthJetty','NDFD','0','0'),
+('Rockport','NOAATANDC','8774770','0'),
+('Rockport','NDFD','0','0')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public."ref_dataSeries"("code","displayName","notes")
+VALUES
+('pWnDir','Predicted Wind Direction','Wind Direction'),
+('pWnSpd','Predicted Wind Speed','Wind Speed')
 ON CONFLICT DO NOTHING;
