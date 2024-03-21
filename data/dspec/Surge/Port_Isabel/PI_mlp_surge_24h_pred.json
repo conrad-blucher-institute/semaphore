@@ -1,5 +1,5 @@
     {
-    "modelName": "PI_mlp_surge_24h",
+    "modelName": "pi_mlp_surge_24h",
     "modelVersion": "1.0.0",
     "author": "Marina VicensMiquel",
     "modelFileName": "./Surge/Port_Isabel/portIsabel_24h.h5",
