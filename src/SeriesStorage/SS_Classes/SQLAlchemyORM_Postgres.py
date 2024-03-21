@@ -78,6 +78,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                     .where(self.outputs.c.dataLocation == semaphoreSeriesDescription.dataLocation)
                     .where(self.outputs.c.dataSeries == semaphoreSeriesDescription.dataSeries)
                     .where(self.outputs.c.dataDatum == semaphoreSeriesDescription.dataDatum)
+                    .where(self.outputs.c.modelName == semaphoreSeriesDescription.modelName)
                     )
         leadTimes = self.__dbSelection(statement).fetchall()
         if len(self.__dbSelection(statement).fetchall()) == 0: #If no lead time is found for some reason return nothing and log this
