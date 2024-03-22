@@ -4,7 +4,7 @@
     "author": "Marina VicensMiquel",
     "modelFileName": "./Surge/North_Jetty/northJetty_12h.h5",
     "timingInfo":{
-        "offset": 600,
+        "offset": 900,
         "interval": 3600
     },
     "outputInfo": {
