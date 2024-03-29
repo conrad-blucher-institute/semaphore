@@ -15,6 +15,8 @@ from datetime import datetime
 from os.path import isabs
 from os import getcwd
 
+
+
 def get_time_stamp() -> None:
 	"""Fetches and formats system time, returns the formatted timestamp."""
 	timestamp = datetime.now()
@@ -30,8 +32,6 @@ def log(text: str) -> None:
 	"""
 	now = datetime.now()
 	timeStamp = now.strftime("%x %X")
-	with open('log.txt', 'a+') as logFile:
-		logFile.write(f'{timeStamp}: {text}\n')
 	print(f'{timeStamp}: {text}')
 
 def construct_true_path(path: str) -> str:
