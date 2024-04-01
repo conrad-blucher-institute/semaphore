@@ -9,16 +9,17 @@
 
 
 # Running inundation models every hour and five minutes and is timestamped.
-5 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/March/ar_inundation_march_48h.json >> ./logs/Inundation/March/ar_inundation_march_48h_$(date "+%d_%H%M").log
-5 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/March/ar_inundation_march_24h.json >> ./logs/Inundation/March/ar_inundation_march_24h_$(date "+%d_%H%M").log
-5 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/March/ar_inundation_march_12h.json >> ./logs/Inundation/March/ar_inundation_march_12h_$(date "+%d_%H%M").log
-5 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/April/ar_inundation_april_48h.json >> ./logs/Inundation/April/ar_inundation_april_48h_$(date "+%d_%H%M").log
-5 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/April/ar_inundation_april_24h.json >> ./logs/Inundation/April/ar_inundation_april_24h_$(date "+%d_%H%M").log
-5 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/April/ar_inundation_april_12h.json >> ./logs/Inundation/April/ar_inundation_april_12h_$(date "+%d_%H%M").log
+5 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Inundation/March && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/March/ar_inundation_march_48h.json >> ./logs/$(date "+%Y/%m")/Inundation/March/ar_inundation_march_48h_$(date "+%d_%H_%M").log
+5 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Inundation/March && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/March/ar_inundation_march_24h.json >> ./logs/$(date "+%Y/%m")/Inundation/March/ar_inundation_march_24h_$(date "+%d_%H_%M").log
+5 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Inundation/March && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/March/ar_inundation_march_12h.json >> ./logs/$(date "+%Y/%m")/Inundation/March/ar_inundation_march_12h_$(date "+%d_%H_%M").log
+5 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Inundation/April && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/April/ar_inundation_april_48h.json >> ./logs/$(date "+%Y/%m")/Inundation/April/ar_inundation_april_48h_$(date "+%d_%H_%M").log
+5 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Inundation/April && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/April/ar_inundation_april_24h.json >> ./logs/$(date "+%Y/%m")/Inundation/April/ar_inundation_april_24h_$(date "+%d_%H_%M").log
+5 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Inundation/April && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/April/ar_inundation_april_12h.json >> ./logs/$(date "+%Y/%m")/Inundation/April/ar_inundation_april_12h_$(date "+%d_%H_%M").log
 
 # Running the surge models every hour and five minutes.
-10 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Aransas/ar_mlp_surge_24h_pred.json >> ./logs/Surge/Aransas/ar_mlp_surge_24h_$(date "+%d_%H%M").log
-10 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Aransas/ar_mlp_surge_12h_pred.json >> ./logs/Surge/Aransas/ar_mlp_surge_12h_$(date "+%d_%H%M").log
-15 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/North_Jetty/nj_mlp_surge_24h_pred.json >> ./logs/Surge/North_Jetty/nj_mlp_surge_24h_$(date "+%d_%H%M").log
-15 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/North_Jetty/nj_mlp_surge_12h_pred.json >> ./logs/Surge/North_Jetty/nj_mlp_surge_12h_$(date "+%d_%H%M").log
-10 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Port_Isabel/pi_mlp_surge_24h_pred.json >> ./logs/Surge/Port_Isabel/pi_mlp_surge_24h_$(date "+%d_%H%M").log
+10 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Surge/Aransas && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Aransas/ar_mlp_surge_24h_pred.json >> ./logs/$(date "+%Y/%m")/Surge/Aransas/ar_mlp_surge_24h_$(date "+%d_%H_%M").log
+10 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Surge/Aransas && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Aransas/ar_mlp_surge_12h_pred.json >> ./logs/$(date "+%Y/%m")/Surge/Aransas/ar_mlp_surge_12h_$(date "+%d_%H_%M").log
+15 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Surge/North_Jetty && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/North_Jetty/nj_mlp_surge_24h_pred.json >> ./logs/$(date "+%Y/%m")/Surge/North_Jetty/nj_mlp_surge_24h_$(date "+%d_%H_%M").log
+15 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Surge/North_Jetty && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/North_Jetty/nj_mlp_surge_12h_pred.json >> ./logs/$(date "+%Y/%m")/Surge/North_Jetty/nj_mlp_surge_12h_$(date "+%d_%H_%M").log
+10 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Surge/Port_Isabel && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Port_Isabel/pi_mlp_surge_24h_pred.json >> ./logs/$(date "+%Y/%m")/Surge/Port_Isabel/pi_mlp_surge_24h_$(date "+%d_%H_%M").log
+10 * * * * mkdir -p ./logs/$(date "+%Y/%m")/Surge/Port_Isabel && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Port_Isabel/pi_mlp_surge_12h_pred.json >> ./logs/$(date "+%Y/%m")/Surge/Port_Isabel/pi_mlp_surge_12h_$(date "+%d_%H_%M").log
