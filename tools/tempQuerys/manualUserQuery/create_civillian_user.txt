@@ -1,7 +1,6 @@
 CREATE ROLE [civillian_user_here] WITH
   LOGIN
   INHERIT
-  REPLICATION
   PASSWORD '[civillian_user_password_here]';
 
 GRANT SELECT ON SEQUENCE public."dataLocation_dataSource_mapping_id_seq" TO  civillian_user_here;

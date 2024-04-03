@@ -20,6 +20,8 @@ from utility import construct_true_path
 import csv
 from os import getenv
 from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.sql import text
 
 load_dotenv()
 
@@ -39,6 +41,19 @@ def readInitCSV(csvFileName: str) -> list:
 
     return dictionaryList
 
+def create_user_and_set_permissions(engine, api_user, api_password, database_name):
+    """Creates a database user and sets permissions."""
+    with engine.connect() as conn:
+        # Create a new user
+        conn.execute(text(f"CREATE USER {api_user} WITH PASSWORD '{api_password}';"))
+        # Grant connect on the database to the new user
+        conn.execute(text(f"GRANT CONNECT ON DATABASE {database_name} TO {api_user};"))
+        # Grant add permissions on all tables in schema public to the new user
+        conn.execute(text(f"GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO {api_user};"))
+        # Grant permissions on sequences in public schema
+        conn.execute(text(f"GRANT SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO {api_user};"))
+        conn.commit()
+
 def main():
     sqlorm = series_storage_factory()
 
@@ -54,6 +69,14 @@ def main():
         sqlorm.insert_ref_dataSource(readInitCSV('dataSource.csv'))
         sqlorm.insert_ref_dataUnit(readInitCSV('dataUnit.csv'))
         sqlorm.insert_data_mapping(readInitCSV('dataMapping.csv'))
+
+        # Database user and permissions
+        admin_connection_string = getenv('DB_LOCATION_STRING') 
+        engine = create_engine(admin_connection_string)
+        api_user = getenv('API_USER')
+        api_password = getenv('API_PASSWORD')
+        database_name = getenv('POSTGRES_DB')
+        create_user_and_set_permissions(engine, api_user, api_password, database_name)
 
 if __name__ == "__main__":
     main()

@@ -39,7 +39,7 @@ services:
     env_file:
       - .env
     environment:
-      - DB_LOCATION_STRING=${DB_LOCATION_STRING}
+      - DB_LOCATION_STRING=${DB_LOCATION_STRING_API}
       - ISERIESSTORAGE_INSTANCE=${ISERIESSTORAGE_INSTANCE}
       - DSPEC_FOLDER_PATH=${DSPEC_FOLDER_PATH}
       - MODEL_FOLDER_PATH=${MODEL_FOLDER_PATH}
@@ -68,16 +68,11 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "${DB_HOST_PORT}:5432"
-    entrypoint: /docker-entrypoint-initdb.d/run_preprocess.sh
     command: ["postgres", "-c", "listen_addresses=*"]
     # networks:
     #   - semaphore-net
     volumes:
       - psql-data:/var/lib/postgresql/data
-      - ./preprocess.py:/preprocess.py
-      - ./entrypoint_creation.sql:/entrypoint_creation.sql
-      - ./run_preprocess.sh:/docker-entrypoint-initdb.d/run_preprocess.sh
-      - ./entrypoint_creation.sql:/docker-entrypoint-initdb.d/entrypoint_creation.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       interval: 5s
