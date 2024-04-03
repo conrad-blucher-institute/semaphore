@@ -81,18 +81,17 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     return responseSeries
 
 
-@app.get('/output/ModelName={ModelName}/ModelVersion={ModelVersion}/series={series}/location={location}/ \
-         /fromDateTime={fromDateTime}/toDateTime={toDateTime}')
-async def get_output(ModelName: str, ModelVersion: str, series: str, location: str, fromDateTime: str, 
+@app.get('/output/modelName={modelName}/modelVersion={modelVersion}/series={series}/location={location}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
+async def get_output(modelName: str, modelVersion: str, series: str, location: str, fromDateTime: str, 
                      toDateTime: str, datum: str = None, interval: int = None):
     """
     Retrieves output series object
 
     Args:
 
-        - `ModelName` (string): The name of the model (e.g. "test AI")
+        - `modelName` (string): The name of the model (e.g. "test AI")
 
-        - `ModelVersion` (string): The version of the model (e.g. "1.0.0")
+        - `modelVersion` (string): The version of the model (e.g. "1.0.0")
 
         - `series` (string): The series name (e.g. "waterHeight")
 
@@ -122,8 +121,8 @@ async def get_output(ModelName: str, ModelVersion: str, series: str, location: s
         interval = timedelta(seconds=interval)
     
     requestDescription = SemaphoreSeriesDescription(
-        ModelName, 
-        ModelVersion, 
+        modelName, 
+        modelVersion, 
         series, 
         location,
         datum

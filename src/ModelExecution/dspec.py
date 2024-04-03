@@ -60,12 +60,13 @@ class InputInfo:
         self.datum = None
         self.interval = None
         self.range = None
+        self.verificationOverride = None
 
     def __str__(self) -> str:
-        return f'\n[InputInfo] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, type: {self.type}, datum: {self.datum}, range: {self.range}'
+        return f'\n[InputInfo] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, type: {self.type}, datum: {self.datum}, range: {self.range}, verificationOverride: {self.verificationOverride}'
     
     def __repr__(self):
-        return f'\nInputInfo({self.name}, {self.location}, {self.source}, {self.series}, {self.unit}, {self.type}, {self.datum}, {self.range})'
+        return f'\nInputInfo({self.name}, {self.location}, {self.source}, {self.series}, {self.unit}, {self.type}, {self.datum}, {self.range}, {self.verificationOverride})'
     
 class TimingInfo:
     """Timing info should contain everything that could be obtained in a dspec timing info object

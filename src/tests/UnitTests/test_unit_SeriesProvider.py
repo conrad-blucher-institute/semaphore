@@ -22,7 +22,7 @@ from src.SeriesProvider.SeriesProvider import SeriesProvider, TimeDescription, S
 
 
 @pytest.mark.parametrize("timeDescription, expected_output", [
-    (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1),  timedelta(hours=1)), {datetime(2000, 1, 1) : None}), # I single data point
+    (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1),  timedelta(hours=1)), [datetime(2000, 1, 1)]), # I single data point
     (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1, hour=11),  timedelta(hours=1)), [datetime(2000, 1, 1) + timedelta(hours=idx) for idx in range(12)]), # A 12 hour long data series
 ])
 def test__generate_datetime_list(timeDescription, expected_output):
@@ -31,7 +31,7 @@ def test__generate_datetime_list(timeDescription, expected_output):
     assert result == expected_output
 
 
-test_series_desc = SeriesDescription('Test', 'Test', 'Test'),
+test_series_desc = SeriesDescription('Test', 'Test', 'Test')
 three_hour_time_desc = TimeDescription(datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=3),  timedelta(hours=1))
 correct_three_hour_series = [
     Input('1', 'test', datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=0)),
@@ -77,8 +77,6 @@ def test__generate_resulting_series(seriesDescription, timeDescription, DBList, 
     assert result.isComplete == correctness
 
     # Test that the method has preformed replacements correctly
-
-    print(result.data)
     for input in result.data:
         assert input.dataValue == '1'
 

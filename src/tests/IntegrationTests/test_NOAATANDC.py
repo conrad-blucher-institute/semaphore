@@ -26,10 +26,10 @@ from dotenv import load_dotenv
 
 @pytest.mark.parametrize("source, series, location, interval, datum", [
     ("NOAATANDC", "dWl", "packChan", timedelta(seconds=3600), "MHHW"),
-    ("NOAATANDC", "dXWnCmp", "packChan", timedelta(seconds=3600), "MHHW"), 
-    ("NOAATANDC", "dXWnCmp", "packChan", timedelta(seconds=360), "MHHW"), 
-    ("NOAATANDC", "dYWnCmp", "packChan", timedelta(seconds=3600), "MHHW"), 
-    ("NOAATANDC", "dYWnCmp", "packChan", timedelta(seconds=360), "MHHW"), 
+    ("NOAATANDC", "dXWnCmp000D", "packChan", timedelta(seconds=3600), "MHHW"), 
+    ("NOAATANDC", "dXWnCmp000D", "packChan", timedelta(seconds=360), "MHHW"), 
+    ("NOAATANDC", "dYWnCmp000D", "packChan", timedelta(seconds=3600), "MHHW"), 
+    ("NOAATANDC", "dYWnCmp000D", "packChan", timedelta(seconds=360), "MHHW"), 
     ("NOAATANDC", "dSurge", "packChan", timedelta(seconds=3600), "MHHW")
 ])
 
