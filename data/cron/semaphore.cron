@@ -2,7 +2,7 @@
 10 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d test_dspec.json >> ./logs/$(date "+%Y/%m")/test_dspec.log
 
 # Running the cold stunning model every three hours and 20 minutes (3:20, 6:20, etc.) and is timestamped.
-20 */3 * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d MLP-OP.json >> ./logs/$(date "+%Y/%m")/MLP-OP_.log
+20 */3 * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d MLP-OP.json >> ./logs/$(date "+%Y/%m")/MLP-OP.log
 
 # Running the thermal refuge model every hour and ten minutes (1:10, 2:10, 3:10, etc.) and is timestamped.
 10 * * * * mkdir -p ./logs/$(date "+%Y/%m") && docker exec semaphore-core python3 src/semaphoreRunner.py -d ThermalRefuge.json >> ./logs/$(date "+%Y/%m")/ThermalRefuge.log
