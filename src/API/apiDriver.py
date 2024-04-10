@@ -18,7 +18,7 @@ from SeriesProvider.SeriesProvider import SeriesProvider
 
 load_dotenv()
 
-app = FastAPI()
+app = FastAPI(root_path='/semaphore-api',)
 
 @app.get('/')
 def read_main():
