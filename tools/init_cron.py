@@ -17,7 +17,9 @@ def main():
         # find interval and convert to cron time
         # find despec file name 
         # construct shell text ex:  10 * * * * docker exec -d core python3 src/semaphoreRunner.py -d test_dspec.json
-    directory = "./logs"
+        
+        
+    directory = "../logs" #Places logs in the directory above it
     
     if not os.path.exists(directory):
      os.makedirs(directory)
