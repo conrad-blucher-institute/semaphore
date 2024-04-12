@@ -248,7 +248,8 @@ class NOAATANDC(IDataIngestion):
         if data is None: return None
 
         data = data['v'].values
-        four_highest = sorted(data)[-4:]
+        input_data = list(filter(lambda item: item is not None, data)) # Removing any Nones from the list
+        four_highest = sorted(input_data)[-4:]
         mean_four_max = sum(four_highest) / 4.0
 
         input = Input(

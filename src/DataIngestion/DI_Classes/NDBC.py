@@ -163,6 +163,7 @@ class NDBC(IDataIngestion):
 
         # We convert the data from strings to float, sort it, take the four highest, and take their mean
         input_data = [float(input.dataValue) for input in full_series_inputs]
+        input_data = list(filter(lambda item: item is not None, input_data)) # Removing any Nones from the list
         four_highest = sorted(input_data)[-4:] # Get the four highest values
         mean_four_max = sum(four_highest) / 4.0
 
