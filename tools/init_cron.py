@@ -19,7 +19,7 @@ def main():
         # construct shell text ex:  10 * * * * docker exec -d core python3 src/semaphoreRunner.py -d test_dspec.json
         
         
-    directory = "../logs" #Places logs in the root path
+    directory = "./logs" 
     
     if not os.path.exists(directory):
      os.makedirs(directory)
