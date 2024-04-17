@@ -12,7 +12,7 @@
 # 
 #
 #Imports
-from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
+from IDatabaseMigration import IDatabaseMigration
 
 from sqlalchemy import Engine
 
