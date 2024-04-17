@@ -21,12 +21,10 @@ class Migration_1_0(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
         #We are passed a database engine, so connect to the database
-        #
         with databaseEngine.connect() as connection:
+            #create the schema manually 
+
+            #create the alternate key constraints
+
+            #insert the rows from first csv files  
             pass
-
-    def rollback(self, databaseEngine: Engine) -> bool:
-        #We don't need a rollback method for this version 
-        # so what should we do in here?
-        pass
-
