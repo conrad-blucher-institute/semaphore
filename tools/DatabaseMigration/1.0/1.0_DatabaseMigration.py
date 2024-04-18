@@ -18,29 +18,10 @@ from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, Uniqu
 from sqlalchemy.dialects.postgresql import insert
 from os import getenv
 from dotenv import load_dotenv
-import csvs
-
-load_dotenv()
-
-def main():
-
-    # Load database location string
-    DB_LOCATION_STRING = os.getenv('DB_LOCATION_STRING')
-
-    # Create the database engine
-    engine = create_engine(DB_LOCATION_STRING)
-
-    #Perform Update (there is no rollback method for this class)
-    if (Migration_1_0.update(engine)):
-        #some kind of log statement? 
-        pass
-    
-
-if __name__ == "__main__":
-    main()
+import csv
 
 #Implementing methods of interface
-class Migration_1_0(IDatabaseMigration):
+class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
         #setting engine
