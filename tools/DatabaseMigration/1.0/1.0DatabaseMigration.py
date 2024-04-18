@@ -13,11 +13,29 @@
 #
 #Imports
 from IDatabaseMigration import IDatabaseMigration
-from sqlalchemy import create_engine as sqlalchemy_create_engine
-from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, CursorResult, Select, select, distinct, Boolean, Interval, text
-from sqlalchemy import inspect
+from sqlalchemy import create_engine 
+from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, Boolean, Interval, text
 from sqlalchemy.dialects.postgresql import insert
-import csv
+from os import getenv
+from dotenv import load_dotenv
+import csvs
+
+load_dotenv()
+
+def main():
+
+    # Load database location string
+    DB_LOCATION_STRING = os.getenv('DB_LOCATION_STRING')
+
+    # Create the database engine
+    engine = create_engine(DB_LOCATION_STRING)
+
+    #Perform Update (there is no rollback method for this class)
+    Migration_1_0.update(engine)
+    
+
+if __name__ == "__main__":
+    main()
 
 #Implementing methods of interface
 class Migration_1_0(IDatabaseMigration):
