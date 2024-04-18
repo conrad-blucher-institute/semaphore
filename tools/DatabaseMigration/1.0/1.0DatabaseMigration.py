@@ -31,7 +31,9 @@ def main():
     engine = create_engine(DB_LOCATION_STRING)
 
     #Perform Update (there is no rollback method for this class)
-    Migration_1_0.update(engine)
+    if (Migration_1_0.update(engine)):
+        #some kind of log statement? 
+        pass
     
 
 if __name__ == "__main__":
