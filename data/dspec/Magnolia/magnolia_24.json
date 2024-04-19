@@ -1,0 +1,125 @@
+{
+    "modelName": "magnolia_24",
+    "modelVersion": "1.0.0",
+    "author": "Jacob Alonzo",
+    "modelFileName": "",
+    "timingInfo":{
+        "offset": 1200,
+        "interval": 3600
+    },
+    "outputInfo": {
+        "outputMethod": "surgeToWaterLevel_avg033_057",
+        "_outputMethod_desc": "surge (output of this model) + pred_harmonic ((station: 033 + station: 057) / 2)",
+        "leadTime": 68400,
+        "series": "pWL",
+        "location": "EstMagnoliaBeach",
+        "unit" : "meter"
+    },
+    "inputs": [
+        { 
+            "_name": "Primary Water Level",
+            "location": "PortLavaca",
+            "source": "TCOON",
+            "series": "dWl",
+            "unit": "meter",
+            "type": "float",
+            "datum": "MLLW",
+            "interval": 3600,
+            "range": [0, -24]
+        },
+        { 
+            "_name": "Surge",
+            "location": "PortLavaca",
+            "source": "TCOON",
+            "series": "dSurge",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range": [0, -24]
+        },
+        { 
+            "_name": "Primary Water Level",
+            "location": "PortOConnor",
+            "source": "TCOON",
+            "series": "dWl",
+            "unit": "meter",
+            "type": "float",
+            "datum": "MLLW",
+            "interval": 3600,
+            "range": [0, -24]
+        },
+        { 
+            "_name": "Surge",
+            "location": "PortOConnor",
+            "source": "TCOON",
+            "series": "dSurge",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range": [0, -24]
+        },
+        { 
+            "_name": "avg(dWL_PortLavaca + dWL_PortOConnor)",
+            "_desc": "This is an engineered feature averaging two location from lighthouse DWL",
+            "location": "EstMagnoliaBeach",
+            "source": "TCOON",
+            "series": ,
+            "unit": "meter",
+            "type": "float",
+            "datum": "MLLW",
+            "interval": 3600,
+            "range": [0, -24]
+        },
+        { 
+            "_name": "avg(dSurge_PortLavaca + dSurge_PortOConnor)",
+            "_desc": "This is an engineered feature averaging two location from lighthouse DSURGE",
+            "location": "EstMagnoliaBeach",
+            "source": "TCOON",
+            "series": ,
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range": [0, -24]
+        },
+        { 
+            "_name": "XWnCmp",
+            "location": "PortLavaca",
+            "source": "TCOON",
+            "series": "dXWnCmp000D",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range": [0, -24]
+        },
+        { 
+            "_name": "YWnCmp",
+            "location": "PortLavaca",
+            "source": "TCOON",
+            "series": "dYWnCmp000D",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range": [0, -24]
+        },
+        { 
+            "_name": "XWnCmp",
+            "location": "PortLavaca",
+            "source": "NDFD",
+            "series": "pXWnCmp000D",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range": [1, 19]
+        },
+        { 
+            "_name": "YWnCmp",
+            "location": "PortLavaca",
+            "source": "NDFD",
+            "series": "pYWnCmp000D",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range": [1, 19]
+        }
+    ]
+}
