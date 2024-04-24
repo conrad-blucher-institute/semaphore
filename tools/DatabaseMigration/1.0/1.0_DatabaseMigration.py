@@ -13,7 +13,6 @@
 #
 #Imports
 from IDatabaseMigration import IDatabaseMigration
-from sqlalchemy import create_engine 
 from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, Boolean, Interval, text
 from sqlalchemy.dialects.postgresql import insert
 from os import getenv
