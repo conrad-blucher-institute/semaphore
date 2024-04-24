@@ -24,6 +24,10 @@ import csv
 class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
+        """This function updates the database to version 1.0 which includes the base schema and data locations. 
+            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
+            :return: bool indicating successful update
+        """
         #setting engine
         self.__engine = databaseEngine
 
