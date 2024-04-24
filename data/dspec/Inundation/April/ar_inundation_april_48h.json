@@ -1,6 +1,6 @@
 {
     "modelName": "ar_inundation_april_48h",
-    "modelVersion": "1.0.0",
+    "modelVersion": "1.0.1",
     "author": "Marina VicensMiquel",
     "modelFileName": "./inundation/April/april_48h",
     "timingInfo":{
