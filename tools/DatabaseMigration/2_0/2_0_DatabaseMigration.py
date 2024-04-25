@@ -14,10 +14,10 @@
 # 
 #
 #Imports
-from IDatabaseMigration import IDatabaseMigration
+from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
 from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, Engine
 from sqlalchemy.dialects.postgresql import insert
-import datetime
+from datetime import datetime
 
 
 class Migrator(IDatabaseMigration):
@@ -40,7 +40,7 @@ class Migrator(IDatabaseMigration):
             self._metadata.create_all(connection)
             #insert the first row
             connection.execute(insert(self.deployed_database_version)
-                               .value(first_row_dict))
+                               .values(first_row_dict))
             connection.commit()
         
         return True
@@ -73,10 +73,8 @@ class Migrator(IDatabaseMigration):
            :return: bool indicating successful update
         """
 
-        #setting engine
-        self.__engine = databaseEngine
-
-         #starting a transaction
+        self.__create_schema()
+        #starting a transaction
         with databaseEngine.begin() as connection:
             #dropping the table
             self.deployed_database_version.drop(connection)

@@ -1,4 +1,4 @@
 {
-    "Target Version" : "1.0",
-    "Description" : "The very first version of the database."
+    "Target Version" : "2.0",
+    "Description" : "Active version adding the version table and DB Migration."
 }

@@ -23,7 +23,7 @@ docker-compose up -d
 python3 tools/init_cron.py 
 
 # initialize the db in the containers
-docker exec semaphore-core python3 tools/init_db.py 
+docker exec semaphore-core python3 tools/migrate_db.py 
 
 # Sleep to give HELATHCHECKS time to run
 sleep 10

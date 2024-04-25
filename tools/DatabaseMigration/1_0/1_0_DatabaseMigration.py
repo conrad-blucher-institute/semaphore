@@ -12,12 +12,12 @@
 # 
 #
 #Imports
-from IDatabaseMigration import IDatabaseMigration
+from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
 from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, Boolean, Interval, text
 from sqlalchemy.dialects.postgresql import insert
-from os import getenv
-from dotenv import load_dotenv
 import csv
+
+CSV_FILE_PATHS = './tools/DatabaseMigration/1_0/init_data'
 
 #Implementing methods of interface
 class Migrator(IDatabaseMigration):
@@ -49,12 +49,35 @@ class Migrator(IDatabaseMigration):
             connection.commit()
 
         #insert the rows from first csv files
-        self.insert_ref_dataDatum(readInitCSV('dataDatum.csv'))
-        self.insert_ref_dataLocation(readInitCSV('dataLocation.csv'))
-        self.insert_ref_dataSeries(readInitCSV('dataSeries.csv'))
-        self.insert_ref_dataSource(readInitCSV('dataSource.csv'))
-        self.insert_ref_dataUnit(readInitCSV('dataUnit.csv'))
-        self.insert_data_mapping(readInitCSV('dataMapping.csv'))
+        self.insert_ref_dataDatum(self.readInitCSV('dataDatum.csv'))
+        self.insert_ref_dataLocation(self.readInitCSV('dataLocation.csv'))
+        self.insert_ref_dataSeries(self.readInitCSV('dataSeries.csv'))
+        self.insert_ref_dataSource(self.readInitCSV('dataSource.csv'))
+        self.insert_ref_dataUnit(self.readInitCSV('dataUnit.csv'))
+        self.insert_data_mapping(self.readInitCSV('dataMapping.csv'))
+
+        return True
+
+
+    def rollback(self, databaseEngine: Engine) -> bool:
+        raise NotImplementedError()
+    
+    
+    def readInitCSV(self, csvFileName: str) -> list:
+        """This function reads in a CSV file with the data needed for the initialization 
+            of the database
+            :param csvFileName: str - CSV file name
+            
+            :return: list of dictionaries
+        """
+        csvFilePath = f'{CSV_FILE_PATHS}/{csvFileName}'
+        dictionaryList = []
+        with open(csvFilePath, mode = 'r') as infile:
+            csvDict = csv.DictReader(infile)
+            for dictionary in csvDict:
+                dictionaryList.append(dictionary)
+
+        return dictionaryList
 
 
     def __create_schema(self) -> None:
@@ -191,22 +214,6 @@ class Migrator(IDatabaseMigration):
             Column("displayName", String(30), nullable=False),
             Column("notes", String(250), nullable=True),
         )
-
-    def readInitCSV(csvFileName: str) -> list:
-        """This function reads in a CSV file with the data needed for the initialization 
-            of the database
-            :param csvFileName: str - CSV file name
-            
-            :return: list of dictionaries
-        """
-        csvFilePath = f'./1.0/init_data/{csvFileName}'
-        dictionaryList = []
-        with open(csvFilePath, mode = 'r') as infile:
-            csvDict = csv.DictReader(infile)
-            for dictionary in csvDict:
-                dictionaryList.append(dictionary)
-
-        return dictionaryList
 
 
     def insert_ref_dataDatum(self, rows: list[dict]) -> list[tuple]:
