@@ -12,47 +12,59 @@
 import os
 from os import path
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Engine
-from sqlalchemy_utils import database_exists
+from sqlalchemy import create_engine, Engine, inspect, Table, MetaData, select, update
 from importlib import import_module
+import datetime
 from json import load
 
 load_dotenv()
 TARGET_VERSION_FILEPATH = './tools/DatabaseMigration/target_version.json'
 
-def get_current_database_version(engine: Engine):
+def get_current_database_version(engine: Engine) -> float:
     """This function get's the current version of the database from the database version table in the database.
             :param engine: Engine -The engine to connect to the database
     """
-    # This function should query the database to determine its current version.
+    #check if the database exists
+    inspector = inspect(engine)
+    dbExists = inspector.has_table('inputs')
+    versionTableExists = inspector.has_table('deployed_database_version')
 
-    # Check if the database exists
-    dbExists = database_exists(engine.url)
-    # If the database doesn't exist
-    if dbExists == 0: 
-        # If the database doesn't exist then the current version is 0
-        current_database_version = 0
-        # Instantiate the base version of the database
-        ## 
+    if not dbExists:
+        return 0.0
+    if not versionTableExists:
+        return 1.0
+    
+    #query the version table and return database version
+    metadata_obj = MetaData()
+    version_table = Table("deployed_database_version", metadata_obj, autoload_with=engine)
 
-        #Update the current version of the database
-        current_database_version = 1.0
-    else: 
-       # if the table exists return the current version
-        #inspection = inspect(engine)
-       # if inspection.has_table(''): existing_tables += 1
-       # if the table doesn't exist return 1.0
-       pass   
-    pass
+    with engine.begin() as connection:
+        stmt = select(version_table.c.versionNumber)
+        cursor = connection.execute(stmt)
+        version = cursor.fetchall()[0]
 
-def set_current_database_version(engine: Engine, version: float, description=''):
+    return float(version)
+    
+def set_current_database_version(engine: Engine, version: float, description='') -> None:
     """This function sets the current database version to the passed version number
        in the database version database table. 
             :param engine: Engine -The engine to connect to the database with
             :param version: float -The version to update the database to
             :param description: str -A description of the version of the database
     """
-    pass
+    #set up table information
+    metadata_obj = MetaData()
+    version_table = Table("deployed_database_version", metadata_obj, autoload_with=engine)
+
+    with engine.begin() as connection:
+        stmt = (update(version_table)
+                       .values({
+                           version_table.c.versionNumber: str(version), 
+                           version_table.c.migrationTime: datetime.utcnow(), 
+                           version_table.c.versionNotes: description
+                       }))
+        connection.execute(stmt)
+        connection.commit()
 
 def get_target_version_info()-> tuple[int, str]:
     """ This function returns the target version information by reading from the target
