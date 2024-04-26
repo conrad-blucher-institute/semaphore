@@ -1,6 +1,6 @@
 {
     "modelName": "ar_inundation_july_12h",
-    "modelVersion": "1.0.0",
+    "modelVersion": "1.0.1",
     "author": "Marina VicensMiquel",
     "modelFileName": "./inundation/July/july_12h",
     "timingInfo":{
