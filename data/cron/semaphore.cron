@@ -44,15 +44,6 @@
 5 * * * * mkdir -p ./logs/$(date "+\%Y")/$(date "+\%m")/Inundation/December && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Inundation/December/ar_inundation_december_12h.json >> ./logs/$(date "+\%Y")/$(date "+\%m")/Inundation/December/ar_inundation_december_12h.log 2>> ./logs/$(date "+\%Y")/$(date "+\%m")/Inundation/December/ar_inundation_december_12h_CRON.log 
 
 
-
-
-
-
-
-
-
-
-
 # Running the surge models every hour and five minutes.
 10 * * * * mkdir -p ./logs/$(date "+\%Y")/$(date "+\%m")/Surge/Aransas && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Aransas/ar_mlp_surge_24h_pred.json >> ./logs/$(date "+\%Y")/$(date "+\%m")/Surge/Aransas/ar_mlp_surge_24h.log 2>> ./logs/$(date "+\%Y")/$(date "+\%m")/Surge/Aransas/ar_mlp_surge_24h_CRON.log 
 10 * * * * mkdir -p ./logs/$(date "+\%Y")/$(date "+\%m")/Surge/Aransas && docker exec semaphore-core python3 src/semaphoreRunner.py -d ./Surge/Aransas/ar_mlp_surge_12h_pred.json >> ./logs/$(date "+\%Y")/$(date "+\%m")/Surge/Aransas/ar_mlp_surge_12h.log 2>> ./logs/$(date "+\%Y")/$(date "+\%m")/Surge/Aransas/ar_mlp_surge_12h_CRON.log
