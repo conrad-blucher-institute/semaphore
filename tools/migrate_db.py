@@ -181,7 +181,7 @@ def main():
         current_version = next_version_value
 
     # Update last time with description of database
-    set_current_database_version(engine, next_version_value, target_desc)  
+    set_current_database_version(engine, target_version, target_desc)  
 
     # Log that migration has finished
     print(f'Fin!')     
