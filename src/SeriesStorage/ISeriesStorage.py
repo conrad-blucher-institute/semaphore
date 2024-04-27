@@ -42,27 +42,6 @@ class ISeriesStorage(ABC):
     @abstractmethod
     def insert_output(self, series: Series) -> Series:
         raise NotImplementedError()
-    
-    ## Reference 
-    @abstractmethod
-    def insert_ref_dataDatum(self, rows: list[dict]) -> list[tuple]:
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def insert_ref_dataLocation(self, rows: list[dict]) -> list[tuple]:
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def insert_ref_dataSeries(self, rows: list[dict]) -> list[tuple]:
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def insert_ref_dataSource(self, rows: list[dict]) -> list[tuple]:
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def insert_ref_dataUnit(self, rows: list[dict]) -> list[tuple]:
-        raise NotImplementedError()
 
 def series_storage_factory() -> ISeriesStorage:
     """Imports the series storage class from the environment variable ISERIESSTORAGE_INSTANCE
@@ -74,8 +53,5 @@ def series_storage_factory() -> ISeriesStorage:
     ss = getenv('ISERIESSTORAGE_INSTANCE')
    
 
-    try:
-        return getattr(import_module(f'.SS_Classes.{ss}', 'SeriesStorage'), f'{ss}')()
-    except Exception as e:
-       raise ModuleNotFoundError(f'No module named {ss} in .SS_Classes!')
+    return getattr(import_module(f'.SS_Classes.{ss}', 'SeriesStorage'), f'{ss}')()
     
