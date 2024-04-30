@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#inputGatherer.py
+#dspecParser.py
 #----------------------------------
 # Created By : Matthew Kastl
 # Created Date: 4/28/2024
