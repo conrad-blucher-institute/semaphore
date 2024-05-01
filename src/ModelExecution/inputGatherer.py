@@ -18,6 +18,7 @@ from SeriesProvider.SeriesProvider import SeriesProvider
 from DataClasses import SeriesDescription, TimeDescription, Input
 from .dspecParser import DSPEC_Parser, Dspec
 from utility import log, construct_true_path
+from PostProcessing.IPostProcessing import post_processing_factory, post_process_data
 #Libraries
 from os import path, getenv
 from json import load
@@ -25,7 +26,8 @@ from datetime import datetime, timedelta
 
 
 class InputGatherer:
-    """ The InputGatherer class ...
+    """ The InputGatherer class which sends the dspc to be parsed, gets the dependant series
+        checks for and calls any post processing and creates an ordered vector by referencing the keys
     """
     def __init__(self, dspecFileName: str) -> None:
         """Constructor sends the dspec file off to be loaded and parsed
@@ -45,8 +47,6 @@ class InputGatherer:
         self.__dspec = parser.parse_dspec()
         self.__seriesProvider = SeriesProvider()
 
-   # -> Parse dspec -> get dependent series -> calls any post processors -> create the ordered vector by referencing the keys
-
 
     def __generate_inputSpecifications(self, referenceTime: datetime) -> None:
         """Generates the list of input specifications. This is a request paired
@@ -59,7 +59,8 @@ class InputGatherer:
             The data requests will be relative to this time.
         """
         specifications = []
-        for input in self.__dspec.inputs:
+        index = 0
+        for input in self.__dspec.dependentSeries:
             try:
                 #Calculate the to and from time from the interval and range
                 toDateTime = referenceTime + timedelta(seconds= input.range[0] * input.interval)
@@ -69,13 +70,14 @@ class InputGatherer:
                 if (input.range[0] == input.range[1]): #isOnePoint
                     fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
 
-                #specifications is a pairing of a request and what type it should 
+                #specifications is a pairing of a request and what type it should return
                 specifications.append((
                     SeriesDescription(
                         input.source, 
                         input.series,
                         input.location,
                         input.datum,
+                        input.outKey,
                         input.verificationOverride
                     ),
                     TimeDescription(
@@ -83,9 +85,10 @@ class InputGatherer:
                         toDateTime,
                         timedelta(seconds=input.interval)
                     ),
-                    input.type
+                    self.__dspec.orderedVector.dTypes[index]
                     )
                 )
+                index += 1
             except Exception as e:
                log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
         self.__specifications = specifications
@@ -102,7 +105,12 @@ class InputGatherer:
             timeDescription = specification[1]
             dataType = specification[2]
 
+            # request data
             responseSeries = self.__seriesProvider.request_input(seriesDescription, timeDescription)
+            # postprocess if needed
+            if not seriesDescription.outKey == None:
+                post_processing_class = post_processing_factory(self.__dspec.postProcessCall)
+                responseSeries = post_processing_class.post_process_data(responseSeries, self.__dspec.postProcessCall)
             if responseSeries.isComplete:
                 [inputVector.append(dataPoint) for dataPoint in self.__cast_data(responseSeries.data, dataType)]
             else:
@@ -137,7 +145,8 @@ class InputGatherer:
 
         referenceTime = datetime.utcfromtimestamp(execution.timestamp() - (execution.timestamp() % interval))
 
-        return referenceTime
+        return referenceTime  
+
     
     def get_inputs(self, dateTime: datetime) -> list[any]:
         """Getter method returns the input vector for the loaded model. Only regenerates the vector
@@ -154,6 +163,7 @@ class InputGatherer:
         if not specificationIsCreated or (specificationIsCreated and requestTimeIsDifferent):
             self.__generate_inputSpecifications(dateTime)
             self.__generate_inputVector()
+            self.__
             return self.__inputVector
         else:
             return self.__inputVector
