@@ -1,105 +1,52 @@
 # -*- coding: utf-8 -*-
 #inputGatherer.py
 #----------------------------------
-# Created By : Matthew Kastl
+# Created By: Matthew Kastl
 # Created Date: 2/3/2023
-# version 1.0
+# Version: 2.0
 #----------------------------------
-""" This file should parse despec files, communicate with series provider to request series and build the input vector for a model.
+""" This file communicates with series provider to request series and build the input vector for a model.
+    The input gatherer also checks for post processing steps and instantiates each class in the right 
+    order from the dspec to post process the data collected. 
  """ 
 #----------------------------------
 # 
 #
 #Imports
-
-
+#Local
 from SeriesProvider.SeriesProvider import SeriesProvider
 from DataClasses import SeriesDescription, TimeDescription, Input
-from .dspec import Dspec, OutputInfo, InputInfo,TimingInfo
+from .dspecParser import DSPEC_Parser, Dspec
 from utility import log, construct_true_path
-
+#Libraries
 from os import path, getenv
 from json import load
 from datetime import datetime, timedelta
 
 
 class InputGatherer:
+    """ The InputGatherer class ...
+    """
     def __init__(self, dspecFileName: str) -> None:
-        """Constructor sends the specFile off to be loaded and parsed
+        """Constructor sends the dspec file off to be loaded and parsed
         """
         self.__dspec = None
         self.__specifications = None
         self.__specificationsConstructionTime = None
         self.__inputVector = None
 
-        self.__parse_dspec(dspecFileName)
-        self.__seriesProvider = SeriesProvider()
-
-    def __parse_dspec(self, dspecFileName: str) -> None:
-        """Parses the JSON Dspec file into a dspec object.
-        """
-
         dspecFilePath = construct_true_path(getenv('DSPEC_FOLDER_PATH')) + dspecFileName
 
         if not path.exists(dspecFilePath):
             log(f'{dspecFilePath} not found!')
             raise FileNotFoundError
-        
-        with open(dspecFilePath) as dspecFile:
-            
-            #Meta and header data.
-            json = load(dspecFile)
 
-            dspec = Dspec()
-            dspec.modelName = json["modelName"]
-            dspec.modelVersion = json["modelVersion"]
-            dspec.author = json["author"]
-            dspec.modelFileName = json["modelFileName"]
-            
-            #TimingInfo
-            timingJson = json["timingInfo"]
-            
-            timingInfo = TimingInfo()
-            timingInfo.offset = timingJson["offset"]
-            timingInfo.interval = timingJson["interval"]
-            
-            dspec.timingInfo = timingInfo #Bind to dspec
-            
-            #OuputInfo
-            outputJson = json["outputInfo"]
-            
-            outputInfo = OutputInfo()
-            outputInfo.outputMethod = outputJson["outputMethod"]
-            outputInfo.leadTime = outputJson["leadTime"]
-            outputInfo.series = outputJson["series"]
-            outputInfo.location = outputJson["location"]
-            outputInfo.interval = outputJson.get("interval")
-            outputInfo.unit = outputJson.get("unit")
-            outputInfo.datum = outputJson.get("datum")
+        parser = DSPEC_Parser(dspecFilePath)
+        self.__dspec = parser.parse_dspec()
+        self.__seriesProvider = SeriesProvider()
 
-            dspec.outputInfo = outputInfo #Bind to dspec
+   # -> Parse dspec -> get dependent series -> calls any post processors -> create the ordered vector by referencing the keys
 
-            #inputs
-            inputsJson = json["inputs"]
-            inputs = []
-            
-            for inputJson in inputsJson:
-                input = InputInfo()
-                input.name = inputJson["_name"]
-                input.location = inputJson["location"]
-                input.source = inputJson["source"]
-                input.series = inputJson["series"]
-                input.type = inputJson["type"]
-                input.interval = inputJson["interval"]
-                input.range = inputJson["range"]
-                input.datum = inputJson.get("datum")
-                input.unit = inputJson.get("unit")
-                input.verificationOverride = inputJson.get("verificationOverride")
-
-                inputs.append(input)
-            dspec.inputs = inputs #Bind to dspec
-
-            self.__dspec = dspec #Bind dspec to this obj
 
     def __generate_inputSpecifications(self, referenceTime: datetime) -> None:
         """Generates the list of input specifications. This is a request paired

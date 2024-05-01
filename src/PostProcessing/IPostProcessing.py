@@ -3,7 +3,7 @@
 #----------------------------------
 # Created By: Anointiyae Beasley
 # Created Date: 4/29/2024
-# version 2.0
+# version 1.0
 #----------------------------------
 """This module serves as both an interface for enhancing ingested data through post-processing 
 and a factory for generating instances of the interface.
@@ -15,11 +15,12 @@ and a factory for generating instances of the interface.
 from abc import ABC, abstractmethod
 from importlib import import_module
 from DataClasses import Series
+from ModelExecution.dspecParser import DSPEC_Parser, Dspec, PostProcessCall
 from PostProcessing import PostProcessing
 
-class PostProcessing(ABC):
+class IPostProcessing(ABC):
     @abstractmethod
-    def post_process_data(self, preprocessedData: list[Series], postProcessCall: str ) -> list[Series]:
+    def post_process_data(self, preprocessedData: list[Series], postProcessCall: PostProcessCall ) -> list[Series]:
         """Abstract method to define the post-processing operation.
 
         Args:
@@ -34,7 +35,7 @@ class PostProcessing(ABC):
         """
         raise NotImplementedError
     
-    def post_processing_factory(postProcessingRequest: str) -> PostProcessing :
+    def post_processing_factory(postProcessingRequest: PostProcessCall) -> PostProcessing :
         """Uses the postProcessingRequest to dynamically import a module
         and instantiate a post-processing class.
 
@@ -48,8 +49,8 @@ class PostProcessing(ABC):
             PostProcessing:  Instance of the post-processing class.
         """
         try:
-            module_name = 'PostProcessingClasses'
-            return getattr(import_module(f'.{module_name}.{postProcessingRequest}', 'PostProcessing'), postProcessingRequest)()
+            MODULE_NAME = 'PostProcessingClasses'
+            return getattr(import_module(f'.{MODULE_NAME}.{postProcessingRequest}', 'PostProcessing'), postProcessingRequest)()
         except (ModuleNotFoundError, AttributeError) as e:
             raise ImportError(f'Error importing post-processing class {postProcessingRequest}: {e}')
         
