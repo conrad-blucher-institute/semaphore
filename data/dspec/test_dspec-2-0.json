@@ -1,0 +1,133 @@
+{
+    "dspecVersion": "2.0",
+    "modelName": "test AI",
+    "modelVersion": "1.0.0",
+    "author": "John Doe",
+    "modelFileName": "test_AI",
+    "timingInfo":{
+        "offset": 0,
+        "interval": 3600
+
+    },
+    "outputInfo": {
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 86400,
+        "series": "testSeries",
+        "location": "packChan",
+        "interval" : 3600, 
+        "datum": "test_datum",
+        "unit" : "meter"
+    },
+    "dependentSeries": [
+        { 
+            "_name": "WindSpeed",
+            "location": "packChan",
+            "source": "NOAATANDC",
+            "series": "dWnSpd",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [0, 0]
+        },
+        {
+            "_name": "Wind Direction",
+            "location": "packChan",
+            "source": "NOAATANDC",
+            "series": "dWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [0, 0]
+        },
+        {
+            "_name": "Wind Speed",
+            "location": "packChan",
+            "source": "NOAATANDC",
+            "series": "dWnSpd",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [0, -11]
+        },
+        {
+            "_name": "Wind Direction",
+            "location": "packChan",
+            "source": "NOAATANDC",
+            "series": "dWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [0, -11]
+        },
+        {
+            "_name": "Wind Speed",
+            "location": "packChan",
+            "source": "NOAATANDC",
+            "series": "dWnSpd",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [0, -12],
+            "outKey": "WindSpd_13"
+        }
+    ],
+    "postProcessCall": [
+        {
+            "call": "computeWindComponents",
+            "args": {
+                "targetSpeedIdx": 0,
+                "targetDirectionIdx": 1,
+                "offset": 0,
+                "outKeys": [
+                    "dXWnCmp000D_1hr",
+                    "dYWnCmp000D_1hr"
+                ]
+            }
+        },
+        {
+            "call": "computeWindComponents",
+            "args": {
+                "targetSpeedIdx": 2,
+                "targetDirectionIdx": 3,
+                "offset": 0,
+                "outKeys": [
+                    "dXWnCmp000D_12hr",
+                    "dYWnCmp000D_12hr"
+                ]
+            }
+        }
+    ],
+    "vectorOrder": [
+        {
+            "key": "dXWnCmp000D_1hr",
+            "dType": "float"
+        },
+        {
+            "key": "dYWnCmp000D_1hr",
+            "dType": "float"
+        },
+        {
+            "key": "dXWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "dYWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "dXWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "dYWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "dXWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "dYWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "WindSpd_13",
+            "dType": "float"
+        }
+    ]
+}
