@@ -35,8 +35,7 @@ class InputGatherer:
         self.__dspec = None
         self.__seriesDescriptionsTimeDescriptions = None
         self.__seriesConstructionTime = None
-        self.__dependentSeriesSeries = None
-        self.__postProcessedSeries = None
+        self.__inputSeriesDict = None
         self.__inputVector = None
 
         dspecFilePath = construct_true_path(getenv('DSPEC_FOLDER_PATH')) + dspecFileName
@@ -77,7 +76,8 @@ class InputGatherer:
                         fromDateTime, 
                         toDateTime,
                         timedelta(seconds=series.interval)
-                    )
+                    ), 
+                    series.outKey
                 ))
             except Exception as e:
                log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
@@ -89,34 +89,69 @@ class InputGatherer:
     def __gather_data(self) -> None: 
         """
         """
-        dependentSeriesSeries = []
+        dependentSeriesSeries = {}
         for dependentSeries in self.__seriesDescriptionsTimeDescriptions:
             # Unpack series and time description
             seriesDescription = dependentSeries[0]
             timeDescription = dependentSeries[1]
+            key = dependentSeries[2]
 
             # Get the data from series provider
             responseSeries = self.__seriesProvider.request_input(seriesDescription, timeDescription)
 
             # Check number of datapoints and if complete then append to list
             if responseSeries.isComplete:
-                dependentSeriesSeries.append(responseSeries.data)
+                dependentSeriesSeries[key] = responseSeries.data
             else: 
                  log(f'ERROR: There was a problem with input gatherer making requests.\n\n Response: {responseSeries}\n\n')
 
-        self.__dependentSeriesSeries = dependentSeriesSeries
-        #there needs to be a dictionary thing going on here i think ^
+        self.__inputSeriesDict = dependentSeriesSeries
 
     def __post_process_data(self) -> None:
         """
         """
-        pass
+        for postProcess in self.__dspec.postProcessCall:
+            # Instantiate Factory Method
+            processing_Class = post_processing_factory(postProcess.call)
+            # Call Post Processing Function
+            newProcessedInput = processing_Class.post_process_data(self.__inputSeriesDict, postProcess)
+            # Add preprocessed dict to the inputSeries dict
+            self.__inputSeriesDict.update(newProcessedInput)
 
     def __order_input_vector(self) -> None:
         """
         """
-        pass
+        input_vector = []
 
+        for key in self.__dspec.orderedVector:
+            dtype = self.__dspec.orderedVector[key]
+            
+            if key in self.__inputSeriesDict:
+                input_vector.append(self.__cast_data(self.__inputSeriesDict[key], dtype))
+            else:
+                log(f'ERROR: There was a problem with input gatherer finding outKey {key} in {self.__inputSeriesDict}')
+
+        self.__inputVector = input_vector
+
+    def __cast_data(self, data: list[Input], dataType: str) -> list[any]:
+        """Casts vector of data to a given type.
+
+        Parameters:
+            data: list[Input] - The data to cast.
+            dataType: str = The datatype as a string to cast to.
+        ReturnsL
+            list[any] - The casted data
+        """
+        castedData = []
+        #Cast from string to unit then append
+        for datapoint in data:
+            match dataType:
+                case 'float':
+                    castedData.append(float(datapoint.dataValue))
+                case _:
+                    log(f'Input gatherer has no conversion for Unit: {dataType}')
+                    raise NotImplementedError
+        return castedData
 
     
     def get_inputs(self, dateTime: datetime) -> list[any]:
