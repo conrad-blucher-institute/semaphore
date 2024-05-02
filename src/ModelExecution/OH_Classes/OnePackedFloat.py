@@ -15,7 +15,7 @@ and initiates the saving process.
 #Imports
 from DataClasses import Output
 from ModelExecution.IOutputHandler import IOutputHandler
-from ..dspec import Dspec
+from ..dspecParser import Dspec
 
 from datetime import datetime, timedelta
 
