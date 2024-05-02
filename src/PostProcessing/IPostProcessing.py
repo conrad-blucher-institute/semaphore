@@ -20,18 +20,18 @@ from PostProcessing import PostProcessing
 
 class IPostProcessing(ABC):
     @abstractmethod
-    def post_process_data(self, preprocessedData: list[Series], postProcessCall: PostProcessCall ) -> list[Series]:
+    def post_process_data(self, preprocessedData: dict[str, Series], postProcessCall: PostProcessCall ) -> dict[str, Series]:
         """Abstract method to define the post-processing operation.
 
         Args:
-            preprocessedData (list[Series]): Preprocessed data to be post-processed.
+            preprocessedData (dict[str, Series]): Preprocessed data to be post-processed with keys.
             postProcessCall (PostProcessCall): The type of post processing the model requires. Located in the dspec.
 
         Raises:
             NotImplementedError: An error will appear when the function haas not been implemented
 
         Returns:
-            list[Series]: A list of series
+            dict[key, Series]: A dictionary with the new preprocessed series and their outkeys
         """
         raise NotImplementedError
     
