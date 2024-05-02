@@ -105,6 +105,7 @@ class InputGatherer:
                  log(f'ERROR: There was a problem with input gatherer making requests.\n\n Response: {responseSeries}\n\n')
 
         self.__dependentSeriesSeries = dependentSeriesSeries
+        #there needs to be a dictionary thing going on here i think ^
 
     def __post_process_data(self) -> None:
         """
