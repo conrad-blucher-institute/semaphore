@@ -16,7 +16,6 @@ from abc import ABC, abstractmethod
 from importlib import import_module
 from DataClasses import Series
 from ModelExecution.dspecParser import DSPEC_Parser, Dspec, PostProcessCall
-from PostProcessing import PostProcessing
 
 class IPostProcessing(ABC):
     @abstractmethod
@@ -35,22 +34,22 @@ class IPostProcessing(ABC):
         """
         raise NotImplementedError
     
-    def post_processing_factory(postProcessingRequest: str) -> IPostProcessing :
-        """Uses the postProcessingRequest to dynamically import a module
-        and instantiate a post-processing class.
+def post_processing_factory(postProcessingRequest: str) -> IPostProcessing :
+    """Uses the postProcessingRequest to dynamically import a module
+    and instantiate a post-processing class.
 
-        Args:
-            postProcessingRequest (str): Name of the post-processing class/module.
+    Args:
+        postProcessingRequest (str): Name of the post-processing class/module.
 
-        Raises:
-            ImportError: An error will appear when something is wrong with the import
+    Raises:
+        ImportError: An error will appear when something is wrong with the import
 
-        Returns:
-            PostProcessing:  Instance of the post-processing class.
-        """
-        try:
-            MODULE_NAME = 'PostProcessingClasses'
-            return getattr(import_module(f'.{MODULE_NAME}.{postProcessingRequest}', 'PostProcessing'), postProcessingRequest)()
-        except (ModuleNotFoundError, AttributeError) as e:
-            raise ImportError(f'Error importing post-processing class {postProcessingRequest}: {e}')
+    Returns:
+        PostProcessing:  Instance of the post-processing class.
+    """
+    try:
+        MODULE_NAME = 'PostProcessingClasses'
+        return getattr(import_module(f'.{MODULE_NAME}.{postProcessingRequest}', 'PostProcessing'), postProcessingRequest)()
+    except (ModuleNotFoundError, AttributeError) as e:
+        raise ImportError(f'Error importing post-processing class {postProcessingRequest}: {e}')
         
