@@ -50,6 +50,10 @@ class InputGatherer:
 
     def __generate_seriesDescription(self, referenceTime: datetime) -> None:
         """
+        This function generates the series description for each dependentSeries input
+
+        param: refrenceTime - datetime : Used to calculate the to and from time 
+         for timeDescripion
         """
         # Create list of series descriptions and time descriptions from dependant series list
         seriesDescriptionsTimeDescriptions = []
@@ -88,6 +92,8 @@ class InputGatherer:
 
     def __gather_data(self) -> None: 
         """
+        This function takes calls the series providor for each series created from the
+        dependentSeries list in the dspec and adds the data and it's key to the inputSeriesDict
         """
         dependentSeriesSeries = {}
         for dependentSeries in self.__seriesDescriptionsTimeDescriptions:
@@ -109,6 +115,10 @@ class InputGatherer:
 
     def __post_process_data(self) -> None:
         """
+        This function calls the post processing methods for any inputs that need post processing
+        the post_process_data function is passed the input dictionary and the process call
+        so that the function can easily find the series needed for the computation and return 
+        a dictionary with the new outkeys and series. 
         """
         for postProcess in self.__dspec.postProcessCall:
             # Instantiate Factory Method
@@ -120,12 +130,15 @@ class InputGatherer:
 
     def __order_input_vector(self) -> None:
         """
+        This function sorts through the inputSeriesDict and adds any series with matching
+        outkeys to the input_vector in the correct order with the data cast to the correct 
+        data type. 
         """
         input_vector = []
 
         for key in self.__dspec.orderedVector:
             dtype = self.__dspec.orderedVector[key]
-            
+
             if key in self.__inputSeriesDict:
                 input_vector.append(self.__cast_data(self.__inputSeriesDict[key], dtype))
             else:
@@ -192,6 +205,7 @@ class InputGatherer:
         return self.__dspec.modelFileName     
     
     def get_dspec(self) -> Dspec:
+        """Returns the dspec object being used."""
         return self.__dspec
 
     def get_input_specifications(self) -> list:
