@@ -25,7 +25,7 @@ class IPostProcessing(ABC):
 
         Args:
             preprocessedData (list[Series]): Preprocessed data to be post-processed.
-            postProcessCall (str): The type of post processing the model requires. Located in the dspec.
+            postProcessCall (PostProcessCall): The type of post processing the model requires. Located in the dspec.
 
         Raises:
             NotImplementedError: An error will appear when the function haas not been implemented
@@ -35,7 +35,7 @@ class IPostProcessing(ABC):
         """
         raise NotImplementedError
     
-    def post_processing_factory(postProcessingRequest: PostProcessCall) -> PostProcessing :
+    def post_processing_factory(postProcessingRequest: str) -> IPostProcessing :
         """Uses the postProcessingRequest to dynamically import a module
         and instantiate a post-processing class.
 
