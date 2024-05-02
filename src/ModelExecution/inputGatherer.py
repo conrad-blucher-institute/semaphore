@@ -199,7 +199,15 @@ class InputGatherer:
         else:
             return self.__inputVector
         
-   
+    def calculate_referenceTime(self, execution :datetime) -> datetime:
+        '''This function calculates the refrence time that semaphore needs to use to get the correct number of inputs from execution time
+        :param execution: datetime -the execution time'''
+
+        interval = self.__dspec.timingInfo.interval
+
+        referenceTime = datetime.utcfromtimestamp(execution.timestamp() - (execution.timestamp() % interval))
+
+        return referenceTime
             
     def get_model_file_name(self) -> str:
         """Returns the name of the model as specified in the DSPEC file."""
