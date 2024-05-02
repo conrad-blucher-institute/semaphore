@@ -18,7 +18,8 @@ from SeriesProvider.SeriesProvider import SeriesProvider
 from DataClasses import SeriesDescription, TimeDescription, Input
 from .dspecParser import DSPEC_Parser, Dspec
 from utility import log, construct_true_path
-from PostProcessing.IPostProcessing import post_processing_factory, post_process_data
+from PostProcessing.IPostProcessing import post_processing_factory
+
 #Libraries
 from os import path, getenv
 from json import load

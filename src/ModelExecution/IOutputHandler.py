@@ -13,7 +13,7 @@ Methods. And Factory to get instance
 #
 #Imports
 
-from .dspec import Dspec
+from .dspecParser import Dspec
 from DataClasses import Output
 
 from abc import ABC, abstractmethod
