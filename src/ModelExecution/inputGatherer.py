@@ -61,11 +61,11 @@ class InputGatherer:
         for series in self.__dspec.dependentSeries:
             try: 
                 # Calculate the to and from time from the interval and range
-                toDateTime = referenceTime + timedelta(seconds= input.range[0] * input.interval)
-                fromDateTime = referenceTime + timedelta(seconds= input.range[1] * input.interval)
+                toDateTime = referenceTime + timedelta(seconds= series.range[0] * series.interval)
+                fromDateTime = referenceTime + timedelta(seconds= series.range[1] * series.interval)
                 
                 # Check if it's only one point
-                if (input.range[0] == input.range[1]): 
+                if (series.range[0] == series.range[1]): 
                     fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
                 
                 # Create paring of series description and time description to pass to series provider
@@ -85,7 +85,7 @@ class InputGatherer:
                     series.outKey
                 ))
             except Exception as e:
-               log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
+               log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {series} Error= {e}')
 
         # Set the series description list and series construction time
         self.__seriesDescriptionsTimeDescriptions = seriesDescriptionsTimeDescriptions
