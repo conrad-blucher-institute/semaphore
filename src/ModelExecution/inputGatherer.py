@@ -135,11 +135,15 @@ class InputGatherer:
         outkeys to the input_vector in the correct order with the data cast to the correct 
         data type. 
         """
+        target_keys = self.__dspec.orderedVector.keys
+        data_types = self.__dspec.orderedVector.dTypes
         input_vector = []
 
-        for key in self.__dspec.orderedVector:
-            dtype = self.__dspec.orderedVector[key]
+        for index, key in enumerate(target_keys):            
+            # Set datatype according to key
+            dtype = data_types[index]
 
+            # Checking for each key in the input series dictionary 
             if key in self.__inputSeriesDict:
                 input_vector.append(self.__cast_data(self.__inputSeriesDict[key], dtype))
             else:
