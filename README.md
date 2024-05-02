@@ -38,7 +38,7 @@ pip install -r requirements.txt
 1. Ensure that Docker Desktop is running on your machine
 2. Run `docker compose build` and `docker compose up` (run `docker compose up -d` to run in the background)
 3. SSH into semaphore container: `docker exec -it semaphore-core bash`
-4. Navigate and run command from inside the container as needed (e.g. `python3 tools/init_db.py` to init the DB)
+4. Navigate and run command from inside the container as needed (e.g. `python3 tools/migrate_db.py` to init the DB)
 5. Database can be accessed using pgAdmin or VSCode Postgresql Explorer plugin
  ![Register DB to pgAdmin](https://user-images.githubusercontent.com/7061990/268778360-2b92cdc0-19dd-48ae-853c-c52876f747d3.png)
  ![Enter your database credentials to register to pgAdmin](https://user-images.githubusercontent.com/7061990/268778380-36b907c7-da08-4ba8-a232-0c7646dfbb82.png)
