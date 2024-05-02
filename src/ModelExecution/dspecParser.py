@@ -221,7 +221,7 @@ class dspec_sub_Parser_2_0:
             for call in postProcessCalls:
                 parsedCall = PostProcessCall()
                 parsedCall.call = call['call']
-                parsedCall.args = call.get('args')
+                parsedCall.args = call.get('args', {})
                 parsedCalls.append(parsedCall)
             
             self.__dspec.postProcessCall = parsedCalls

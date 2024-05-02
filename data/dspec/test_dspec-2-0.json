@@ -26,7 +26,8 @@
             "series": "dWnSpd",
             "unit": "meter",
             "interval": 3600,
-            "range": [0, 0]
+            "range": [0, 0],
+            "outKey": "WindSpd_01"
         },
         {
             "_name": "Wind Direction",
@@ -35,7 +36,8 @@
             "series": "dWnDir",
             "unit": "degrees",
             "interval": 3600,
-            "range": [0, 0]
+            "range": [0, 0],
+            "outKey": "WindDir_01"
         },
         {
             "_name": "Wind Speed",
@@ -44,7 +46,8 @@
             "series": "dWnSpd",
             "unit": "meter",
             "interval": 3600,
-            "range": [0, -11]
+            "range": [0, -11],
+            "outKey": "WindSpd_12"
         },
         {
             "_name": "Wind Direction",
@@ -53,7 +56,8 @@
             "series": "dWnDir",
             "unit": "degrees",
             "interval": 3600,
-            "range": [0, -11]
+            "range": [0, -11],
+            "outKey": "WindDir_12"
         },
         {
             "_name": "Wind Speed",
@@ -73,6 +77,10 @@
                 "targetSpeedIdx": 0,
                 "targetDirectionIdx": 1,
                 "offset": 0,
+                "inKeys": [
+                    "WindSpd_01",
+                    "WindDir_01"
+                ],
                 "outKeys": [
                     "dXWnCmp000D_1hr",
                     "dYWnCmp000D_1hr"
@@ -85,6 +93,10 @@
                 "targetSpeedIdx": 2,
                 "targetDirectionIdx": 3,
                 "offset": 0,
+                "inKeys": [
+                    "WindSpd_12",
+                    "WindDir_12"
+                ],
                 "outKeys": [
                     "dXWnCmp000D_12hr",
                     "dYWnCmp000D_12hr"
