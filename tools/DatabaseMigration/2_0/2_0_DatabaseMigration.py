@@ -68,7 +68,7 @@ class Migrator(IDatabaseMigration):
 
     def rollback(self, databaseEngine: Engine) -> bool:
         """This function rolls the database back to version 1.0 which involves
-           removing the changes associated with verison 2.0 (the database version table)
+           removing the changes associated with version 2.0 (the database version table)
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
         """
