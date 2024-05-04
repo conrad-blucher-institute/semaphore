@@ -1,0 +1,113 @@
+{
+    "dspecVersion": "2.0",
+    "modelName": "magnolia_transform_24",
+    "modelVersion": "1.0.0",
+    "author": "Jacob Alonzo",
+    "modelFileName": "",
+    "timingInfo":{
+        "offset": 1200,
+        "interval": 3600
+
+    },
+    "outputInfo": {
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 86400,
+        "series": "pWL",
+        "location": "MagnoliaBeach",
+        "unit": "meter" 
+    },
+    "dependentSeries": [
+        { 
+            "_name": "magnolia_24 output",
+            "location": "EstMagnoliaBeach",
+            "source": "semaphore",
+            "series": "magnolia_24 output",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range":  [7, 19],
+            "outKey": "MG_24_output_12"
+        },
+        { 
+            "_name": "Wind Direction Prediction",
+            "location": "PortLavaca",
+            "source": "NDFD",
+            "series": "pWnDir",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range": [1, 24],
+            "outKey": "PL_WNDIR_F24"
+        },
+        { 
+            "_name": "Wind Speed Prediction",
+            "location": "PortLavaca",
+            "source": "NDFD",
+            "series": "pWnSpd",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range": [1, 24],
+            "outKey": "PL_WNDSPD_F24"
+        },
+        { 
+            "_name": "Harmonic Predictions",
+            "location": "PortLavaca",
+            "source": "TCOON",
+            "series": "pHarm",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range":  [7, 19],
+            "outKey": "PL_pHarm_12"
+        },
+        { 
+            "_name": "Harmonic Predictions POC",
+            "location": "PortOConnor",
+            "source": "TCOON",
+            "series": "pHarm",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range":  [7, 19],
+            "outKey": "POC_pHarm_12"
+        }
+
+    ],
+    "postProcessCall": [
+        {
+            "call": "computeWindComponents",
+            "args": {
+                "offset": 0,
+                "targetWindSpeed_inKey":"PL_WNDSPD_F24",
+                "targetWindDirection_inKey":"PL_WNDIR_F24",
+                "x_comp_outKey": "x_PL_WNDCMP_F24", 
+                "y_comp_outKey": "y_PL_WNDCMP_F24"      
+            }
+        },
+        {
+            "call": "magnolia_predictions_post_process",
+            "args": {
+                "predHarmFirst_inKey":"PL_pHarm_12",
+                "predHarmSecond_inKey":"POC_pHarm_12",
+                "magnolia_Pred_inKey":"MG_24_output_12",
+                "Magnolia_WL_outKey": "MG_WL_F12"        
+            }
+        }
+        
+    ],
+    "vectorOrder": [
+        {
+            "key": "MG_WL_F12",
+            "dType": "float"
+        },
+        {
+            "key": "x_PL_WNDCMP_F24",
+            "dType": "float"
+        },
+        {
+            "key": "y_PL_WNDCMP_F24",
+            "dType": "float"
+        }
+    ]
+}
