@@ -1,6 +1,6 @@
 {
     "modelName": "ar_inundation_oct_48h",
-    "modelVersion": "1.0.1",
+    "modelVersion": "1.0.0",
     "author": "Marina VicensMiquel",
     "modelFileName": "./inundation/October/october_48h",
     "timingInfo":{
