@@ -24,7 +24,7 @@ from DataClasses import Series, SeriesDescription, Input, TimeDescription, Semap
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
 
-class Semaphore(IDataIngestion):
+class SEMAPHORE(IDataIngestion):
 
     def __init__(self):
         self.series_storage = series_storage_factory()
@@ -59,7 +59,7 @@ class Semaphore(IDataIngestion):
     
 
     def __convert_input_to_output(self, outputs: list[Output]) -> list[Input]:
-        
+        """A simple method to cast and output object into an input object"""
         inputs = []
         for output in outputs:
 
@@ -76,3 +76,4 @@ class Semaphore(IDataIngestion):
                     timeGenerated
                 )
             )
+        return inputs
