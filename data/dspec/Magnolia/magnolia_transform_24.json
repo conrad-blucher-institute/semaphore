@@ -20,8 +20,8 @@
         { 
             "_name": "magnolia_24 output",
             "location": "EstMagnoliaBeach",
-            "source": "semaphore",
-            "series": "magnolia_24 output",
+            "source": "SEMAPHORE",
+            "series": "magnolia_24|1.0.0|pSurge",
             "unit": "meter",
             "type": "float",
             "interval": 3600,
