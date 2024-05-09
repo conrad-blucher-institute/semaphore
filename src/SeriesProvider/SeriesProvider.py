@@ -105,16 +105,15 @@ class SeriesProvider():
          merged_df.set_index("timeVerified", inplace=True)
          
          #Fill in the missing predictions and timestamps with NaNs
-         filled_merged_df = fill_in_date_gaps(merged_df,timeDescription.fromDateTime, timeDescription.toDateTime, timeDescription.interval,)
+         filled_merged_df = fill_in_date_gaps(merged_df,timeDescription.fromDateTime, timeDescription.toDateTime, timeDescription.interval)
          #interpolate with time series interpolation
-         largerThanMaxGapDistance, rows_with_nan = check_gap_distance(filled_merged_df, seriesDescription.maxGapDistance, timeDescription.interval)
+         largerThanMaxGapDistance = check_gap_distance(filled_merged_df, seriesDescription.maxGapDistance, timeDescription.interval)
          if largerThanMaxGapDistance:
              log(f'''Interpolation error,
                     Reason: There are gaps between data that is larger than the maxGapDistance limit.\n 
                     {seriesDescription} \n 
                     {timeDescription} \n 
                     maxGapDistance: {seriesDescription.maxGapDistance}
-                    Rows with NaN only: {rows_with_nan}
                 ''')
              return validated_merged_result   
              
@@ -134,9 +133,9 @@ class SeriesProvider():
          validated_merged_result.isComplete = True
          return validated_merged_result
      
-    def  check_gap_distance(df: pd.DataFrame, maxGapDistance: timedelta, interval: timedelta):
-        """This method will remove all rows with successfull queries leaving just the NaN values. It will then check to make 
-        sure that there isn't a distance between two NAN values that is larger than the maxGapDistance. 
+    def  check_gap_distance(df: pd.DataFrame, maxGapDistance: timedelta, interval: timedelta) -> bool:
+        """This method will remove all rows with successfull queries leaving just the NaN values. 
+        It will then check to see if there is a group of consecutive NaNs that are larger than the maxGapDistance.
 
         Args:
             df (pd.DataFrame): The dataFrame of data
@@ -182,7 +181,7 @@ class SeriesProvider():
             previous_date = current_date
 
         # If no NaN gap was greater than maxGapDistance
-        return False, rows_with_nan
+        return False
              
     def fill_in_date_gaps(df : pd.DataFrame , start_date : datetime , end_date : datetime , interval : timedelta ) -> pd.DataFrame:
         """Fills in missing date gaps with NaNs based on given interval.
