@@ -113,21 +113,21 @@
     ],
     "postProcessCall": [
         {
-            "call": "computeWindComponents",
+            "call": "ResolveVectorComponents",
             "args": {
                 "offset": 0,
-                "targetWindSpeed_inKey":"PL_PWSPD_F20",
-                "targetWindDirection_inKey":"PL_PWNDIR_F20",
+                "targetMagnitude_inKey":"PL_PWSPD_F20",
+                "targetDirection_inKey":"PL_PWNDIR_F20",
                 "x_comp_outKey": "x_PL_PWNDCMP_F20", 
                 "y_comp_outKey": "y_PL_PWNDCMP_F20"      
             }
         },
         {
-            "call": "computeWindComponents",
+            "call": "ResolveVectorComponents",
             "args": {
                 "offset": 0,
-                "targetWindSpeed_inKey":"PL_WNSPD_25",
-                "targetWindDirection_inKey":"PL_WNDIR_25",
+                "targetMagnitude_inKey":"PL_WNSPD_25",
+                "targetDirection_inKey":"PL_WNDIR_25",
                 "x_comp_outKey": "x_PL_PWNDCMP_25", 
                 "y_comp_outKey": "y_PL_PWNDCMP_25"      
             }
