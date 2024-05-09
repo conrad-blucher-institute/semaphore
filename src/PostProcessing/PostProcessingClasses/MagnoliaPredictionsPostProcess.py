@@ -39,7 +39,7 @@ class MagnoliaPredictionsPostProcess(IPostProcessing):
 
     """
     def post_process_data(self, preprocessedData: dict[str, Series], postProcessCall: PostProcessCall ) -> dict[str, Series]:
-        """Abstract method to define the post-processing operation.
+        """Method to define the post-processing operation.
 
         Args:
             preprocessedData (dict[str, Series]): Preprocessed data to be post-processed with keys.
