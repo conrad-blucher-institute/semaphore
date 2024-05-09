@@ -86,7 +86,7 @@
             }
         },
         {
-            "call": "magnolia_predictions_post_process",
+            "call": "MagnoliaPredictionsPostProcess",
             "args": {
                 "predHarmFirst_inKey":"PL_pHarm_12",
                 "predHarmSecond_inKey":"POC_pHarm_12",
