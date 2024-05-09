@@ -38,7 +38,7 @@ class Average(IPostProcessing):
 
     """
     def post_process_data(self, preprocessedData: dict[str, Series], postProcessCall: PostProcessCall ) -> dict[str, Series]:
-        """Abstract method to define the post-processing operation.
+        """Method to define the post-processing operation.
 
         Args:
             preprocessedData (dict[str, Series]): Preprocessed data to be post-processed with keys.
@@ -53,7 +53,7 @@ class Average(IPostProcessing):
         first_series = preprocessedData[args['targetAvgFirst_inKey']]
         second_series = preprocessedData[args['targetAvgSecond_inKey']]
 
-        # Iterate through the magnitude and direction data, calculating components, and saving results in Input objects
+        # Iterate through the both series taking their average
         averages = []
         for first, second in zip(first_series.data, second_series.data):
 
@@ -70,7 +70,7 @@ class Average(IPostProcessing):
                 )
             )
 
-        # Repack component vectors as new series, reading the key from the arguments obj
+        # Repack average as new series, reading the key from the arguments obj
         desc = first_series.description
 
         average_outKey = args['avg_outkey']
