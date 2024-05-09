@@ -27,7 +27,9 @@
             "unit": "meter",
             "interval": 3600,
             "range": [0, 0],
-            "outKey": "WindSpd_01"
+            "outKey": "WindSpd_01",
+            "maxGapDistance" : 60
+            
         },
         {
             "_name": "Wind Direction",

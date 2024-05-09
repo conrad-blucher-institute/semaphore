@@ -100,20 +100,22 @@ class SeriesDescription():
         :param dataSource: str - The data's source (e.g. 'NOAATANDC')
         :param dataSeries: str - The series name (e.g. 'x_wind')
         :param dataLocation: str - The location of the data ('packChan')
+        :param maxGapDistance: timedelta - The max gap distance allowed for interpolation
         :param dataDatum: str = None
     """
-    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None, verificationOverride: int = None) -> None:
+    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None, maxGapDistance : timedelta = None, verificationOverride: int = None) -> None:
         self.dataSource = dataSource
         self.dataSeries = dataSeries
         self.dataLocation = dataLocation
         self.dataDatum = dataDatum
+        self.maxGapDistance = maxGapDistance
         self.verificationOverride = verificationOverride
 
     def __str__(self) -> str:
-        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, verificationOverride: {self.verificationOverride}'
+        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, maxGapDistance: {self.maxGapDistance}, verificationOverride: {self.verificationOverride}'
     
     def __repr__(self) -> str:
-        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum}, {self.verificationOverride})'
+        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum}, {self.maxGapDistance}, {self.verificationOverride})'
 
 
 class SemaphoreSeriesDescription():

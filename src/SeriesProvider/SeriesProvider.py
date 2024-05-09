@@ -15,8 +15,8 @@ from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataIngestion.IDataIngestion import data_ingestion_factory
 from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription, Input
 from utility import log
-
-from datetime import timedelta
+import pandas as pd
+from datetime import timedelta,datetime
 
 
 
@@ -39,7 +39,7 @@ class SeriesProvider():
             returningSeries = self.seriesStorage.insert_output(series)
 
         return returningSeries
-
+    
     def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series:
         """This method attempts to return a series matching a series description and a time description.
             It will attempt first to get the series from series storage, kicking off data ingestion if series storage
@@ -70,7 +70,7 @@ class SeriesProvider():
         if(validated_merged_result.isComplete):
             return validated_merged_result
         
-        # If neither were valid then we log this occurrence. We still return the best result we have, which is the merged result 
+        # If neither were valid then we log the occurence of missing values and check for interpolation. Then we return the interpolated result.
         log(f'''Request input failure, 
                     Reason: {validated_merged_result.nonCompleteReason} \n 
                     {seriesDescription} \n 
@@ -79,9 +79,134 @@ class SeriesProvider():
                     Data Ingestion Result: {None if data_ingestion_results == None else data_ingestion_results.data} \n
                     Merged Result: {validated_merged_result.data}
             ''')
-        return validated_merged_result
-
+        
+        if seriesDescription.maxGapDistance is not None:
             
+            interpolated_merged_results = interpolate_series(seriesDescription, timeDescription, validated_merged_result)
+            return interpolated_merged_results
+        
+        return validated_merged_result
+      
+    
+    def interpolate_series(seriesDescription: SeriesDescription, timeDescription: TimeDescription, validated_merged_result: Series) -> Series: 
+         """This method will interpolate the results from the query if the gaps between the NaNs are not larger than the maxGapDistance
+
+        Args:
+            seriesDescription (SeriesDescription): Describes a set of data
+            timeDescription (TimeDescription): Describes the date time properties of the dataset
+            validated_merged_result (Series): The merged result of the DB and DI queries
+
+        Returns:
+            Series : The merged result of the DB and DI queries
+        """
+        
+         merged_df = pd.DataFrame([input.__dict__ for input in validated_merged_result.data])
+         
+         merged_df.set_index("timeVerified", inplace=True)
+         
+         #Fill in the missing predictions and timestamps with NaNs
+         filled_merged_df = fill_in_date_gaps(merged_df,timeDescription.fromDateTime, timeDescription.toDateTime, timeDescription.interval,)
+         #interpolate with time series interpolation
+         largerThanMaxGapDistance, rows_with_nan = check_gap_distance(filled_merged_df, seriesDescription.maxGapDistance, timeDescription.interval)
+         if largerThanMaxGapDistance:
+             log(f'''Interpolation error,
+                    Reason: There are gaps between data that is larger than the maxGapDistance limit.\n 
+                    {seriesDescription} \n 
+                    {timeDescription} \n 
+                    maxGapDistance: {seriesDescription.maxGapDistance}
+                    Rows with NaN only: {rows_with_nan}
+                ''')
+             return validated_merged_result   
+             
+         filled_merged_df['dataValue'] = filled_merged_df['dataValue'].interpolate(method='linear', limit = seriesDescription.maxGapDistance)
+         filled_merged_df.reset_index(inplace=True)
+         inputs = [] 
+         for __, row in filled_merged_df.iterrows():
+             inputs.append(Input(
+                 dataValue=row["dataValue"],
+                 dataUnit=row["dataUnit"],
+                 timeGenerated=row["timeGenerated"],
+                 timeVerified=row["timeVerified"],
+                 longitude=row["longitude"],
+                 latitude=row["latitude"]
+             ))  
+         validated_merged_result.data = inputs
+         validated_merged_result.isComplete = True
+         return validated_merged_result
+     
+    def  check_gap_distance(df: pd.DataFrame, maxGapDistance: timedelta, interval: timedelta):
+        """This method will remove all rows with successfull queries leaving just the NaN values. It will then check to make 
+        sure that there isn't a distance between two NAN values that is larger than the maxGapDistance. 
+
+        Args:
+            df (pd.DataFrame): The dataFrame of data
+            maxGapDistance (timedelta): The max gap distance the researcher allows for their model
+            interval (timedelta): The time step separating the data points in order
+
+        Returns:
+            bool: Determines if a gap is larger than the maxGapDistance
+            DataFrame: Dataframe of the rows without NaNs
+        """
+        # Find any rows that have NaNs
+        nan_mask = df.isna().any(axis=1)
+
+        # Extract only rows with NaNs <- Important
+        rows_with_nan = df[nan_mask]
+
+        previous_date = None
+        nan_gap_size = 1
+        for current_date in rows_with_nan.index:
+
+            # If first date, set the previous date to the current date and then continue
+            if previous_date is None:
+
+                previous_date = current_date
+
+                continue
+
+            time_difference = current_date - previous_date
+
+            # Since there are only rows with Nans present, if the time difference between the previous date and the current date is 
+            # greater than the interval then there is a prediction/data present between the values
+            if (time_difference > interval):
+                # Reset the counter
+                nan_gap_size = 1
+
+            else:
+                nan_gap_size += 1
+
+            # If the NaN gap is greater than maxGapDistance, return True
+            if(nan_gap_size > maxGapDistance):
+                return True
+
+            previous_date = current_date
+
+        # If no NaN gap was greater than maxGapDistance
+        return False, rows_with_nan
+             
+    def fill_in_date_gaps(df : pd.DataFrame , start_date : datetime , end_date : datetime , interval : timedelta ) -> pd.DataFrame:
+        """Fills in missing date gaps with NaNs based on given interval.
+
+            Args:
+                df [DataFrame]: pandas dataframe
+
+                start_date (datetime): Date to start at
+
+                end_date (datetime): Date to end at
+
+                interval (timedelta): The time step separating the data points in order
+
+            Returns:
+                [DataFrame]: pandas dataframe containing desired data
+            """
+
+        all_dates = pd.date_range(start=start_date, end=end_date, freq=interval)
+
+        all_dates_df = pd.DataFrame(index=all_dates)
+
+        merged_df = pd.merge(all_dates_df, df, left_index=True, right_index=True, how='left')
+
+        return merged_df
     
     def request_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription: TimeDescription) -> Series: 
         ''' Takes a description of an output series and attempts to return it
@@ -173,7 +298,7 @@ class SeriesProvider():
 
             # If a result was missing, an input was not mapped to that key. Thus its mapped to None. We remove the whole k:v pair as to not pollute the results with None.
             datetimeDict = {k : v for k, v in datetimeDict.items() if v is not None}
-
+            #Taking out the entire pair including the timestamp may make it difficult to interpolate
         result = Series(
             description= seriesDescription, 
             isComplete= isComplete,

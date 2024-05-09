@@ -75,6 +75,7 @@ class InputGatherer:
                         series.series, 
                         series.location, 
                         series.datum, 
+                        series.maxGapDistance,
                         series.verificationOverride
                     ), 
                     TimeDescription(
