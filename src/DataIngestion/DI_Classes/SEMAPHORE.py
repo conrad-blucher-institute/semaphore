@@ -54,11 +54,11 @@ class SEMAPHORE(IDataIngestion):
 
         # Repack the data with the original series description and return
         return_series = Series(seriesDescription, True, timeDescription)
-        return_series.data = self.__convert_input_to_output(result.data) # Cast outputs to inputs
+        return_series.data = self.__convert_output_to_input(result.data) # Cast outputs to inputs
         return return_series
     
 
-    def __convert_input_to_output(self, outputs: list[Output]) -> list[Input]:
+    def __convert_output_to_input(self, outputs: list[Output]) -> list[Input]:
         """A simple method to cast and output object into an input object"""
         inputs = []
         for output in outputs:
