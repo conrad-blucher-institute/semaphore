@@ -72,7 +72,6 @@ class ModelWrapper:
         
         shape = self._model.input_shape
         
-        log(f'input shape {shape}')
         
         if type(shape) == list:
             shape = shape[0]
