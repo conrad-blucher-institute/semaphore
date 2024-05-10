@@ -25,6 +25,7 @@ from os import path, getenv
 from numpy import array, reshape
 from tensorflow.keras.models import load_model
 
+
 class ModelWrapper:
     def __init__(self, dspecFileName: str) -> None:
         """
@@ -67,11 +68,11 @@ class ModelWrapper:
         to the correct shape required by the model, dynamically. The shape that the input comes in
         and what the model was trained with, aren't necessarily the same.
         """
-
-        #Get only first and last layers
-        firstLayer, *_, lastLayer = self._model.layers 
-
-        shape = firstLayer.input_shape
+      
+        
+        shape = self._model.input_shape
+        
+        
         if type(shape) == list:
             shape = shape[0]
 

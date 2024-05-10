@@ -1,0 +1,63 @@
+{
+    "modelName": "ar_inundation_may_12h",
+    "modelVersion": "1.0.0",
+    "author": "Marina VicensMiquel",
+    "modelFileName": "./inundation/May/may_12h",
+    "timingInfo":{
+        "offset": 60,
+        "interval": 3600
+    },
+    "outputInfo": {
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 43200,
+        "series": "pInundation",
+        "location": "Aransas",
+        "unit" : "meter"
+    },
+    "inputs": [
+        { 
+            "_name": "4 Max Mean DPD",
+            "location": "Freeport",
+            "source": "NDBC",
+            "series": "d_12h_4mm_DPD",
+            "unit": "seconds",
+            "type": "float",
+            "interval": 3600,
+            "range": [0, -11],
+            "verificationOverride": 1
+        },
+        { 
+            "_name": "4 Max Mean APD",
+            "location": "Freeport",
+            "source": "NDBC",
+            "series": "d_12h_4mm_APD",
+            "unit": "seconds",
+            "type": "float",
+            "interval": 3600,
+            "range": [0, -11],
+            "verificationOverride": 1
+        },
+        { 
+            "_name": "4 Max Mean WVHT",
+            "location": "Freeport",
+            "source": "NDBC",
+            "series": "d_12h_4mm_WVHT",
+            "unit": "meter",
+            "type": "float",
+            "interval": 3600,
+            "range": [0, -11],
+            "verificationOverride": 1
+        },
+        { 
+            "_name": "4 Max Mean Water Level",
+            "location": "Aransas",
+            "source": "NOAATANDC",
+            "series": "d_12h_4mm_wl",
+            "unit": "meter",
+            "type": "float",
+            "datum": "NAVD",
+            "interval": 3600,
+            "range": [0, -11],
+            "verificationOverride": 1
+        }
+]}

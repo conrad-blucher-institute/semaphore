@@ -1,8 +1,8 @@
 {
-    "modelName": "ar_inundation_march_24h",
-    "modelVersion": "1.0.1",
+    "modelName": "ar_inundation_sep_24h",
+    "modelVersion": "1.0.0",
     "author": "Marina VicensMiquel",
-    "modelFileName": "./inundation/March/march_24h",
+    "modelFileName": "./inundation/September/september_24h",
     "timingInfo":{
         "offset": 60,
         "interval": 3600

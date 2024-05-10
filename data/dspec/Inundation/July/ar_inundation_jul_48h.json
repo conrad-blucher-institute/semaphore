@@ -1,8 +1,8 @@
 {
-    "modelName": "ar_inundation_april_48h",
-    "modelVersion": "1.0.1",
+    "modelName": "ar_inundation_jul_48h",
+    "modelVersion": "1.0.0",
     "author": "Marina VicensMiquel",
-    "modelFileName": "./inundation/April/april_48h",
+    "modelFileName": "./inundation/July/july_48h",
     "timingInfo":{
         "offset": 60,
         "interval": 3600
