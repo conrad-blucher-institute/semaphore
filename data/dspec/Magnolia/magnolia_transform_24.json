@@ -53,7 +53,7 @@
         { 
             "_name": "Harmonic Predictions",
             "location": "PortLavaca",
-            "source": "TCOON",
+            "source": "LIGHTHOUSE",
             "series": "pHarm",
             "unit": "meter",
             "type": "float",
@@ -64,7 +64,7 @@
         { 
             "_name": "Harmonic Predictions POC",
             "location": "PortOConnor",
-            "source": "TCOON",
+            "source": "lIGHTHOUSE",
             "series": "pHarm",
             "unit": "meter",
             "type": "float",

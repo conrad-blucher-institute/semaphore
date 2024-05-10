@@ -1,5 +1,4 @@
 dataLocationCode,dataSourceCode,dataSourceLocationCode,priorityOrder
-PortLavaca,NDFD,0,0
-PortLavacatcoon,tcoon,"________",0
-PortOConnor,tcoon,"____",0
-
+"PortLavaca","NDFD","0",0
+"PortLavaca","LIGHTHOUSE","033",0
+"PortOConnor","LIGHTHOUSE","057",0
