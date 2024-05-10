@@ -38,12 +38,12 @@ class Migrator(IDatabaseMigration):
         # Reflect the tables from the database that we want to add data too
         metadata = MetaData()
         metadata.reflect(bind=databaseEngine)
-        self.ref_dataLocation = metadata.tables['ref_dataLocation']
-        self.ref_dataSource = metadata.tables['ref_dataSource']
+        ref_dataLocation = metadata.tables['ref_dataLocation']
+        ref_dataSource = metadata.tables['ref_dataSource']
 
         # Insert the data based off of csv files
-        self.insert_ref_dataLocation(self.readInitCSV('magnoliaLocations.csv'))
-        self.insert_ref_dataSource(self.readInitCSV('semaphoreDataSource.csv'))
+        self.insert_ref_data(self.readInitCSV('magnoliaLocations.csv'), ref_dataLocation)
+        self.insert_ref_data(self.readInitCSV('semaphoreDataSource.csv'), ref_dataSource)
         
         return True
     
@@ -63,37 +63,20 @@ class Migrator(IDatabaseMigration):
 
         return dictionaryList
     
-    def insert_ref_dataLocation(self, rows: list[dict]) -> list[tuple]:
+    def insert_ref_data(self, rows: list[dict], table: Table) -> list[tuple]:
         """This method inserts reference rows
             :param rows: A list of dictionaries. The dict can be found in NOTE 1
             :return Series - SQLALCHEMY tupleish rows
             NOTE:: {"code": None, "displayName": None, "notes": None, "latitude": None, "longitude": None}
         """
         with self.__engine.connect() as conn:
-            cursor = conn.execute(insert(self.ref_dataLocation)
-                                  .returning(self.ref_dataLocation)
+            cursor = conn.execute(insert(table)
+                                  .returning(table)
                                   .values(rows)
                                   )
             result = cursor.fetchall()
             conn.commit()
             return result
-        
-    def insert_ref_dataSource(self, rows: list[dict]) -> list[tuple]:
-        """This method inserts reference rows
-            :param rows: A list of dictionaries. The dict can be found in NOTE 1
-            :return Series - SQLALCHEMY tupleish rows
-            NOTE:: {"code": None, "displayName": None, "notes": None}
-        """
-        
-        with self.__engine.connect() as conn:
-            cursor = conn.execute(insert(self.ref_dataSource)
-                                  .returning(self.ref_dataSource)
-                                  .values(rows)
-                                  )
-            result = cursor.fetchall()
-            conn.commit()
-        return result
-
 
     def rollback(self, databaseEngine: Engine) -> bool:
         """This function rolls the database back to version 2.0 which involves removing the changes 
@@ -108,16 +91,16 @@ class Migrator(IDatabaseMigration):
         # Reflect the tables from the database that we want to add data too
         metadata = MetaData()
         metadata.reflect(bind=databaseEngine)
-        self.ref_dataLocation = metadata.tables['ref_dataLocation']
-        self.ref_dataSource = metadata.tables['ref_dataSource']
+        ref_dataLocation = metadata.tables['ref_dataLocation']
+        ref_dataSource = metadata.tables['ref_dataSource']
 
         # Delete the data according to csv files
-        self.remove_ref_dataLocation(self.readInitCSV('magnoliaLocations.csv'))
-        self.remove_ref_dataSource(self.readInitCSV('semaphoreDataSource.csv'))
+        self.remove_ref_data(self.readInitCSV('magnoliaLocations.csv'), ref_dataLocation)
+        self.remove_ref_data(self.readInitCSV('semaphoreDataSource.csv'), ref_dataSource)
 
         return True
     
-    def remove_ref_dataLocation(self, conditions: list[dict]) -> list[tuple]:
+    def remove_ref_data(self, conditions: list[dict], table: Table) -> list[tuple]:
         """This method removes reference rows
             :param conditions: A list of dictionaries. The dict can be found in NOTE 1
             :return Series - SQLALCHEMY tupleish rows that were removed
@@ -127,43 +110,16 @@ class Migrator(IDatabaseMigration):
             # First, fetch the rows that are going to be deleted (for returning)
             results = []
             for condition in conditions:
-                stmt = select(self.ref_dataLocation).where(
-                    *[getattr(self.ref_dataLocation.c, key) == value for key, value in condition.items()])
+                stmt = select(table).where(
+                    *[getattr(table.c, key) == value for key, value in condition.items()])
                 results.extend(conn.execute(stmt).fetchall())
 
             # Now delete the rows
             for condition in conditions:
-                delete_stmt = delete(self.ref_dataLocation).where(
-                    *[getattr(self.ref_dataLocation.c, key) == value for key, value in condition.items()])
+                delete_stmt = delete(table).where(
+                    *[getattr(table.c, key) == value for key, value in condition.items()])
                 conn.execute(delete_stmt)
                 
             conn.commit()
 
         return results
-        
-    def remove_ref_dataSource(self, conditions: list[dict]) -> list[tuple]:
-        """This method removes reference rows
-            :param conditions: A list of dictionaries. The dict can be found in NOTE 1
-            :return Series - SQLALCHEMY tupleish rows that were removed
-            NOTE:: {"code": None, "displayName": None, "notes": None}
-        """
-        
-        with self.__engine.connect() as conn:
-            # First, fetch the rows that are going to be deleted (for returning)
-            results = []
-            for condition in conditions:
-                stmt = select(self.ref_dataSource).where(
-                    *[getattr(self.ref_dataSource.c, key) == value for key, value in condition.items()])
-                results.extend(conn.execute(stmt).fetchall())
-
-            # Now delete the rows
-            for condition in conditions:
-                delete_stmt = delete(self.ref_dataSource).where(
-                    *[getattr(self.ref_dataSource.c, key) == value for key, value in condition.items()])
-                conn.execute(delete_stmt)
-
-            conn.commit()
-
-        
-        return results
-        
