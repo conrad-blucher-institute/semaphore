@@ -16,7 +16,7 @@ from DataIngestion.IDataIngestion import data_ingestion_factory
 from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription, Input
 from utility import log
 import pandas as pd
-from datetime import timedelta,datetime
+from datetime import datetime, timedelta
 
 
 
@@ -107,6 +107,9 @@ class SeriesProvider():
          # Add the missing timeVerified datetimes and fill the remaining columns with NaNs
          filled_input_df = self.__fill_in_date_gaps(input_df,inSeries.timeDescription.fromDateTime, inSeries.timeDescription.toDateTime, inSeries.timeDescription.interval)
          
+         # Rename the index back to 'timeVerified' after filling in date gaps
+         filled_input_df.index = filled_input_df.index.rename('timeVerified')
+
          largerThanMaxGapDistance = self.__check_gap_distance(filled_input_df, inSeries.description.maxGapDistance, inSeries.timeDescription.interval)
          if largerThanMaxGapDistance:
              log(f'''Interpolation error,
@@ -116,9 +119,20 @@ class SeriesProvider():
                 ''')
              return inSeries  
              
-         filled_input_df['dataValue'] = filled_input_df['dataValue'].interpolate(method='linear', limit = inSeries.description.maxGapDistance)
+         # Cast dataValue string to float for interpolation
+         filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(float)
 
+         # No limit is set since we already checked if the limit was passed above
+         filled_input_df['dataValue'] = filled_input_df['dataValue'].interpolate(method='linear')
+
+         # Convert dataValue back to string
+         filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(str)
+
+         # Reset the index to make timeVerified a normal column again
          filled_input_df.reset_index(inplace=True)
+
+         # Backfill/Forward-fill the remaining columns that are NaN/NaT.
+         filled_input_df.ffill().bfill()
 
          inputs = [] 
          for __, row in filled_input_df.iterrows():
@@ -148,8 +162,8 @@ class SeriesProvider():
         Returns:
             bool: Determines if a gap is larger than the maxGapDistance
         """
-        # Find any rows that have NaNs
-        nan_mask = df.isna().any(axis=1)
+        # Find any rows where dataValue is NaN
+        nan_mask = df['dataValue'].isna()
 
         # Extract only rows with NaNs
         rows_with_nan = df[nan_mask]
@@ -177,7 +191,7 @@ class SeriesProvider():
                 nan_gap_size += 1
 
             # If the NaN gap is greater than maxGapDistance, return True
-            if(nan_gap_size > maxGapDistance):
+            if(nan_gap_size * interval > maxGapDistance):
                 return True
 
             previous_date = current_date
