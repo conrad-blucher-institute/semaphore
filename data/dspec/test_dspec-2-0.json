@@ -27,8 +27,8 @@
             "unit": "meter",
             "interval": 3600,
             "range": [0, 0],
-            "outKey": "WindSpd_01",
-            "maxGapDistance" : 60
+            "outKey": "WindSpd_01"
+            
             
         },
         {
@@ -39,7 +39,13 @@
             "unit": "degrees",
             "interval": 3600,
             "range": [0, 0],
+            "interpolationParameters": {
+                "method": "linear",
+                "limit": 3600
+            },
             "outKey": "WindDir_01"
+            
+
         },
         {
             "_name": "Wind Speed",

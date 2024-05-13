@@ -120,11 +120,12 @@ class dspec_sub_Parser_1_0:
                 dseries.series = inputJson["series"]
                 dseries.interval = inputJson["interval"]
                 dseries.range = inputJson["range"]
+                dseries.interpolationParameters = inputJson.get("interpolationParameters",{"method": None, "limit": None})
                 dseries.datum = inputJson.get("datum")
                 dseries.unit = inputJson.get("unit")
                 dseries.verificationOverride = inputJson.get("verificationOverride")
                 dseries.outKey = str(idx) # Assign it a key for ordered vector
-                dseries.maxGapDistance = inputJson.get("maxGapDistance")
+
 
                 # We record what is needed for the ordered vector
                 types.append(inputJson["type"])
@@ -205,11 +206,12 @@ class dspec_sub_Parser_2_0:
                 dSeries.series = dSeries_dict["series"]
                 dSeries.interval = dSeries_dict["interval"]
                 dSeries.range = dSeries_dict["range"]
+                dSeries.interpolationParameters = dSeries_dict.get("interpolationParameters",{"method": None, "limit": None})
                 dSeries.datum = dSeries_dict.get("datum")
                 dSeries.unit = dSeries_dict.get("unit")
                 dSeries.outKey = dSeries_dict.get("outKey")
                 dSeries.verificationOverride = dSeries_dict.get("verificationOverride")
-                dSeries.maxGapDistance = dSeries_dict.get("maxGapDistance")
+                
                 
 
                 dependentSeries.append(dSeries)
@@ -294,15 +296,16 @@ class DependentSeries:
         self.datum = None
         self.interval = None
         self.range = None
+        self.interpolationParameters = {}
         self.outKey = None
         self.verificationOverride = None
-        self.maxGapDistance = None
+        
         
     def __str__(self) -> str:
-        return f'\n[InputInfo] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, datum: {self.datum}, range: {self.range}, outkey: {self.outKey}, maxGapDistance: {self.maxGapDistance}, verificationOverride: {self.verificationOverride}'
+        return f'\n[InputInfo] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, datum: {self.datum}, range: {self.range}, outkey: {self.outKey}, interpolation: {self.interpolation}, verificationOverride: {self.verificationOverride}'
     
     def __repr__(self):
-        return f'\nInputInfo({self.name}, {self.location}, {self.source}, {self.series}, {self.unit}, {self.datum}, {self.range}, {self.outKey},{self.maxGapDistance}, {self.verificationOverride})'
+        return f'\nInputInfo({self.name}, {self.location}, {self.source}, {self.series}, {self.unit}, {self.datum}, {self.range}, {self.outKey},{self.interpolation}, {self.verificationOverride})'
     
 class PostProcessCall:
     '''All information pertaining to a required call to a post processing function'''

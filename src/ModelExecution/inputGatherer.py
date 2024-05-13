@@ -68,14 +68,14 @@ class InputGatherer:
                 if (series.range[0] == series.range[1]): 
                     fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
                 
-                # Create paring of series description and time description to pass to series provider
+                # Create pairing of series description and time description to pass to series provider
                 seriesDescriptionsTimeDescriptions.append((
                     SeriesDescription(
                         series.source,
                         series.series, 
                         series.location, 
                         series.datum, 
-                        series.maxGapDistance,
+                        series.interpolationParameters,
                         series.verificationOverride
                     ), 
                     TimeDescription(

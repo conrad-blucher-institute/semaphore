@@ -11,10 +11,10 @@
 # 
 #
 #Imports
-from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataIngestion.IDataIngestion import data_ingestion_factory
-from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription, Input
-from utility import log
+from src.SeriesStorage.ISeriesStorage import series_storage_factory
+from src.DataIngestion.IDataIngestion import data_ingestion_factory
+from src.DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription, Input
+from src.utility import log
 import pandas as pd
 from datetime import datetime, timedelta
 
@@ -82,7 +82,7 @@ class SeriesProvider():
       
     
     def __interpolate_series(self, inSeries: Series) -> Series: 
-         """This method will interpolate the results from the query if the gaps between the NaNs are not larger than the maxGapDistance
+         """This method will interpolate the results from the query if the gaps between the NaNs are not larger than the limit
 
         Args:
             inSeries (Series): The incomplete merged result of the DB and DI queries
@@ -90,11 +90,18 @@ class SeriesProvider():
         Returns:
             Series : The Series with new interpolated Inputs added
         """
-         if inSeries.description.maxGapDistance is None:
+         timeDescription = inSeries.timeDescription
+         seriesDescription = inSeries.description
+         interpolationParameters = seriesDescription.interpolationParameters
+         
+         #What if its none?
+         method = interpolationParameters.get("method")
+         limit = interpolationParameters.get("limit")
+         if limit is None:
              log(f'''Interpolation error,
-                    Reason: maxGapDistance not defined.\n 
-                    {inSeries.description} \n 
-                    {inSeries.timeDescription} \n 
+                    Reason: limit not defined.\n 
+                    {seriesDescription} \n 
+                    {timeDescription} \n 
                 ''')
              return inSeries
         
@@ -103,17 +110,17 @@ class SeriesProvider():
          input_df.set_index('timeVerified', inplace=True)
          
          # Add the missing timeVerified datetimes and fill the remaining columns with NaNs
-         filled_input_df = self.__fill_in_date_gaps(input_df,inSeries.timeDescription.fromDateTime, inSeries.timeDescription.toDateTime, inSeries.timeDescription.interval)
+         filled_input_df = self.__fill_in_date_gaps(input_df, timeDescription.fromDateTime, timeDescription.toDateTime, timeDescription.interval)
          
          # Rename the index back to 'timeVerified' after filling in date gaps
          filled_input_df.index = filled_input_df.index.rename('timeVerified')
 
-         largerThanMaxGapDistance = self.__check_gap_distance(filled_input_df, inSeries.description.maxGapDistance, inSeries.timeDescription.interval)
-         if largerThanMaxGapDistance:
+         largerThanLimit = self.__check_gap_distance(filled_input_df, limit, timeDescription.interval)
+         if largerThanLimit:
              log(f'''Interpolation error,
-                    Reason: There are gaps in the data that are larger than the maxGapDistance limit.\n 
-                    {inSeries.description} \n 
-                    {inSeries.timeDescription} \n 
+                    Reason: There are gaps in the data that are larger than the limit parameter.\n 
+                    {seriesDescription} \n 
+                    {timeDescription} \n 
                 ''')
              return inSeries  
              
@@ -121,7 +128,7 @@ class SeriesProvider():
          filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(float)
 
          # No limit is set since we already checked if the limit was passed above
-         filled_input_df['dataValue'] = filled_input_df['dataValue'].interpolate(method='linear')
+         filled_input_df['dataValue'] = filled_input_df['dataValue'].interpolate(method= method)
 
          # Convert dataValue back to string
          filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(str)
@@ -143,22 +150,22 @@ class SeriesProvider():
                  latitude=row["latitude"]
              ))
         
-         outSeries = Series(inSeries.description, True, inSeries.timeDescription)
+         outSeries = Series(seriesDescription, True, timeDescription)
          outSeries.data = inputs
 
          return outSeries
      
-    def  __check_gap_distance(self, df: pd.DataFrame, maxGapDistance: timedelta, interval: timedelta) -> bool:
+    def  __check_gap_distance(self, df: pd.DataFrame, limit: timedelta, interval: timedelta) -> bool:
         """This method will remove all non-NaN rows from the DataFrame leaving just the NaN rows. 
-        It will then check to see if there is a group of consecutive NaNs that are larger than the maxGapDistance.
+        It will then check to see if there is a group of consecutive NaNs that are larger than the limit.
 
         Args:
             df (pd.DataFrame): The DataFrame of data
-            maxGapDistance (timedelta): The max gap distance the researcher allows for their model
+            limit (timedelta): The max gap distance the researcher allows for their model
             interval (timedelta): The time step separating the data points in order
 
         Returns:
-            bool: Determines if a gap is larger than the maxGapDistance
+            bool: Determines if a gap is larger than the limit
         """
         # Find any rows where dataValue is NaN
         nan_mask = df['dataValue'].isna()
@@ -188,13 +195,13 @@ class SeriesProvider():
             else:
                 nan_gap_size += 1
 
-            # If the NaN gap is greater than maxGapDistance, return True
-            if(nan_gap_size * interval > maxGapDistance):
+            # If the NaN gap is greater than the limit, return True
+            if(nan_gap_size * interval > limit):
                 return True
 
             previous_date = current_date
 
-        # If no NaN gap was greater than maxGapDistance
+        # If no NaN gap was greater than the limit
         return False
              
     def __fill_in_date_gaps(self, df : pd.DataFrame , start_date : datetime , end_date : datetime , interval : timedelta ) -> pd.DataFrame:
