@@ -38,12 +38,16 @@ class Migrator(IDatabaseMigration):
         # Reflect the tables from the database that we want to add data too
         metadata = MetaData()
         metadata.reflect(bind=databaseEngine)
+        
         ref_dataLocation = metadata.tables['ref_dataLocation']
         ref_dataSource = metadata.tables['ref_dataSource']
+        ref_dataLocation_dataSource_mapping = metadata.tables['dataLocation_dataSource_mapping']
 
         # Insert the data based off of csv files
         self.insert_ref_data(self.readInitCSV('magnoliaLocations.csv'), ref_dataLocation)
         self.insert_ref_data(self.readInitCSV('semaphoreDataSource.csv'), ref_dataSource)
+        self.insert_ref_data(self.readInitCSV('magnoliaMapping.csv'), ref_dataLocation_dataSource_mapping)
+
         
         return True
     
@@ -91,12 +95,17 @@ class Migrator(IDatabaseMigration):
         # Reflect the tables from the database that we want to add data too
         metadata = MetaData()
         metadata.reflect(bind=databaseEngine)
+
         ref_dataLocation = metadata.tables['ref_dataLocation']
         ref_dataSource = metadata.tables['ref_dataSource']
+        ref_dataLocation_dataSource_mapping = metadata.tables['dataLocation_dataSource_mapping']
+
 
         # Delete the data according to csv files
         self.remove_ref_data(self.readInitCSV('magnoliaLocations.csv'), ref_dataLocation)
         self.remove_ref_data(self.readInitCSV('semaphoreDataSource.csv'), ref_dataSource)
+        self.remove_ref_data(self.readInitCSV('magnoliaMapping.csv'), ref_dataLocation_dataSource_mapping)
+
 
         return True
     
