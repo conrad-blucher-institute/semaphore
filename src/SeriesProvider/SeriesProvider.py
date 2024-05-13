@@ -85,12 +85,10 @@ class SeriesProvider():
          """This method will interpolate the results from the query if the gaps between the NaNs are not larger than the maxGapDistance
 
         Args:
-            seriesDescription (SeriesDescription): Describes a set of data
-            timeDescription (TimeDescription): Describes the date time properties of the dataset
-            validated_merged_result (Series): The merged result of the DB and DI queries
+            inSeries (Series): The incomplete merged result of the DB and DI queries
 
         Returns:
-            Series : The merged result of the DB and DI queries
+            Series : The Series with new interpolated Inputs added
         """
          if inSeries.description.maxGapDistance is None:
              log(f'''Interpolation error,
