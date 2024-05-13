@@ -1,4 +1,4 @@
 {
     "Target Version" : "2.1",
-    "Description" : "Adding rows to the locations reference table and the data source reference table for Magnolia Models."
+    "Description" : "Adding rows to the locations reference table, locations mapping reference table, and the data source reference table for Magnolia Models."
 }
