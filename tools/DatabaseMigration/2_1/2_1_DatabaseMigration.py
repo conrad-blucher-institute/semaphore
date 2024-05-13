@@ -92,7 +92,7 @@ class Migrator(IDatabaseMigration):
         # Setting engine
         self.__engine = databaseEngine
 
-        # Reflect the tables from the database that we want to add data too
+        # Reflect the tables from the database that we want to add data to
         metadata = MetaData()
         metadata.reflect(bind=databaseEngine)
 
