@@ -79,102 +79,104 @@ class SeriesProvider():
       
     
     def __interpolate_series(self, inSeries: Series) -> Series: 
-         """This method will interpolate the results from the query if the gaps between the NaNs are not larger than the limit
+        """This method will interpolate the results from the query if the gaps between the NaNs are not larger than the limit
 
-        Args:
-            inSeries (Series): The incomplete merged result of the DB and DI queries
+    Args:
+        inSeries (Series): The incomplete merged result of the DB and DI queries
 
-        Returns:
-            Series : The Series with new interpolated Inputs added
-        """
-         timeDescription = inSeries.timeDescription
-         seriesDescription = inSeries.description
-         interpolationParameters = seriesDescription.interpolationParameters
+    Returns:
+        Series : The Series with new interpolated Inputs added
+    """
+        timeDescription = inSeries.timeDescription
+        seriesDescription = inSeries.description
+        interpolationParameters = seriesDescription.interpolationParameters
 
-         # If there is only one Input (only one data point) then we do not interpolate
-         if(len(inSeries.data) <= 1):
-             log(f'''Interpolation error,
-                    Reason: Only one Input found in series.\n 
-                    {seriesDescription} \n 
-                    {timeDescription} \n 
-                ''')
-             return inSeries
+        # If there is only one Input (only one data point) then we do not interpolate
+        if(len(inSeries.data) <= 1):
+            log(f'''Interpolation error,
+                Reason: Only one Input found in series.\n 
+                {seriesDescription} \n 
+                {timeDescription} \n 
+            ''')
+            return inSeries
 
-         if interpolationParameters is None:
-             log(f'''Interpolation error,
-                    Reason: Interpolation Parameters not defined.\n 
-                    {seriesDescription} \n 
-                    {timeDescription} \n 
-                ''')
-             return inSeries
-         
-         # Will hard fail if one or both doesn't exist
-         method = interpolationParameters['method']
-         limit = interpolationParameters['limit']
-         
-         limit = timedelta(seconds = limit)
+        if interpolationParameters is None:
+            error_message = f'''Interpolation error,
+                Reason: Interpolation Parameters not defined.\n 
+                {seriesDescription} \n 
+                {timeDescription} \n 
+            '''
+            log(error_message)
+            inSeries.nonCompleteReason = '' if inSeries.nonCompleteReason is None else inSeries.nonCompleteReason  + f'\n{error_message}'
+            return inSeries
         
-         input_df = pd.DataFrame([input.__dict__ for input in inSeries.data])
-         
-         input_df.set_index('timeVerified', inplace=True)
-         
-         # Add the missing timeVerified datetimes and fill the remaining columns with NaNs/NaTs
-         filled_input_df = self.__fill_in_date_gaps(input_df, timeDescription.fromDateTime, timeDescription.toDateTime, timeDescription.interval)
-         
-         # Rename the index back to 'timeVerified' after filling in date gaps
-         filled_input_df.index = filled_input_df.index.rename('timeVerified')
-
-         largerThanLimit = self.__check_gap_distance(filled_input_df, limit, timeDescription.interval)
-         if largerThanLimit:
-             error_message = f'''Interpolation error,
-                    Reason: There are gaps in the data that are larger than the interpolation limit parameter.\n 
-                    {seriesDescription} \n 
-                    {timeDescription} \n 
-                '''
-             log(error_message)
-             inSeries.nonCompleteReason = inSeries.nonCompleteReason  + f'\n{error_message}'
-             return inSeries  
-             
-         # Cast dataValue string to float for interpolation
-         filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(float)
-
-         # No limit is set since we already checked if the limit was passed above
-         # Area limited to 'inside' to avoid extrapolation
-         filled_input_df['dataValue'] = filled_input_df['dataValue'].interpolate(method = method, limit_area = 'inside')
-
-         # Drop rows where 'dataValue' is NaN
-         filled_input_df = filled_input_df.dropna(subset=['dataValue'])
-
-         # Convert dataValue back to string
-         filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(str)
-
-         # Reset the index to make timeVerified a normal column again
-         filled_input_df.reset_index(inplace=True)
-
-         # Convert timeGenerated to object from datetime64[ns] such that it can be converted to None
-         filled_input_df['timeGenerated'] = filled_input_df['timeGenerated'].astype('object')
-
-         # Set NaT timeGenerated to None
-         filled_input_df.loc[filled_input_df['timeGenerated'].isnull(), 'timeGenerated'] = None
-
-         # Forward-fill the remaining columns that are NaN.
-         filled_input_df = filled_input_df.ffill()
-
-         inputs = [] 
-         for __, row in filled_input_df.iterrows():
-             inputs.append(Input(
-                 dataValue=row["dataValue"],
-                 dataUnit=row["dataUnit"],
-                 timeGenerated=row["timeGenerated"],
-                 timeVerified=row["timeVerified"],
-                 longitude=row["longitude"],
-                 latitude=row["latitude"]
-             ))
+        # Will hard fail if one or both doesn't exist
+        method = interpolationParameters['method']
+        limit = interpolationParameters['limit']
         
-         outSeries = Series(seriesDescription, True, timeDescription)
-         outSeries.data = inputs
+        limit = timedelta(seconds = limit)
+    
+        input_df = pd.DataFrame([input.__dict__ for input in inSeries.data])
+        
+        input_df.set_index('timeVerified', inplace=True)
+        
+        # Add the missing timeVerified datetimes and fill the remaining columns with NaNs/NaTs
+        filled_input_df = self.__fill_in_date_gaps(input_df, timeDescription.fromDateTime, timeDescription.toDateTime, timeDescription.interval)
+        
+        # Rename the index back to 'timeVerified' after filling in date gaps
+        filled_input_df.index = filled_input_df.index.rename('timeVerified')
 
-         return outSeries
+        largerThanLimit = self.__check_gap_distance(filled_input_df, limit, timeDescription.interval)
+        if largerThanLimit:
+            error_message = f'''Interpolation error,
+                Reason: There are gaps in the data that are larger than the interpolation limit parameter.\n 
+                {seriesDescription} \n 
+                {timeDescription} \n 
+            '''
+            log(error_message)
+            inSeries.nonCompleteReason = '' if inSeries.nonCompleteReason is None else inSeries.nonCompleteReason  + f'\n{error_message}'
+            return inSeries  
+            
+        # Cast dataValue string to float for interpolation
+        filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(float)
+
+        # No limit is set since we already checked if the limit was passed above
+        # Area limited to 'inside' to avoid extrapolation
+        filled_input_df['dataValue'] = filled_input_df['dataValue'].interpolate(method = method, limit_area = 'inside')
+
+        # Drop rows where 'dataValue' is NaN
+        filled_input_df = filled_input_df.dropna(subset=['dataValue'])
+
+        # Convert dataValue back to string
+        filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(str)
+
+        # Reset the index to make timeVerified a normal column again
+        filled_input_df.reset_index(inplace=True)
+
+        # Convert timeGenerated to object from datetime64[ns] such that it can be converted to None
+        filled_input_df['timeGenerated'] = filled_input_df['timeGenerated'].astype('object')
+
+        # Set NaT timeGenerated to None
+        filled_input_df.loc[filled_input_df['timeGenerated'].isnull(), 'timeGenerated'] = None
+
+        # Forward-fill the remaining columns that are NaN.
+        filled_input_df = filled_input_df.ffill()
+
+        inputs = [] 
+        for __, row in filled_input_df.iterrows():
+            inputs.append(Input(
+                dataValue=row["dataValue"],
+                dataUnit=row["dataUnit"],
+                timeGenerated=row["timeGenerated"],
+                timeVerified=row["timeVerified"],
+                longitude=row["longitude"],
+                latitude=row["latitude"]
+            ))
+    
+        outSeries = Series(seriesDescription, True, timeDescription)
+        outSeries.data = inputs
+
+        return outSeries
      
     def  __check_gap_distance(self, df: pd.DataFrame, limit: timedelta, interval: timedelta) -> bool:
         """This method will remove all non-NaN rows from the DataFrame leaving just the NaN rows. 
