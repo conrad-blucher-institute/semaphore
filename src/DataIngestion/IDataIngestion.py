@@ -12,7 +12,7 @@ Methods. As well as the factory to generate the instance of the interface
 # 
 #
 #Imports
-from src.DataClasses import SeriesDescription, Series, TimeDescription
+from DataClasses import SeriesDescription, Series, TimeDescription
 
 from abc import ABC, abstractmethod
 from importlib import import_module

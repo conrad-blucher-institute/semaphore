@@ -11,10 +11,10 @@
 # 
 #
 #Imports
-from src.SeriesStorage.ISeriesStorage import series_storage_factory
-from src.DataIngestion.IDataIngestion import data_ingestion_factory
-from src.DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription, Input
-from src.utility import log
+from SeriesStorage.ISeriesStorage import series_storage_factory
+from DataIngestion.IDataIngestion import data_ingestion_factory
+from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription, Input
+from utility import log
 import pandas as pd
 from datetime import datetime, timedelta
 
@@ -70,13 +70,15 @@ class SeriesProvider():
         if(validated_merged_result.isComplete):
             return validated_merged_result
         
-        # If neither were valid then we attempt to interpolate
-        log(f'Init Interpolation from {seriesDescription}|{timeDescription}')
-        interpolation_results = self.__interpolate_series(validated_merged_result)
-        validated_interpolation_results = self.__generate_resulting_series(seriesDescription, timeDescription, interpolation_results.data)
-        
-        if(validated_interpolation_results.isComplete):
-            return validated_interpolation_results
+        #If there is only one Input (Only one data point) then we do not interpolate
+        if(len(validated_merged_result.data) > 1):
+            # If neither were valid then we attempt to interpolate
+            log(f'Init Interpolation from {seriesDescription}|{timeDescription}')
+            interpolation_results = self.__interpolate_series(validated_merged_result)
+            validated_interpolation_results = self.__generate_resulting_series(seriesDescription, timeDescription, interpolation_results.data)
+            
+            if(validated_interpolation_results.isComplete):
+                return validated_interpolation_results
         
         return validated_interpolation_results
       
