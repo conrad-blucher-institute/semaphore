@@ -28,6 +28,8 @@
             "interval": 3600,
             "range": [0, 0],
             "outKey": "WindSpd_01"
+            
+            
         },
         {
             "_name": "Wind Direction",
@@ -38,6 +40,8 @@
             "interval": 3600,
             "range": [0, 0],
             "outKey": "WindDir_01"
+            
+
         },
         {
             "_name": "Wind Speed",
@@ -47,6 +51,10 @@
             "unit": "meter",
             "interval": 3600,
             "range": [0, -11],
+            "interpolationParameters": {
+                "method":"linear",
+                "limit": 3600
+            },
             "outKey": "WindSpd_12"
         },
         {
@@ -57,6 +65,10 @@
             "unit": "degrees",
             "interval": 3600,
             "range": [0, -11],
+            "interpolationParameters": {
+                "method": "linear",
+                "limit": 3600
+            },
             "outKey": "WindDir_12"
         },
         {
@@ -67,6 +79,10 @@
             "unit": "meter",
             "interval": 3600,
             "range": [0, -12],
+            "interpolationParameters": {
+                "method": "linear",
+                "limit": 3600
+            },
             "outKey": "WindSpd_13"
         }
     ],
