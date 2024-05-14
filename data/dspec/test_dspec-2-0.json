@@ -27,7 +27,6 @@
             "unit": "meter",
             "interval": 3600,
             "range": [0, 0],
-            "interpolationParameters": {},
             "outKey": "WindSpd_01"
             
             
@@ -40,7 +39,6 @@
             "unit": "degrees",
             "interval": 3600,
             "range": [0, 0],
-            "interpolationParameters": {},
             "outKey": "WindDir_01"
             
 
