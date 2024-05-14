@@ -126,6 +126,7 @@ class InputGatherer:
             # Instantiate Factory Method
             processing_Class = post_processing_factory(postProcess.call)
             # Call Post Processing Function
+            log(f'Init Post processing: {postProcess.call}\n\tArgs: {postProcess.args}')
             newProcessedInput = processing_Class.post_process_data(self.__inputSeriesDict, postProcess)
             # Add preprocessed dict to the inputSeries dict
             self.__inputSeriesDict.update(newProcessedInput)

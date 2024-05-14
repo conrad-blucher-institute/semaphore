@@ -19,8 +19,6 @@ from os.path import exists
 from json import load
 
 
-
-
 class DSPEC_Parser:
     def __init__(self, fPath: str) -> None:
 
@@ -34,9 +32,8 @@ class DSPEC_Parser:
             self.__dspec_version = dspec_json.get('dspecVersion', '1.0')
             self.__dspec_json = dspec_json
 
-    def parse_dspec(self):
+    def parse_dspec(self) -> 'Dspec':
         
-
         match self.__dspec_version:
             case '1.0':
                 sub_parser = dspec_sub_Parser_1_0(self.__dspec_json)
@@ -285,8 +282,7 @@ class OutputInfo:
         return f'\nOutputInfo({self.outputMethod}, {self.leadTime}, {self.series}, {self.location}, {self.interval}, {self.fromDateTime}, {self.toDateTime}, {self.datum}, {self.unit})'
 
 class DependentSeries:
-    '''input object should contain everything that could be contained
-    in a dspec input object'''
+    '''A dependant series is a described series to pull from Series provider.'''
     def __init__(self) -> None:
         self.name = None
         self.location = None
@@ -320,7 +316,7 @@ class PostProcessCall:
         return f'\nInputInfo({self.call}, {self.args})'
     
 class VectorOrder:
-    '''All information pertaining to a required call to a post processing function'''
+    '''An object that holds the order and datatypes that the input vector should actually be'''
     def __init__(self) -> None:
         self.keys = []
         self.dTypes = []

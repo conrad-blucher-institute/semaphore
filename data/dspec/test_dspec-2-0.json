@@ -88,35 +88,23 @@
     ],
     "postProcessCall": [
         {
-            "call": "computeWindComponents",
+            "call": "ResolveVectorComponents",
             "args": {
-                "targetSpeedIdx": 0,
-                "targetDirectionIdx": 1,
                 "offset": 0,
-                "inKeys": [
-                    "WindSpd_01",
-                    "WindDir_01"
-                ],
-                "outKeys": [
-                    "dXWnCmp000D_1hr",
-                    "dYWnCmp000D_1hr"
-                ]
+                "targetMagnitude_inKey":"WindSpd_01",
+                "targetDirection_inKey":"WindDir_01",
+                "x_comp_outKey": "dXWnCmp000D_1hr", 
+                "y_comp_outKey": "dYWnCmp000D_1hr"      
             }
         },
         {
-            "call": "computeWindComponents",
+            "call": "ResolveVectorComponents",
             "args": {
-                "targetSpeedIdx": 2,
-                "targetDirectionIdx": 3,
                 "offset": 0,
-                "inKeys": [
-                    "WindSpd_12",
-                    "WindDir_12"
-                ],
-                "outKeys": [
-                    "dXWnCmp000D_12hr",
-                    "dYWnCmp000D_12hr"
-                ]
+                "targetMagnitude_inKey":"WindSpd_12",
+                "targetDirection_inKey":"WindDir_12",
+                "x_comp_outKey": "dXWnCmp000D_12hr", 
+                "y_comp_outKey": "dYWnCmp000D_12hr"      
             }
         }
     ],
