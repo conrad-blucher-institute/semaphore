@@ -70,15 +70,10 @@ class SeriesProvider():
         if(validated_merged_result.isComplete):
             return validated_merged_result
         
-        #If there is only one Input (Only one data point) then we do not interpolate
-        if(len(validated_merged_result.data) > 1):
-            # If neither were valid then we attempt to interpolate
-            log(f'Init Interpolation from {seriesDescription}|{timeDescription}')
-            interpolation_results = self.__interpolate_series(validated_merged_result)
-            validated_interpolation_results = self.__generate_resulting_series(seriesDescription, timeDescription, interpolation_results.data)
-            
-            if(validated_interpolation_results.isComplete):
-                return validated_interpolation_results
+        # If neither were valid then we attempt to interpolate
+        log(f'Init Interpolation from {seriesDescription}|{timeDescription}')
+        interpolation_results = self.__interpolate_series(validated_merged_result)
+        validated_interpolation_results = self.__generate_resulting_series(seriesDescription, timeDescription, interpolation_results.data)
         
         return validated_interpolation_results
       
@@ -95,13 +90,29 @@ class SeriesProvider():
          timeDescription = inSeries.timeDescription
          seriesDescription = inSeries.description
          interpolationParameters = seriesDescription.interpolationParameters
+
+         # If there is only one Input (only one data point) then we do not interpolate
+         if(len(inSeries.data) <= 1):
+             log(f'''Interpolation error,
+                    Reason: Only one Input found in series.\n 
+                    {seriesDescription} \n 
+                    {timeDescription} \n 
+                ''')
+             return inSeries
+
+         if interpolationParameters is None:
+             log(f'''Interpolation error,
+                    Reason: Interpolation Parameters not defined.\n 
+                    {seriesDescription} \n 
+                    {timeDescription} \n 
+                ''')
+             return inSeries
          
-         #What if its none?
          method = interpolationParameters.get("method")
          limit = interpolationParameters.get("limit")
-         if limit is None:
+         if method is None or limit is None:
              log(f'''Interpolation error,
-                    Reason: limit not defined.\n 
+                    Reason: Method and/or limit not defined.\n 
                     {seriesDescription} \n 
                     {timeDescription} \n 
                 ''')
@@ -111,7 +122,7 @@ class SeriesProvider():
          
          input_df.set_index('timeVerified', inplace=True)
          
-         # Add the missing timeVerified datetimes and fill the remaining columns with NaNs
+         # Add the missing timeVerified datetimes and fill the remaining columns with NaNs/NaTs
          filled_input_df = self.__fill_in_date_gaps(input_df, timeDescription.fromDateTime, timeDescription.toDateTime, timeDescription.interval)
          
          # Rename the index back to 'timeVerified' after filling in date gaps
@@ -130,7 +141,11 @@ class SeriesProvider():
          filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(float)
 
          # No limit is set since we already checked if the limit was passed above
-         filled_input_df['dataValue'] = filled_input_df['dataValue'].interpolate(method= method)
+         # Area limited to 'inside' to avoid extrapolation
+         filled_input_df['dataValue'] = filled_input_df['dataValue'].interpolate(method = method, limit_area = 'inside')
+
+         # Drop rows where 'dataValue' is NaN
+         filled_input_df = filled_input_df.dropna(subset=['dataValue'])
 
          # Convert dataValue back to string
          filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(str)
@@ -138,8 +153,14 @@ class SeriesProvider():
          # Reset the index to make timeVerified a normal column again
          filled_input_df.reset_index(inplace=True)
 
-         # Backfill/Forward-fill the remaining columns that are NaN/NaT.
-         filled_input_df = filled_input_df.ffill().bfill()
+         # Convert timeGenerated to object from datetime64[ns] such that it can be converted to None
+         filled_input_df['timeGenerated'] = filled_input_df['timeGenerated'].astype('object')
+
+         # Set NaT timeGenerated to None
+         filled_input_df.loc[filled_input_df['timeGenerated'].isnull(), 'timeGenerated'] = None
+
+         # Forward-fill the remaining columns that are NaN.
+         filled_input_df = filled_input_df.ffill()
 
          inputs = [] 
          for __, row in filled_input_df.iterrows():
