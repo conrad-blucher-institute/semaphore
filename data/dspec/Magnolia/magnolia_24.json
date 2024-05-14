@@ -20,7 +20,7 @@
         { 
             "_name": "Primary Water Level",
             "location": "PortLavaca",
-            "source": "TCOON",
+            "source": "LIGHTHOUSE",
             "series": "dWl",
             "unit": "meter",
             "type": "float",
@@ -32,7 +32,7 @@
         { 
             "_name": "Surge",
             "location": "PortLavaca",
-            "source": "TCOON",
+            "source": "LIGHTHOUSE",
             "series": "dSurge",
             "unit": "meter",
             "type": "float",
@@ -43,7 +43,7 @@
         { 
             "_name": "Primary Water Level",
             "location": "PortOConnor",
-            "source": "TCOON",
+            "source": "LIGHTHOUSE",
             "series": "dWl",
             "unit": "meter",
             "type": "float",
@@ -55,7 +55,7 @@
         { 
             "_name": "Surge",
             "location": "PortOConnor",
-            "source": "TCOON",
+            "source": "LIGHTHOUSE",
             "series": "dSurge",
             "unit": "meter",
             "type": "float",
@@ -67,7 +67,7 @@
         { 
             "_name": "Wind Direction",
             "location": "PortLavaca",
-            "source": "TCOON",
+            "source": "LIGHTHOUSE",
             "series": "dWnDir",
             "unit": "meter",
             "type": "float",
@@ -79,7 +79,7 @@
         { 
             "_name": "Wind Speed",
             "location": "PortLavaca",
-            "source": "TCOON",
+            "source": "LIGHTHOUSE",
             "series": "dWnSpd",
             "unit": "meter",
             "type": "float",
