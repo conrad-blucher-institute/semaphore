@@ -15,11 +15,10 @@ and a factory for generating instances of the interface.
 from abc import ABC, abstractmethod
 from importlib import import_module
 from DataClasses import Series
-from ModelExecution.dspecParser import DSPEC_Parser, Dspec, PostProcessCall
 
 class IPostProcessing(ABC):
     @abstractmethod
-    def post_process_data(self, preprocessedData: dict[str, Series], postProcessCall: PostProcessCall ) -> dict[str, Series]:
+    def post_process_data(self, preprocessedData: dict[str, Series], postProcessCall: 'PostProcessCall' ) -> dict[str, Series]:
         """Abstract method to define the post-processing operation.
 
         Args:
