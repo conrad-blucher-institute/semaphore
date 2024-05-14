@@ -23,7 +23,6 @@
             "source": "SEMAPHORE",
             "series": "magnolia_24|1.0.0|pSurge",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range":  [7, 19],
             "outKey": "MG_24_output_12"
@@ -34,7 +33,6 @@
             "source": "NDFD",
             "series": "pWnDir",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range": [1, 24],
             "outKey": "PL_WNDIR_F24"
@@ -45,7 +43,6 @@
             "source": "NDFD",
             "series": "pWnSpd",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range": [1, 24],
             "outKey": "PL_WNDSPD_F24"
@@ -56,7 +53,6 @@
             "source": "LIGHTHOUSE",
             "series": "pHarm",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range":  [7, 19],
             "outKey": "PL_pHarm_12"
@@ -67,7 +63,6 @@
             "source": "lIGHTHOUSE",
             "series": "pHarm",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range":  [7, 19],
             "outKey": "POC_pHarm_12"

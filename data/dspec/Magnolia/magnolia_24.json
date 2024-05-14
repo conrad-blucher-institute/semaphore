@@ -23,7 +23,6 @@
             "source": "LIGHTHOUSE",
             "series": "dWl",
             "unit": "meter",
-            "type": "float",
             "datum": "MLLW",
             "interval": 3600,
             "range": [0, -24],
@@ -35,7 +34,6 @@
             "source": "LIGHTHOUSE",
             "series": "dSurge",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range": [0, -24],
             "outKey": "PL_Surge_25"
@@ -46,7 +44,6 @@
             "source": "LIGHTHOUSE",
             "series": "dWl",
             "unit": "meter",
-            "type": "float",
             "datum": "MLLW",
             "interval": 3600,
             "range": [0, -24],
@@ -58,7 +55,6 @@
             "source": "LIGHTHOUSE",
             "series": "dSurge",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range": [0, -24],
             "outKey": "POC_Surge_25"
@@ -70,7 +66,6 @@
             "source": "LIGHTHOUSE",
             "series": "dWnDir",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range": [0, -24],
             "outKey": "PL_WNDIR_25"
@@ -82,7 +77,6 @@
             "source": "LIGHTHOUSE",
             "series": "dWnSpd",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range": [0, -24],
             "outKey": "PL_WNSPD_25"
@@ -94,7 +88,6 @@
             "source": "NDFD",
             "series": "pWnDir",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range": [1, 19],
             "outKey": "PL_PWNDIR_F20"
@@ -105,7 +98,6 @@
             "source": "NDFD",
             "series": "pWnSpd",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range": [1, 19],
             "outKey": "PL_PWSPD_F20"
