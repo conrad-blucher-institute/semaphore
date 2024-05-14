@@ -75,7 +75,7 @@ def __interpolate_series(inSeries: Series) -> Series:
          filled_input_df.reset_index(inplace=True)
 
          # Backfill/Forward-fill the remaining columns that are NaN/NaT.
-         filled_input_df.ffill().bfill()
+         filled_input_df = filled_input_df.ffill().bfill()
 
          inputs = [] 
          for __, row in filled_input_df.iterrows():
