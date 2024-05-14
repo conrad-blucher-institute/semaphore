@@ -18,12 +18,12 @@ from ModelExecution.dspecParser import PostProcessCall
 
 class MagnoliaPredictionsPostProcess(IPostProcessing):
     """
-        Class computes the mean of two series.
+        This class computes the mean of two harmonic series and adds surge to it to compute water level.
 
         args: 
                 predHarmFirst_inKey - The key for the first harmonic series.
                 predHarmSecond_inKey - The key for the second harmonic series.
-                magnolia_Pred_inKey - The key for the pred harmonic series.
+                magnolia_Pred_inKey - The key for the pred surge.
                 Magnolia_WL_outKey - The key to save the transformed WL as.
 
         json_copy:
