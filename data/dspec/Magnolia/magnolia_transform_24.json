@@ -76,11 +76,11 @@
     ],
     "postProcessCall": [
         {
-            "call": "computeWindComponents",
+            "call": "ResolveVectorComponents",
             "args": {
                 "offset": 0,
-                "targetWindSpeed_inKey":"PL_WNDSPD_F24",
-                "targetWindDirection_inKey":"PL_WNDIR_F24",
+                "targetMagnitude_inKey":"PL_WNDSPD_F24",
+                "targetDirection_inKey":"PL_WNDIR_F24",
                 "x_comp_outKey": "x_PL_WNDCMP_F24", 
                 "y_comp_outKey": "y_PL_WNDCMP_F24"      
             }
