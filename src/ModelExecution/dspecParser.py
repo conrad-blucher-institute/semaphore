@@ -120,7 +120,7 @@ class dspec_sub_Parser_1_0:
                 dseries.series = inputJson["series"]
                 dseries.interval = inputJson["interval"]
                 dseries.range = inputJson["range"]
-                dseries.interpolationParameters = inputJson.get("interpolationParameters",{"method": None, "limit": None})
+                dseries.interpolationParameters = inputJson.get("interpolationParameters")
                 dseries.datum = inputJson.get("datum")
                 dseries.unit = inputJson.get("unit")
                 dseries.verificationOverride = inputJson.get("verificationOverride")
@@ -206,7 +206,7 @@ class dspec_sub_Parser_2_0:
                 dSeries.series = dSeries_dict["series"]
                 dSeries.interval = dSeries_dict["interval"]
                 dSeries.range = dSeries_dict["range"]
-                dSeries.interpolationParameters = dSeries_dict.get("interpolationParameters",{"method": None, "limit": None})
+                dSeries.interpolationParameters = dSeries_dict.get("interpolationParameters")
                 dSeries.datum = dSeries_dict.get("datum")
                 dSeries.unit = dSeries_dict.get("unit")
                 dSeries.outKey = dSeries_dict.get("outKey")
@@ -296,7 +296,7 @@ class DependentSeries:
         self.datum = None
         self.interval = None
         self.range = None
-        self.interpolationParameters = {}
+        self.interpolationParameters = None
         self.outKey = None
         self.verificationOverride = None
         
