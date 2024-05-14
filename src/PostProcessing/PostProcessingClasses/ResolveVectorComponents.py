@@ -56,7 +56,7 @@ class ResolveVectorComponents(IPostProcessing):
 
         # Unpack arguments from arg object
         args = postProcessCall.args
-        offset = args['offset']
+        offset = float(args['offset'])
         magnitude_series = preprocessedData[args['targetMagnitude_inKey']]
         direction_series = preprocessedData[args['targetDirection_inKey']]
 
@@ -68,11 +68,11 @@ class ResolveVectorComponents(IPostProcessing):
             direction = dir_input.dataValue
             magnitude = mag_input.dataValue
 
-            # Direction my be in degrees for calculation
+            # Direction must be in degrees for calculation
             if(dir_input.dataUnit != 'degrees'): direction = degrees(direction)
 
-            x_comp = magnitude * cos(radians(float(direction - offset)))
-            y_comp = magnitude * sin(radians(float(direction - offset)))
+            x_comp = magnitude * cos(radians(float(direction + offset)))
+            y_comp = magnitude * sin(radians(float(direction + offset)))
 
             # Magnitude contains the correct metadata from resulting series
             x_comps.append(Input(
