@@ -117,6 +117,8 @@ class SeriesProvider():
                     {timeDescription} \n 
                 ''')
              return inSeries
+         
+         limit = timedelta(seconds = limit)
         
          input_df = pd.DataFrame([input.__dict__ for input in inSeries.data])
          
