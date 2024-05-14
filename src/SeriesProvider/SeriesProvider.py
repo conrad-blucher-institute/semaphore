@@ -126,11 +126,13 @@ class SeriesProvider():
 
          largerThanLimit = self.__check_gap_distance(filled_input_df, limit, timeDescription.interval)
          if largerThanLimit:
-             log(f'''Interpolation error,
-                    Reason: There are gaps in the data that are larger than the limit parameter.\n 
+             error_message = f'''Interpolation error,
+                    Reason: There are gaps in the data that are larger than the interpolation limit parameter.\n 
                     {seriesDescription} \n 
                     {timeDescription} \n 
-                ''')
+                '''
+             log(error_message)
+             inSeries.nonCompleteReason = inSeries.nonCompleteReason  + f'\n{error_message}'
              return inSeries  
              
          # Cast dataValue string to float for interpolation
