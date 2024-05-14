@@ -108,15 +108,9 @@ class SeriesProvider():
                 ''')
              return inSeries
          
-         method = interpolationParameters.get("method")
-         limit = interpolationParameters.get("limit")
-         if method is None or limit is None:
-             log(f'''Interpolation error,
-                    Reason: Method and/or limit not defined.\n 
-                    {seriesDescription} \n 
-                    {timeDescription} \n 
-                ''')
-             return inSeries
+         # Will hard fail if one or both doesn't exist
+         method = interpolationParameters['method']
+         limit = interpolationParameters['limit']
          
          limit = timedelta(seconds = limit)
         
@@ -343,7 +337,7 @@ class SeriesProvider():
 
             # If a result was missing, an input was not mapped to that key. Thus its mapped to None. We remove the whole k:v pair as to not pollute the results with None.
             datetimeDict = {k : v for k, v in datetimeDict.items() if v is not None}
-            #Taking out the entire pair including the timestamp may make it difficult to interpolate
+
         result = Series(
             description= seriesDescription, 
             isComplete= isComplete,
