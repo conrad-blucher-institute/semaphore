@@ -15,7 +15,7 @@
 #Imports
 #Local
 from SeriesProvider.SeriesProvider import SeriesProvider
-from DataClasses import SeriesDescription, TimeDescription, Input
+from DataClasses import SeriesDescription, TimeDescription, Input, DataIntegrityDescription
 from .dspecParser import DSPEC_Parser, Dspec
 from utility import log, construct_true_path
 from PostProcessing.IPostProcessing import post_processing_factory
@@ -75,7 +75,10 @@ class InputGatherer:
                         series.series, 
                         series.location, 
                         series.datum, 
-                        series.interpolationParameters,
+                        DataIntegrityDescription(
+                            series.dataIntegrityCall.call,
+                            series.dataIntegrityCall.args
+                        ),
                         series.verificationOverride
                     ), 
                     TimeDescription(
