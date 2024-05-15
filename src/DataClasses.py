@@ -90,7 +90,7 @@ class DataIntegrityDescription():
         return f'\n[DataIntegrityDescription] -> call: {self.call}, args: {self.args}'
     
     def __repr__(self) -> str:
-        return f'\DataIntegrityDescription({self.call}, {self.args})'
+        return f'\nDataIntegrityDescription({self.call}, {self.args})'
 
 class TimeDescription():
     """A time description should describe the datetime properties of a dataset.
