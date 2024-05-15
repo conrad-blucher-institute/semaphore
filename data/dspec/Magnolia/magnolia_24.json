@@ -1,0 +1,189 @@
+{
+    
+    "dspecVersion": "2.0",
+    "modelName": "magnolia_24",
+    "modelVersion": "1.0.0",
+    "author": "Jacob Alonzo",
+    "modelFileName": "./Magnolia/24hr_leadtime_1stANN",
+    "timingInfo":{
+        "offset": 1200,
+        "interval": 3600
+    },
+    "outputInfo": {
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 68400,
+        "series": "pSurge",
+        "location": "EstMagnoliaBeach",
+        "unit" : "meter"
+    },
+    "dependentSeries": [
+        { 
+            "_name": "Primary Water Level",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
+            "series": "dWl",
+            "unit": "meter",
+            "datum": "MLLW",
+            "interval": 3600,
+            "range": [0, -24],
+            "outKey": "PL_PWL_25"
+        },
+        { 
+            "_name": "Surge",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
+            "series": "dSurge",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [0, -24],
+            "outKey": "PL_Surge_25"
+        },
+        { 
+            "_name": "Primary Water Level",
+            "location": "PortOConnor",
+            "source": "LIGHTHOUSE",
+            "series": "dWl",
+            "unit": "meter",
+            "datum": "MLLW",
+            "interval": 3600,
+            "range": [0, -24],
+            "outKey": "POC_PWL_25"
+        },
+        { 
+            "_name": "Surge",
+            "location": "PortOConnor",
+            "source": "LIGHTHOUSE",
+            "series": "dSurge",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [0, -24],
+            "outKey": "POC_Surge_25"
+
+        },
+        { 
+            "_name": "Wind Direction",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
+            "series": "dWnDir",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [0, -24],
+            "outKey": "PL_WNDIR_25"
+            
+        },
+        { 
+            "_name": "Wind Speed",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
+            "series": "dWnSpd",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [0, -24],
+            "outKey": "PL_WNSPD_25"
+
+        },
+        { 
+            "_name": "Wind Direction Predicition",
+            "location": "PortLavaca",
+            "source": "NDFD_EXP",
+            "series": "pWnDir",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [19, 1],
+            "outKey": "PL_PWNDIR_F20"
+        },
+        { 
+            "_name": "Wind Speed Prediction",
+            "location": "PortLavaca",
+            "source": "NDFD_EXP",
+            "series": "pWnSpd",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [19, 1],
+            "outKey": "PL_PWSPD_F20"
+        }
+    ],
+    "postProcessCall": [
+        {
+            "call": "ResolveVectorComponents",
+            "args": {
+                "offset": 0,
+                "targetMagnitude_inKey":"PL_PWSPD_F20",
+                "targetDirection_inKey":"PL_PWNDIR_F20",
+                "x_comp_outKey": "x_PL_PWNDCMP_F20", 
+                "y_comp_outKey": "y_PL_PWNDCMP_F20"      
+            }
+        },
+        {
+            "call": "ResolveVectorComponents",
+            "args": {
+                "offset": 0,
+                "targetMagnitude_inKey":"PL_WNSPD_25",
+                "targetDirection_inKey":"PL_WNDIR_25",
+                "x_comp_outKey": "x_PL_PWNDCMP_25", 
+                "y_comp_outKey": "y_PL_PWNDCMP_25"      
+            }
+        },
+        {
+            "call": "Average",
+            "args": {
+                "targetAvgFirst_inKey":"PL_PWL_25",
+                "targetAvgSecond_inKey":"POC_PWL_25",
+                "avg_outkey": "AVG_PWL_25" 
+                     
+            }
+        },
+        {
+            "call": "Average",
+            "args": {
+                "targetAvgFirst_inKey":"PL_Surge_25",
+                "targetAvgSecond_inKey":"POC_Surge_25",
+                "avg_outkey": "AVG_Surge_25" 
+                     
+            }
+        }
+    
+    ],
+    "vectorOrder": [
+        {
+            "key": "PL_PWL_25",
+            "dType": "float"
+        },
+        {
+            "key": "PL_Surge_25",
+            "dType": "float"
+        },
+        {
+            "key": "POC_PWL_25",
+            "dType": "float"
+        },
+        {
+            "key": "POC_Surge_25",
+            "dType": "float"
+        },
+        {
+            "key": "AVG_PWL_25",
+            "dType": "float"
+        },
+        {
+            "key": "AVG_Surge_25",
+            "dType": "float"
+        },
+        {
+            "key": "x_PL_PWNDCMP_25",
+            "dType": "float"
+        },
+        {
+            "key": "y_PL_PWNDCMP_25",
+            "dType": "float"
+        },
+        {
+            "key": "x_PL_PWNDCMP_F20",
+            "dType": "float"
+        },
+        {
+            "key": "y_PL_PWNDCMP_F20",
+            "dType": "float"
+        }
+    ]
+}

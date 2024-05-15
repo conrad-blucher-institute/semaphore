@@ -1,166 +1,158 @@
 # -*- coding: utf-8 -*-
 #inputGatherer.py
 #----------------------------------
-# Created By : Matthew Kastl
+# Created By: Matthew Kastl
 # Created Date: 2/3/2023
-# version 1.0
+# Version: 2.0
 #----------------------------------
-""" This file should parse despec files, communicate with series provider to request series and build the input vector for a model.
+""" This file communicates with series provider to request series and build the input vector for a model.
+    The input gatherer also checks for post processing steps and instantiates each class in the right 
+    order from the dspec to post process the data collected. 
  """ 
 #----------------------------------
 # 
 #
 #Imports
-
-
+#Local
 from SeriesProvider.SeriesProvider import SeriesProvider
 from DataClasses import SeriesDescription, TimeDescription, Input
-from .dspec import Dspec, OutputInfo, InputInfo,TimingInfo
+from .dspecParser import DSPEC_Parser, Dspec
 from utility import log, construct_true_path
+from PostProcessing.IPostProcessing import post_processing_factory
 
+#Libraries
 from os import path, getenv
 from json import load
 from datetime import datetime, timedelta
 
 
 class InputGatherer:
+    """ The InputGatherer class which sends the dspc to be parsed, gets the dependant series
+        checks for and calls any post processing and creates an ordered vector by referencing the keys
+    """
     def __init__(self, dspecFileName: str) -> None:
-        """Constructor sends the specFile off to be loaded and parsed
+        """Constructor sends the dspec file off to be loaded and parsed
         """
         self.__dspec = None
-        self.__specifications = None
-        self.__specificationsConstructionTime = None
+        self.__seriesDescriptionsTimeDescriptions = None
+        self.__seriesConstructionTime = None
+        self.__inputSeriesDict = None
         self.__inputVector = None
-
-        self.__parse_dspec(dspecFileName)
-        self.__seriesProvider = SeriesProvider()
-
-    def __parse_dspec(self, dspecFileName: str) -> None:
-        """Parses the JSON Dspec file into a dspec object.
-        """
 
         dspecFilePath = construct_true_path(getenv('DSPEC_FOLDER_PATH')) + dspecFileName
 
         if not path.exists(dspecFilePath):
             log(f'{dspecFilePath} not found!')
             raise FileNotFoundError
-        
-        with open(dspecFilePath) as dspecFile:
-            
-            #Meta and header data.
-            json = load(dspecFile)
 
-            dspec = Dspec()
-            dspec.modelName = json["modelName"]
-            dspec.modelVersion = json["modelVersion"]
-            dspec.author = json["author"]
-            dspec.modelFileName = json["modelFileName"]
-            
-            #TimingInfo
-            timingJson = json["timingInfo"]
-            
-            timingInfo = TimingInfo()
-            timingInfo.offset = timingJson["offset"]
-            timingInfo.interval = timingJson["interval"]
-            
-            dspec.timingInfo = timingInfo #Bind to dspec
-            
-            #OuputInfo
-            outputJson = json["outputInfo"]
-            
-            outputInfo = OutputInfo()
-            outputInfo.outputMethod = outputJson["outputMethod"]
-            outputInfo.leadTime = outputJson["leadTime"]
-            outputInfo.series = outputJson["series"]
-            outputInfo.location = outputJson["location"]
-            outputInfo.interval = outputJson.get("interval")
-            outputInfo.unit = outputJson.get("unit")
-            outputInfo.datum = outputJson.get("datum")
+        parser = DSPEC_Parser(dspecFilePath)
+        self.__dspec = parser.parse_dspec()
+        self.__seriesProvider = SeriesProvider()
 
-            dspec.outputInfo = outputInfo #Bind to dspec
-
-            #inputs
-            inputsJson = json["inputs"]
-            inputs = []
-            
-            for inputJson in inputsJson:
-                input = InputInfo()
-                input.name = inputJson["_name"]
-                input.location = inputJson["location"]
-                input.source = inputJson["source"]
-                input.series = inputJson["series"]
-                input.type = inputJson["type"]
-                input.interval = inputJson["interval"]
-                input.range = inputJson["range"]
-                input.datum = inputJson.get("datum")
-                input.unit = inputJson.get("unit")
-                input.verificationOverride = inputJson.get("verificationOverride")
-
-                inputs.append(input)
-            dspec.inputs = inputs #Bind to dspec
-
-            self.__dspec = dspec #Bind dspec to this obj
-
-    def __generate_inputSpecifications(self, referenceTime: datetime) -> None:
-        """Generates the list of input specifications. This is a request paired
-        with the expected datatype as a list. This list is saved as an attribute
-        on this class. Also saves the time in which this was requested. This can be 
-        used to determine if the specification needs to be remade.
-
-        Parameters:
-            referenceTime: datetime - The time to generate the specification of
-            The data requests will be relative to this time.
+    def __generate_seriesDescription(self, referenceTime: datetime) -> None:
         """
-        specifications = []
-        for input in self.__dspec.inputs:
-            try:
-                #Calculate the to and from time from the interval and range
-                toDateTime = referenceTime + timedelta(seconds= input.range[0] * input.interval)
-                fromDateTime = referenceTime + timedelta(seconds= input.range[1] * input.interval)
+        This function generates the series description for each dependentSeries input
+
+        param: refrenceTime - datetime : Used to calculate the to and from time 
+         for timeDescripion
+        """
+        # Create list of series descriptions and time descriptions from dependant series list
+        seriesDescriptionsTimeDescriptions = []
+        for series in self.__dspec.dependentSeries:
+            try: 
+                # Calculate the to and from time from the interval and range
+                toDateTime = referenceTime + timedelta(seconds= series.range[0] * series.interval)
+                fromDateTime = referenceTime + timedelta(seconds= series.range[1] * series.interval)
                 
-                #TODO:: Create better logic to properly analyse a given input
-                if (input.range[0] == input.range[1]): #isOnePoint
+                # Check if it's only one point
+                if (series.range[0] == series.range[1]): 
                     fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
-
-                #specifications is a pairing of a request and what type it should 
-                specifications.append((
+                
+                # Create pairing of series description and time description to pass to series provider
+                seriesDescriptionsTimeDescriptions.append((
                     SeriesDescription(
-                        input.source, 
-                        input.series,
-                        input.location,
-                        input.datum,
-                        input.verificationOverride
-                    ),
+                        series.source,
+                        series.series, 
+                        series.location, 
+                        series.datum, 
+                        series.interpolationParameters,
+                        series.verificationOverride
+                    ), 
                     TimeDescription(
-                        fromDateTime,
+                        fromDateTime, 
                         toDateTime,
-                        timedelta(seconds=input.interval)
-                    ),
-                    input.type
-                    )
-                )
+                        timedelta(seconds=series.interval)
+                    ), 
+                    series.outKey
+                ))
             except Exception as e:
-               log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {input} Error= {e}')
-        self.__specifications = specifications
-        self.__specificationsConstructionTime = referenceTime
+               log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {series} Error= {e}')
 
-    def __generate_inputVector(self) -> None:
-        """This method fills input specifications. It queries the system
-        for the data and casts the data according to the dspec
+        # Set the series description list and series construction time
+        self.__seriesDescriptionsTimeDescriptions = seriesDescriptionsTimeDescriptions
+        self.__seriesConstructionTime = referenceTime
+
+    def __gather_data(self) -> None: 
         """
-        inputVector = []
-        for specification in self.__specifications:
-            #unpack specification
-            seriesDescription = specification[0]
-            timeDescription = specification[1]
-            dataType = specification[2]
+        This function takes calls the series providor for each series created from the
+        dependentSeries list in the dspec and adds the data and it's key to the inputSeriesDict
+        """
+        dependentSeriesSeries = {}
+        for dependentSeries in self.__seriesDescriptionsTimeDescriptions:
+            # Unpack series and time description
+            seriesDescription = dependentSeries[0]
+            timeDescription = dependentSeries[1]
+            key = dependentSeries[2]
 
+            # Get the data from series provider
             responseSeries = self.__seriesProvider.request_input(seriesDescription, timeDescription)
+
+            # Check number of datapoints and if complete then append to list
             if responseSeries.isComplete:
-                [inputVector.append(dataPoint) for dataPoint in self.__cast_data(responseSeries.data, dataType)]
+                dependentSeriesSeries[key] = responseSeries
+            else: 
+                raise RuntimeError(f'ERROR: There was a problem with input gatherer making requests.\n\n Response: {responseSeries}\n\n')
+
+        self.__inputSeriesDict = dependentSeriesSeries
+
+    def __post_process_data(self) -> None:
+        """
+        This function calls the post processing methods for any inputs that need post processing
+        the post_process_data function is passed the input dictionary and the process call
+        so that the function can easily find the series needed for the computation and return 
+        a dictionary with the new outkeys and series. 
+        """
+        for postProcess in self.__dspec.postProcessCall:
+            # Instantiate Factory Method
+            processing_Class = post_processing_factory(postProcess.call)
+            # Call Post Processing Function
+            log(f'Init Post processing: \n\t{postProcess.call}\n\tArgs: {postProcess.args}')
+            newProcessedInput = processing_Class.post_process_data(self.__inputSeriesDict, postProcess)
+            # Add preprocessed dict to the inputSeries dict
+            self.__inputSeriesDict.update(newProcessedInput)
+
+    def __order_input_vector(self) -> None:
+        """
+        This function sorts through the inputSeriesDict and adds any series with matching
+        outkeys to the input_vector in the correct order with the data cast to the correct 
+        data type. 
+        """
+        target_keys = self.__dspec.orderedVector.keys
+        data_types = self.__dspec.orderedVector.dTypes
+        input_vector = []
+
+        log('Ordered Vector:')
+        for key, dtype in zip(target_keys, data_types):            
+
+            # Checking for each key in the input series dictionary 
+            if key in self.__inputSeriesDict:
+                casted_data = self.__cast_data(self.__inputSeriesDict[key].data, dtype)
+                log(f'\t{key}: - amnt_found: {len(casted_data)}')
+                input_vector += casted_data
             else:
-                log(f'ERROR: There was a problem with input gatherer making requests.\n\n Response: {responseSeries}\n\n')
-        self.__inputVector = inputVector
+                log(f'ERROR: There was a problem with input gatherer finding outKey {key} in {self.__inputSeriesDict}')
+
+        self.__inputVector = input_vector
 
     def __cast_data(self, data: list[Input], dataType: str) -> list[any]:
         """Casts vector of data to a given type.
@@ -181,16 +173,7 @@ class InputGatherer:
                     log(f'Input gatherer has no conversion for Unit: {dataType}')
                     raise NotImplementedError
         return castedData
-    
-    def calculate_referenceTime(self, execution :datetime) -> datetime:
-        '''This function calculates the refrence time that semaphore needs to use to get the correct number of inputs from execution time
-        :param execution: datetime -the execution time'''
 
-        interval = self.__dspec.timingInfo.interval
-
-        referenceTime = datetime.utcfromtimestamp(execution.timestamp() - (execution.timestamp() % interval))
-
-        return referenceTime
     
     def get_inputs(self, dateTime: datetime) -> list[any]:
         """Getter method returns the input vector for the loaded model. Only regenerates the vector
@@ -200,24 +183,45 @@ class InputGatherer:
             dateTime: datetime - The datetime to base the input vector off of, the returned vector
             will be relative to it.
         """
-        
-        #Only regenerate specification If its truly a new request.
-        specificationIsCreated = self.__specifications != None
-        requestTimeIsDifferent = dateTime != self.__specificationsConstructionTime
-        if not specificationIsCreated or (specificationIsCreated and requestTimeIsDifferent):
-            self.__generate_inputSpecifications(dateTime)
-            self.__generate_inputVector()
+        # Only go about creating input vector if the request is new
+        seriesCreated = self.__seriesDescriptionsTimeDescriptions != None
+        requestTimeIsDifferent = dateTime != self.__seriesConstructionTime
+        if not seriesCreated or (seriesCreated and requestTimeIsDifferent):
+            # The dspec was parsed in the constructor
+            # Convert dependent series described in the dspec into series description objects
+            self.__generate_seriesDescription(dateTime)
+
+            # Call series provider to gather inputs
+            self.__gather_data()
+
+            # Call post processing 
+            self.__post_process_data()
+
+            # Order series according to keys and cast data
+            self.__order_input_vector()
+
+            #Return ordered input vector
             return self.__inputVector
+        # Otherwise just return current input vector
         else:
             return self.__inputVector
         
-   
+    def calculate_referenceTime(self, execution :datetime) -> datetime:
+        '''This function calculates the refrence time that semaphore needs to use to get the correct number of inputs from execution time
+        :param execution: datetime -the execution time'''
+
+        interval = self.__dspec.timingInfo.interval
+
+        referenceTime = datetime.utcfromtimestamp(execution.timestamp() - (execution.timestamp() % interval))
+
+        return referenceTime
             
     def get_model_file_name(self) -> str:
         """Returns the name of the model as specified in the DSPEC file."""
         return self.__dspec.modelFileName     
     
     def get_dspec(self) -> Dspec:
+        """Returns the dspec object being used."""
         return self.__dspec
 
     def get_input_specifications(self) -> list:

@@ -16,7 +16,8 @@ sys.path.append('/app/src')
     
 import pytest
 from datetime import datetime, timedelta
-from src.SeriesProvider.SeriesProvider import SeriesProvider, TimeDescription, SeriesDescription, Input
+from src.SeriesProvider.SeriesProvider import SeriesProvider
+from src.DataClasses import TimeDescription, SeriesDescription, Input
 
 
 

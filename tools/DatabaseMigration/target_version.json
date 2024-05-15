@@ -1,4 +1,4 @@
 {
-    "Target Version" : "2.0",
-    "Description" : "Active version adding the version table and DB Migration."
+    "Target Version" : "2.1",
+    "Description" : "Adding rows to the locations reference table, locations mapping reference table, and the data source reference table for Magnolia Models."
 }
