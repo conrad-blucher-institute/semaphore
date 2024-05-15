@@ -99,7 +99,7 @@ class InputGatherer:
         else: return DataIntegrityDescription(
                             dependentSeries.dataIntegrityCall.call,
                             dependentSeries.dataIntegrityCall.args
-                    ),
+                    )
 
 
 

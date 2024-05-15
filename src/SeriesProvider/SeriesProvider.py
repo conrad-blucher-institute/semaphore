@@ -79,7 +79,7 @@ class SeriesProvider():
         
         log(f'Init Interpolation...')
         # If neither were valid then we attempt to interpolate, checking if we have permissions to do so inside the method
-        integrityClass = data_integrity_factory(validated_merged_result.description.dataIntegrityDescription.call)
+        integrityClass = data_integrity_factory(seriesDescription.dataIntegrityDescription.call)
         interpolation_results = integrityClass.exec(validated_merged_result)
         validated_interpolation_results = self.__generate_resulting_series(seriesDescription, timeDescription, interpolation_results.data)
         
