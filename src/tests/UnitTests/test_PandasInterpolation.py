@@ -33,7 +33,8 @@ dependent_series = {
                 "call": "PandasInterpolation",
                 "args": {
                     "method": "linear",
-                    "limit": '7200'
+                    "limit": '7200',
+                    "limit_area":"None" 
                 }
             },
             "outKey": "WindDir_01",
