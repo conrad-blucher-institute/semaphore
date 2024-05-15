@@ -30,7 +30,7 @@ class PandasInterpolation(IDataIntegrity):
 
 
     json_copy:
-    {
+    "dataIntegrityCall": {
         "call": "PandasInterpolation",
         "args": {
             "limit":"",

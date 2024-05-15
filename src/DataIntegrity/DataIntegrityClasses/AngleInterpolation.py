@@ -31,7 +31,7 @@ class AngleInterpolation(IDataIntegrity):
 
 
     json_copy:
-    {
+    "dataIntegrityCall": {
         "call": "AngleInterpolation",
         "args": {
             "limit":"",
