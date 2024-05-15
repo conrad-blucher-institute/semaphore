@@ -16,7 +16,7 @@
 #Local
 from SeriesProvider.SeriesProvider import SeriesProvider
 from DataClasses import SeriesDescription, TimeDescription, Input, DataIntegrityDescription
-from .dspecParser import DSPEC_Parser, Dspec
+from .dspecParser import DSPEC_Parser, Dspec, DependentSeries
 from utility import log, construct_true_path
 from PostProcessing.IPostProcessing import post_processing_factory
 
@@ -75,10 +75,7 @@ class InputGatherer:
                         series.series, 
                         series.location, 
                         series.datum, 
-                        DataIntegrityDescription(
-                            series.dataIntegrityCall.call,
-                            series.dataIntegrityCall.args
-                        ),
+                        self.__get_dataIntegrityCall(series),
                         series.verificationOverride
                     ), 
                     TimeDescription(
@@ -94,6 +91,17 @@ class InputGatherer:
         # Set the series description list and series construction time
         self.__seriesDescriptionsTimeDescriptions = seriesDescriptionsTimeDescriptions
         self.__seriesConstructionTime = referenceTime
+
+    def __get_dataIntegrityCall(self, dependentSeries: DependentSeries) -> DataIntegrityDescription:
+        """This method should return None if there is no Data Integrity Call, 
+        else it makes a DataIntegrityDescription and returns that"""
+        if dependentSeries.dataIntegrityCall is None: return None
+        else: return DataIntegrityDescription(
+                            dependentSeries.dataIntegrityCall.call,
+                            dependentSeries.dataIntegrityCall.args
+                    ),
+
+
 
     def __gather_data(self) -> None: 
         """
