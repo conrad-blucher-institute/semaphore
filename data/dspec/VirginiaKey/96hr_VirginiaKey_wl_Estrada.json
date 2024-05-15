@@ -1,0 +1,117 @@
+{
+    "dspecVersion": "2.0",
+    "modelName": "96hr_VirginiaKey_wl_Estrada",
+    "modelVersion": "1.0.0",
+    "author": "Beto Estrada",
+    "modelFileName": "./VirginiaKey/96hr_VirginiaKey_wl_Estrada",
+    "timingInfo":{
+        "offset": 1200,
+        "interval": 3600
+    },
+    "outputInfo": {
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 345600,
+        "series": "pWl",
+        "location": "VirginiaKey",
+        "unit" : "meter",
+        "datum": "NAVD"
+    },
+    "dependentSeries": [
+        { 
+            "_name": "Water Level",
+            "location": "VirginiaKey",
+            "source": "NOAATANDC",
+            "series": "dWl",
+            "unit": "meter",
+            "datum": "NAVD",
+            "interval": 3600,
+            "range": [0, -48],
+            "outKey": "VK_WL_49"
+        },
+        { 
+            "_name": "Wind Speed",
+            "location": "VirginiaKey",
+            "source": "NOAATANDC",
+            "series": "dWnSpd",
+            "unit": "mps",
+            "interval": 3600,
+            "range": [0, -48],
+            "outKey": "VK_WSPD_49"
+        },
+        { 
+            "_name": "Wind Direction",
+            "location": "VirginiaKey",
+            "source": "NOAATANDC",
+            "series": "dWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [0, -48],
+            "outKey": "VK_WDIR_49"
+            
+        },
+        { 
+            "_name": "Wind Speed Prediction",
+            "location": "VirginiaKey",
+            "source": "NDFD_EXP",
+            "series": "pWnSpd",
+            "unit": "mps",
+            "interval": 3600,
+            "range": [96, 1],
+            "outKey": "VK_PWSPD_F96"
+        },
+        { 
+            "_name": "Wind Direction Prediction",
+            "location": "VirginiaKey",
+            "source": "NDFD_EXP",
+            "series": "pWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [96, 1],
+            "outKey": "VK_PWDIR_F96"
+        }
+    ],
+    "postProcessCall": [
+        {
+            "call": "ResolveVectorComponents",
+            "args": {
+                "offset": 0,
+                "targetMagnitude_inKey":"VK_WSPD_49",
+                "targetDirection_inKey":"VK_WDIR_49",
+                "x_comp_outKey": "x_VK_WNDCMP_49", 
+                "y_comp_outKey": "y_VK_WNDCMP_49"      
+            }
+        },
+        {
+            "call": "ResolveVectorComponents",
+            "args": {
+                "offset": 0,
+                "targetMagnitude_inKey":"VK_PWSPD_F96",
+                "targetDirection_inKey":"VK_PWDIR_F96",
+                "x_comp_outKey": "x_VK_PWNDCMP_F96", 
+                "y_comp_outKey": "y_VK_PWNDCMP_F96"      
+            }
+        }
+    ],
+    "vectorOrder": [
+        {
+            "key": "VK_WL_49",
+            "dType": "float"
+        },
+        {
+            "key": "x_VK_WNDCMP_49",
+            "dType": "float"
+        },
+        {
+            "key": "y_VK_WNDCMP_49",
+            "dType": "float"
+        },
+        {
+            "key": "x_VK_PWNDCMP_F96",
+            "dType": "float"
+        },
+        {
+            "key": "y_VK_PWNDCMP_F96",
+            "dType": "float"
+        }
+    ]
+}
