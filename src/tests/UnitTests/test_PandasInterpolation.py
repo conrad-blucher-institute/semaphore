@@ -34,7 +34,7 @@ dependent_series = {
                 "args": {
                     "method": "linear",
                     "limit": '7200',
-                    "limit_area":"None" 
+                    "limit_area":"inside" 
                 }
             },
             "outKey": "WindDir_01",
