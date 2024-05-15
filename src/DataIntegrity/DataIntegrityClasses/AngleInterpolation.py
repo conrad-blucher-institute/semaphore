@@ -65,6 +65,7 @@ class AngleInterpolation(IDataIntegrity):
         method = dataIntegrityDescription.args['method']
         limit = int(dataIntegrityDescription.args['limit'])
         limit_area = dataIntegrityDescription.args['limit_area']
+        limit_area = None if limit_area == 'None' else limit_area
         
         limit = timedelta(seconds = limit)
     
