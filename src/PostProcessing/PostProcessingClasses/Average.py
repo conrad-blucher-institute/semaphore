@@ -57,11 +57,11 @@ class Average(IPostProcessing):
         averages = []
         for first, second in zip(first_series.data, second_series.data):
 
-            average = (first.dataValue + second.dataValue) / 2
+            average = (float(first.dataValue) + float(second.dataValue)) / 2
 
             # Magnitude contains the correct metadata from resulting series
             averages.append(Input(
-                dataValue=      average,
+                dataValue=      str(average),
                 dataUnit=       first.dataUnit,
                 timeGenerated=  first.timeGenerated,
                 timeVerified=   first.timeVerified,

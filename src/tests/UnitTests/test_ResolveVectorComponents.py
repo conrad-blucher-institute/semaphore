@@ -74,6 +74,6 @@ def test_post_process_data():
     # Iterate through the resulting components checking if they were calculated correctly
     for true_x, true_y, test_x_input, test_y_input in zip(x_comp, y_comp, x_comps_series.data, y_comps_series.data):
         tolerance = 1e-5
-        if not isclose(true_x, test_x_input.dataValue, abs_tol=tolerance) or not isclose(true_y, test_y_input.dataValue, abs_tol=tolerance):
+        if not isclose(true_x, float(test_x_input.dataValue), abs_tol=tolerance) or not isclose(true_y, float(test_y_input.dataValue), abs_tol=tolerance):
             assert False
     assert True

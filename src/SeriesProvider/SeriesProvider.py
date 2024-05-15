@@ -49,13 +49,13 @@ class SeriesProvider():
             :param timeDescription - A description of the temporal information of the wanted series. 
             :returns series - The series containing as much data as could be found.
         """
-        log(f'Init input request from {seriesDescription}|{timeDescription}')
+        log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
         
         # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 6 minuets
         timeDescription.interval = timedelta(minutes=6) if timeDescription.interval == None else timeDescription.interval
         
         # Pull data from series storage and validate it, if valid return it
-        log(f'Init DB Query from {seriesDescription}|{timeDescription}')
+        log(f'Init DB Query...')
         series_storage_results = self.seriesStorage.select_input(seriesDescription, timeDescription)
         validated_series_storage_results = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data)
         if(validated_series_storage_results.isComplete):
@@ -63,18 +63,24 @@ class SeriesProvider():
 
         # If series storage results weren't valid
         # Pull data ingestion, validate it with the series storage results, if valid return it
-        log(f'Init DI Query from {seriesDescription}|{timeDescription}')
+        log(f'Init DI Query...')
         data_ingestion_class = data_ingestion_factory(seriesDescription)
         data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
         validated_merged_result = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data, data_ingestion_results.data if data_ingestion_results != None else None)
         if(validated_merged_result.isComplete):
             return validated_merged_result
         
-        # If neither were valid then we attempt to interpolate
-        log(f'Init Interpolation from {seriesDescription}|{timeDescription}')
+        if seriesDescription.interpolationParameters is None:
+            log(f'Series is not complete and interpolation was not granted!')
+            return validated_merged_result
+        
+        log(f'Init Interpolation...')
+        # If neither were valid then we attempt to interpolate, checking if we have permissions to do so inside the method
         interpolation_results = self.__interpolate_series(validated_merged_result)
         validated_interpolation_results = self.__generate_resulting_series(seriesDescription, timeDescription, interpolation_results.data)
         
+        if (not validated_interpolation_results.isComplete):
+            log('Series is not complete after interpolation!')
         return validated_interpolation_results
       
     
@@ -90,24 +96,12 @@ class SeriesProvider():
         timeDescription = inSeries.timeDescription
         seriesDescription = inSeries.description
         interpolationParameters = seriesDescription.interpolationParameters
-
+    
         # If there is only one Input (only one data point) then we do not interpolate
         if(len(inSeries.data) <= 1):
             log(f'''Interpolation error,
-                Reason: Only one Input found in series.\n 
-                {seriesDescription} \n 
-                {timeDescription} \n 
+                Reason: Only one Input found in series.
             ''')
-            return inSeries
-
-        if interpolationParameters is None:
-            error_message = f'''Interpolation error,
-                Reason: Interpolation Parameters not defined.\n 
-                {seriesDescription} \n 
-                {timeDescription} \n 
-            '''
-            log(error_message)
-            inSeries.nonCompleteReason = '' if inSeries.nonCompleteReason is None else inSeries.nonCompleteReason  + f'\n{error_message}'
             return inSeries
         
         # Will hard fail if one or both doesn't exist

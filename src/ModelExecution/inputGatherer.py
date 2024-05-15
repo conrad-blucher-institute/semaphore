@@ -109,9 +109,9 @@ class InputGatherer:
 
             # Check number of datapoints and if complete then append to list
             if responseSeries.isComplete:
-                dependentSeriesSeries[key] = responseSeries.data
+                dependentSeriesSeries[key] = responseSeries
             else: 
-                 log(f'ERROR: There was a problem with input gatherer making requests.\n\n Response: {responseSeries}\n\n')
+                raise RuntimeError(f'ERROR: There was a problem with input gatherer making requests.\n\n Response: {responseSeries}\n\n')
 
         self.__inputSeriesDict = dependentSeriesSeries
 
@@ -126,7 +126,7 @@ class InputGatherer:
             # Instantiate Factory Method
             processing_Class = post_processing_factory(postProcess.call)
             # Call Post Processing Function
-            log(f'Init Post processing: {postProcess.call}\n\tArgs: {postProcess.args}')
+            log(f'Init Post processing: \n\t{postProcess.call}\n\tArgs: {postProcess.args}')
             newProcessedInput = processing_Class.post_process_data(self.__inputSeriesDict, postProcess)
             # Add preprocessed dict to the inputSeries dict
             self.__inputSeriesDict.update(newProcessedInput)
@@ -141,13 +141,14 @@ class InputGatherer:
         data_types = self.__dspec.orderedVector.dTypes
         input_vector = []
 
-        for index, key in enumerate(target_keys):            
-            # Set datatype according to key
-            dtype = data_types[index]
+        log('Ordered Vector:')
+        for key, dtype in zip(target_keys, data_types):            
 
             # Checking for each key in the input series dictionary 
             if key in self.__inputSeriesDict:
-                input_vector.append(self.__cast_data(self.__inputSeriesDict[key], dtype))
+                casted_data = self.__cast_data(self.__inputSeriesDict[key].data, dtype)
+                log(f'\t{key}: - amnt_found: {len(casted_data)}')
+                input_vector += casted_data
             else:
                 log(f'ERROR: There was a problem with input gatherer finding outKey {key} in {self.__inputSeriesDict}')
 

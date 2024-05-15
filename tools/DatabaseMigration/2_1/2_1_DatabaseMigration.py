@@ -42,11 +42,15 @@ class Migrator(IDatabaseMigration):
         ref_dataLocation = metadata.tables['ref_dataLocation']
         ref_dataSource = metadata.tables['ref_dataSource']
         ref_dataLocation_dataSource_mapping = metadata.tables['dataLocation_dataSource_mapping']
+        ref_dataDatum = metadata.tables['ref_dataDatum']
+        ref_dataSeries = metadata.tables['ref_dataSeries']
 
         # Insert the data based off of csv files
         self.insert_ref_data(self.readInitCSV('magnoliaLocations.csv'), ref_dataLocation)
         self.insert_ref_data(self.readInitCSV('semaphoreDataSource.csv'), ref_dataSource)
         self.insert_ref_data(self.readInitCSV('magnoliaMapping.csv'), ref_dataLocation_dataSource_mapping)
+        self.insert_ref_data(self.readInitCSV('magnoliaDatums.csv'), ref_dataDatum)
+        self.insert_ref_data(self.readInitCSV('magnoliaSeries.csv'), ref_dataSeries)
 
         
         return True
@@ -99,12 +103,15 @@ class Migrator(IDatabaseMigration):
         ref_dataLocation = metadata.tables['ref_dataLocation']
         ref_dataSource = metadata.tables['ref_dataSource']
         ref_dataLocation_dataSource_mapping = metadata.tables['dataLocation_dataSource_mapping']
-
+        ref_dataDatum = metadata.tables['ref_dataDatum']
+        ref_dataSeries = metadata.tables['ref_dataSeries']
 
         # Delete the data according to csv files
         self.remove_ref_data(self.readInitCSV('magnoliaLocations.csv'), ref_dataLocation)
         self.remove_ref_data(self.readInitCSV('semaphoreDataSource.csv'), ref_dataSource)
         self.remove_ref_data(self.readInitCSV('magnoliaMapping.csv'), ref_dataLocation_dataSource_mapping)
+        self.remove_ref_data(self.readInitCSV('magnoliaDatums.csv'), ref_dataDatum)
+        self.remove_ref_data(self.readInitCSV('magnoliaSeries.csv'), ref_dataSeries)
 
 
         return True

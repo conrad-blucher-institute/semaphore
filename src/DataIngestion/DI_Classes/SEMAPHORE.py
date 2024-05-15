@@ -63,7 +63,7 @@ class SEMAPHORE(IDataIngestion):
         inputs = []
         for output in outputs:
 
-            value = output.dataUnit
+            value = output.dataValue
             unit = output.dataUnit
             timeGenerated = output.timeGenerated
             leadTime = output.leadTime

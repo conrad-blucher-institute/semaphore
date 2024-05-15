@@ -67,6 +67,10 @@ class NDFD_EXP(IDataIngestion):
         match seriesDescription.dataSeries:
             case 'pAirTemp':
                 return self.fetch_predictions(seriesDescription, timeDescription, 'temp')
+            case 'pWnDir':
+                return self.fetch_predictions(seriesDescription, timeDescription, 'wdir')
+            case 'pWnSpd':
+                return self.fetch_predictions(seriesDescription, timeDescription, 'wspd')
             case _ : 
                 raise NotImplementedError(f'NDFD_EXP received request {seriesDescription} but could not map it to a series')
 

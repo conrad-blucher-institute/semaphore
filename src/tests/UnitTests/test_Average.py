@@ -70,6 +70,6 @@ def test_post_process_data():
     # Iterate through the resulting components checking if they were calculated correctly
     for a, a_test in zip(average, average_test.data):
         tolerance = 1e-5
-        if not isclose(a, a_test.dataValue, abs_tol=tolerance):
+        if not isclose(a, float(a_test.dataValue), abs_tol=tolerance):
             assert False
     assert True

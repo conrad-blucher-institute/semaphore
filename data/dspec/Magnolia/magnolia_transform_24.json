@@ -3,7 +3,7 @@
     "modelName": "magnolia_transform_24",
     "modelVersion": "1.0.0",
     "author": "Jacob Alonzo",
-    "modelFileName": "",
+    "modelFileName": "./Magnolia/24hr_leadtime_2ndANN",
     "timingInfo":{
         "offset": 1200,
         "interval": 3600
@@ -12,9 +12,10 @@
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
         "leadTime": 86400,
-        "series": "pWL",
+        "series": "pWl",
         "location": "MagnoliaBeach",
-        "unit": "meter" 
+        "unit": "meter", 
+        "datum": "MLLW"
     },
     "dependentSeries": [
         { 
@@ -24,27 +25,27 @@
             "series": "magnolia_24|1.0.0|pSurge",
             "unit": "meter",
             "interval": 3600,
-            "range":  [7, 19],
+            "range":  [19, 7],
             "outKey": "MG_24_output_12"
         },
         { 
             "_name": "Wind Direction Prediction",
             "location": "PortLavaca",
-            "source": "NDFD",
+            "source": "NDFD_EXP",
             "series": "pWnDir",
             "unit": "meter",
             "interval": 3600,
-            "range": [1, 24],
+            "range": [24, 1],
             "outKey": "PL_WNDIR_F24"
         },
         { 
             "_name": "Wind Speed Prediction",
             "location": "PortLavaca",
-            "source": "NDFD",
+            "source": "NDFD_EXP",
             "series": "pWnSpd",
             "unit": "meter",
             "interval": 3600,
-            "range": [1, 24],
+            "range": [24, 1],
             "outKey": "PL_WNDSPD_F24"
         },
         { 
@@ -53,18 +54,20 @@
             "source": "LIGHTHOUSE",
             "series": "pHarm",
             "unit": "meter",
+            "datum": "MLLW",
             "interval": 3600,
-            "range":  [7, 19],
+            "range":  [19, 7],
             "outKey": "PL_pHarm_12"
         },
         { 
             "_name": "Harmonic Predictions POC",
             "location": "PortOConnor",
-            "source": "lIGHTHOUSE",
+            "source": "LIGHTHOUSE",
             "series": "pHarm",
             "unit": "meter",
+            "datum": "MLLW",
             "interval": 3600,
-            "range":  [7, 19],
+            "range":  [19, 7],
             "outKey": "POC_pHarm_12"
         }
 

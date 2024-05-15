@@ -54,17 +54,16 @@ class MagnoliaPredictionsPostProcess(IPostProcessing):
         magnolia_predHarmFirst = preprocessedData[args['predHarmFirst_inKey']]
         magnolia_predHarmSecond = preprocessedData[args['predHarmSecond_inKey']]
         magnolia_Preds = preprocessedData[args['magnolia_Pred_inKey']]
-
         transformeds = []
         for first, second, magnolia_pred in zip(magnolia_predHarmFirst.data, magnolia_predHarmSecond.data, magnolia_Preds.data):
             
             # Average the hermonics and add it to the predicted surge
-            average = (first.dataValue + second.dataValue) / 2
-            transformed = magnolia_pred.dataValue + average
+            average = (float(first.dataValue) + float(second.dataValue)) / 2
+            transformed = float(magnolia_pred.dataValue) + average
 
             # Magnitude contains the correct metadata from resulting series
             transformeds.append(Input(
-                dataValue=      transformed,
+                dataValue=      str(transformed),
                 dataUnit=       magnolia_pred.dataUnit,
                 timeGenerated=  magnolia_pred.timeGenerated,
                 timeVerified=   magnolia_pred.timeVerified,

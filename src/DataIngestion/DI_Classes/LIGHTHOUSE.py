@@ -27,8 +27,19 @@ class LIGHTHOUSE(IDataIngestion):
     
     def __init__(self):
         self.seriesStorage = series_storage_factory()
-        self.lighthouseDataInfoMap = {'dAirTmp': ('atp', 'celsius'),
-                                       'dWaterTmp': ('wtp', 'celsius')}
+        # Our series name (lighthouse series name, unit, datum controlled)
+        self.lighthouseDataInfoMap = {
+            'dAirTmp': ('atp', 'celsius', False),
+            'dWaterTmp': ('wtp', 'celsius', False),
+            'dWnSpd': ('wsd', 'mps', False),
+            'dWnDir': ('wdr', 'degrees', False),
+            'dSurge': ('surge', 'meter', False),
+            'dWl': ('pwl', 'meter', True),
+            'pHarm': ('harmwl', 'meter', True),
+        }
+        self.datumMap = {
+            'MLLW': 'mllw'
+        }
 
     
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
@@ -67,11 +78,12 @@ class LIGHTHOUSE(IDataIngestion):
         toString = timeDescription.toDateTime.strftime('%m/%d/%y').replace('/', '%2F')
         
         ### Find what LIGHTHOUSE calls the series we want
-        # sim = series info map
+        # SIM = series info map
         SIMSeriesCodeIndex = 0
         SIMSeriesUnitIndex = 1
-        sim = self.lighthouseDataInfoMap.get(seriesDescription.dataSeries)
-        if(sim == None):
+        SIMSeriesDatumControlledIndex = 2
+        seriesInfoMap = self.lighthouseDataInfoMap.get(seriesDescription.dataSeries)
+        if(seriesInfoMap == None):
             log(f'No mapping for series code {seriesDescription.dataSeries} found in LIGHTHOUSE ingestion class!')
             return None
         
@@ -80,7 +92,14 @@ class LIGHTHOUSE(IDataIngestion):
         
         ### Get LIGHTHOUSE data
         # Build the URL to hit
-        url = f'http://lighthouse.tamucc.edu/pd?stnlist={lighthouseLocationCode}&serlist={sim[SIMSeriesCodeIndex]}&when={fromString}%2C{toString}&whentz=UTC0&-action=app_json&unit=metric&elev=stnd'
+
+        datum = 'stnd'
+        if (seriesInfoMap[SIMSeriesDatumControlledIndex]):
+            datum = self.datumMap.get(seriesDescription.dataDatum, None)
+            if datum is None:
+                raise NotImplementedError(f'There is no datum code mapping for {seriesDescription.dataDatum} in lighthouse')
+
+        url = f'http://lighthouse.tamucc.edu/pd?stnlist={lighthouseLocationCode}&serlist={seriesInfoMap[SIMSeriesCodeIndex]}&when={fromString}%2C{toString}&whentz=UTC0&-action=app_json&unit=metric&elev={datum}'
         apiReturn = self.__api_request(url)
         if apiReturn == None:
             log(f'LIGHTHOUSE | __pull_pd_endpoint_dataPoint | For unknown reason fetch failed for {seriesDescription}{timeDescription}')
@@ -89,7 +108,7 @@ class LIGHTHOUSE(IDataIngestion):
         # Parse Meta Data
         lat = apiReturn[lighthouseLocationCode]['lat']
         lon = apiReturn[lighthouseLocationCode]['lon']
-        data = apiReturn[lighthouseLocationCode]['data'][sim[SIMSeriesCodeIndex]]
+        data = apiReturn[lighthouseLocationCode]['data'][seriesInfoMap[SIMSeriesCodeIndex]]
 
         ### Convert data to a list of inputs
         dataValueIndex = 1
@@ -112,7 +131,7 @@ class LIGHTHOUSE(IDataIngestion):
                 dt = datetime.utcfromtimestamp(epochTimeStamp)
                 inputs.append(Input(
                     dataPoint[dataValueIndex],
-                    sim[SIMSeriesUnitIndex],
+                    seriesInfoMap[SIMSeriesUnitIndex],
                     dt, # Validation time and generated time are the same as these are data points
                     dt,
                     lon,

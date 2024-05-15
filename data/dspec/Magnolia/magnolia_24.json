@@ -4,7 +4,7 @@
     "modelName": "magnolia_24",
     "modelVersion": "1.0.0",
     "author": "Jacob Alonzo",
-    "modelFileName": "",
+    "modelFileName": "./Magnolia/24hr_leadtime_1stANN",
     "timingInfo":{
         "offset": 1200,
         "interval": 3600
@@ -85,21 +85,21 @@
         { 
             "_name": "Wind Direction Predicition",
             "location": "PortLavaca",
-            "source": "NDFD",
+            "source": "NDFD_EXP",
             "series": "pWnDir",
             "unit": "meter",
             "interval": 3600,
-            "range": [1, 19],
+            "range": [19, 1],
             "outKey": "PL_PWNDIR_F20"
         },
         { 
             "_name": "Wind Speed Prediction",
             "location": "PortLavaca",
-            "source": "NDFD",
+            "source": "NDFD_EXP",
             "series": "pWnSpd",
             "unit": "meter",
             "interval": 3600,
-            "range": [1, 19],
+            "range": [19, 1],
             "outKey": "PL_PWSPD_F20"
         }
     ],
