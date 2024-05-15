@@ -1,17 +1,16 @@
 {
     "dspecVersion": "2.0",
-    "modelName": "magnolia_transform_24",
+    "modelName": "magnolia_transform_12",
     "modelVersion": "1.0.0",
     "author": "Jacob Alonzo",
-    "modelFileName": "./Magnolia/24hr_leadtime_2ndANN",
+    "modelFileName": "./Magnolia/12hr_leadtime_2ndANN",
     "timingInfo":{
-        "offset": 1200,
+        "offset": 1500,
         "interval": 3600
-
     },
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
-        "leadTime": 86400,
+        "leadTime": 43200,
         "series": "pWl",
         "location": "MagnoliaBeach",
         "unit": "meter", 
@@ -19,34 +18,50 @@
     },
     "dependentSeries": [
         { 
-            "_name": "magnolia_24 output",
+            "_name": "magnolia_12 output",
             "location": "EstMagnoliaBeach",
             "source": "SEMAPHORE",
-            "series": "magnolia_24|1.0.0|pSurge",
+            "series": "magnolia_12|1.0.0|pSurge",
             "unit": "meter",
             "interval": 3600,
-            "range":  [19, 7],
-            "outKey": "MG_24_output_12"
+            "range":  [7, -3],
+            "outKey": "MG_12_output_12"
         },
         { 
             "_name": "Wind Direction Prediction",
             "location": "PortLavaca",
             "source": "NDFD_EXP",
             "series": "pWnDir",
-            "unit": "meter",
+            "unit": "degrees",
             "interval": 3600,
-            "range": [24, 1],
-            "outKey": "PL_WNDIR_F24"
+            "range": [12, 1],
+            "outKey": "PL_WNDIR_F12",
+            "dataIntegrityCall": {
+                "call": "AngleInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"inside"    
+                }
+            }
         },
         { 
             "_name": "Wind Speed Prediction",
             "location": "PortLavaca",
             "source": "NDFD_EXP",
             "series": "pWnSpd",
-            "unit": "meter",
+            "unit": "mps",
             "interval": 3600,
-            "range": [24, 1],
-            "outKey": "PL_WNDSPD_F24"
+            "range": [12, 1],
+            "outKey": "PL_WNDSPD_F12",
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"inside"    
+                }
+            }
         },
         { 
             "_name": "Harmonic Predictions",
@@ -56,7 +71,7 @@
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
-            "range":  [19, 7],
+            "range":  [7, -3],
             "outKey": "PL_pHarm_12"
         },
         { 
@@ -67,7 +82,7 @@
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
-            "range":  [19, 7],
+            "range":  [7, -3],
             "outKey": "POC_pHarm_12"
         }
 
@@ -77,10 +92,10 @@
             "call": "ResolveVectorComponents",
             "args": {
                 "offset": 0,
-                "targetMagnitude_inKey":"PL_WNDSPD_F24",
-                "targetDirection_inKey":"PL_WNDIR_F24",
-                "x_comp_outKey": "x_PL_WNDCMP_F24", 
-                "y_comp_outKey": "y_PL_WNDCMP_F24"      
+                "targetMagnitude_inKey":"PL_WNDSPD_F12",
+                "targetDirection_inKey":"PL_WNDIR_F12",
+                "x_comp_outKey": "x_PL_WNDCMP_F12", 
+                "y_comp_outKey": "y_PL_WNDCMP_F12"      
             }
         },
         {
@@ -88,7 +103,7 @@
             "args": {
                 "predHarmFirst_inKey":"PL_pHarm_12",
                 "predHarmSecond_inKey":"POC_pHarm_12",
-                "magnolia_Pred_inKey":"MG_24_output_12",
+                "magnolia_Pred_inKey":"MG_12_output_12",
                 "Magnolia_WL_outKey": "MG_WL_F12"        
             }
         }
@@ -100,11 +115,11 @@
             "dType": "float"
         },
         {
-            "key": "x_PL_WNDCMP_F24",
+            "key": "x_PL_WNDCMP_F12",
             "dType": "float"
         },
         {
-            "key": "y_PL_WNDCMP_F24",
+            "key": "y_PL_WNDCMP_F12",
             "dType": "float"
         }
     ]

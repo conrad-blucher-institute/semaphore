@@ -1,17 +1,16 @@
 {
-    
     "dspecVersion": "2.0",
-    "modelName": "magnolia_24",
+    "modelName": "magnolia_48",
     "modelVersion": "1.0.0",
     "author": "Jacob Alonzo",
-    "modelFileName": "./Magnolia/24hr_leadtime_1stANN",
+    "modelFileName": "./Magnolia/48hr_leadtime_48HrsOfWind_1stANN",
     "timingInfo":{
         "offset": 1200,
         "interval": 3600
     },
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
-        "leadTime": 68400,
+        "leadTime": 154800,
         "series": "pSurge",
         "location": "EstMagnoliaBeach",
         "unit" : "meter"
@@ -65,7 +64,7 @@
             "location": "PortLavaca",
             "source": "LIGHTHOUSE",
             "series": "dWnDir",
-            "unit": "meter",
+            "unit": "degrees",
             "interval": 3600,
             "range": [0, -24],
             "outKey": "PL_WNDIR_25"
@@ -76,7 +75,7 @@
             "location": "PortLavaca",
             "source": "LIGHTHOUSE",
             "series": "dWnSpd",
-            "unit": "meter",
+            "unit": "mps",
             "interval": 3600,
             "range": [0, -24],
             "outKey": "PL_WNSPD_25"
@@ -89,18 +88,34 @@
             "series": "pWnDir",
             "unit": "meter",
             "interval": 3600,
-            "range": [19, 1],
-            "outKey": "PL_PWNDIR_F20"
+            "range": [43, 1],
+            "outKey": "PL_PWNDIR_F43",
+            "dataIntegrityCall": {
+                "call": "AngleInterpolation",
+                "args": {
+                    "limit":"7200",
+                    "method":"linear",
+                    "limit_area":"None"    
+                }
+            }
         },
         { 
             "_name": "Wind Speed Prediction",
             "location": "PortLavaca",
             "source": "NDFD_EXP",
             "series": "pWnSpd",
-            "unit": "meter",
+            "unit": "mps",
             "interval": 3600,
-            "range": [19, 1],
-            "outKey": "PL_PWSPD_F20"
+            "range": [43, 1],
+            "outKey": "PL_PWSPD_F43",
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"7200",
+                    "method":"linear",
+                    "limit_area":"None"    
+                }
+            }
         }
     ],
     "postProcessCall": [
@@ -108,10 +123,10 @@
             "call": "ResolveVectorComponents",
             "args": {
                 "offset": 0,
-                "targetMagnitude_inKey":"PL_PWSPD_F20",
-                "targetDirection_inKey":"PL_PWNDIR_F20",
-                "x_comp_outKey": "x_PL_PWNDCMP_F20", 
-                "y_comp_outKey": "y_PL_PWNDCMP_F20"      
+                "targetMagnitude_inKey":"PL_PWSPD_F43",
+                "targetDirection_inKey":"PL_PWNDIR_F43",
+                "x_comp_outKey": "x_PL_PWNDCMP_F43", 
+                "y_comp_outKey": "y_PL_PWNDCMP_F43"      
             }
         },
         {
@@ -178,11 +193,11 @@
             "dType": "float"
         },
         {
-            "key": "x_PL_PWNDCMP_F20",
+            "key": "x_PL_PWNDCMP_F43",
             "dType": "float"
         },
         {
-            "key": "y_PL_PWNDCMP_F20",
+            "key": "y_PL_PWNDCMP_F43",
             "dType": "float"
         }
     ]
