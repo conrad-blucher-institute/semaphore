@@ -35,7 +35,8 @@ class AngleInterpolation(IDataIntegrity):
         "call": "AngleInterpolation",
         "args": {
             "limit":"",
-            "method":""     
+            "method":"",
+            "limit_area":"None | inside | outside"     
         }
     }
     """
@@ -63,6 +64,7 @@ class AngleInterpolation(IDataIntegrity):
         # Will hard fail if one or both doesn't exist
         method = dataIntegrityDescription.args['method']
         limit = int(dataIntegrityDescription.args['limit'])
+        limit_area = dataIntegrityDescription.args['limit_area']
         
         limit = timedelta(seconds = limit)
     
@@ -96,7 +98,7 @@ class AngleInterpolation(IDataIntegrity):
 
         # No limit is set since we already checked if the limit was passed above
         # Area limited to 'inside' to avoid extrapolation
-        filled_input_df[['x_comp', 'y_comp']] = filled_input_df[['x_comp', 'y_comp']].interpolate(method = method, limit_area = 'inside')
+        filled_input_df[['x_comp', 'y_comp']] = filled_input_df[['x_comp', 'y_comp']].interpolate(method = method, limit_area = limit_area)
 
         # After Interpolation we repair the angle.
         filled_input_df['dataValue'] = np.degrees(np.arctan2(filled_input_df['y_comp'], filled_input_df['x_comp']))

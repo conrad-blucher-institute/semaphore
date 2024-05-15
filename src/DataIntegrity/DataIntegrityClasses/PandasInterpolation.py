@@ -34,7 +34,8 @@ class PandasInterpolation(IDataIntegrity):
         "call": "PandasInterpolation",
         "args": {
             "limit":"",
-            "method":""     
+            "method":""  
+            "limit_area":"None | inside | outside"
         }
     }
     """
@@ -62,6 +63,7 @@ class PandasInterpolation(IDataIntegrity):
         # Will hard fail if one or both doesn't exist
         method = dataIntegrityDescription.args['method']
         limit = int(dataIntegrityDescription.args['limit'])
+        limit_area = dataIntegrityDescription.args['limit_area']
         
         limit = timedelta(seconds = limit)
     
@@ -91,7 +93,7 @@ class PandasInterpolation(IDataIntegrity):
 
         # No limit is set since we already checked if the limit was passed above
         # Area limited to 'inside' to avoid extrapolation
-        filled_input_df['dataValue'] = filled_input_df['dataValue'].interpolate(method = method, limit_area = 'inside')
+        filled_input_df['dataValue'] = filled_input_df['dataValue'].interpolate(method = method, limit_area = limit_area)
 
         # Drop rows where 'dataValue' is NaN
         filled_input_df = filled_input_df.dropna(subset=['dataValue'])

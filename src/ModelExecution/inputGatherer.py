@@ -122,7 +122,7 @@ class InputGatherer:
             if responseSeries.isComplete:
                 dependentSeriesSeries[key] = responseSeries
             else: 
-                raise RuntimeError(f'ERROR: There was a problem with input gatherer making requests.\n\n Response: {responseSeries}\n\n')
+                raise RuntimeError(f'ERROR: There was a problem with input gatherer making requests.\n\nResponse: \t{responseSeries}\n\n')
 
         self.__inputSeriesDict = dependentSeriesSeries
 

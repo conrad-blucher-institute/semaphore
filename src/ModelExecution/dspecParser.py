@@ -216,7 +216,7 @@ class dspec_sub_Parser_2_0:
                     dataIntegrityCall = DataIntegrityCall()
                     dataIntegrityCall.call = dataIntegrityDict['call']
                     dataIntegrityCall.args = dataIntegrityDict['args']
-                    dSeries.dataIntegrityCall = dataIntegrityDict
+                    dSeries.dataIntegrityCall = dataIntegrityCall
                 
                 dependentSeries.append(dSeries)
 
