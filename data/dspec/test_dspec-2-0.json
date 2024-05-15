@@ -13,7 +13,7 @@
         "outputMethod": "OnePackedFloat",
         "leadTime": 86400,
         "series": "testSeries",
-        "location": "packChan",
+        "location": "PortLavaca",
         "interval" : 3600, 
         "datum": "test_datum",
         "unit" : "meter"
@@ -21,8 +21,8 @@
     "dependentSeries": [
         { 
             "_name": "WindSpeed",
-            "location": "packChan",
-            "source": "NOAATANDC",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
             "series": "dWnSpd",
             "unit": "meter",
             "interval": 3600,
@@ -33,8 +33,8 @@
         },
         {
             "_name": "Wind Direction",
-            "location": "packChan",
-            "source": "NOAATANDC",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
             "series": "dWnDir",
             "unit": "degrees",
             "interval": 3600,
@@ -45,43 +45,55 @@
         },
         {
             "_name": "Wind Speed",
-            "location": "packChan",
-            "source": "NOAATANDC",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
             "series": "dWnSpd",
             "unit": "meter",
             "interval": 3600,
             "range": [0, -11],
-            "interpolationParameters": {
-                "method":"linear",
-                "limit": 3600
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"inside"      
+                }
             },
             "outKey": "WindSpd_12"
         },
         {
             "_name": "Wind Direction",
-            "location": "packChan",
-            "source": "NOAATANDC",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
             "series": "dWnDir",
             "unit": "degrees",
             "interval": 3600,
             "range": [0, -11],
-            "interpolationParameters": {
-                "method": "linear",
-                "limit": 3600
+            "dataIntegrityCall": {
+                "call": "AngleInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"inside"  
+                }
             },
             "outKey": "WindDir_12"
         },
         {
             "_name": "Wind Speed",
-            "location": "packChan",
-            "source": "NOAATANDC",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
             "series": "dWnSpd",
             "unit": "meter",
             "interval": 3600,
             "range": [0, -12],
-            "interpolationParameters": {
-                "method": "linear",
-                "limit": 3600
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"inside"    
+                }
             },
             "outKey": "WindSpd_13"
         }

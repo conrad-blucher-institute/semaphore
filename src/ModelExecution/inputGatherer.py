@@ -15,8 +15,8 @@
 #Imports
 #Local
 from SeriesProvider.SeriesProvider import SeriesProvider
-from DataClasses import SeriesDescription, TimeDescription, Input
-from .dspecParser import DSPEC_Parser, Dspec
+from DataClasses import SeriesDescription, TimeDescription, Input, DataIntegrityDescription
+from .dspecParser import DSPEC_Parser, Dspec, DependentSeries
 from utility import log, construct_true_path
 from PostProcessing.IPostProcessing import post_processing_factory
 
@@ -75,7 +75,7 @@ class InputGatherer:
                         series.series, 
                         series.location, 
                         series.datum, 
-                        series.interpolationParameters,
+                        self.__get_dataIntegrityCall(series),
                         series.verificationOverride
                     ), 
                     TimeDescription(
@@ -91,6 +91,17 @@ class InputGatherer:
         # Set the series description list and series construction time
         self.__seriesDescriptionsTimeDescriptions = seriesDescriptionsTimeDescriptions
         self.__seriesConstructionTime = referenceTime
+
+    def __get_dataIntegrityCall(self, dependentSeries: DependentSeries) -> DataIntegrityDescription:
+        """This method should return None if there is no Data Integrity Call, 
+        else it makes a DataIntegrityDescription and returns that"""
+        if dependentSeries.dataIntegrityCall is None: return None
+        else: return DataIntegrityDescription(
+                            dependentSeries.dataIntegrityCall.call,
+                            dependentSeries.dataIntegrityCall.args
+                    )
+
+
 
     def __gather_data(self) -> None: 
         """
@@ -111,7 +122,7 @@ class InputGatherer:
             if responseSeries.isComplete:
                 dependentSeriesSeries[key] = responseSeries
             else: 
-                raise RuntimeError(f'ERROR: There was a problem with input gatherer making requests.\n\n Response: {responseSeries}\n\n')
+                raise RuntimeError(f'ERROR: There was a problem with input gatherer making requests.\n\nResponse: \t{responseSeries}\n\n')
 
         self.__inputSeriesDict = dependentSeriesSeries
 

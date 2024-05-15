@@ -76,6 +76,21 @@ class Output():
             return True
         else: return False
 
+class DataIntegrityDescription():
+    """A time description should describe the data Integrity steps that should be taken
+        :param call: str - The Data Integrity class to call.
+        :param args: dict[str, str] - The argument dictionary
+    """
+
+    def __init__(self, call: str, args: dict[str, str]):
+        self.call = call
+        self.args = args
+
+    def __str__(self) -> str:
+        return f'\n[DataIntegrityDescription] -> call: {self.call}, args: {self.args}'
+    
+    def __repr__(self) -> str:
+        return f'\nDataIntegrityDescription({self.call}, {self.args})'
 
 class TimeDescription():
     """A time description should describe the datetime properties of a dataset.
@@ -102,20 +117,21 @@ class SeriesDescription():
         :param dataLocation: str - The location of the data ('packChan')
         :param limit: timedelta - The max gap distance allowed for interpolation
         :param dataDatum: str = None
+        :param dataIntegrityDescription: DataIntegrityDescription = None - An object that contains the data integrity calls that should be handled.
     """
-    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None, interpolationParameters: dict = None , verificationOverride: int = None) -> None:
+    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None,  dataIntegrityDescription: DataIntegrityDescription = None, verificationOverride: int = None) -> None:
         self.dataSource = dataSource
         self.dataSeries = dataSeries
         self.dataLocation = dataLocation
         self.dataDatum = dataDatum
-        self.interpolationParameters = interpolationParameters
+        self.dataIntegrityDescription = dataIntegrityDescription
         self.verificationOverride = verificationOverride
 
     def __str__(self) -> str:
-        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, interpolationParameters: {self.interpolationParameters}, verificationOverride: {self.verificationOverride}'
+        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, dataIntegrityDescription: {self.dataIntegrityDescription}, verificationOverride: {self.verificationOverride}'
     
     def __repr__(self) -> str:
-        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum}, {self.interpolationParameters}, {self.verificationOverride})'
+        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum}, {self.dataIntegrityDescription}, {self.verificationOverride})'
 
 
 class SemaphoreSeriesDescription():

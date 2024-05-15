@@ -203,14 +203,21 @@ class dspec_sub_Parser_2_0:
                 dSeries.series = dSeries_dict["series"]
                 dSeries.interval = dSeries_dict["interval"]
                 dSeries.range = dSeries_dict["range"]
-                dSeries.interpolationParameters = dSeries_dict.get("interpolationParameters")
                 dSeries.datum = dSeries_dict.get("datum")
                 dSeries.unit = dSeries_dict.get("unit")
                 dSeries.outKey = dSeries_dict.get("outKey")
                 dSeries.verificationOverride = dSeries_dict.get("verificationOverride")
-                
-                
 
+                # If there is a data Integrity Call we parse it, else its set to None.
+                dataIntegrityDict = dSeries_dict.get("dataIntegrityCall")
+                if dataIntegrityDict is None:
+                    dSeries.dataIntegrityCall = None
+                else:
+                    dataIntegrityCall = DataIntegrityCall()
+                    dataIntegrityCall.call = dataIntegrityDict['call']
+                    dataIntegrityCall.args = dataIntegrityDict['args']
+                    dSeries.dataIntegrityCall = dataIntegrityCall
+                
                 dependentSeries.append(dSeries)
 
             # Bind to dspec
@@ -292,16 +299,16 @@ class DependentSeries:
         self.datum = None
         self.interval = None
         self.range = None
-        self.interpolationParameters = None
+        self.dataIntegrityCall = None
         self.outKey = None
         self.verificationOverride = None
         
         
     def __str__(self) -> str:
-        return f'\n[InputInfo] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, datum: {self.datum}, range: {self.range}, outkey: {self.outKey}, interpolation: {self.interpolation}, verificationOverride: {self.verificationOverride}'
+        return f'\n[DependentSeries] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, datum: {self.datum}, range: {self.range}, outkey: {self.outKey}, dataIntegrityCall: {self.dataIntegrityCall}, verificationOverride: {self.verificationOverride}'
     
     def __repr__(self):
-        return f'\nInputInfo({self.name}, {self.location}, {self.source}, {self.series}, {self.unit}, {self.datum}, {self.range}, {self.outKey},{self.interpolation}, {self.verificationOverride})'
+        return f'\nDependentSeries({self.name}, {self.location}, {self.source}, {self.series}, {self.unit}, {self.datum}, {self.range}, {self.outKey},{self.dataIntegrityCall}, {self.verificationOverride})'
     
 class PostProcessCall:
     '''All information pertaining to a required call to a post processing function'''
@@ -310,10 +317,21 @@ class PostProcessCall:
         self.args = None
 
     def __str__(self) -> str:
-        return f'\n[InputInfo] -> call: {self.call}, args: {self.args}'
+        return f'\n[PostProcessCall] -> call: {self.call}, args: {self.args}'
     
     def __repr__(self):
-        return f'\nInputInfo({self.call}, {self.args})'
+        return f'\nPostProcessCall({self.call}, {self.args})'
+    
+class DataIntegrityCall:
+    def __init__(self) -> None:
+            self.call = None
+            self.args = None
+
+    def __str__(self) -> str:
+        return f'\n[DataIntegrityCall] -> call: {self.call}, args: {self.args}'
+    
+    def __repr__(self):
+        return f'\nDataIntegrityCall({self.call}, {self.args})'
     
 class VectorOrder:
     '''An object that holds the order and datatypes that the input vector should actually be'''
@@ -322,10 +340,10 @@ class VectorOrder:
         self.dTypes = []
 
     def __str__(self) -> str:
-        return f'\n[InputInfo] -> keys: {self.keys}, dTypes: {self.dTypes}'
+        return f'\n[VectorOrder] -> keys: {self.keys}, dTypes: {self.dTypes}'
     
     def __repr__(self):
-        return f'\nInputInfo({self.keys}, {self.dTypes})'
+        return f'\nVectorOrder({self.keys}, {self.dTypes})'
     
 
 class TimingInfo:

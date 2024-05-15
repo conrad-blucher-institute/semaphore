@@ -1,0 +1,94 @@
+# -*- coding: utf-8 -*-
+#test_AngleInterpolation.py
+#-------------------------------
+# Created By: Beto Estrada & Anointiyae Beasley  
+# Created Date: 5/15/2024
+# version 1.0
+#----------------------------------
+"""This file tests the AngleInterpolation Data Integrity Class
+ """ 
+#----------------------------------
+# 
+#Imports
+import sys
+sys.path.append('/app/src')
+
+import pytest
+from datetime import datetime, timedelta
+
+from src.DataClasses import Input, Series, SeriesDescription, TimeDescription, DataIntegrityDescription
+from src.DataIntegrity.IDataIntegrity import data_integrity_factory
+
+
+dependent_series = {
+            "_name": "Wind Direction",
+            "location": "packChan",
+            "source": "NOAATANDC",
+            "series": "dWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [0, 10],
+            "datum": None,
+            "dataIntegrityCall": {
+                "call": "AngleInterpolation",
+                "args": {
+                    "method": "linear",
+                    "limit": '7200',
+                    "limit_area":"inside" 
+                }
+            },
+            "outKey": "WindDir_01",
+            "verificationOverride": None
+        }
+
+testTimeDescription = TimeDescription(datetime(2024, 1, 1, hour=0), datetime(2024, 1, 1, hour=6),  timedelta(seconds = 3600))
+
+seven_hour_series_missing_one = [
+    Input('60', 'test', datetime(2024, 1, 1, hour=0), datetime(2024, 1, 1, hour=0)),
+    Input('66', 'test', datetime(2024, 1, 1, hour=1), datetime(2024, 1, 1, hour=0)),
+    Input('69', 'test', datetime(2024, 1, 1, hour=2), datetime(2024, 1, 1, hour=0)),
+    Input('72', 'test', datetime(2024, 1, 1, hour=4), datetime(2024, 1, 1, hour=0)),
+    Input('76', 'test', datetime(2024, 1, 1, hour=5), datetime(2024, 1, 1, hour=0)),
+    Input('270', 'test', datetime(2024, 1, 1, hour=6), datetime(2024, 1, 1, hour=0))
+]
+
+seven_hour_series_missing_three_consecutive = [
+    Input('60', 'test', datetime(2024, 1, 1, hour=0), datetime(2024, 1, 1, hour=0)),
+    Input('66', 'test', datetime(2024, 1, 1, hour=1), datetime(2024, 1, 1, hour=0)),
+    Input('69', 'test', datetime(2024, 1, 1, hour=2), datetime(2024, 1, 1, hour=0)),
+    Input('76', 'test', datetime(2024, 1, 1, hour=6), datetime(2024, 1, 1, hour=0))
+]
+
+seven_hour_series_missing_one_tails_missing = [
+    Input('66', 'test', datetime(2024, 1, 1, hour=1), datetime(2024, 1, 1, hour=0)),
+    Input('69', 'test', datetime(2024, 1, 1, hour=2), datetime(2024, 1, 1, hour=0)),
+    Input('72', 'test', datetime(2024, 1, 1, hour=4), datetime(2024, 1, 1, hour=0)),
+    Input('76', 'test', datetime(2024, 1, 1, hour=5), datetime(2024, 1, 1, hour=0))
+]
+
+@pytest.mark.parametrize("dependent_series, timeDescription, inputs, expected_length_of_data", [
+    (dependent_series, testTimeDescription, seven_hour_series_missing_one, 7), # One value missing, expects len of 7, no NaNs
+    (dependent_series, testTimeDescription, seven_hour_series_missing_three_consecutive, 4), # Three consecutive values missing, expects len of 4, no interpolation initiated
+    (dependent_series, testTimeDescription, seven_hour_series_missing_one_tails_missing, 5) # One value missing in middle, 2 missing at tails, expects len of 5, tails should be ignored
+])
+def test_interpolate_series(dependent_series: list, timeDescription: TimeDescription, inputs: list, expected_length_of_data: int):
+    seriesDescription = SeriesDescription(
+        dependent_series["source"],
+        dependent_series["series"],
+        dependent_series["location"],
+        dataIntegrityDescription= DataIntegrityDescription(
+            dependent_series["dataIntegrityCall"]['call'],
+            dependent_series["dataIntegrityCall"]['args']
+        )
+    )
+    
+    inSeries = Series(description = seriesDescription, isComplete = False, timeDescription = timeDescription)
+
+    inSeries.data = inputs
+
+    data_integrity_class = data_integrity_factory(seriesDescription.dataIntegrityDescription.call)
+    outSeries = data_integrity_class.exec(inSeries)
+
+    actual_length_of_data = len(outSeries.data)
+
+    assert actual_length_of_data == expected_length_of_data
