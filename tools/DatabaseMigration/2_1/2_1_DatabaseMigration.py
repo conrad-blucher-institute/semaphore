@@ -15,6 +15,7 @@
 #
 #Imports
 from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
+from DatabaseMigration.databaseMigrationUtility import KeywordType, DatabaseDeletionHelper
 from sqlalchemy import Engine, MetaData, Table, delete, select
 from sqlalchemy.dialects.postgresql import insert
 import csv
@@ -93,49 +94,14 @@ class Migrator(IDatabaseMigration):
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
         """
-        # Setting engine
-        self.__engine = databaseEngine
+        fileNames = ['magnoliaLocations.csv', 'semaphoreDataSource.csv', 'magnoliaDatums.csv', 'magnoliaSeries.csv']
+        fileTypes = [KeywordType.DATA_LOCATION, KeywordType.DATA_SOURCE, KeywordType.DATA_DATUM, KeywordType.DATA_SERIES]
 
-        # Reflect the tables from the database that we want to add data to
-        metadata = MetaData()
-        metadata.reflect(bind=databaseEngine)
+        # Using the utility helper class to delete any data dependent on the rows added in the 2.1 Migration
+        helper = DatabaseDeletionHelper(databaseEngine)
 
-        ref_dataLocation = metadata.tables['ref_dataLocation']
-        ref_dataSource = metadata.tables['ref_dataSource']
-        ref_dataLocation_dataSource_mapping = metadata.tables['dataLocation_dataSource_mapping']
-        ref_dataDatum = metadata.tables['ref_dataDatum']
-        ref_dataSeries = metadata.tables['ref_dataSeries']
-
-        # Delete the data according to csv files
-        self.remove_ref_data(self.readInitCSV('magnoliaLocations.csv'), ref_dataLocation)
-        self.remove_ref_data(self.readInitCSV('semaphoreDataSource.csv'), ref_dataSource)
-        self.remove_ref_data(self.readInitCSV('magnoliaMapping.csv'), ref_dataLocation_dataSource_mapping)
-        self.remove_ref_data(self.readInitCSV('magnoliaDatums.csv'), ref_dataDatum)
-        self.remove_ref_data(self.readInitCSV('magnoliaSeries.csv'), ref_dataSeries)
-
+        for file, type in zip(fileNames, fileTypes):
+            for rowDict in self.readInitCSV(file):
+                helper.deep_delete_keyword(rowDict["code"], type)
 
         return True
-    
-    def remove_ref_data(self, conditions: list[dict], table: Table) -> list[tuple]:
-        """This method removes reference rows
-            :param conditions: A list of dictionaries. The dict can be found in NOTE 1
-            :return Series - SQLALCHEMY tupleish rows that were removed
-            NOTE:: {"code": None, "displayName": None, "notes": None, "latitude": None, "longitude": None}
-        """
-        with self.__engine.connect() as conn:
-            # First, fetch the rows that are going to be deleted (for returning)
-            results = []
-            for condition in conditions:
-                stmt = select(table).where(
-                    *[getattr(table.c, key) == value for key, value in condition.items()])
-                results.extend(conn.execute(stmt).fetchall())
-
-            # Now delete the rows
-            for condition in conditions:
-                delete_stmt = delete(table).where(
-                    *[getattr(table.c, key) == value for key, value in condition.items()])
-                conn.execute(delete_stmt)
-                
-            conn.commit()
-
-        return results
