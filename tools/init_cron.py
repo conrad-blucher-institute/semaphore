@@ -19,8 +19,9 @@ def main():
     """ The main function of init_cron.py reads through the despc folder to 
         initialize cron jobs for models marked to run. 
     """
+    print('Initializing Cron File...')
 
-    #clear the current file
+    
     #Gather information from dspec. For example, the interval of time it needs to run....
     #read the folders
     #Create header for each model based on folders
@@ -31,7 +32,7 @@ def main():
 
     # Clear out the cron file SAFELY
     subprocess.run(['crontab', '-r'])
-    # Make a new cron file
+    # Make a new cron file using the local file we have written to
     subprocess.run(['crontab', './data/cron/semaphore.cron'])
     
 if __name__ == "__main__":
