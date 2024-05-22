@@ -4,6 +4,7 @@
     "author": "Marina VicensMiquel",
     "modelFileName": "./inundation/January/january_24h",
     "timingInfo":{
+        "active": true,
         "offset": 60,
         "interval": 3600
     },

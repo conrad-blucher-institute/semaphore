@@ -5,6 +5,7 @@
     "author": "John Doe",
     "modelFileName": "test_AI",
     "timingInfo":{
+        "active": true,
         "offset": 0,
         "interval": 3600
 

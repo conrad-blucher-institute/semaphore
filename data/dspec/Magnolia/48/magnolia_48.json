@@ -5,6 +5,7 @@
     "author": "Jacob Alonzo",
     "modelFileName": "./Magnolia/48hr_leadtime_48HrsOfWind_1stANN",
     "timingInfo":{
+        "active": true,
         "offset": 1200,
         "interval": 3600
     },
