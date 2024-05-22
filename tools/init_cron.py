@@ -29,10 +29,7 @@ def format_timing(model_info)-> str:
 def format_logging_string():
     """ A function to format the logging string according to the model's information:
         
-        mkdir -p ./logs/$(date "+\%Y")/$(date "+\%m")/Inundation/January &&
-        
-        The && sign is at the end of the log file folder creation so that the 
-        next command in the job is still run. 
+        mkdir -p ./logs/$(date "+\%Y")/$(date "+\%m")/Inundation/January
     """
     pass
 
