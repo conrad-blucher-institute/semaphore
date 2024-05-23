@@ -59,7 +59,7 @@ def format_logging_string(dspec_path: str, modelName: str):
     return f'mkdir -p ./logs/{modelName} && docker exec semaphore-core python3 src/semaphoreRunner.py -d {dspec_call_path} >> ./logs/{modelName}/$(date "+%Y")_$(date "+%m")_{modelName}.log 2>> ./logs/CRON.log'
 
 
-def get_model_info(dspec_path: str) -> tuple[str, bool, int, int] | None:
+def get_model_info(dspec_path: str):
     """ Parses a dspec to read its timing info. Parses out its individual components.
         :param dspec_path: str - The path of the dspec.
         :returns a tuple of the components or None if something went wrong.
