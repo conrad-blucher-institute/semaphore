@@ -1,0 +1,134 @@
+{
+    "dspecVersion": "2.0",
+    "modelName": "72hr_VirginiaKey_wl",
+    "modelVersion": "1.0.0",
+    "author": "Beto Estrada",
+    "modelFileName": "./VirginiaKey/72hr_VirginiaKey_wl_Estrada",
+    "timingInfo":{
+        "active": true,
+        "offset": 1200,
+        "interval": 3600
+    },
+    "outputInfo": {
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 259200,
+        "series": "pWl",
+        "location": "VirginiaKey",
+        "unit" : "meter",
+        "datum": "NAVD"
+    },
+    "dependentSeries": [
+        { 
+            "_name": "Water Level",
+            "location": "VirginiaKey",
+            "source": "NOAATANDC",
+            "series": "dWl",
+            "unit": "meter",
+            "datum": "NAVD",
+            "interval": 3600,
+            "range": [0, -48],
+            "outKey": "VK_WL_49"
+        },
+        { 
+            "_name": "Wind Speed",
+            "location": "VirginiaKey",
+            "source": "NOAATANDC",
+            "series": "dWnSpd",
+            "unit": "mps",
+            "interval": 3600,
+            "range": [0, -48],
+            "outKey": "VK_WSPD_49"
+        },
+        { 
+            "_name": "Wind Direction",
+            "location": "VirginiaKey",
+            "source": "NOAATANDC",
+            "series": "dWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [0, -48],
+            "outKey": "VK_WDIR_49"
+            
+        },
+        { 
+            "_name": "Wind Speed Prediction",
+            "location": "VirginiaKey",
+            "source": "NDFD_EXP",
+            "series": "pWnSpd",
+            "unit": "mps",
+            "interval": 3600,
+            "range": [72, 1],
+            "outKey": "VK_PWSPD_F72",
+			"dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"18000",
+                    "method":"linear",
+                    "limit_area":"None"    
+                }
+            }
+        },
+        { 
+            "_name": "Wind Direction Prediction",
+            "location": "VirginiaKey",
+            "source": "NDFD_EXP",
+            "series": "pWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [72, 1],
+            "outKey": "VK_PWDIR_F72",
+            "dataIntegrityCall": {
+                "call": "AngleInterpolation",
+                "args": {
+                    "limit":"18000",
+                    "method":"linear",
+                    "limit_area":"None"    
+                }
+            }
+        }
+    ],
+    "postProcessCall": [
+        {
+            "call": "ResolveVectorComponents",
+            "args": {
+                "offset": -20,
+                "targetMagnitude_inKey":"VK_WSPD_49",
+                "targetDirection_inKey":"VK_WDIR_49",
+                "x_comp_outKey": "x_VK_WNDCMP_49", 
+                "y_comp_outKey": "y_VK_WNDCMP_49"      
+            }
+        },
+        {
+            "call": "ResolveVectorComponents",
+            "args": {
+                "offset": -20,
+                "targetMagnitude_inKey":"VK_PWSPD_F72",
+                "targetDirection_inKey":"VK_PWDIR_F72",
+                "x_comp_outKey": "x_VK_PWNDCMP_F72", 
+                "y_comp_outKey": "y_VK_PWNDCMP_F72"      
+            }
+        }
+    ],
+    "vectorOrder": [
+        {
+            "key": "VK_WL_49",
+            "dType": "float"
+        },
+        {
+            "key": "x_VK_WNDCMP_49",
+            "dType": "float"
+        },
+        {
+            "key": "y_VK_WNDCMP_49",
+            "dType": "float"
+        },
+        {
+            "key": "x_VK_PWNDCMP_F72",
+            "dType": "float"
+        },
+        {
+            "key": "y_VK_PWNDCMP_F72",
+            "dType": "float"
+        }
+    ]
+}
