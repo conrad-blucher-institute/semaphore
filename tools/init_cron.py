@@ -216,10 +216,6 @@ def main():
 
             file.write(line + "\n")
 
-    #MAKE SURE THERE IS AN EXTRA SPACE AT END OF FILE
-    with open("semaphore.cron", "a") as file:
-            file.write("\n")
-
     # Clear out the old cron file SAFELY
     subprocess.run(['crontab', '-r'])
 
