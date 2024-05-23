@@ -5,7 +5,7 @@
     "modelFileName": "./inundation/November/november_12h",
     "timingInfo":{
         "active": true,
-        "offset": 60,
+        "offset": 1800,
         "interval": 3600
     },
     "outputInfo": {

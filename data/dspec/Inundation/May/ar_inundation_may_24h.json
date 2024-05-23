@@ -5,7 +5,7 @@
     "modelFileName": "./inundation/May/may_24h",
     "timingInfo":{
         "active": true,
-        "offset": 60,
+        "offset": 1680,
         "interval": 3600
     },
     "outputInfo": {

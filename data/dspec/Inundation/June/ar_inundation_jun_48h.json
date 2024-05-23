@@ -5,7 +5,7 @@
     "modelFileName": "./inundation/June/june_48h",
     "timingInfo":{
         "active": true,
-        "offset": 60,
+        "offset": 1440,
         "interval": 3600
     },
     "outputInfo": {

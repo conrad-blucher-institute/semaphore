@@ -5,7 +5,7 @@
     "modelFileName": "./inundation/August/august_48h",
     "timingInfo":{
         "active": true,
-        "offset": 60,
+        "offset": 720,
         "interval": 3600
     },
     "outputInfo": {
