@@ -1,9 +1,10 @@
     {
-    "modelName": "test AI",
+    "modelName": "test_AI",
     "modelVersion": "1.0.0",
     "author": "John Doe",
     "modelFileName": "test_AI",
     "timingInfo":{
+        "active": true,
         "offset": 0,
         "interval": 3600
 

@@ -4,7 +4,8 @@
     "author": "Marina VicensMiquel",
     "modelFileName": "./inundation/April/april_48h",
     "timingInfo":{
-        "offset": 60,
+        "active": true,
+        "offset": 480,
         "interval": 3600
     },
     "outputInfo": {

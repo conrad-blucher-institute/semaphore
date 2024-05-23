@@ -4,7 +4,8 @@
     "author": "Marina VicensMiquel",
     "modelFileName": "./inundation/December/december_12h",
     "timingInfo":{
-        "offset": 60,
+        "active": true,
+        "offset": 840,
         "interval": 3600
     },
     "outputInfo": {

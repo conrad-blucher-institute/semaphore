@@ -4,6 +4,7 @@
     "author": "Andrew DeSimone",
     "modelFileName": "thermalrefugemodel",
     "timingInfo":{
+        "active": true,
         "offset": 0,
         "interval": 3600
 
