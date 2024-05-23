@@ -1,0 +1,3 @@
+{
+    "comment": "The MLP-OP model running every three hours with a ten minute offset AND the Thermal Refuge model running every hour with a zero minute offset."
+}

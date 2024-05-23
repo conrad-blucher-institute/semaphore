@@ -5,7 +5,7 @@
     "modelFileName": "./inundation/April/april_24h",
     "timingInfo":{
         "active": true,
-        "offset": 600,
+        "offset": 480,
         "interval": 3600
     },
     "outputInfo": {

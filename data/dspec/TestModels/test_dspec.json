@@ -6,7 +6,7 @@
     "timingInfo":{
         "active": true,
         "offset": 0,
-        "interval": 60
+        "interval": 3600
 
     },
     "outputInfo": {
