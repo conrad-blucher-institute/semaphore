@@ -1,6 +1,6 @@
 {
     "dspecVersion": "2.0",
-    "modelName": "24hr_VirginiaKey_wl_Estrada",
+    "modelName": "24hr_VirginiaKey_wl",
     "modelVersion": "1.0.0",
     "author": "Beto Estrada",
     "modelFileName": "./VirginiaKey/24hr_VirginiaKey_wl_Estrada",
@@ -57,7 +57,15 @@
             "unit": "mps",
             "interval": 3600,
             "range": [24, 1],
-            "outKey": "VK_PWSPD_F24"
+            "outKey": "VK_PWSPD_F24",
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"None"    
+                }
+            }
         },
         { 
             "_name": "Wind Direction Prediction",
@@ -67,14 +75,22 @@
             "unit": "degrees",
             "interval": 3600,
             "range": [24, 1],
-            "outKey": "VK_PWDIR_F24"
+            "outKey": "VK_PWDIR_F24",
+            "dataIntegrityCall": {
+                "call": "AngleInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"None"    
+                }
+            }
         }
     ],
     "postProcessCall": [
         {
             "call": "ResolveVectorComponents",
             "args": {
-                "offset": 0,
+                "offset": -20,
                 "targetMagnitude_inKey":"VK_WSPD_25",
                 "targetDirection_inKey":"VK_WDIR_25",
                 "x_comp_outKey": "x_VK_WNDCMP_25", 
@@ -84,7 +100,7 @@
         {
             "call": "ResolveVectorComponents",
             "args": {
-                "offset": 0,
+                "offset": -20,
                 "targetMagnitude_inKey":"VK_PWSPD_F24",
                 "targetDirection_inKey":"VK_PWDIR_F24",
                 "x_comp_outKey": "x_VK_PWNDCMP_F24", 
