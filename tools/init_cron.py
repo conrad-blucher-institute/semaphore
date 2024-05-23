@@ -94,7 +94,7 @@ def get_model_info(dspec_path: str):
     
 
 
-def process_dspec_file(dspec_path: str) -> str | bool:
+def process_dspec_file(dspec_path: str):
     """Takes a dspec file path and builds a line for the cron file
     Dependent on the timing information inside the dspec.
     :returns str | bool - The line to put in the cron file as a string
@@ -117,7 +117,7 @@ def process_dspec_file(dspec_path: str) -> str | bool:
         return True
 
 
-def read_comment_json(json_path: str) -> str | None:
+def read_comment_json(json_path: str):
     """
     Reads and returns the comment from a comment.json file found withing the
     directory structure.
@@ -133,7 +133,7 @@ def read_comment_json(json_path: str) -> str | None:
 
     return '# ' + comment
 
-def directory_crawl_recursive(directory_path: str, out: list[str | bool], depth: int = 0):
+def directory_crawl_recursive(directory_path: str, out, depth: int = 0):
     """
     This function recursively explores a directory generating the cron file.
     It will print out comments found in comment.json's and report the file structure in the cron file.
