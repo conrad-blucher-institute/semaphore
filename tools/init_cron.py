@@ -55,7 +55,9 @@ def format_logging_string(dspec_path: str, modelName: str):
 
     cronjob = 
     """
-    return f'mkdir -p ./logs/{modelName} && docker exec semaphore-core python3 src/semaphoreRunner.py -d {dspec_path} >> ./logs/{modelName}/$(date "+\%Y")_$(date "+\%m")_{modelName}.log 2>> ./logs/CRON.log'
+
+    dspec_call_path = path.join(*(dspec_path.split(os.path.sep)[3:]))
+    return f'mkdir -p ./logs/{modelName} && docker exec semaphore-core python3 src/semaphoreRunner.py -d {dspec_call_path} >> ./logs/{modelName}/$(date "+%Y")_$(date "+%m")_{modelName}.log 2>> ./logs/CRON.log'
 
 
 def get_model_info(dspec_path: str) -> tuple[str, bool, int, int] | None:
@@ -109,8 +111,10 @@ def process_dspec_file(dspec_path: str) -> str | bool:
     if active:
         timing = format_timing(offset, interval)
         logging_string = format_logging_string(dspec_path, name)
+        print('DSPEC Active: ', dspec_path)
         return f'{timing} {logging_string}'
     else:
+        print('DSPEC Dormant: ', dspec_path)
         return True
 
 
@@ -198,7 +202,7 @@ def main():
     cron_lines = []
     directory_crawl_recursive(base_dir, cron_lines)
 
-    with open("./data/cron/semaphore.cron", "w") as file:
+    with open("./semaphore.cron", "w") as file:
         for line in cron_lines: 
             if line == False:
                 answer = ''
@@ -220,7 +224,7 @@ def main():
     subprocess.run(['crontab', '-r'])
 
     # Make a new cron file using the local file we have written to
-    subprocess.run(['crontab', './data/cron/semaphore.cron'])
+    subprocess.run(['crontab', './semaphore.cron'])
     
 if __name__ == "__main__":
     main()
