@@ -49,6 +49,10 @@ class NOAATANDC(IDataIngestion):
                 return self.__fetch_4_max_mean_dWl(seriesDescription, timeDescription)
             case 'dSurge':
                 return self.__fetch_dSurge(seriesDescription, timeDescription)
+            case 'dWnSpd':
+                return self.__fetch_WnSpd(seriesDescription, timeDescription)
+            case 'dWnDir':
+                return self.__fetch_WnDir(seriesDescription, timeDescription)
             case _:
                 log(f'Data series: {seriesDescription.dataSeries}, not found for NOAAT&C for request: {seriesDescription}')
                 return None
@@ -183,6 +187,72 @@ class NOAATANDC(IDataIngestion):
 
         self.__seriesStorage.insert_input(series)
         return series
+    
+    def __fetch_WnDir(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
+        
+        data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'wind')
+        if data is None: return None
+
+        wnDir_inputs = []
+        for idx in data.index:
+
+            # parse
+            dt = idx.to_pydatetime()
+            wind_dir = data['d'][idx]
+
+            # If value is not on interval we ignore it
+            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
+                continue
+
+            dataPoints = Input(
+                dataValue= wind_dir,
+                dataUnit= 'degrees',
+                timeVerified= dt,
+                timeGenerated= dt, 
+                longitude= lat_lon[1],
+                latitude= lat_lon[0]
+            )
+            wnDir_inputs.append(dataPoints)
+
+
+        wnDir_series = Series(seriesDescription, True, timeDescription)
+        wnDir_series.data = wnDir_inputs
+        self.__seriesStorage.insert_input(wnDir_series)
+
+        return wnDir_series
+    
+    def __fetch_WnSpd(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
+        
+        data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'wind')
+        if data is None: return None
+
+        wnSpd_inputs = []
+        for idx in data.index:
+
+            # parse
+            dt = idx.to_pydatetime()
+            wind_spd = data['s'][idx]
+
+            # If value is not on interval we ignore it
+            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
+                continue
+
+            dataPoints = Input(
+                dataValue= wind_spd,
+                dataUnit= 'mps',
+                timeVerified= dt,
+                timeGenerated= dt, 
+                longitude= lat_lon[1],
+                latitude= lat_lon[0]
+            )
+            wnSpd_inputs.append(dataPoints)
+
+
+        wnSpd_series = Series(seriesDescription, True, timeDescription)
+        wnSpd_series.data = wnSpd_inputs
+        self.__seriesStorage.insert_input(wnSpd_series)
+
+        return wnSpd_series
     
 
     def __fetch_WnCmp(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, isXWnCmp: bool) -> None | Series:
