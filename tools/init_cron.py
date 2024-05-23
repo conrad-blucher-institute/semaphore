@@ -15,7 +15,6 @@
 import subprocess, os
 from os import path, listdir, getcwd, getenv
 from json import load, decoder
-from dotenv import load_dotenv
 
 def parse_seconds_to_components(seconds: int):
     """ This method takes a delta of seconds and converts it into
@@ -197,8 +196,8 @@ def main():
     """
     print('Initializing Cron File...')
 
-    load_dotenv()
-    base_dir = getenv('REPOSITORY_DSPEC_FOLDER_PATH')
+
+    base_dir = './data/dspec/'
     cron_lines = []
     directory_crawl_recursive(base_dir, cron_lines)
 
