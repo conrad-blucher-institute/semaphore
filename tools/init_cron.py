@@ -14,7 +14,7 @@
 # Imports
 import subprocess, os
 from os import path, listdir, getcwd, getenv
-from json import load
+from json import load, decoder
 from dotenv import load_dotenv
 
 def parse_seconds_to_components(seconds: int):
@@ -64,14 +64,21 @@ def get_model_info(dspec_path: str) -> tuple[str, bool, int, int] | None:
         :returns a tuple of the components or None if something went wrong.
             Returns components : modelName, active, offset, interval
     """
-    with open(dspec_path) as dspecFile:
-        # Read json from file
-        dspec_json = load(dspecFile)
-    timing_info = dspec_json.get('timingInfo')
+    timing_info = None
+    try:
+        with open(dspec_path) as dspecFile:
+            # Read json from file
+            dspec_json = load(dspecFile)
+        timing_info = dspec_json.get('timingInfo')
+        
+    except decoder.JSONDecodeError:
+        pass
+    finally:
+        if timing_info is None:
+            print(f'Warning: No timing found in {dspec_path}')
+            return None
     
-    if timing_info is None:
-        print(f'Warning: No timing found in {dspec_path}')
-        return None
+
     
     name = dspec_json.get('modelName')
     active = timing_info.get('active')
@@ -204,6 +211,8 @@ def main():
                 if answer == 'Y':
                     print("Aborting...")
                     exit(1)
+                else:
+                    continue
 
             file.write(line + "\n")
 
