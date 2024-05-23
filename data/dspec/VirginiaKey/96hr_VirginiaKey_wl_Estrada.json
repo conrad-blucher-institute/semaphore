@@ -5,6 +5,7 @@
     "author": "Beto Estrada",
     "modelFileName": "./VirginiaKey/96hr_VirginiaKey_wl_Estrada",
     "timingInfo":{
+        "active": true,
         "offset": 1200,
         "interval": 3600
     },
