@@ -4,6 +4,7 @@
     "author": "Christian Duff",
     "modelFileName": "MLP-OP",
     "timingInfo":{
+        "active": true,
         "offset": 600,
         "interval": 10800
 

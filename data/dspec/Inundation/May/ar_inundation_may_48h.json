@@ -4,7 +4,8 @@
     "author": "Marina VicensMiquel",
     "modelFileName": "./inundation/May/may_48h",
     "timingInfo":{
-        "offset": 60,
+        "active": true,
+        "offset": 1680,
         "interval": 3600
     },
     "outputInfo": {

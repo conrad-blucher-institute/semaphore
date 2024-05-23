@@ -3,6 +3,7 @@
 !.vscode/tasks.json
 *.env
 demo.py
+
 # Ignore virtual enviroment root
 venv/
 
@@ -15,6 +16,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+*.cron
 bin/
 build/
 develop-eggs/
