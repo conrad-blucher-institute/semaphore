@@ -143,6 +143,8 @@ def directory_crawl_recursive(directory_path: str, out: list[str | bool], depth:
     # List everything in our directory
     directory = listdir(directory_path)
     next_directory_paths = []
+    model_strings = []
+    comment_strings = []
     for item in directory:
         item_path = path.join(directory_path, item)
 
@@ -156,15 +158,21 @@ def directory_crawl_recursive(directory_path: str, out: list[str | bool], depth:
             if item == 'comment.json':
                 result = read_comment_json(item_path)
                 if result is not None:
-                    out.append(result)
+                    comment_strings.append(result)
             else:
                 result = process_dspec_file(item_path)
 
                 # The should be appended if there was an issue, or a strong was successfully made
                 # True means the dspec was turned off.
                 if result != True:
-                    out.append(result)
+                    model_strings.append(result)
     
+    # We append comments before model strings, so they show up in the correct order
+    for string in comment_strings:
+        out.append(string)
+    for string in model_strings:
+        out.append(string)
+
     # Recurse
     for directory_path in next_directory_paths:
         directory_crawl_recursive(directory_path, out, depth + 1)
