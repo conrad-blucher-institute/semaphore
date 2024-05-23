@@ -37,12 +37,15 @@ def format_timing(offset: int, interval: int) -> str:
     o_hours, o_minutes = parse_seconds_to_components(offset)
     i_hours, i_minutes = parse_seconds_to_components(interval)
 
-    
-    str_hours = f'{o_hours if o_hours != 0 else "*"}{f"/{i_hours}" if i_hours > 1 else ""}'
-    str_minutes = f'{o_minutes}{f"/{i_minutes}" if i_minutes > 1 else ""}'
+    isMinInterval = i_hours == 0
 
-    # Month and Year  and day are always wild cards as we don't currently parse that far.
-    return f'{str_minutes} {str_hours} * * *'
+    if isMinInterval:
+        str_cron = f'{o_minutes}-59/{i_minutes} * * * *'
+    else:
+        str_cron = f'{o_minutes} */{i_hours} * * *'
+
+    # Month, Year, and day are always wild cards as we don't currently parse that far.
+    return str_cron
 
 
 def format_logging_string(dspec_path: str, modelName: str):
@@ -118,7 +121,7 @@ def read_comment_json(json_path: str) -> str | None:
         print(f'Warning: {json_path} has no correctly formatted comment key.')
         return None
 
-    return comment
+    return '# ' + comment
 
 def directory_crawl_recursive(directory_path: str, out: list[str | bool], depth: int = 0):
     """
