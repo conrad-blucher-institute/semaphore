@@ -56,7 +56,7 @@ def format_logging_string(dspec_path: str, modelName: str):
     """
 
     dspec_call_path = path.join(*(dspec_path.split(os.path.sep)[3:]))
-    return f'mkdir -p ./logs/{modelName} && docker exec semaphore-core python3 src/semaphoreRunner.py -d {dspec_call_path} >> ./logs/{modelName}/$(date "+%Y")_$(date "+%m")_{modelName}.log 2>> ./logs/CRON.log'
+    return f'mkdir -p ./logs/{modelName} && docker exec semaphore-core python3 src/semaphoreRunner.py -d {dspec_call_path} >> ./logs/{modelName}/$(date "+\%Y")_$(date "+\%m")_{modelName}.log 2>> ./logs/CRON.log'
 
 
 def get_model_info(dspec_path: str):
