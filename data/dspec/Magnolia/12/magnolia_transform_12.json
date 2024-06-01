@@ -25,7 +25,7 @@
             "series": "magnolia_12|1.0.0|pSurge",
             "unit": "meter",
             "interval": 3600,
-            "range":  [7, -3],
+            "range":  [7, -5],
             "outKey": "MG_12_output_12"
         },
         { 
@@ -72,7 +72,7 @@
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
-            "range":  [7, -3],
+            "range":  [7, -5],
             "outKey": "PL_pHarm_12"
         },
         { 
@@ -83,7 +83,7 @@
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
-            "range":  [7, -3],
+            "range":  [7, -5],
             "outKey": "POC_pHarm_12"
         }
 
