@@ -6,7 +6,7 @@
     "modelFileName": "./Magnolia/48hr_leadtime_48HrsOfWind_2ndANN",
     "timingInfo":{
         "active": true,
-        "offset": 1200,
+        "offset": 1260,
         "interval": 3600
     },
     "outputInfo": {
