@@ -1,4 +1,4 @@
 {
-    "Target Version" : "2.2",
-    "Description" : "Adding rows to the locations reference table and locations mapping reference table for Virginia Key Models."
+    "Target Version" : "2.3",
+    "Description" : "Adding one row to the datum reference table for the Magnolia model."
 }
