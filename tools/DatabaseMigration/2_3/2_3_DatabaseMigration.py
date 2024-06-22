@@ -6,9 +6,8 @@
 # Version 1.0
 #----------------------------------
 """This is a database migration script that will initialize version
-    2.1 of the database. The change from version 2.0 to 2.1 is that
-    we are adding rows to the locations reference table and the data
-    source reference table. 
+    2.3 of the database. The change from version 2.2 to 2.3 is that
+    we are adding one row to the datum reference table.
  """ 
 #----------------------------------
 # 
