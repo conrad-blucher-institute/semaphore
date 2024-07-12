@@ -33,7 +33,7 @@ class HOHONU (IDataIngestion):
             raise ValueError(f"API host or authorization is empty.")
         
         datum = seriesDescription.dataDatum
-        station_id = seriesDescription.station_id #station id
+        station_id = seriesDescription.station_id
         from_time = timeDescription.fromDateTime
         to_time = timeDescription.toDateTime
         
@@ -51,24 +51,13 @@ class HOHONU (IDataIngestion):
             return None
 
         try:
+            
             response_data = json.loads(response_json)
+            response_df = self.__convert_response_to_dataframe(response_data)
             
-            response_df = self.convert_response_to_dataframe(response_data)
-            
-
         except ValueError or json.JSONDecodeError as e:
             log(f"Error decoding JSON from Hohonu API: {str(e)}")
 
-        outputs = []
-        for timestamp, value in zip(response_df["timestamp"], response_df["value"]):
-            dataPoint = Output(
-                dataValue= value,
-                dataUnit= "feet",
-                timeGenerated= timestamp,
-                leadTime= timeDescription.leadtime
-            )
-            outputs.append(dataPoint)
-        
 
         series = Series(
             description= seriesDescription,
@@ -76,12 +65,64 @@ class HOHONU (IDataIngestion):
             timeDescription= timeDescription
         )
         
-        if seriesDescription.is_output is None or seriesDescription.is_output is False:
-            series.data = self.__convert_output_to_input(outputs)
-        else:
-            series.data = outputs       
+        #Convert the date format
+        response_df['timestamp'] = response_df['timestamp'].apply(self.__convert_date_format)
         
+        #Corrects the interval of the timestamps
+        resampled_df = self.__corrects_interval(response_df, timeDescription)
+        
+        if seriesDescription.is_output is None or seriesDescription.is_output is False:
+            outputs = self.__convert_dataframe_to_output(resampled_df, timeDescription)
+            series.data = self.__convert_output_to_input(outputs)
+            
+        else:
+            outputs = self.__convert_dataframe_to_output(resampled_df, timeDescription)
+            series.data = outputs       
+    
         return series
+    
+    def __corrects_interval(self, response_df: pd.DataFrame, timeDescription: TimeDescription):
+        """This script ensures the correct interval of datapoints is being used"""
+       
+        if not pd.api.types.is_datetime64_any_dtype(response_df['timestamp']):
+            response_df['timestamp'] = pd.to_datetime(response_df['timestamp'])
+        
+        response_df.set_index('timestamp', inplace=True)
+    
+        # Resample the DataFrame to a different interval (e.g., 30 seconds)
+        new_interval = f"{timeDescription.interval}S" # (e.g., '30S' for 30 seconds)
+        
+        # Ensures the correct interval is used 
+        resampled_df = response_df.resample(new_interval).interpolate('linear')
+        
+        return resampled_df
+        
+    def __convert_date_format(self, date):
+        """Converts the hohonu dataframes' date format to Semaphore's date format
+
+        Args:
+            hohonu_df (pd.DataFrame): Datatframe containing hohonu station data
+
+        Returns:
+            hohonu_df (pd.DataFrame): Datatframe containing hohonu station data
+        """
+        
+        return date.strftime('%Y-%m-%d %H:%M:%S') 
+    
+    def __convert_dataframe_to_output(self,df: pd.DataFrame, timeDescription: TimeDescription) ->list[Output]:
+        
+        df = df.reset_index()
+        outputs = []
+        for timestamp, value in zip(df["timestamp"], df["value"]):
+            dataPoint = Output(
+                dataValue= value,
+                dataUnit= "feet",
+                timeGenerated= timestamp,
+                leadTime= timeDescription.leadtime
+            )
+            outputs.append(dataPoint)
+        return outputs
+        
         
     def __convert_output_to_input(self, outputs: list[Output]) -> list[Input]:
             """A simple method to cast and output object into an input object"""
@@ -103,7 +144,7 @@ class HOHONU (IDataIngestion):
                 )
             return inputs
         
-    def convert_response_to_dataframe(self, response_data) -> pd.DataFrame:
+    def __convert_response_to_dataframe(self, response_data) -> pd.DataFrame:
         """converts the dictionary response into a dataframe with correct timestamp and value pairings
 
     Args:
@@ -124,6 +165,8 @@ class HOHONU (IDataIngestion):
         
         df = pd.DataFrame(list(data_dict.items()), columns=['timestamp', 'value'])
         
+        # Convert timestamp to datetime
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
         
         return df
 

@@ -97,8 +97,9 @@ class TimeDescription():
         :param fromDateTime: datetime - The datetime the data starts at
         :param toDateTime: datetime - The datetime the data stops at
         :param interval: timedelta = None - The time step separating the data points in order
+        :parm leadTime: timedelta - The lead time for the model
     """
-    def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: timedelta = None, leadtime: str = None) -> None:
+    def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: timedelta = None, leadtime: timedelta = None) -> None:
         self.fromDateTime = fromDateTime
         self.toDateTime = toDateTime
         self.interval = interval
@@ -119,6 +120,8 @@ class SeriesDescription():
         :param limit: timedelta - The max gap distance allowed for interpolation
         :param dataDatum: str = None
         :param dataIntegrityDescription: DataIntegrityDescription = None - An object that contains the data integrity calls that should be handled.
+        :param is_output: bool = None - A bool that tells Semaphor whether this information will be used as an output or input
+        :param station_id: str = The stations ID
     """
     def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None,  dataIntegrityDescription: DataIntegrityDescription = None, verificationOverride: int = None, is_output: bool = None, station_id: str = None) -> None:
         self.dataSource = dataSource
