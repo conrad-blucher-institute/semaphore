@@ -119,19 +119,21 @@ class SeriesDescription():
         :param dataDatum: str = None
         :param dataIntegrityDescription: DataIntegrityDescription = None - An object that contains the data integrity calls that should be handled.
     """
-    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None,  dataIntegrityDescription: DataIntegrityDescription = None, verificationOverride: int = None) -> None:
+    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None,  dataIntegrityDescription: DataIntegrityDescription = None, verificationOverride: int = None, is_output: bool = None, station_id: str = None) -> None:
         self.dataSource = dataSource
         self.dataSeries = dataSeries
         self.dataLocation = dataLocation
         self.dataDatum = dataDatum
         self.dataIntegrityDescription = dataIntegrityDescription
         self.verificationOverride = verificationOverride
+        self.is_output = is_output
+        self.station_id = station_id
 
     def __str__(self) -> str:
-        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, dataIntegrityDescription: {self.dataIntegrityDescription}, verificationOverride: {self.verificationOverride}'
+        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, dataIntegrityDescription: {self.dataIntegrityDescription}, verificationOverride: {self.verificationOverride}, is_output: {self.is_output}, station_id: {self.station_id}'
     
     def __repr__(self) -> str:
-        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum}, {self.dataIntegrityDescription}, {self.verificationOverride})'
+        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum}, {self.dataIntegrityDescription}, {self.verificationOverride}, {self.is_output}, {self.station_id})'
 
 
 class SemaphoreSeriesDescription():
