@@ -6,8 +6,9 @@ Semaphore is a student-built and maintained Python application that semi-automat
 
 ## Dependency
 - Python version >= 3.10
-- Some version of SQLite as this is the only Database system currently supported.
-[SQLite Download Page](https://www.sqlite.org/download.html)
+- Some version of SQLite (deprecated) [SQLite Download Page](https://www.sqlite.org/download.html) OR
+- PostGres 15.4 with SQLAlchemy 2.0.20  //you can use pgAdmin to access and view the PG database
+
     
 ## Deployment
 
