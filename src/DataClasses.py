@@ -98,16 +98,17 @@ class TimeDescription():
         :param toDateTime: datetime - The datetime the data stops at
         :param interval: timedelta = None - The time step separating the data points in order
     """
-    def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: timedelta = None) -> None:
+    def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: timedelta = None, leadtime: str = None) -> None:
         self.fromDateTime = fromDateTime
         self.toDateTime = toDateTime
         self.interval = interval
+        self.leadtime = leadtime
 
     def __str__(self) -> str:
-        return f'\n[TimeDescription] -> fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}. interval: {self.interval}'
+        return f'\n[TimeDescription] -> fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, interval: {self.interval}, leadtime: {self.leadtime}'
     
     def __repr__(self) -> str:
-        return f'\nTimeDescription({self.fromDateTime}, {self.toDateTime}, {self.interval})'
+        return f'\nTimeDescription({self.fromDateTime}, {self.toDateTime}, {self.interval}, {self.leadtime})'
 
 
 class SeriesDescription():

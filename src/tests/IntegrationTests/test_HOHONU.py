@@ -19,8 +19,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
-    (SeriesDescription('HOHONU', 'dWl', 'MagnoliaBeach', station_id='hohonu_185', dataDatum= 'D2W_FEET', is_output=True), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=5)),toDateTime= datetime.now()), 5), # 1hr interval
-    
+    (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', station_id='hohonu-185', dataDatum= 'D2W_FEET', is_output=True), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=10)),toDateTime= (datetime.now()- timedelta(hours= 8) ), leadtime=43200), 20), # 6 min interval 
 ])
 
 def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: TimeDescription, expected_output: None):
@@ -31,7 +30,7 @@ def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: Ti
 
     hohonu = data_ingestion_factory(seriesDescription)
     result = hohonu.ingest_series(seriesDescription, timeDescription)
-    
+   
     assert len(result.data) == expected_output
 
 
