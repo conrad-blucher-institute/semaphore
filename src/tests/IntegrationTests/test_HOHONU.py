@@ -16,10 +16,11 @@ from src.DataClasses import SeriesDescription,TimeDescription,Input
 import pytest
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+import pandas as  pd
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
-    (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', station_id='hohonu-185', dataDatum= 'D2W_FEET', is_output=True), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=10)),toDateTime= (datetime.now()- timedelta(hours= 8) ), interval= 3600, leadtime=43200), 2),
-    (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', station_id='hohonu-185', dataDatum= 'D2W_FEET', is_output=False), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=10)),toDateTime= (datetime.now()- timedelta(hours= 8) ), interval= 3600, leadtime=43200), 2),
+    (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', station_id='hohonu-185', dataDatum= 'D2W_FEET', is_output=False), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=10)),toDateTime= (datetime.now()- timedelta(hours= 8) ), interval= timedelta(seconds = 3600), leadtime=timedelta(seconds = 43200)), 3),
+     (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', station_id='hohonu-185', dataDatum= 'D2W_FEET', is_output=True), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=10)),toDateTime= (datetime.now()- timedelta(hours= 8) ), interval= timedelta(seconds = 3600), leadtime=timedelta(seconds = 43200)), 3)
 ])
 
 def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: TimeDescription, expected_output: None):
@@ -30,7 +31,7 @@ def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: Ti
 
     hohonu = data_ingestion_factory(seriesDescription)
     result = hohonu.ingest_series(seriesDescription, timeDescription)
-   
+
     assert len(result.data) == expected_output
     if seriesDescription.is_output is False:
         assert isinstance(result.data, list), "result.data is not a list"

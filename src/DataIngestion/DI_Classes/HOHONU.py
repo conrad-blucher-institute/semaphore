@@ -4,12 +4,11 @@
 # Created by: Anointiyae Beasley
 # Adapted from: Matthew Kastl's work
 #---------------------------------------------
-""" This script fetches data from the HOHONU public API
+""" This script fetches data from the HOHONU public API and returns a series
 """ 
 #---------------------------------------------
 # 
 #
-from DataClasses import Series, SeriesDescription, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, Input, Output, TimeDescription
@@ -19,6 +18,7 @@ from utility import log
 import pandas as pd
 import json
 from urllib.parse import quote
+from datetime import datetime
 
 class HOHONU (IDataIngestion):
     def __init__(self):
@@ -37,8 +37,8 @@ class HOHONU (IDataIngestion):
         from_time = timeDescription.fromDateTime
         to_time = timeDescription.toDateTime
         
-        from_time_encoded = self.datetime_to_quoted_string(from_time)
-        to_time_encoded = self.datetime_to_quoted_string(to_time)
+        from_time_encoded = self.__datetime_to_quoted_string(from_time)
+        to_time_encoded = self.__datetime_to_quoted_string(to_time)
         
         url = f"{api_host}/api/v1/stations/{station_id}/statistic/?from={from_time_encoded}&to={to_time_encoded}&datum={datum}&cleaned=true&format=json"
         headers = {"Authorization": api_authorization}
@@ -47,7 +47,7 @@ class HOHONU (IDataIngestion):
         response_json = self.__fetch(url,headers)
         
         if response_json is None:
-            log(f'No data found for hohonu API request url: {url}')
+            log(f'No data found for hohonu API. Request url: {url}')
             return None
 
         try:
@@ -57,7 +57,6 @@ class HOHONU (IDataIngestion):
             
         except ValueError or json.JSONDecodeError as e:
             log(f"Error decoding JSON from Hohonu API: {str(e)}")
-
 
         series = Series(
             description= seriesDescription,
@@ -70,13 +69,14 @@ class HOHONU (IDataIngestion):
         
         #Corrects the interval of the timestamps
         resampled_df = self.__corrects_interval(response_df, timeDescription)
+    
+        outputs = self.__convert_dataframe_to_output(resampled_df, timeDescription)
         
         if seriesDescription.is_output is None or seriesDescription.is_output is False:
-            outputs = self.__convert_dataframe_to_output(resampled_df, timeDescription)
+            
             series.data = self.__convert_output_to_input(outputs)
             
         else:
-            outputs = self.__convert_dataframe_to_output(resampled_df, timeDescription)
             series.data = outputs       
     
         return series
@@ -90,7 +90,7 @@ class HOHONU (IDataIngestion):
         response_df.set_index('timestamp', inplace=True)
     
         # Resample the DataFrame to a different interval (e.g., 30 seconds)
-        new_interval = f"{timeDescription.interval}S" # (e.g., '30S' for 30 seconds)
+        new_interval = f"{timeDescription.interval.total_seconds()}S" # (e.g., '30S' for 30 seconds)
         
         # Ensures the correct interval is used 
         resampled_df = response_df.resample(new_interval).interpolate('linear')
@@ -114,10 +114,11 @@ class HOHONU (IDataIngestion):
         df = df.reset_index()
         outputs = []
         for timestamp, value in zip(df["timestamp"], df["value"]):
+            dt = timestamp.to_pydatetime()
             dataPoint = Output(
                 dataValue= value,
                 dataUnit= "feet",
-                timeGenerated= timestamp,
+                timeGenerated= dt,
                 leadTime= timeDescription.leadtime
             )
             outputs.append(dataPoint)
@@ -144,15 +145,15 @@ class HOHONU (IDataIngestion):
                 )
             return inputs
         
-    def __convert_response_to_dataframe(self, response_data) -> pd.DataFrame:
+    def __convert_response_to_dataframe(self, response_data: json) -> pd.DataFrame:
         """converts the dictionary response into a dataframe with correct timestamp and value pairings
 
     Args:
 
-        - `df` (DataFrame): pandas DataFrame containing the column 'dataValue'
+        - `response_data'(json): The json recieved when fetching data from the API
 
     Returns:
-		[DataFrame]: pandas DataFrame with 'dataValue' now in feet
+		[DataFrame]: pandas DataFrame
 	"""
         data_timestamps = response_data['data'][0]
         data_values =  response_data['data'][1]
@@ -170,13 +171,13 @@ class HOHONU (IDataIngestion):
         
         return df
 
-    def __fetch(self,url, headers):
+    def __fetch(self, url: str, headers: str) -> str:
         """Fetches desired url using requests library
         Args:
             url (string): desired url
             headers (string) : header required for the request
         Returns:
-            res.text (string): string of HTTP response object
+            response.text (string): string of HTTP response object
         """
         try: 
             response = requests.get(url, headers=headers)
@@ -184,22 +185,22 @@ class HOHONU (IDataIngestion):
             response.raise_for_status()  # raises an exception if the response status is not in the 200-299 range
         
         except requests.exceptions.HTTPError as error:
-            log(f'HTTP error occurred: {error}')
-            log(f"Returning None.\n")
+            log(f'HTTP error occurred when fetching HOHONU data: {error}')
             return None
         except Exception as error:
-            log(f'An error occurred: {error}')
-            log(f"Returning None.\n")
+            log(f'An error occurred when fetching HOHONU data: {error}')
             return None
 
         return response.text
     
-    def datetime_to_quoted_string(self,dt):
+    def __datetime_to_quoted_string(self, dt: datetime) -> str:
         """
         Converts a datetime object to an ISO 8601 string and URL-encodes it.
         
-        :param dt: The datetime object to convert and encode.
-        :return: A URL-encoded ISO 8601 string.
+        Args:
+            dt (datetime): A date that is a datetime variable
+        Returns:
+            dt_quoted (string): URL-encoded ISO 8601 string representation of the datetime object
         """
         # Convert datetime to ISO 8601 string format
         dt_str = dt.strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -208,5 +209,4 @@ class HOHONU (IDataIngestion):
         dt_quoted = quote(dt_str)
         
         return dt_quoted
-
         
