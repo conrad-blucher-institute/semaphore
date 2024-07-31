@@ -99,7 +99,7 @@ class LIGHTHOUSE(IDataIngestion):
             if datum is None:
                 raise NotImplementedError(f'There is no datum code mapping for {seriesDescription.dataDatum} in lighthouse')
 
-        url = f'http://lighthouse.tamucc.edu/pd?stnlist={lighthouseLocationCode}&serlist={seriesInfoMap[SIMSeriesCodeIndex]}&when={fromString}%2C{toString}&whentz=UTC0&-action=app_json&unit=metric&elev={datum}'
+        url = f'https://lighthouse.tamucc.edu/pd?stnlist={lighthouseLocationCode}&serlist={seriesInfoMap[SIMSeriesCodeIndex]}&when={fromString}%2C{toString}&whentz=UTC0&-action=app_json&unit=metric&elev={datum}'
         apiReturn = self.__api_request(url)
         if apiReturn == None:
             log(f'LIGHTHOUSE | __pull_pd_endpoint_dataPoint | For unknown reason fetch failed for {seriesDescription}{timeDescription}')
