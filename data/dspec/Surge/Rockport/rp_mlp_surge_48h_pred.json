@@ -1,10 +1,11 @@
     {
+    "dspecVersion": "2.0.0",
     "modelName": "rp_S2S_surge_48h",
     "modelVersion": "1.0.0",
     "author": "Marina VicensMiquel",
     "modelFileName": "./Surge/Rockport/rockport_48h.h5",
     "timingInfo":{
-        "active": false,
+        "active": true,
         "offset": 600,
         "interval": 3600
     },
@@ -16,7 +17,7 @@
         "datum": "NA",
         "unit" : "meter"
     },
-    "inputs": [
+    "dependentSeries": [
     { 
         "_name": "surge_now",
         "location": "Rockport",
@@ -26,7 +27,8 @@
         "datum": "NAVD",
         "type": "float",
         "interval": 3600,
-        "range": [0, 0]
+        "range": [0, 0],
+        "outKey": "RP_Surge_1"
     },
     {
         "_name": "now_X_wind_component",
@@ -36,7 +38,8 @@
         "unit": "mps",
         "type": "float",
         "interval": 3600,
-        "range": [0, 0]
+        "range": [0, 0],
+        "outKey": "x_RP_WNDCMP_1"
     },
     {
         "_name": "now_Y_wind_component",
@@ -46,7 +49,8 @@
         "unit": "mps",
         "type": "float",
         "interval": 3600,
-        "range": [0, 0]
+        "range": [0, 0],
+        "outKey": "y_RP_WNDCMP_1"
     },
     {
         "_name": "surge",
@@ -57,7 +61,8 @@
         "datum": "NAVD",
         "type": "float",
         "interval": 3600,
-        "range": [-1, -12]
+        "range": [-1, -12],
+        "outKey": "RP_Surge_13"
     },
     {
         "_name": "past_X_wind_component",
@@ -67,7 +72,8 @@
         "unit": "mps",
         "type": "float",
         "interval": 3600,
-        "range": [-1, -12]
+        "range": [-1, -12],
+        "outKey": "x_RP_WNDCMP_P13"
     },
     {
         "_name": "past_Y_wind_component",
@@ -77,7 +83,8 @@
         "unit": "mps",
         "type": "float",
         "interval": 3600,
-        "range": [-1, -12]
+        "range": [-1, -12],
+        "outKey": "y_RP_WNDCMP_P13"
     },
     {
         "_name": "future_X_wind_component",
@@ -87,7 +94,16 @@
         "unit": "mps",
         "type": "float",
         "interval": 3600,
-        "range": [48, 1]
+        "range": [48, 1],
+        "outKey": "x_RP_WNDCMP_F49",
+        "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"inside"    
+                }
+            }
     },
     {
         "_name": "future_Y_wind_component",
@@ -97,6 +113,52 @@
         "unit": "mps",
         "type": "float",
         "interval": 3600,
-        "range": [48, 1]
+        "range": [48, 1],
+        "outKey": "y_RP_WNDCMP_F49",
+        "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"inside"    
+                }
+            }
     }
-]}
+],
+"vectorOrder": [
+    {
+        "key": "RP_Surge_1",
+        "dType": "float"
+    },
+    {
+        "key": "x_RP_WNDCMP_1",
+        "dType": "float"
+    },
+    {
+        "key": "y_RP_WNDCMP_1",
+        "dType": "float"
+    },
+    {
+        "key": "RP_Surge_13",
+        "dType": "float"
+    },
+    {
+        "key": "x_RP_WNDCMP_P13",
+        "dType": "float"
+    },
+    {
+        "key": "y_RP_WNDCMP_P13",
+        "dType": "float"
+    },
+    {
+        "key": "x_RP_WNDCMP_F49",
+        "dType": "float"
+    },
+    {
+        "key": "y_RP_WNDCMP_F49",
+        "dType": "float"
+    }
+]
+
+
+}
