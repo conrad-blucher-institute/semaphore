@@ -1,5 +1,5 @@
     {
-    "dspecVersion": "2.0.0",
+    "dspecVersion": "2.0",
     "modelName": "pi_mlp_surge_72h",
     "modelVersion": "1.0.0",
     "author": "Marina VicensMiquel",
@@ -125,6 +125,7 @@
             }
     }
 ],
+"postProcessCall": [],
 "vectorOrder": [
     {
         "key": "PI_Surge_1",
