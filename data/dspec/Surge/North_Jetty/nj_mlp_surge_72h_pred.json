@@ -99,7 +99,7 @@
         "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
-                    "limit":"3600",
+                    "limit":"36000",
                     "method":"linear",
                     "limit_area":"inside"    
                 }
@@ -119,7 +119,7 @@
         "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
-                    "limit":"3600",
+                    "limit":"36000",
                     "method":"linear",
                     "limit_area":"inside"    
                 }
