@@ -139,11 +139,9 @@ class LIGHTHOUSE(IDataIngestion):
                 ))
 
         if(len(inputs) > 0):
-            ### Build Series, send data to DB, return data
+            ### Build Series, return data
             resultSeries = Series(seriesDescription, timeDescription)
             resultSeries.data = inputs
-            #Insert series into DB
-            self.seriesStorage.insert_input(resultSeries)
             return resultSeries
         else:
             log("Lighthouse returned no non null inputs")

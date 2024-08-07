@@ -178,7 +178,6 @@ class NDBC(IDataIngestion):
 
         series = Series(seriesDescription, True, timeDescription)
         series.data = [input]
-        insertedRows = self.seriesStorage.insert_input(series)
         return series
 
 
