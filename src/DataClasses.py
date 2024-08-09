@@ -120,24 +120,22 @@ class SeriesDescription():
         :param limit: timedelta - The max gap distance allowed for interpolation
         :param dataDatum: str = None
         :param dataIntegrityDescription: DataIntegrityDescription = None - An object that contains the data integrity calls that should be handled.
-        :param is_output: bool = None - A bool that tells Semaphor whether this information will be used as an output or input
-        :param station_id: str = The stations ID
     """
-    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None,  dataIntegrityDescription: DataIntegrityDescription = None, verificationOverride: int = None, is_output: bool = None, station_id: str = None) -> None:
+    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None,  dataIntegrityDescription: DataIntegrityDescription = None, verificationOverride: int = None) -> None:
         self.dataSource = dataSource
         self.dataSeries = dataSeries
         self.dataLocation = dataLocation
         self.dataDatum = dataDatum
         self.dataIntegrityDescription = dataIntegrityDescription
         self.verificationOverride = verificationOverride
-        self.is_output = is_output
-        self.station_id = station_id
+       
+        
 
     def __str__(self) -> str:
-        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, dataIntegrityDescription: {self.dataIntegrityDescription}, verificationOverride: {self.verificationOverride}, is_output: {self.is_output}, station_id: {self.station_id}'
+        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, dataIntegrityDescription: {self.dataIntegrityDescription}, verificationOverride: {self.verificationOverride}'
     
     def __repr__(self) -> str:
-        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum}, {self.dataIntegrityDescription}, {self.verificationOverride}, {self.is_output}, {self.station_id})'
+        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum}, {self.dataIntegrityDescription}, {self.verificationOverride})'
 
 
 class SemaphoreSeriesDescription():
