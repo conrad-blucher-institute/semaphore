@@ -223,9 +223,6 @@ class NDFD_EXP(IDataIngestion):
             resultSeries = Series(seriesRequest, True)
             resultSeries.data = inputs
 
-            # Insert series into DB
-            self.__seriesStorage.insert_input(resultSeries)
-
             return resultSeries
 
         except ValueError as err:
@@ -323,10 +320,6 @@ class NDFD_EXP(IDataIngestion):
         xCompSeries.data = xCompInputs
         yCompSeries = Series(yCompDesc, True, timeDescription)
         yCompSeries.data = yCompInputs
-
-        #Saving the series in the database
-        self.__seriesStorage.insert_input(xCompSeries)
-        self.__seriesStorage.insert_input(yCompSeries)
         
         #Step three: Return it
         return xCompSeries if isXWindCmp else yCompSeries      
