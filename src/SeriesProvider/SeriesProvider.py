@@ -28,7 +28,7 @@ class SeriesProvider():
     def __init__(self) -> None:
         self.seriesStorage = series_storage_factory()
     
-    def save_series(self, series: Series) -> Series:
+    def save_output_series(self, series: Series) -> Series:
         """Passes a series to Series Storage to be stored.
             :param series - The series to store.
             :returns series - A series containing only the stored values.
@@ -37,11 +37,25 @@ class SeriesProvider():
 
         if not (type(series.description) == SemaphoreSeriesDescription): #Check and make sure this is actually something with the proper description to be inserted
             returningSeries.isComplete = False
-            returningSeries.nonCompleteReason = f'A save Request must be provided a series with a SemaphoreSeriesDescription not a Series Description'
+            returningSeries.nonCompleteReason = f'An output save request must be provided a series with a SemaphoreSeriesDescription not a Series Description'
         else:
             returningSeries = self.seriesStorage.insert_output(series)
 
         return returningSeries
+    
+    def save_input_series(self, series: Series):
+        """Passes a series to Series Storage to be stored.
+            :param series - The series to store.
+        """
+        
+        if (type(series.description) == SemaphoreSeriesDescription): #Check and make sure this is actually something with the proper description to be inserted
+            log(f'An input save request must be provided a series with a Series Description not a SemaphoreSeriesDescription. This series will not be saved.')
+        elif (series.description.dataSource == "SEMAPHORE"):
+            pass # Do nothing if the data source is "SEMAPHORE"
+        else:
+             self.seriesStorage.insert_input(series)
+
+        
     
     def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series:
         """This method attempts to return a series matching a series description and a time description.
@@ -71,6 +85,7 @@ class SeriesProvider():
         data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
         validated_merged_result = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data, data_ingestion_results.data if data_ingestion_results != None else None)
         if(validated_merged_result.isComplete):
+            self.save_input_series(validated_merged_result)
             return validated_merged_result
         
         if seriesDescription.dataIntegrityDescription is None:
@@ -85,6 +100,8 @@ class SeriesProvider():
         
         if (not validated_interpolation_results.isComplete):
             log('Series is not complete after interpolation!')
+            
+        self.save_input_series(validated_interpolation_results)    
         return validated_interpolation_results
       
     

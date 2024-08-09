@@ -141,7 +141,6 @@ class NOAATANDC(IDataIngestion):
         series = Series(seriesDescription, True, timeDescription)
         series.data = inputs
 
-        self.__seriesStorage.insert_input(series)
         return series
     
 
@@ -185,7 +184,6 @@ class NOAATANDC(IDataIngestion):
         series = Series(seriesDescription, True, timeDescription)
         series.data = inputs
 
-        self.__seriesStorage.insert_input(series)
         return series
     
     def __fetch_WnDir(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
@@ -217,7 +215,6 @@ class NOAATANDC(IDataIngestion):
 
         wnDir_series = Series(seriesDescription, True, timeDescription)
         wnDir_series.data = wnDir_inputs
-        self.__seriesStorage.insert_input(wnDir_series)
 
         return wnDir_series
     
@@ -250,7 +247,6 @@ class NOAATANDC(IDataIngestion):
 
         wnSpd_series = Series(seriesDescription, True, timeDescription)
         wnSpd_series.data = wnSpd_inputs
-        self.__seriesStorage.insert_input(wnSpd_series)
 
         return wnSpd_series
     
@@ -302,12 +298,10 @@ class NOAATANDC(IDataIngestion):
         seriesDescription.dataSeries = f'dXWnCmp{str(int(offset)).zfill(3)}D'
         x_series = Series(seriesDescription, True, timeDescription)
         x_series.data = x_inputs
-        self.__seriesStorage.insert_input(x_series)
 
         seriesDescription.dataSeries = f'dYWnCmp{str(int(offset)).zfill(3)}D'
         y_series = Series(seriesDescription, True, timeDescription)
         y_series.data = y_inputs
-        self.__seriesStorage.insert_input(y_series)
 
         return x_series if isXWnCmp else y_series
     
@@ -334,5 +328,4 @@ class NOAATANDC(IDataIngestion):
         series = Series(seriesDescription, True, timeDescription)
         series.data = [input]
 
-        self.__seriesStorage.insert_input(series)
         return series
