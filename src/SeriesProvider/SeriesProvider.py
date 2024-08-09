@@ -46,15 +46,14 @@ class SeriesProvider():
     def save_input_series(self, series: Series):
         """Passes a series to Series Storage to be stored.
             :param series - The series to store.
-            :returns series - A series containing only the stored values.
         """
-        returningSeries = Series(series.description, True)
-
+        
         if (type(series.description) == SemaphoreSeriesDescription): #Check and make sure this is actually something with the proper description to be inserted
-            returningSeries.isComplete = False
-            returningSeries.nonCompleteReason = f'An input save request must be provided a series with a Series Description not a SemaphoreSeriesDescription'
+            log(f'An input save request must be provided a series with a Series Description not a SemaphoreSeriesDescription. This series will not be saved.')
+        elif (series.description.dataSource == "SEMAPHORE"):
+            pass # Do nothing if the data source is "SEMAPHORE"
         else:
-           self.seriesStorage.insert_input(series)
+             self.seriesStorage.insert_input(series)
 
         
     
