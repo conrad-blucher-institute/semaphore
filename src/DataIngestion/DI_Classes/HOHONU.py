@@ -33,7 +33,7 @@ class HOHONU (IDataIngestion):
             raise ValueError(f"API host or authorization is empty.")
         
         datum = seriesDescription.dataDatum
-        station_id = seriesDescription.station_id
+        station_id = self.seriesStorage.find_external_location_code(seriesDescription.dataSource, seriesDescription.dataLocation)
         from_time = timeDescription.fromDateTime
         to_time = timeDescription.toDateTime
         
@@ -70,19 +70,17 @@ class HOHONU (IDataIngestion):
         #Corrects the interval of the timestamps
         resampled_df = self.__corrects_interval(response_df, timeDescription)
     
-        outputs = self.__convert_dataframe_to_output(resampled_df, timeDescription)
+        inputs = self.__convert_dataframe_to_input(resampled_df, timeDescription)
         
-        if seriesDescription.is_output is None or seriesDescription.is_output is False:
-            
-            series.data = self.__convert_output_to_input(outputs)
-            
-        else:
-            series.data = outputs       
+        series.data = inputs      
     
         return series
     
     def __corrects_interval(self, response_df: pd.DataFrame, timeDescription: TimeDescription):
-        """This script ensures the correct interval of datapoints is being used"""
+        """Ensures the correct interval is being used.
+        :param response_df: Pandas Dataframe 
+        :param timeDescription: TimeDescription - A data TimeDescription object with the information to pull 
+        """
        
         if not pd.api.types.is_datetime64_any_dtype(response_df['timestamp']):
             response_df['timestamp'] = pd.to_datetime(response_df['timestamp'])
@@ -97,53 +95,31 @@ class HOHONU (IDataIngestion):
         
         return resampled_df
         
-    def __convert_date_format(self, date):
+    def __convert_date_format(self, date : str) -> datetime:
         """Converts the hohonu dataframes' date format to Semaphore's date format
-
-        Args:
-            hohonu_df (pd.DataFrame): Datatframe containing hohonu station data
-
-        Returns:
-            hohonu_df (pd.DataFrame): Datatframe containing hohonu station data
+        :param date: A date time
         """
         
         return date.strftime('%Y-%m-%d %H:%M:%S') 
     
-    def __convert_dataframe_to_output(self,df: pd.DataFrame, timeDescription: TimeDescription) ->list[Output]:
-        
+    def __convert_dataframe_to_input(self,df: pd.DataFrame, timeDescription: TimeDescription) ->list[Output]:
+        """Converts a dataframe 
+        :param date: A date time
+        """
         df = df.reset_index()
-        outputs = []
+        inputs = []
         for timestamp, value in zip(df["timestamp"], df["value"]):
             dt = timestamp.to_pydatetime()
-            dataPoint = Output(
+            dataPoint = Input(
                 dataValue= value,
                 dataUnit= "feet",
+                timeVerified= dt + timeDescription.leadtime,
                 timeGenerated= dt,
                 leadTime= timeDescription.leadtime
             )
-            outputs.append(dataPoint)
-        return outputs
+            inputs.append(dataPoint)
+        return inputs
         
-        
-    def __convert_output_to_input(self, outputs: list[Output]) -> list[Input]:
-            """A simple method to cast and output object into an input object"""
-            inputs = []
-            for output in outputs:
-
-                value = output.dataValue
-                unit = output.dataUnit
-                timeGenerated = output.timeGenerated
-                leadTime = output.leadTime
-
-                inputs.append(
-                    Input(
-                        value,
-                        unit,
-                        timeGenerated + leadTime, # Verified Time
-                        timeGenerated
-                    )
-                )
-            return inputs
         
     def __convert_response_to_dataframe(self, response_data: json) -> pd.DataFrame:
         """converts the dictionary response into a dataframe with correct timestamp and value pairings
