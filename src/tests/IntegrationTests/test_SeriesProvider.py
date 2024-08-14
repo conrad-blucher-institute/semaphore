@@ -17,7 +17,7 @@ from dotenv import load_dotenv
     
 import pytest
 from datetime import datetime, timedelta
-from src.SeriesProvider.SeriesProvider import SeriesProvider, TimeDescription, Series, SeriesDescription, SemaphoreSeriesDescription
+from src.SeriesProvider.SeriesProvider import SeriesProvider, TimeDescription, Series, SeriesDescription, SemaphoreSeriesDescription,Input
 
 
 def test_save_series():
@@ -27,10 +27,24 @@ def test_save_series():
     load_dotenv()
     seriesProvider = SeriesProvider()
     
-    seriesDescription = SeriesDescription('apple', 'pear', 'grape')
+    inputs = [
+    Input(dataValue="20.5", dataUnit="meter", timeVerified=datetime(2024, 8, 14, 12, 0), timeGenerated=datetime(2024, 8, 14, 11, 45)),
+    Input(dataValue="21.0", dataUnit="meter", timeVerified=datetime(2024, 8, 14, 12, 6), timeGenerated=datetime(2024, 8, 14, 11, 51)),
+    Input(dataValue="22.0", dataUnit="meter", timeVerified=datetime(2024, 8, 14, 12, 12), timeGenerated=datetime(2024, 8, 14, 11, 57)),
+    Input(dataValue="19.8", dataUnit="meter", timeVerified=datetime(2024, 8, 14, 12, 18), timeGenerated=datetime(2024, 8, 14, 12, 3)),
+    Input(dataValue="20.0", dataUnit="meter", timeVerified=datetime(2024, 8, 14, 12, 24), timeGenerated=datetime(2024, 8, 14, 12, 9)),
+    Input(dataValue="20.2", dataUnit="meter", timeVerified=datetime(2024, 8, 14, 12, 30), timeGenerated=datetime(2024, 8, 14, 12, 15)),
+    Input(dataValue="19.5", dataUnit="meter", timeVerified=datetime(2024, 8, 14, 12, 36), timeGenerated=datetime(2024, 8, 14, 12, 21)),
+    Input(dataValue="21.3", dataUnit="meter", timeVerified=datetime(2024, 8, 14, 12, 42), timeGenerated=datetime(2024, 8, 14, 12, 27)),
+    Input(dataValue="21.8", dataUnit="meter", timeVerified=datetime(2024, 8, 14, 12, 48), timeGenerated=datetime(2024, 8, 14, 12, 33)),
+    Input(dataValue="20.7", dataUnit="meter", timeVerified=datetime(2024, 8, 14, 12, 54), timeGenerated=datetime(2024, 8, 14, 12, 39))
+]
+    
+    seriesDescription = SeriesDescription('LIGHTHOUSE', 'pWl', 'PACKER')
     timeDescription = TimeDescription(datetime(2001, 12, 28), datetime(2001, 12, 28) + timedelta(hours=24))
     series = Series(seriesDescription, True, timeDescription)
-    seriesProvider.save_series(series)
+    series.data = inputs
+    seriesProvider.save_input_series(series)
     assert True
 
 @pytest.mark.parametrize("seriesDescription, timeDescription", [
