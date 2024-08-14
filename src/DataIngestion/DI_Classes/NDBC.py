@@ -167,6 +167,9 @@ class NDBC(IDataIngestion):
         four_highest = sorted(input_data)[-4:] # Get the four highest values
         mean_four_max = sum(four_highest) / 4.0
 
+        print(f'length of array we want the last input of: {len(full_series_inputs)}')
+        print(f'full_sries_inputs: {full_series_inputs}')
+
         # we return a series with a single input
         last_input = full_series_inputs[-1]
         input = Input(
