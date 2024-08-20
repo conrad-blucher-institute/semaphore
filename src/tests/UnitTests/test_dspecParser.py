@@ -21,8 +21,8 @@ from src.utility import log, construct_true_path
 from src.ModelExecution.inputGatherer import InputGatherer
 
 @pytest.mark.parametrize("dspecFileName", [
-     ('test_dspec.json'),
-     ('test_dspec-2-0.json')
+     ('TestModels/test_dspec.json'),
+     ('TestModels/test_dspec-2-0.json')
 ])
 def test_parseDSPEC(dspecFileName: str):
     """This function tests whether the specified DSPEC file
