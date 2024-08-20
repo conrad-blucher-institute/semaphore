@@ -1,5 +1,6 @@
 {
     "chartName": "Magnolia Bay",
+    "interval":3600,
     "chartSeries": [
         {
             "legend":"Magnolia Bay Predictions",
