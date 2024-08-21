@@ -19,8 +19,8 @@ from dotenv import load_dotenv
 import pandas as  pd
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
-    (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', station_id='hohonu-185', dataDatum= 'D2W_FEET', is_output=False), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=10)),toDateTime= (datetime.now()- timedelta(hours= 8) ), interval= timedelta(seconds = 3600), leadtime=timedelta(seconds = 43200)), 3),
-     (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', station_id='hohonu-185', dataDatum= 'D2W_FEET', is_output=True), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=10)),toDateTime= (datetime.now()- timedelta(hours= 8) ), interval= timedelta(seconds = 3600), leadtime=timedelta(seconds = 43200)), 3)
+    (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', dataDatum= 'D2W_FEET', is_output=False), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=10)),toDateTime= (datetime.now()- timedelta(hours= 8) ), interval= timedelta(seconds = 3600), leadtime=timedelta(seconds = 43200)), 2),
+     (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', dataDatum= 'D2W_FEET', is_output=True), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=10)),toDateTime= (datetime.now()- timedelta(hours= 7) ), interval= timedelta(seconds = 3600), leadtime=timedelta(seconds = 43200)), 3)
 ])
 
 def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: TimeDescription, expected_output: None):
