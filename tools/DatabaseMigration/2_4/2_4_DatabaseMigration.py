@@ -35,14 +35,16 @@ class Migrator(IDatabaseMigration):
         metadata = MetaData()
         metadata.reflect(bind=databaseEngine)
         
+        ref_dataSource = metadata.tables['ref_dataSource']
         ref_dataDatum = metadata.tables['ref_dataDatum']
         ref_dataLocation_dataSource_mapping = metadata.tables['dataLocation_dataSource_mapping']
-        ref_dataSource = metadata.tables['ref_dataSource']
+
         
          # Insert the data based off of csv files
+        self.insert_ref_data(self.readInitCSV('hohonuDataSource.csv'), ref_dataSource)
         self.insert_ref_data(self.readInitCSV('hohonuDataDatum.csv'), ref_dataDatum)
         self.insert_ref_data(self.readInitCSV('hohonuDataMapping.csv'), ref_dataLocation_dataSource_mapping)
-        self.insert_ref_data(self.readInitCSV('hohonuDataSource.csv'), ref_dataSource)
+        
         
         return True
         
