@@ -1,5 +1,6 @@
 {
     "chartName": "Magnolia Bay",
+    "chartCSV": "magnolia-bay",
     "interval":3600,
     "chartSeries": [
         {
@@ -41,7 +42,6 @@
             "_name": "Magnolia Beach Water Levels",
             "location": "Magnolia Beach",
             "source": "HOHONU",
-            "station_id": "hohonu-185",
             "series": "pWl",
             "unit": "feet",
             "datum" : "D2W_FEET",
