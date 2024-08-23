@@ -36,13 +36,11 @@ class Migrator(IDatabaseMigration):
         metadata.reflect(bind=databaseEngine)
         
         ref_dataSource = metadata.tables['ref_dataSource']
-        ref_dataDatum = metadata.tables['ref_dataDatum']
         ref_dataLocation_dataSource_mapping = metadata.tables['dataLocation_dataSource_mapping']
 
         
          # Insert the data based off of csv files
         self.insert_ref_data(self.readInitCSV('hohonuDataSource.csv'), ref_dataSource)
-        self.insert_ref_data(self.readInitCSV('hohonuDataDatum.csv'), ref_dataDatum)
         self.insert_ref_data(self.readInitCSV('hohonuDataMapping.csv'), ref_dataLocation_dataSource_mapping)
         
         
@@ -86,8 +84,8 @@ class Migrator(IDatabaseMigration):
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
         """
-        fileNames = ['hohonuDataDatum.csv','hohonuDataSource.csv']
-        fileTypes = [KeywordType.DATA_DATUM, KeywordType.DATA_SOURCE]
+        fileNames = ['hohonuDataSource.csv']
+        fileTypes = [KeywordType.DATA_SOURCE]
 
         # Using the utility helper class to delete any data dependent on the rows added in the 2.4 Migration
         helper = DatabaseDeletionHelper(databaseEngine)
