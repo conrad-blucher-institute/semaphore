@@ -97,13 +97,11 @@ class TimeDescription():
         :param fromDateTime: datetime - The datetime the data starts at
         :param toDateTime: datetime - The datetime the data stops at
         :param interval: timedelta = None - The time step separating the data points in order
-        :parm leadTime: timedelta - The lead time for the model
     """
     def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: timedelta = None) -> None:
         self.fromDateTime = fromDateTime
         self.toDateTime = toDateTime
         self.interval = interval
-        
 
     def __str__(self) -> str:
         return f'\n[TimeDescription] -> fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, interval: {self.interval}'
@@ -128,8 +126,6 @@ class SeriesDescription():
         self.dataDatum = dataDatum
         self.dataIntegrityDescription = dataIntegrityDescription
         self.verificationOverride = verificationOverride
-       
-        
 
     def __str__(self) -> str:
         return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, dataIntegrityDescription: {self.dataIntegrityDescription}, verificationOverride: {self.verificationOverride}'
