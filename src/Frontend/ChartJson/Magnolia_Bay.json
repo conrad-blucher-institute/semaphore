@@ -1,6 +1,6 @@
 {
-    "chartName": "Magnolia Bay",
-    "chartCSV": "magnolia-bay",
+    "chartName": "Magnolia Beach",
+    "chartCSV": "magnolia-beach",
     "interval":3600,
     "chartSeries": [
         {
@@ -44,7 +44,7 @@
             "source": "HOHONU",
             "series": "pWl",
             "unit": "feet",
-            "datum" : "D2W_FEET",
+            "datum" : "D2W",
             "interval": 3600,
             "range": [120,0],
             "outKey": "MB_WL_120"
