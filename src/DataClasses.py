@@ -99,17 +99,17 @@ class TimeDescription():
         :param interval: timedelta = None - The time step separating the data points in order
         :parm leadTime: timedelta - The lead time for the model
     """
-    def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: timedelta = None, leadtime: timedelta = None) -> None:
+    def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: timedelta = None) -> None:
         self.fromDateTime = fromDateTime
         self.toDateTime = toDateTime
         self.interval = interval
-        self.leadtime = leadtime
+        
 
     def __str__(self) -> str:
-        return f'\n[TimeDescription] -> fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, interval: {self.interval}, leadtime: {self.leadtime}'
+        return f'\n[TimeDescription] -> fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, interval: {self.interval}'
     
     def __repr__(self) -> str:
-        return f'\nTimeDescription({self.fromDateTime}, {self.toDateTime}, {self.interval}, {self.leadtime})'
+        return f'\nTimeDescription({self.fromDateTime}, {self.toDateTime}, {self.interval})'
 
 
 class SeriesDescription():
