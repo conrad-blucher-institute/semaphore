@@ -20,7 +20,7 @@ import json
 from urllib.parse import quote
 from datetime import datetime
 
-class HOHONU (IDataIngestion):
+class HOHONU(IDataIngestion):
     def __init__(self):
         self.seriesStorage = series_storage_factory()
         
@@ -40,21 +40,30 @@ class HOHONU (IDataIngestion):
         from_time_encoded = self.__datetime_to_quoted_string(from_time)
         to_time_encoded = self.__datetime_to_quoted_string(to_time)
         
-        url = f"{api_host}/api/v1/stations/{station_id}/statistic/?from={from_time_encoded}&to={to_time_encoded}&datum={datum}&cleaned=true&format=json"
+        url = f"{api_host}/api/v1/stations/{station_id}/statistic/?from={from_time_encoded}&to={to_time_encoded}&datum={datum}&cleaned=false&format=json"
         headers = {"Authorization": api_authorization}
         
         
-        response_json = self.__fetch(url,headers)
+        response = self.__fetch(url,headers)
         
-        if response_json is None:
+        if response is None:
             log(f'No data found for hohonu API. Request url: {url}')
             return None
+        
 
         try:
             
-            response_data = json.loads(response_json)
+            response_data = json.loads(response)
+            
+            if not response_data['data'] or all(not sublist for sublist in response_data['data']):
+                log(f'No data found for hohonu API. Request url: {url}')
+                return None
+            
             response_df = self.__convert_response_to_dataframe(response_data)
             
+            # Convert millimeters to meters
+            response_df['value'] = response_df['value'].apply(self.mm_to_m)
+
         except ValueError or json.JSONDecodeError as e:
             log(f"Error decoding JSON from Hohonu API: {str(e)}")
 
@@ -69,9 +78,9 @@ class HOHONU (IDataIngestion):
         
         #Corrects the interval of the timestamps
         resampled_df = self.__corrects_interval(response_df, timeDescription)
-    
-        inputs = self.__convert_dataframe_to_input(resampled_df, timeDescription)
-        
+
+        inputs = self.__convert_dataframe_to_input(resampled_df)
+
         series.data = inputs      
     
         return series
@@ -88,7 +97,7 @@ class HOHONU (IDataIngestion):
         response_df.set_index('timestamp', inplace=True)
     
         # Resample the DataFrame to a different interval (e.g., 30 seconds)
-        new_interval = f"{timeDescription.interval.total_seconds()}S" # (e.g., '30S' for 30 seconds)
+        new_interval = f"{int(timeDescription.interval.total_seconds())}S" # (e.g., '30S' for 30 seconds)
         
         # Ensures the correct interval is used 
         resampled_df = response_df.resample(new_interval).interpolate('linear')
@@ -102,7 +111,7 @@ class HOHONU (IDataIngestion):
         
         return date.strftime('%Y-%m-%d %H:%M:%S') 
     
-    def __convert_dataframe_to_input(self,df: pd.DataFrame, timeDescription: TimeDescription) ->list[Output]:
+    def __convert_dataframe_to_input(self, df: pd.DataFrame) ->list[Output]:
         """Converts a dataframe 
         :param date: A date time
         """
@@ -112,10 +121,11 @@ class HOHONU (IDataIngestion):
             dt = timestamp.to_pydatetime()
             dataPoint = Input(
                 dataValue= value,
-                dataUnit= "feet",
-                timeVerified= dt + timeDescription.leadtime,
+                dataUnit= "meter",
+                timeVerified= dt,
                 timeGenerated= dt,
-                leadTime= timeDescription.leadtime
+                longitude=None,
+                latitude=None
             )
             inputs.append(dataPoint)
         return inputs
@@ -185,4 +195,9 @@ class HOHONU (IDataIngestion):
         dt_quoted = quote(dt_str)
         
         return dt_quoted
-        
+    
+    def mm_to_m(self, mm):
+        """Convert millimeters to meters.
+        Args:
+            mm (millimeter): A measurement in millimeters"""
+        return mm / 1000

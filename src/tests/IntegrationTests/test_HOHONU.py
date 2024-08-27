@@ -19,8 +19,8 @@ from dotenv import load_dotenv
 import pandas as  pd
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
-    (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', dataDatum= 'D2W_FEET', is_output=False), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=10)),toDateTime= (datetime.now()- timedelta(hours= 8) ), interval= timedelta(seconds = 3600), leadtime=timedelta(seconds = 43200)), 2),
-     (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', dataDatum= 'D2W_FEET', is_output=True), TimeDescription(fromDateTime=(datetime.now() - timedelta(hours=10)),toDateTime= (datetime.now()- timedelta(hours= 7) ), interval= timedelta(seconds = 3600), leadtime=timedelta(seconds = 43200)), 3)
+    (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', dataDatum= 'D2W'), TimeDescription(fromDateTime=datetime(2024, 8, 26, 15, 0, 0), toDateTime=datetime(2024, 8, 26, 20, 0, 0), interval= timedelta(seconds = 3600)), 6),
+    (SeriesDescription(dataSource='HOHONU', dataSeries='dWl', dataLocation='MagnoliaBeach', dataDatum= 'D2W'), TimeDescription(fromDateTime=datetime(2024, 8, 26, 15, 0, 0),toDateTime=datetime(2024, 8, 26, 16, 0, 0), interval= timedelta(seconds = 360)), 11)
 ])
 
 def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: TimeDescription, expected_output: None):
@@ -28,12 +28,13 @@ def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: Ti
         function is complete.
     """
     load_dotenv()
-
     hohonu = data_ingestion_factory(seriesDescription)
     result = hohonu.ingest_series(seriesDescription, timeDescription)
-
-    assert len(result.data) == expected_output
-    if seriesDescription.is_output is False:
+   
+    if result is None:
+        assert False, "The result is None"
+    else:
+        assert len(result.data) == expected_output
         assert isinstance(result.data, list), "result.data is not a list"
         assert all(isinstance(item, Input) for item in result.data), "Not all elements in result.data are instances of Input"
 
