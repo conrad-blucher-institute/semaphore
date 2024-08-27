@@ -6,7 +6,7 @@
 # Version 1.0
 #----------------------------------
 """This is a database migration script that will initialize version
-    2.4 of the database. The change from version 2.3 to 2.4 includes a new dataMapping, dataSource, and dataDatum for HOHONU.
+    2.4 of the database. The change from version 2.3 to 2.4 includes a new dataMapping and dataSource for HOHONU.
  """ 
 #----------------------------------
 # 
