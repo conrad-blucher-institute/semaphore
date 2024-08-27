@@ -146,12 +146,12 @@ class NOAATANDC(IDataIngestion):
 
     def __fetch_dSurge(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
 
-        surgeSeriesName = seriesDescription.dataSeries
-        seriesDescription.dataSeries = 'pWl'
-        pData, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'predictions')
-        seriesDescription.dataSeries = 'dWl'
-        wlData, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'water_level')
-        seriesDescription.dataSeries = surgeSeriesName
+        pWLDesc = SeriesDescription(seriesDescription.dataSource, 'pWl', seriesDescription.dataLocation, seriesDescription.dataDatum)
+        pData, lat_lon = self.__fetch_NOAA_data(pWLDesc, timeDescription, 'predictions')
+
+        dwlDesc = SeriesDescription(seriesDescription.dataSource, 'dWl', seriesDescription.dataLocation, seriesDescription.dataDatum)
+        wlData, lat_lon = self.__fetch_NOAA_data(dwlDesc, timeDescription, 'water_level')
+
         if pData is None: return None
         if wlData is None: return None
 
@@ -183,7 +183,6 @@ class NOAATANDC(IDataIngestion):
 
         series = Series(seriesDescription, True, timeDescription)
         series.data = inputs
-
         return series
     
     def __fetch_WnDir(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
@@ -255,8 +254,8 @@ class NOAATANDC(IDataIngestion):
 
         offset = float(seriesDescription.dataSeries[-4:-2])
         
-        seriesDescription.dataSeries = 'dWind'
-        data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'wind')
+        dWindDesc = SeriesDescription(seriesDescription.dataSource, 'dWind', seriesDescription.dataLocation, seriesDescription.dataDatum)
+        data, lat_lon = self.__fetch_NOAA_data(dWindDesc, timeDescription, 'wind')
         if data is None: return None
 
         x_inputs = []
@@ -294,13 +293,14 @@ class NOAATANDC(IDataIngestion):
             )
             y_inputs.append(dataPoints)
 
+        #Changing the series description name back to what we will be saving in the database after calculations
+        xCompDesc = SeriesDescription(seriesDescription.dataSource, f'dXWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
+        yCompDesc = SeriesDescription(seriesDescription.dataSource, f'dYWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
 
-        seriesDescription.dataSeries = f'dXWnCmp{str(int(offset)).zfill(3)}D'
-        x_series = Series(seriesDescription, True, timeDescription)
+        x_series = Series(xCompDesc, True, timeDescription)
         x_series.data = x_inputs
 
-        seriesDescription.dataSeries = f'dYWnCmp{str(int(offset)).zfill(3)}D'
-        y_series = Series(seriesDescription, True, timeDescription)
+        y_series = Series(yCompDesc, True, timeDescription)
         y_series.data = y_inputs
 
         return x_series if isXWnCmp else y_series
