@@ -104,7 +104,7 @@ class TimeDescription():
         self.interval = interval
 
     def __str__(self) -> str:
-        return f'\n[TimeDescription] -> fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}. interval: {self.interval}'
+        return f'\n[TimeDescription] -> fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, interval: {self.interval}'
     
     def __repr__(self) -> str:
         return f'\nTimeDescription({self.fromDateTime}, {self.toDateTime}, {self.interval})'
