@@ -85,7 +85,9 @@ class SeriesProvider():
         data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
         validated_merged_result = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data, data_ingestion_results.data if data_ingestion_results != None else None)
         if(validated_merged_result.isComplete):
-            self.save_input_series(validated_merged_result)
+            inserted_series = self.save_input_series(validated_merged_result)
+            if(inserted_series is None or len(inserted_series.data) == 0):
+                log('WARNING:: A data insertion was triggered but no data was actually inserted!')
             return validated_merged_result
         
         if seriesDescription.dataIntegrityDescription is None:
