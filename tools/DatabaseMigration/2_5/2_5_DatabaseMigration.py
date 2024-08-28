@@ -25,8 +25,7 @@ CSV_FILE_PATHS = './tools/DatabaseMigration/2_5/init_data'
 class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
-        """This function updates the database to version 2.2 which adds rows to the locations reference 
-           table and the location mapping reference table.
+        """This function updates the database to version 2.5 which update Series descriptions
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
@@ -88,8 +87,7 @@ class Migrator(IDatabaseMigration):
         return results
 
     def rollback(self, databaseEngine: Engine) -> bool:
-        """This function rolls the database back to version 2.1 which involves removing the changes 
-           associated with version 2.2.
+        """This function rolls the database from 2.5
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
