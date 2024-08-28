@@ -1,0 +1,4 @@
+code,displayName,notes
+dWaterTmp,Actual Water Temperature,Water Temperature
+dAirTmp,Actual Air Temperature,Air Temperature
+pAirTemp,Predictive Air Temperature,Air Temperature

@@ -1,4 +1,4 @@
 {
-    "Target Version" : "2.3",
-    "Description" : "Adding one row to the datum reference table for the Magnolia model."
+    "Target Version" : "2.5",
+    "Description" : "Fixing errors in Series reference data."
 }
