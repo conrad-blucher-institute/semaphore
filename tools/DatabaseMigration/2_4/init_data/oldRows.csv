@@ -1,0 +1,4 @@
+code,displayName,notes
+dWaterTmp,Water Tempature,Actual Water Tempature
+dAirTmp,Water Tempature,Actual Water Tempature
+pAirTemp,Water Tempature,Predictive Water Tempature
