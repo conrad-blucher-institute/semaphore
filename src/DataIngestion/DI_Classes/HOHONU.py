@@ -1,5 +1,5 @@
 #!/usr/local/bin/python
-#NDBC.py
+#HOHONU.py
 #---------------------------------------------
 # Created by: Anointiyae Beasley
 # Adapted from: Matthew Kastl's work
@@ -62,7 +62,7 @@ class HOHONU(IDataIngestion):
             response_df = self.__convert_response_to_dataframe(response_data)
             
             # Convert millimeters to meters
-            response_df['value'] = response_df['value'].apply(self.mm_to_m)
+            response_df['value'] = response_df['value'].apply(self.__mm_to_m)
 
         except ValueError or json.JSONDecodeError as e:
             log(f"Error decoding JSON from Hohonu API: {str(e)}")
@@ -196,7 +196,7 @@ class HOHONU(IDataIngestion):
         
         return dt_quoted
     
-    def mm_to_m(self, mm):
+    def __mm_to_m(self, mm):
         """Convert millimeters to meters.
         Args:
             mm (millimeter): A measurement in millimeters"""
