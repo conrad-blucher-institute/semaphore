@@ -19,13 +19,13 @@ from sqlalchemy.dialects.postgresql import insert
 import csv
 
 #Constants
-CSV_FILE_PATHS = './tools/DatabaseMigration/2_5/init_data'
+CSV_FILE_PATHS = './tools/DatabaseMigration/2_4/init_data'
 
 
 class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
-        """This function updates the database to version 2.5 which update Series descriptions
+        """This function updates the database to version 2.4 which update Series descriptions
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
@@ -87,7 +87,7 @@ class Migrator(IDatabaseMigration):
         return results
 
     def rollback(self, databaseEngine: Engine) -> bool:
-        """This function rolls the database from 2.5
+        """This function rolls the database from 2.4
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
