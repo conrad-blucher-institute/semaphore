@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-#2_5_DatabaseMigration.py
+#2_4_DatabaseMigration.py
 #----------------------------------
 # Created By: Matthew Kastl
 # Created Date:8/28/2024
 # Version 1.0
 #----------------------------------
 """This is a database migration script that will update to version
-    2.5 of the database. The intended change is fixing some incorrect meta data. 
+    2.4 of the database. The intended change is fixing some incorrect meta data. 
  """ 
 #----------------------------------
 # 
