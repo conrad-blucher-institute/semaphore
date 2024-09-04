@@ -56,22 +56,17 @@ class TEST_DI(IDataIngestion):
                     raise Exception(f'In testing DI class {amount_of_missing} from a series that only has {len(series.data)} values!')
                 
                 series.data = self.__generate_data_with_missing(series.data, amount_of_missing)
-                print(series.data)
                 return series
 
 
     def __generate_data_with_missing(self, data: list[Input], amount_of_missing: int) -> list[Input]:
         missing_idx = random.sample(range(0, len(data)), amount_of_missing)
-        print(missing_idx)
         new_data = []
-        print('before', data)
         for idx, data in enumerate(data):
             if idx in missing_idx:
-                print(f'Missing idx {idx} skipped!')
                 continue
             else:
                 new_data.append(data)
-        print('after', new_data)
         return new_data
 
             
