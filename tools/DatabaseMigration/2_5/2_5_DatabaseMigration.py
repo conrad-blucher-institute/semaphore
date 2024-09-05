@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-#2_4_DatabaseMigration.py
+#2_5_DatabaseMigration.py
 #----------------------------------
 # Created By: Anointiyae Beasley
 # Created Date: 08/21/2024
 # Version 1.0
 #----------------------------------
 """This is a database migration script that will initialize version
-    2.4 of the database. The change from version 2.3 to 2.4 includes a new dataMapping and dataSource for HOHONU.
+    2.5 of the database. The change from version 2.4 to 2.5 includes a new dataMapping and dataSource for HOHONU.
  """ 
 #----------------------------------
 # 
@@ -19,12 +19,12 @@ from sqlalchemy.dialects.postgresql import insert
 import csv
 
 #Constants
-CSV_FILE_PATHS = './tools/DatabaseMigration/2_4/init_data'
+CSV_FILE_PATHS = './tools/DatabaseMigration/2_5/init_data'
 
 class Migrator(IDatabaseMigration):
     
     def update(self, databaseEngine: Engine) -> bool:
-        """This function updates the database to version 2.4.
+        """This function updates the database to version 2.5.
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
         """
@@ -78,8 +78,8 @@ class Migrator(IDatabaseMigration):
             return result
 
     def rollback(self, databaseEngine: Engine) -> bool:
-        """This function rolls the database back to version 2.3 which involves removing the changes 
-           associated with version 2.4 
+        """This function rolls the database back to version 2.4 which involves removing the changes 
+           associated with version 2.5 
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
@@ -87,7 +87,7 @@ class Migrator(IDatabaseMigration):
         fileNames = ['hohonuDataSource.csv']
         fileTypes = [KeywordType.DATA_SOURCE]
 
-        # Using the utility helper class to delete any data dependent on the rows added in the 2.4 Migration
+        # Using the utility helper class to delete any data dependent on the rows added in the 2.5 Migration
         helper = DatabaseDeletionHelper(databaseEngine)
 
         for file, type in zip(fileNames, fileTypes):
