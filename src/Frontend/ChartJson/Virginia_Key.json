@@ -1,0 +1,114 @@
+{
+    "chartName": "Virginia Key",
+    "interval":3600,
+    "chartSeries": [
+        {
+            "_name": "virginia_key_12 output",
+            "location": "VirginiaKey",
+            "source": "SEMAPHORE",
+            "series": "12hr_VirginiaKey_wl|1.0.0|pWl",
+            "unit": "meter",
+            "interval": 3600,
+            "range":  [12, 0],
+            "outKey": "VK_pWL_F12",
+            "is_output": true
+            
+        },
+        {
+            "_name": "virginia_key_24 output",
+            "location": "VirginiaKey",
+            "source": "SEMAPHORE",
+            "series": "24hr_VirginiaKey_wl|1.0.0|pWl",
+            "unit": "meter",
+            "interval": 3600,
+            "range":  [24, 13],
+            "outKey": "VK_pWL_F24",
+            "is_output": true
+
+        },
+        {
+            "_name": "virginia_key_48 output",
+            "location": "VirginiaKey",
+            "source": "SEMAPHORE",
+            "series": "48hr_VirginiaKey_wl|1.0.0|pWl",
+            "unit": "meter",
+            "interval": 3600,
+            "range":  [48, 25],
+            "outKey": "VK_pWL_F48",
+            "is_output": true
+            
+        },
+        {
+            "_name": "virginia_key_72 output",
+            "location": "VirginiaKey",
+            "source": "SEMAPHORE",
+            "series": "72hr_VirginiaKey_wl|1.0.0|pWl",
+            "unit": "meter",
+            "interval": 3600,
+            "range":  [72,49],
+            "outKey": "VK_pWL_F72",
+            "is_output": true
+            
+        },
+        {
+            "_name": "virginia_key_96 output",
+            "location": "VirginiaKey",
+            "source": "SEMAPHORE",
+            "series": "96hr_VirginiaKey_wl|1.0.0|pWl",
+            "unit": "meter",
+            "interval": 3600,
+            "range":  [96, 73],
+            "outKey": "VK_pWL_F96",
+            "is_output": true
+            
+        },
+        {
+            "_name": "nooaa output",
+            "location": "VirginiaKey",
+            "source": "NOAATANDC",
+            "series": "pWl",
+            "unit": "meter",
+            "interval": 3600,
+            "range":  [-96, 0],
+            "outKey": "NOAATANDC_pWL",
+            "is_output": true
+            
+        }
+
+    ],
+    "postProcessCall": [
+        {
+            "call": "InterpolateBetweenMeasurementsAndPredictions",
+            "args": [
+                {
+                    "predictions_key:": "VK_pWL_F12",
+                    "measurements_key": "NOAATANDC_pWL"
+                },
+                {
+                    "predictions_key:": "VK_pWL_F24",
+                    "measurements_key": "NOAATANDC_pWL"
+                },
+                {
+                    "predictions_key:": "VK_pWL_F48",
+                    "measurements_key": "NOAATANDC_pWL"
+                }
+
+             ]   
+        },
+        {
+            "call": "ConvertWaterLevelToSurge",
+            "args": [
+                {
+                    "predictions_key:": "VK_pWL_F12",
+                    "measurements_key": "NOAATANDC_pWL"
+                },
+                {
+                    "predictions_key:": "VK_pWL_F12",
+                    "measurements_key": "NOAATANDC_pWL"
+                }   
+
+             ]   
+        }
+        
+    ]
+}
