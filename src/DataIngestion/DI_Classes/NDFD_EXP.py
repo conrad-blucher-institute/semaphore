@@ -39,6 +39,8 @@ import traceback
 import os
 import sys
 
+from time import sleep
+
 Time = TypeVar('Time')
 NewTime = TypeVar('NewTime')
 Data = TypeVar('Data')
@@ -55,6 +57,8 @@ ZippedDataset = List[Tuple[SeriesName, List[Tuple[Time, Data]]]]
 class NDFD_EXP(IDataIngestion):
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
+
+        sleep(30)
         
         # Remove digits 
         processed_series = re.sub('\d', '', seriesDescription.dataSeries)
