@@ -78,17 +78,27 @@ class NOAATANDC(IDataIngestion):
     def __fetch_NOAA_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, NOAAProduct: str) -> None | Series:
         
         stationID = self.__get_station_number(seriesDescription.dataLocation)
+        print(f'-----------------------------------------')
+        print(f'Station ID: {stationID}')
+        print(f'-----------------------------------------')
         if stationID == None: return None
 
 
         toTime = timeDescription.toDateTime
         fromTime = timeDescription.fromDateTime
+
+        print(f'-----------------------------------------')
+        print(f'toTime: {toTime}')
+        print(f'fromTime: {fromTime}')
+        print(f'-----------------------------------------')
         
         # Some NOAA products dont allow the selection of 1 point. So here we detect
         # if we are wanting a single point, and artificially expanding the to time 
         isSinglePoint = timeDescription.toDateTime == timeDescription.fromDateTime
         if isSinglePoint:
             toTime = toTime + timeDescription.interval
+            print(f'-----------------------------------------')
+            print(f'toTime adjusted: {toTime}')
 
         try:
             station = Station(id=stationID)
@@ -147,10 +157,20 @@ class NOAATANDC(IDataIngestion):
     def __fetch_dSurge(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
 
         pWLDesc = SeriesDescription(seriesDescription.dataSource, 'pWl', seriesDescription.dataLocation, seriesDescription.dataDatum)
+        print(f'---------------------------------------------------------------')
+        print(f'predicted water level description: {pWLDesc}')
+        print(f'---------------------------------------------------------------')
         pData, lat_lon = self.__fetch_NOAA_data(pWLDesc, timeDescription, 'predictions')
+        print(f'---------------------------------------------------------------')
+        print(f'pData: {pData}')
 
         dwlDesc = SeriesDescription(seriesDescription.dataSource, 'dWl', seriesDescription.dataLocation, seriesDescription.dataDatum)
+        print(f'---------------------------------------------------------------')
+        print(f'data water level description: {dwlDesc}')
+        print(f'---------------------------------------------------------------')
         wlData, lat_lon = self.__fetch_NOAA_data(dwlDesc, timeDescription, 'water_level')
+        print(f'---------------------------------------------------------------')
+        print(f'wlData: {wlData}')
 
         if pData is None: return None
         if wlData is None: return None
