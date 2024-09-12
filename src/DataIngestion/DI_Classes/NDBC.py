@@ -162,7 +162,7 @@ class NDBC(IDataIngestion):
         full_series_inputs = self.__get_NDBC(seriesDescription, timeDescription).data # request the data
 
         if not full_series_inputs:  # check that data has been provided
-            log(f"Error: NDBC returned no data! Likely an NDBC outage.")
+            log(f"Warning: NDBC returned no data! Possibly an NDBC outage.")
             # Noted here as likely being an outage because semaphore has only
             # experienced issues with NDBC for limited periods of time
             # leading us to believe the issue is on NDBC's side.
