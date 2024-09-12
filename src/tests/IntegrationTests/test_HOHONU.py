@@ -11,8 +11,10 @@
 # 
 #
 #Import
-from src.DataIngestion.IDataIngestion import data_ingestion_factory
-from src.DataClasses import SeriesDescription,TimeDescription,Input
+import sys
+sys.path.append('/app/src')
+from DataIngestion.IDataIngestion import data_ingestion_factory
+from DataClasses import SeriesDescription,TimeDescription,Input
 import pytest
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -35,7 +37,14 @@ def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: Ti
         assert False, "The result is None"
     else:
         assert len(result.data) == expected_output
+        
         assert isinstance(result.data, list), "result.data is not a list"
-        assert all(isinstance(item, Input) for item in result.data), "Not all elements in result.data are instances of Input"
+        
+        for item in result.data:
+            assert type(item) is Input, f"Item {item} is not of type Input. It is of type {type(item)}"
+
+
+
+
 
 
