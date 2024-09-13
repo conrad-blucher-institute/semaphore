@@ -1,8 +1,9 @@
 {
+    "dspecVersion": "2.0",
     "modelName": "ThermalRefuge",
     "modelVersion": "1.0.0",
     "author": "Andrew DeSimone",
-    "modelFileName": "thermalrefugemodel",
+    "modelFileName": "./thermalrefugemodel",
     "timingInfo":{
         "active": true,
         "offset": 0,
@@ -17,16 +18,16 @@
         "location": "SouthBirdIsland",
         "unit" : "celsius"
     },
-    "inputs": [
+    "dependentSeries": [
         { 
             "_name": "Water Temp",
             "location": "SouthBirdIsland",
             "source": "LIGHTHOUSE",
             "series": "dWaterTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [-1, -1]
+            "range": [-1, -1],
+            "outKey": "SBI_WT_1"
         },
         { 
             "_name": "Air Temp",
@@ -34,9 +35,9 @@
             "source": "LIGHTHOUSE",
             "series": "dAirTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [-1, -1]
+            "range": [-1, -1],
+            "outKey": "SBI_AT_1"
         },
         { 
             "_name": "Water Temp",
@@ -44,9 +45,9 @@
             "source": "LIGHTHOUSE",
             "series": "dWaterTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [-2, -2]
+            "range": [-2, -2],
+            "outKey": "SBI_WT_2"
         },
         { 
             "_name": "Air Temp",
@@ -54,9 +55,9 @@
             "source": "LIGHTHOUSE",
             "series": "dAirTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [-2, -2]
+            "range": [-2, -2],
+            "outKey": "SBI_AT_2"
         },
         { 
             "_name": "Water Temp",
@@ -64,9 +65,9 @@
             "source": "LIGHTHOUSE",
             "series": "dWaterTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [-3, -3]
+            "range": [-3, -3],
+            "outKey": "SBI_WT_3"
         },
         { 
             "_name": "Air Temp",
@@ -74,9 +75,9 @@
             "source": "LIGHTHOUSE",
             "series": "dAirTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [-3, -3]
+            "range": [-3, -3],
+            "outKey": "SBI_AT_3"
         },
         { 
             "_name": "Water Temp",
@@ -84,9 +85,9 @@
             "source": "LIGHTHOUSE",
             "series": "dWaterTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [-4, -4]
+            "range": [-4, -4],
+            "outKey": "SBI_WT_4"
         },
         { 
             "_name": "Air Temp",
@@ -94,8 +95,64 @@
             "source": "LIGHTHOUSE",
             "series": "dAirTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [-5, -5]
+            "range": [-4, -4],
+            "outKey": "SBI_AT_4"
+        },
+        { 
+            "_name": "Water Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [-5, -5],
+            "outKey": "SBI_WT_5"
+        },
+        { 
+            "_name": "Air Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [-5, -5],
+            "outKey": "SBI_AT_5"
         }
-]}
+    ],
+    "postProcessCall": [],
+    "vectorOrder": [
+        {
+            "key": "SBI_WT_1",
+            "dType": "float"
+        },
+        {
+            "key": "SBI_AT_1",
+            "dType": "float"
+        },
+        {
+            "key": "SBI_WT_2",
+            "dType": "float"
+        },
+        {
+            "key": "SBI_AT_2",
+            "dType": "float"
+        },
+        {
+            "key": "SBI_WT_3",
+            "dType": "float"
+        },
+        {
+            "key": "SBI_AT_3",
+            "dType": "float"
+        },
+        {
+            "key": "SBI_WT_4",
+            "dType": "float"
+        },
+        {
+            "key": "SBI_AT_5",
+            "dType": "float"
+        }
+    ]
+}
