@@ -18,8 +18,7 @@ from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, T
 
 
 from utility import log
-import pandas as pd
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 
 
@@ -56,7 +55,7 @@ class SeriesProvider():
         """
         log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
         
-        # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 6 minuets
+        # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 6 minutes
         timeDescription.interval = timedelta(minutes=6) if timeDescription.interval == None else timeDescription.interval
         
         # First we check the database to see if it has the data we need
@@ -70,7 +69,7 @@ class SeriesProvider():
             return validated_DI_results
         
         # If neither of those in isolation work we try merging them together
-        validated_merged_results = self.__generate_resulting_series(seriesDescription, timeDescription, raw_DB_results.data, None if raw_DI_results is None else raw_DI_results.data)
+        validated_merged_results = self.__validate_series(seriesDescription, timeDescription, raw_DB_results.data, None if raw_DI_results is None else raw_DI_results.data)
         if validated_merged_results.isComplete: 
             return validated_merged_results
         elif seriesDescription.dataIntegrityDescription is None:
@@ -105,7 +104,7 @@ class SeriesProvider():
 
         log(f'Init DB Query...')
         series_storage_results = self.seriesStorage.select_input(seriesDescription, timeDescription)
-        validated_series_storage_results = self.__generate_resulting_series(seriesDescription, timeDescription, series_storage_results.data)
+        validated_series_storage_results = self.__validate_series(seriesDescription, timeDescription, series_storage_results.data)
         return validated_series_storage_results, series_storage_results
         
 
@@ -113,7 +112,7 @@ class SeriesProvider():
         """ Handles the process of getting requested data from series storage, validating it, and returning both validated and raw results 
         :param seriesDescription: SeriesDescription - The semantic description of request
         :param timeDescription: TimeDescription - The temporal description of the request
-        :returns tuple[Series, Series] | None
+        :returns tuple[Series | None, Series | None]
             - Series | None - The results from the DI that have gone through validation or None if data ingestion encountered an error.
             - Series | None - The raw results from the ingestion class or None if data ingestion encountered an error.
         """
@@ -130,23 +129,46 @@ class SeriesProvider():
             if(inserted_series is None or len(inserted_series.data) == 0): # A sanity check that the data is actually getting inserted!
                 log('WARNING:: A data insertion was triggered but no data was actually inserted!')
 
-        validated_data_ingestion_result = self.__generate_resulting_series(seriesDescription, timeDescription, data_ingestion_results.data)
+        validated_data_ingestion_result = self.__validate_series(seriesDescription, timeDescription, data_ingestion_results.data)
         return validated_data_ingestion_result, data_ingestion_results
     
 
-    def __data_interpolation(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, validated_merged_result: Series) -> tuple[Series]:
+    def __data_interpolation(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, validated_merged_result: Series) -> Series:
+        """ Handles the process of sending a series through data integrity  
+        :param seriesDescription: SeriesDescription - The semantic description of request
+        :param timeDescription: TimeDescription - The temporal description of the request
+        :returns Series
+            - interpolated results: Series - Results after the data integrity method processed it
+        """
         log(f'Init Interpolation...')
-        # If neither were valid then we attempt to interpolate, checking if we have permissions to do so inside the method
         integrityClass = data_integrity_factory(seriesDescription.dataIntegrityDescription.call)
         interpolation_results = integrityClass.exec(validated_merged_result)
-        interpolated_results = self.__generate_resulting_series(seriesDescription, timeDescription, interpolation_results.data)
+        interpolated_results = self.__validate_series(seriesDescription, timeDescription, interpolation_results.data)
     
         if (not interpolated_results.isComplete):
                 log('WARNING:: Series is not complete after interpolation!')
         return interpolated_results
 
 
-    def __generate_resulting_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, first: list[Input], second: list[Input] | None = None) -> Series: 
+    def __validate_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, first: list[Input], second: list[Input] | None = None) -> Series: 
+        """This function validates a set of results against a request. It will choose the correct validation method, send it to be validated and return a resulting series
+        containing information on if the series is complete, and if not, the reason why its not a complete series.
+        :param seriesDescription: SemaphoreSeriesDescription - The request description
+        :param timeDescription: TimeDescription - The description of the temporal information of the request 
+        :param first: list[Input] - A list of results to validate.
+        :param second: list[Input] - An optional list of results to merge then validate (NOTE::Likely should be DI results of both DB and DI are being provided)
+        :return a validated series: Series
+
+        """
+        # If there is a verification Override we handle that first and return before the rest of the logic
+        if seriesDescription.verificationOverride is not None:
+            return self.__validate_series_by_verification_override(seriesDescription, timeDescription, first, second)
+        else:
+            return self.__validate_series_by_timeslots(seriesDescription, timeDescription, first, second)
+           
+        
+    
+    def __validate_series_by_timeslots(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, first: list[Input], second: list[Input] | None = None) -> Series: 
         """This function validates a set of results against a request. It will generate a list of every expected time stamp and 
         attempt to match inputs to those timestamps. If two sets of results are provided it will merge them
         prioritizing results from from the second when they conflict with results from the first. The intended use is to provide
@@ -158,11 +180,6 @@ class SeriesProvider():
         :return a validated series: Series
 
         """
-        # If there is a verification Override we handle that first and return before the rest of the logic
-        if seriesDescription.verificationOverride != None:
-            return self.__validate_verification_override(seriesDescription, timeDescription, first, second)
-           
-        # Default logic
         missing_results = 0
         datetimeList = self.__generate_datetime_list(timeDescription) # A list with every time stamp we expect, with a value of none
         
@@ -172,7 +189,7 @@ class SeriesProvider():
         # Construct a dictionary for the first results
         first_results = { input.timeVerified : input for input in first}
 
-        if second != None:# If there are second results construct a dictionary for that too 
+        if second is not None:# If there are second results construct a dictionary for that too 
             second_results = { input.timeVerified : input for input in second}
         else: # If there aren't any we just make an empty dictionary
             second_results = {}
@@ -209,7 +226,8 @@ class SeriesProvider():
         result.data = list(datetimeDict.values())
         return result
     
-    def __validate_verification_override(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, first: list[Input], second: list[Input] | None = None) -> Series:
+    
+    def __validate_series_by_verification_override(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, first: list[Input], second: list[Input] | None = None) -> Series:
         """ There are times when we don't want a series to go through normal verification. A verification override can be used 
         to use a hard coded value and check a merged series against that value. 
             NOTE:: This method will always prefer the second series if it is provided! (Ex. New data from data ingestion should be used over old data from the database.)
@@ -219,8 +237,8 @@ class SeriesProvider():
         :param second: list[Input] - An optional list of results to merge then validate (NOTE::Likely should be DI results of both DB and DI are being provided)
         :return a validated series: Series
         """
-        first_valid = first != None and len(first) == seriesDescription.verificationOverride
-        second_valid = second != None and len(second) == seriesDescription.verificationOverride
+        first_valid = first is not None and len(first) == seriesDescription.verificationOverride
+        second_valid = second is not None and len(second) == seriesDescription.verificationOverride
 
         valid_list = None
         if second_valid: 
@@ -228,7 +246,7 @@ class SeriesProvider():
         elif first_valid:
             valid_list = first_valid
 
-        if valid_list != None:
+        if valid_list is not None:
             result = Series(
                 description= seriesDescription, 
                 isComplete= True,
