@@ -20,7 +20,6 @@ ERROR_RAISE - Actually will raise an exception for you to catch
 # 
 #
 #Input
-from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 

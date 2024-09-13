@@ -114,11 +114,11 @@ correct_three_hour_series_middle_changed = [
     (test_series_desc, three_hour_time_desc, correct_three_hour_series_missing_one, correct_three_hour_series_with_duplicate, True), # Missing one from DB, correct DI series w/ Duplicate
     (test_series_desc, three_hour_time_desc, correct_three_hour_series_middle_changed, correct_three_hour_series, True), # Both Series, DI has updated data
 ])
-def test__generate_resulting_series(seriesDescription, timeDescription, DBList, DIList, correctness):
+def test__validate_series(seriesDescription, timeDescription, DBList, DIList, correctness):
 
     # Call the generate resulting series method
     seriesProvider = SeriesProvider()
-    result = seriesProvider._SeriesProvider__generate_resulting_series(seriesDescription, timeDescription, DBList, DIList)
+    result = seriesProvider._SeriesProvider__validate_series(seriesDescription, timeDescription, DBList, DIList)
 
     # Test that the method is correctly validating if the series is correct or not
     assert result.isComplete == correctness
