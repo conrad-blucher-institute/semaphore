@@ -65,8 +65,8 @@ def test_post_process_data():
     test_result = result['fmm']
 
     # Iterate through the resulting components checking if they were calculated correctly
-    for a, a_test in zip(expected_result, test_result.data):
+    for actual, expected in zip(test_result.data, expected_result):
         tolerance = 1e-5
-        if not isclose(a, float(a_test.dataValue), abs_tol=tolerance):
+        if not isclose(float(actual.dataValue), expected, abs_tol=tolerance):
             assert False
     assert True

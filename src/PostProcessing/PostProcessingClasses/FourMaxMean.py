@@ -58,9 +58,9 @@ class FourMaxMean(IPostProcessing):
         mean_four_max_val = sum(four_highest) / 4.0
         
         # The four max mean operation changes none of the meta information
-        # TF we copy the first input from the in data and change the value 
+        # TF we copy the last input from the in data and change the value 
         # This is expected a List[Input]
-        mean_four_max: Input = deepcopy(IN_SERIES.data[0])
+        mean_four_max: Input = deepcopy(IN_SERIES.data[-1])
         mean_four_max.dataValue = str(mean_four_max_val)
         mean_four_max_list = [mean_four_max]
 
