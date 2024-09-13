@@ -1,12 +1,12 @@
 {
     "dspecVersion": "2.0",
     "modelName": "magnolia_transform_24",
-    "modelVersion": "2.0.0",
+    "modelVersion": "3.0.0",
     "author": "Jacob Alonzo",
     "modelFileName": "./Magnolia/24hr_leadtime_2ndANN",
     "timingInfo":{
         "active": true,
-        "offset": 1260,
+        "offset": 1320,
         "interval": 3600
     },
     "outputInfo": {
@@ -22,7 +22,7 @@
             "_name": "magnolia_24 output",
             "location": "EstMagnoliaBeach",
             "source": "SEMAPHORE",
-            "series": "magnolia_24|1.0.0|pSurge",
+            "series": "magnolia_24|2.0.0|pSurge",
             "unit": "meter",
             "interval": 3600,
             "range":  [19, 7],

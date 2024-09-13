@@ -1,12 +1,12 @@
 {
     "dspecVersion": "2.0",
     "modelName": "magnolia_transform_48",
-    "modelVersion": "2.0.1",
+    "modelVersion": "3.0.0",
     "author": "Jacob Alonzo",
     "modelFileName": "./Magnolia/48hr_leadtime_48HrsOfWind_2ndANN",
     "timingInfo":{
         "active": true,
-        "offset": 1260,
+        "offset": 1320,
         "interval": 3600
     },
     "outputInfo": {
@@ -22,7 +22,7 @@
             "_name": "magnolia_48 output",
             "location": "EstMagnoliaBeach",
             "source": "SEMAPHORE",
-            "series": "magnolia_48|1.0.0|pSurge",
+            "series": "magnolia_48|2.0.0|pSurge",
             "unit": "meter",
             "interval": 3600,
             "range":  [43, 31],

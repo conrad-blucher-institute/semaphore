@@ -1,7 +1,7 @@
 {
     "dspecVersion": "2.0",
     "modelName": "magnolia_48",
-    "modelVersion": "1.0.0",
+    "modelVersion": "2.0.0",
     "author": "Jacob Alonzo",
     "modelFileName": "./Magnolia/48hr_leadtime_48HrsOfWind_1stANN",
     "timingInfo":{
