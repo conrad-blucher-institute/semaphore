@@ -123,7 +123,7 @@ class SeriesProvider():
         if data_ingestion_results is None: return None, None # ingestion returns None if there was an error
 
         # If we actually got some data, that data should be new and we need to save it in the database.
-        if(data_ingestion_results.data):
+        if(data_ingestion_results.data and data_ingestion_results.description.dataSource != "SEMAPHORE"):
             inserted_series = self.seriesStorage.insert_input(data_ingestion_results)
             
             if(inserted_series is None or len(inserted_series.data) == 0): # A sanity check that the data is actually getting inserted!
