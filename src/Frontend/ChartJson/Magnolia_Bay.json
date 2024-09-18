@@ -1,0 +1,123 @@
+{
+    "chartName": "Magnolia Beach",
+    "chartCSV": "magnolia-beach",
+    "interval":3600,
+    "chartSeries": [
+        {
+            "legend":"Magnolia Bay Predictions",
+            "_name": "magnolia_12 output",
+            "location": "EstMagnoliaBeach",
+            "source": "SEMAPHORE",
+            "series": "magnolia_transform_12|2.0.0|pWl",
+            "unit": "meter",
+            "interval": 3600,
+            "range":  [12, 0],
+            "outKey": "MB_pWL_F12"
+        },
+        {
+            "legend":"Magnolia Bay Predictions",
+            "_name": "magnolia_24 output",
+            "location": "EstMagnoliaBeach",
+            "source": "SEMAPHORE",
+            "series": "magnolia_24|2.0.0|pWl",
+            "unit": "meter",
+            "interval": 3600,
+            "range":  [24, 13],
+            "outKey": "MB_pWL_F24"
+        },
+        {
+            "legend":"Magnolia Bay Predictions",
+            "_name": "magnolia_48 output",
+            "location": "EstMagnoliaBeach",
+            "source": "SEMAPHORE",
+            "series": "magnolia_48|2.0.0|pWl",
+            "unit": "meter",
+            "interval": 3600,
+            "range":  [48, 25],
+            "outKey": "MB_pWL_F48"
+            
+        },
+        {
+            "legend":"Magnolia Bay Water Level",
+            "_name": "Magnolia Beach Water Levels",
+            "location": "Magnolia Beach",
+            "source": "HOHONU",
+            "series": "pWl",
+            "unit": "feet",
+            "datum" : "D2W",
+            "interval": 3600,
+            "range": [120,0],
+            "outKey": "MB_WL_120"
+        }
+
+    ],
+    "postProcessCall": [
+        
+        {
+            "call": "FindMostRecentMeasurement",
+            "args": [
+                {
+                    "measurements_key": "MB_WL_120",
+                    "valid measurements_key": "valid_MB_WL_120"
+                }  
+
+             ]   
+        },
+        {
+            "call": "ConvertWaterLevelToSurge",
+            "args": [
+                {
+                    "predictions_key:": "MB_pWL_F12",
+                    "measurements_key": "MB_WL_120"
+                },
+                {
+                    "predictions_key:": "MB_pWL_F24",
+                    "measurements_key": "MB_WL_120"
+                },
+                {
+                    "predictions_key:": "MB_pWL_F48",
+                    "measurements_key": "MB_WL_120"
+                }
+
+             ]   
+        },
+        {
+            "call": "InterpolateBetweenMeasurementsAndPredictions",
+            "args": [
+                {
+                    "predictions_key:": "MB_pWL_F12",
+                    "measurements_key": "MB_WL_120"
+                },
+                {
+                    "predictions_key:": "MB_pWL_F24",
+                    "measurements_key": "MB_WL_120"
+                },
+                {
+                    "predictions_key:": "MB_pWL_F48",
+                    "measurements_key": "MB_WL_120"
+                }
+
+             ]   
+        },
+        {
+            "call": "ConvertSurgeToWaterLevel",
+            "args": [
+                {
+                    "predictions_key:": "MB_pWL_F12",
+                    "measurements_key": "MB_WL_120"
+                },
+                {
+                    "predictions_key:": "MB_pWL_F24",
+                    "measurements_key": "MB_WL_120"
+                },
+                {
+                    "predictions_key:": "MB_pWL_F48",
+                    "measurements_key": "MB_WL_120"
+                }   
+
+             ]   
+        }
+        
+    ]
+
+}
