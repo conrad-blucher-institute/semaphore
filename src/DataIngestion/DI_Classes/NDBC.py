@@ -19,6 +19,7 @@ import re
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
+from utility import log
 
 class NDBC(IDataIngestion):
 
@@ -154,11 +155,19 @@ class NDBC(IDataIngestion):
         # We expoct the lower method __get_NDBC to save the data in ingests into the database. Then we use that data
         # to compute the four max mean. The issue is the seriesDescription is loaded with the series name as 4mm_XXX
         # and we dont want the lower method to store its data into the db under that name. That would be false.
-        #Thus the lines below switch the name in the seriesDescription, then switch it back after the lower method has run
+        # Thus the lines below switch the name in the seriesDescription, then switch it back after the lower method has run
 
         four_max_series_name = seriesDescription.dataSeries # save old name
         seriesDescription.dataSeries = self.fourMaxMeanConversionDict[seriesDescription.dataSeries] # query the NDBC name
         full_series_inputs = self.__get_NDBC(seriesDescription, timeDescription).data # request the data
+
+        if not full_series_inputs:  # check that data has been provided
+            log(f"Warning: NDBC returned no data! Possibly an NDBC outage.")
+            # Noted here as likely being an outage because semaphore has only
+            # experienced issues with NDBC for limited periods of time
+            # leading us to believe the issue is on NDBC's side.
+            return None
+        
         seriesDescription.dataSeries = four_max_series_name # switch the name back
 
         # We convert the data from strings to float, sort it, take the four highest, and take their mean
