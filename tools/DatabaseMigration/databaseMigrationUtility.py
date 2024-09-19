@@ -13,6 +13,7 @@
 #Imports
 from enum import Enum
 from sqlalchemy import Engine, MetaData, delete
+from sqlalchemy.sql import text
 
 class KeywordType(Enum):
     """A class to enumerate the different keyword types. 
@@ -144,10 +145,11 @@ class DatabaseUsersHelper():
         metadata = MetaData()
         metadata.reflect(bind=databaseEngine)
         self.__metadata = metadata
+        self.database_name = "semaphore-core?"
 
-    def create_admin_user_and_set_permissions(engine, user, password, database_name):
+    def create_admin_user_and_set_permissions(self, user, password):
         """Creates a database user with superuser privileges and sets permissions."""
-        with engine.connect() as conn:
+        with self.__engine.connect() as conn:
             # Create a new user with superuser privileges
             conn.execute(text(f"CREATE ROLE {user} WITH LOGIN SUPERUSER PASSWORD '{password}';"))
             # Grant connect on the database to the new user
@@ -158,9 +160,9 @@ class DatabaseUsersHelper():
             conn.execute(text(f"GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO {user};"))
             conn.commit()
 
-    def create_civ_user_and_set_permissions(engine, user, password, database_name):
+    def create_civ_user_and_set_permissions(self, user, password):
         """Creates a database user with read only permissions."""
-        with engine.connect() as conn:
+        with self.__engine.connect() as conn:
             # Create a new user
             conn.execute(text(f"CREATE USER {user} WITH PASSWORD '{password}';"))
             # Grant connect on the database to the new user
@@ -170,72 +172,3 @@ class DatabaseUsersHelper():
             # Grant SELECT permissions on all sequences in public schema to the new user
             conn.execute(text(f"GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO {user};"))
             conn.commit()
-
-    def __delete_dependant_rows(self, keyword: str, tableName: str, columnName: str):
-        """ A function to delete dependant rows according to the passed keyword, tableName, and columnName. 
-            :param: keyword - str - The foreign key we want to delete.
-            :param: tableName - str - The name of the table we want to delete from.
-            :param: columnName - str - The name of the colum that the keyword is in. 
-        """
-        # In dataLocation_dataSource_mapping table the column names are different from the columns in the other tables
-        processedColumnName = columnName if tableName != "dataLocation_dataSource_mapping" else f'{columnName}Code'
-        
-        # Connect to the database and delete 
-        with self.__engine.connect() as conn:
-
-            # Reflect the table we want to delete from
-            table = self.__metadata.tables[tableName]
-            
-            # Now delete the dependent data rows
-            delete_stmt = delete(table).where(table.c[processedColumnName] == keyword).returning(table)
-            cursor = conn.execute(delete_stmt)
-            result = cursor.fetchall()  
-            conn.commit()
-
-        # Write deleted data to file
-        self.__deletion_data_dump(result)
-
-    def __delete_reference_row(self, keyword: str, tableName: str):
-        """ A function to delete reference rows according to the passed keyword and tableName. 
-            :param: keyword - str - The foreign key we want to delete.
-            :param: tableName - str - The name of the table we want to delete from.
-        """
-        # Connect to the database and delete reference row
-        with self.__engine.connect() as conn:
-
-            # Reflect the table we want to delete from
-            table = self.__metadata.tables[tableName]
-            
-            # Now delete the reference data rows
-            delete_stmt = delete(table).where(table.c.code == keyword).returning(table)
-            cursor = conn.execute(delete_stmt)
-            result = cursor.fetchall()  
-            conn.commit()
-
-        # Write deleted data to file
-        self.__deletion_data_dump(result)
-
-    def __deletion_data_dump(self, result: any): 
-        """ A function to write deleted database information to a file for safekeeping. 
-            :param: result - any - The information we want to keep.
-        """
-        with open("deletion_dump.txt", "a") as file:
-            for line in result:
-                file.write(str(line)+"\n")
-
-    def deep_delete_keyword(self, keyword: str, keywordType: KeywordType):
-        """ A function to delete foreign keys from the database that 
-            potentially have dependent data in the primary tables. 
-            :param: keyword - str - The foreign key we want to delete.
-            :param: keywordType - KeywordType - The enumerator of the type of foreign key that the keyword is.
-        """
-
-        # Depending on keyword type get dictionary information
-        keywordInfo = KEYWORD_DEPENDENT_TABLES[keywordType]
-
-        # Delete keyword from dependent tables
-        for tableName in keywordInfo["primaries"]:
-            self.__delete_dependant_rows(keyword, tableName, keywordInfo["column_name"])
-
-        # Delete keyword from reference table
-        self.__delete_reference_row(keyword, keywordInfo["reference"])
