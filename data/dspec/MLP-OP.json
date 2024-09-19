@@ -1,8 +1,9 @@
 {
+    "dspecVersion": "2.0",
     "modelName": "MLP-OP",
     "modelVersion": "2.0.0",
     "author": "Christian Duff",
-    "modelFileName": "MLP-OP",
+    "modelFileName": "./MLP-OP",
     "timingInfo":{
         "active": true,
         "offset": 600,
@@ -16,16 +17,16 @@
         "location": "SouthBirdIsland",
         "unit" : "celsius"
     },
-    "inputs": [
+    "dependentSeries": [
         { 
             "_name": "Water Temp",
             "location": "NPSBI",
             "source": "LIGHTHOUSE",
             "series": "dWaterTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [0, -23]
+            "range": [0, -23],
+            "outKey": "NPSBI_DWT_24"
         },
         { 
             "_name": "Air Temp",
@@ -33,9 +34,9 @@
             "source": "LIGHTHOUSE",
             "series": "dAirTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [0, -23]
+            "range": [0, -23],
+            "outKey": "PACK_DAT_24"
         },
         { 
             "_name": "Air Temp",
@@ -43,9 +44,24 @@
             "source": "NDFD_EXP",
             "series": "pAirTemp",
             "unit": "celsius",
-            "type": "float",
             "interval": 10800,
-            "range": [16, 1]
+            "range": [16, 1],
+            "outKey": "SBI_PAT_16"
         }
-
-]}
+    ],
+    "postProcessCall": [],
+    "vectorOrder": [
+        {
+            "key": "NPSBI_DWT_24",
+            "dType": "float"
+        },
+        {
+            "key": "PACK_DAT_24",
+            "dType": "float"
+        },
+        {
+            "key": "SBI_PAT_16",
+            "dType": "float"
+        }
+    ]
+}
