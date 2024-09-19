@@ -25,28 +25,35 @@ class NDBC(IDataIngestion):
     def __init__(self):
         self.seriesStorage = series_storage_factory()
         self.unitConversionDict = {
-                                    'm' : 'meter',
-                                    'degT' : 'celsius',
-                                    'sec' : 'seconds',
-                                    'm/s': 'mps'
-                                }
+            'm' : 'meter',
+            'degT' : 'celsius',
+            'sec' : 'seconds',
+            'm/s': 'mps'
+        }
+        self.NDBC_SeriesDict = {
+            'WVHT' : 'WVHT',
+            'DPD' : 'DPD',
+            'APD' : 'APD'
+        }
         self.fourMaxMeanConversionDict = {
-                                    'd_48h_4mm_WVHT' : 'WVHT',
-                                    'd_24h_4mm_WVHT' : 'WVHT',
-                                    'd_12h_4mm_WVHT' : 'WVHT',
-                                    'd_48h_4mm_DPD' : 'DPD',
-                                    'd_24h_4mm_DPD' : 'DPD',
-                                    'd_12h_4mm_DPD' : 'DPD',
-                                    'd_48h_4mm_APD' : 'APD',
-                                    'd_24h_4mm_APD' : 'APD',
-                                    'd_12h_4mm_APD' : 'APD'
-                                }
+            'd_48h_4mm_WVHT' : 'WVHT',
+            'd_24h_4mm_WVHT' : 'WVHT',
+            'd_12h_4mm_WVHT' : 'WVHT',
+            'd_48h_4mm_DPD' : 'DPD',
+            'd_24h_4mm_DPD' : 'DPD',
+            'd_12h_4mm_DPD' : 'DPD',
+            'd_48h_4mm_APD' : 'APD',
+            'd_24h_4mm_APD' : 'APD',
+            'd_12h_4mm_APD' : 'APD'
+        }
 
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
         
+        if seriesDescription.dataSeries in self.NDBC_SeriesDict.keys():
+            return self.__get_NDBC(seriesDescription, timeDescription)
         # Detects if this is a regular NDBC series or the engineered feature  
-        if seriesDescription.dataSeries in self.fourMaxMeanConversionDict.keys():
+        elif seriesDescription.dataSeries in self.fourMaxMeanConversionDict.keys():
             return self.__get_mean_four_max(seriesDescription, timeDescription)
         else: 
             raise NotImplementedError(f'NDBC has not implemented request: {seriesDescription}')
