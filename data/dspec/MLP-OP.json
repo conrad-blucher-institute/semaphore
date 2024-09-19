@@ -3,7 +3,7 @@
     "modelName": "MLP-OP",
     "modelVersion": "2.0.0",
     "author": "Christian Duff",
-    "modelFileName": "MLP-OP",
+    "modelFileName": "./MLP-OP",
     "timingInfo":{
         "active": true,
         "offset": 600,
@@ -26,7 +26,7 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [0, -23],
-            "outKey": "NPSBI_DWL_24"
+            "outKey": "NPSBI_DWT_24"
         },
         { 
             "_name": "Air Temp",
@@ -52,7 +52,7 @@
     "postProcessCall": [],
     "vectorOrder": [
         {
-            "key": "NPSBI_DWL_24",
+            "key": "NPSBI_DWT_24",
             "dType": "float"
         },
         {
