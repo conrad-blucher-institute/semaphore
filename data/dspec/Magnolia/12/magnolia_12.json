@@ -1,7 +1,7 @@
 {
     "dspecVersion": "2.0",
     "modelName": "magnolia_12",
-    "modelVersion": "2.0.0",
+    "modelVersion": "1.0.0",
     "author": "Jacob Alonzo",
     "modelFileName": "./Magnolia/12hr_leadtime_1stANN",
     "timingInfo":{
@@ -46,7 +46,7 @@
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
-            "range": [0, -24], 
+            "range": [0, -24],
             "outKey": "POC_PWL_25"
         },
         { 
