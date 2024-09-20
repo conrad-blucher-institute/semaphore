@@ -19,7 +19,7 @@ from sqlalchemy.dialects.postgresql import insert
 import csv
 
 #Constants
-CSV_FILE_PATHS = './tools/DatabaseMigration/2_7/init_data'
+CSV_FILE_PATHS = './tools/DatabaseMigration/2_5/init_data'
 
 
 class Migrator(IDatabaseMigration):
@@ -93,7 +93,7 @@ class Migrator(IDatabaseMigration):
         helper = DatabaseDeletionHelper(databaseEngine)
 
         for file, type in zip(fileNames, fileTypes):
-            for rowDict in self.readInitCSV(file):
+            for rowDict in self.__readInitCSV(file):
                 helper.deep_delete_keyword(rowDict["code"], type)
 
         return True
