@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-#2_7_DatabaseMigration.py
+#2_5_DatabaseMigration.py
 #----------------------------------
 # Created By: Matthew Kastl
 # Created Date:9/19/2024
 # Version 1.0
 #----------------------------------
 """This is a database migration script that will update to version
-    2.7 of the database. The intended change is add series for NDBC
+    2.5 of the database. The intended change is add series for NDBC
  """ 
 #----------------------------------
 # 
@@ -25,7 +25,7 @@ CSV_FILE_PATHS = './tools/DatabaseMigration/2_7/init_data'
 class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
-        """This function updates the database to version 2.7 which update Series descriptions
+        """This function updates the database to version 2.5 which update Series descriptions
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
@@ -78,7 +78,7 @@ class Migrator(IDatabaseMigration):
 
     def rollback(self, databaseEngine: Engine) -> bool:
         """This function rolls the database back to version 2.6 which involves removing the changes 
-           associated with version 2.7.
+           associated with version 2.5.
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
