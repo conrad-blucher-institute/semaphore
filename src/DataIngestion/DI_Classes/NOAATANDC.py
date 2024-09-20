@@ -45,6 +45,8 @@ class NOAATANDC(IDataIngestion):
         match seriesDescription.dataSeries:
             case 'dWl':
                 return self.__fetch_dWl(seriesDescription, timeDescription)
+            case 'pWl':
+                return self.__fetch_pWl(seriesDescription, timeDescription)
             case 'd_48h_4mm_wl'|'d_24h_4mm_wl'|'d_12h_4mm_wl':
                 return self.__fetch_4_max_mean_dWl(seriesDescription, timeDescription)
             case 'dSurge':
@@ -115,6 +117,37 @@ class NOAATANDC(IDataIngestion):
     def __fetch_dWl(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
 
         data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'water_level')
+        if data is None: return None
+
+        inputs = []
+        for idx in data.index:
+
+            # parse
+            dt = idx.to_pydatetime()
+            value = data['v'][idx]
+
+            # If value is not on interval we ignore it
+            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
+                continue
+
+            dataPoints = Input(
+                dataValue= value,
+                dataUnit= 'meter',
+                timeVerified= dt,
+                timeGenerated= dt, 
+                longitude= lat_lon[1],
+                latitude= lat_lon[0]
+            )
+            inputs.append(dataPoints)
+
+        series = Series(seriesDescription, True, timeDescription)
+        series.data = inputs
+
+        return series
+    
+    def __fetch_pWl(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
+
+        data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'predictions')
         if data is None: return None
 
         inputs = []

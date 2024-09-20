@@ -18,147 +18,209 @@
         "unit" : "meter"
     },
     "dependentSeries": [
-    { 
-        "_name": "surge_now",
-        "location": "Aransas",
-        "source": "NOAATANDC",
-        "series": "dSurge",
-        "unit": "meter",
-        "datum": "NAVD",
-        "type": "float",
-        "interval": 3600,
-        "range": [0, 0],
-        "outKey": "AR_Surge_1"
-    },
-    {
-        "_name": "now_X_wind_component",
-        "location": "Aransas",
-        "source": "NOAATANDC",
-        "series": "dXWnCmp000D",
-        "unit": "mps",
-        "type": "float",
-        "interval": 3600,
-        "range": [0, 0],
-        "outKey": "x_AR_WNDCMP_1"
-    },
-    {
-        "_name": "now_Y_wind_component",
-        "location": "Aransas",
-        "source": "NOAATANDC",
-        "series": "dYWnCmp000D",
-        "unit": "mps",
-        "type": "float",
-        "interval": 3600,
-        "range": [0, 0],
-        "outKey": "y_AR_WNDCMP_1"
-    },
-    {
-        "_name": "surge",
-        "location": "Aransas",
-        "source": "NOAATANDC",
-        "series": "dSurge",
-        "unit": "meter",
-        "datum": "NAVD",
-        "type": "float",
-        "interval": 3600,
-        "range": [-1, -6],
-        "outKey": "AR_Surge_7"
-    },
-    {
-        "_name": "past_X_wind_component",
-        "location": "Aransas",
-        "source": "NOAATANDC",
-        "series": "dXWnCmp000D",
-        "unit": "mps",
-        "type": "float",
-        "interval": 3600,
-        "range": [-1, -6],
-        "outKey": "x_AR_WNDCMP_P7"
-    },
-    {
-        "_name": "past_Y_wind_component",
-        "location": "Aransas",
-        "source": "NOAATANDC",
-        "series": "dYWnCmp000D",
-        "unit": "mps",
-        "type": "float",
-        "interval": 3600,
-        "range": [-1, -6],
-        "outKey": "y_AR_WNDCMP_P7"
-    },
-    {
-        "_name": "future_X_wind_component",
-        "location": "Aransas",
-        "source": "NDFD_EXP",
-        "series": "pXWnCmp000D",
-        "unit": "mps",
-        "type": "float",
-        "interval": 3600,
-        "range": [72, 1],
-        "outKey": "x_AR_WNDCMP_F73",
-        "dataIntegrityCall": {
+        { 
+            "_name": "for surge now actuals",
+            "location": "Aransas",
+            "source": "NOAATANDC",
+            "series": "dWl",
+            "unit": "meter",
+            "datum": "NAVD",
+            "interval": 3600,
+            "range": [0, 0],
+            "outKey": "DWL_NOW_1"
+        },
+        { 
+            "_name": "for surge now predictions",
+            "location": "Aransas",
+            "source": "NOAATANDC",
+            "series": "pWl",
+            "unit": "meter",
+            "datum": "NAVD",
+            "interval": 3600,
+            "range": [0, 0],
+            "outKey": "PWL_NOW_1"
+        },
+        { 
+            "_name": "for surge past actuals",
+            "location": "Aransas",
+            "source": "NOAATANDC",
+            "series": "dWl",
+            "unit": "meter",
+            "datum": "NAVD",
+            "interval": 3600,
+            "range": [-1, -6],
+            "outKey": "DWL_PAST_6"
+        },
+        { 
+            "_name": "for surge past predictions",
+            "location": "Aransas",
+            "source": "NOAATANDC",
+            "series": "pWl",
+            "unit": "meter",
+            "datum": "NAVD",
+            "interval": 3600,
+            "range": [-1, -6],
+            "outKey": "PWL_PAST_6"
+        },
+        {
+            "_name": "wind speed now",
+            "location": "Aransas",
+            "source": "NOAATANDC",
+            "series": "dWnSpd",
+            "unit": "mps",
+            "interval": 3600,
+            "range": [0, 0],
+            "outKey": "WSPD_NOW_1"
+        },
+        {
+            "_name": "wind direction now",
+            "location": "Aransas",
+            "source": "NOAATANDC",
+            "series": "dWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [0, 0],
+            "outKey": "WDIR_NOW_1"
+        },
+        {
+            "_name": "wind speed past",
+            "location": "Aransas",
+            "source": "NOAATANDC",
+            "series": "dWnSpd",
+            "unit": "mps",
+            "interval": 3600,
+            "range": [-1, -6],
+            "outKey": "WSPD_PAST_6"
+        },
+        {
+            "_name": "wind direction past",
+            "location": "Aransas",
+            "source": "NOAATANDC",
+            "series": "dWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [-1, -6],
+            "outKey": "WDIR_PAST_6"
+        },
+        {
+            "_name": "wind speed future",
+            "location": "Aransas",
+            "source": "NDFD_EXP",
+            "series": "pWnSpd",
+            "unit": "mps",
+            "interval": 3600,
+            "range": [72, 1],
+            "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
                     "limit":"36000",
                     "method":"linear",
                     "limit_area":"inside"    
                 }
-            }
-    },
-    {
-        "_name": "future_Y_wind_component",
-        "location": "Aransas",
-        "source": "NDFD_EXP",
-        "series": "pYWnCmp000D",
-        "unit": "mps",
-        "type": "float",
-        "interval": 3600,
-        "range": [72, 1],
-        "outKey": "y_AR_WNDCMP_F73",
-        "dataIntegrityCall": {
+            },
+            "outKey": "WSPD_FUTR_72"
+        },
+        {
+            "_name": "wind direction future",
+            "location": "Aransas",
+            "source": "NDFD_EXP",
+            "series": "pWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [72, 1],
+            "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
-                    "limit": "36000",
+                    "limit":"36000",
                     "method":"linear",
                     "limit_area":"inside"    
                 }
+            },
+            "outKey": "WDIR_FUTR_72"
+        }
+    ],
+    "postProcessCall": [
+        {
+            "call": "ResolveVectorComponents",
+            "args": {
+                "offset": 0,
+                "targetMagnitude_inKey":"WSPD_NOW_1",
+                "targetDirection_inKey":"WDIR_NOW_1",
+                "x_comp_outKey": "x_DWNDCMP_NOW_1", 
+                "y_comp_outKey": "y_DWNDCMP_NOW_1"      
             }
-    }
-],
-"postProcessCall": [],
-"vectorOrder": [
-    {
-        "key": "AR_Surge_1",
-        "dType": "float"
-    },
-    {
-        "key": "x_AR_WNDCMP_1",
-        "dType": "float"
-    },
-    {
-        "key": "y_AR_WNDCMP_1",
-        "dType": "float"
-    },
-    {
-        "key": "AR_Surge_7",
-        "dType": "float"
-    },
-    {
-        "key": "x_AR_WNDCMP_P7",
-        "dType": "float"
-    },
-    {
-        "key": "y_AR_WNDCMP_P7",
-        "dType": "float"
-    },
-    {
-        "key": "x_AR_WNDCMP_F73",
-        "dType": "float"
-    },
-    {
-        "key": "y_AR_WNDCMP_F73",
-        "dType": "float"
-    }
-]
-
+        },
+        {
+            "call": "ResolveVectorComponents",
+            "args": {
+                "offset": 0,
+                "targetMagnitude_inKey":"WSPD_PAST_6",
+                "targetDirection_inKey":"WDIR_PAST_6",
+                "x_comp_outKey": "x_DWNDCMP_PAST_6", 
+                "y_comp_outKey": "y_DWNDCMP_PAST_6"      
+            }
+        },
+        {
+            "call": "ResolveVectorComponents",
+            "args": {
+                "offset": 0,
+                "targetMagnitude_inKey":"WSPD_FUTR_72",
+                "targetDirection_inKey":"WDIR_FUTR_72",
+                "x_comp_outKey": "x_DWNDCMP_FUTR_72", 
+                "y_comp_outKey": "y_DWNDCMP_FUTR_72"      
+            }
+        },
+        {
+            "call": "ArithmeticOperation",
+            "args": {
+                "op": "subtraction",
+                "targetFirst_inKey": "DWL_NOW_1",
+                "targetSecond_inKey": "PWL_NOW_1",
+                "outkey": "SURGE_NOW_1"    
+            }
+        },
+        {
+            "call": "ArithmeticOperation",
+            "args": {
+                "op": "subtraction",
+                "targetFirst_inKey": "DWL_PAST_6",
+                "targetSecond_inKey": "PWL_PAST_6",
+                "outkey": "SURGE_PAST_6"    
+            }
+        }
+    ],
+    "vectorOrder": [
+        {
+            "key": "SURGE_NOW_1",
+            "dType": "float"
+        },
+        {
+            "key": "x_DWNDCMP_NOW_1",
+            "dType": "float"
+        },
+        {
+            "key": "y_DWNDCMP_NOW_1",
+            "dType": "float"
+        },
+        {
+            "key": "SURGE_PAST_6",
+            "dType": "float"
+        },
+        {
+            "key": "x_DWNDCMP_PAST_6",
+            "dType": "float"
+        },
+        {
+            "key": "y_DWNDCMP_PAST_6",
+            "dType": "float"
+        },
+        {
+            "key": "x_DWNDCMP_FUTR_72",
+            "dType": "float"
+        },
+        {
+            "key": "y_DWNDCMP_FUTR_72",
+            "dType": "float"
+        }
+    ]
 }
