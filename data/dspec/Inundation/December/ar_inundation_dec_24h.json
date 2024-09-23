@@ -67,6 +67,7 @@
             "call": "FourMaxMean",
             "args": {
                 "target_inKey": "DPD_24",
+                "warning_trigger": "40",
                 "outkey": "fmm_DPD_1" 
                      
             }
@@ -75,6 +76,7 @@
             "call": "FourMaxMean",
             "args": {
                 "target_inKey": "APD_24",
+                "warning_trigger": "40",
                 "outkey": "fmm_APD_1" 
                      
             }
@@ -83,6 +85,7 @@
             "call": "FourMaxMean",
             "args": {
                 "target_inKey": "WVHT_24",
+                "warning_trigger": "40",
                 "outkey": "fmm_WVHT_1" 
                      
             }
@@ -91,6 +94,7 @@
             "call": "FourMaxMean",
             "args": {
                 "target_inKey": "dWl_24",
+                "warning_trigger": "23",
                 "outkey": "fmm_dWl_1" 
                      
             }
@@ -114,4 +118,5 @@
             "dType": "float"
         }
     ]
+    
 }

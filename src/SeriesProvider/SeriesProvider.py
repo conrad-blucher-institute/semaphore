@@ -212,7 +212,7 @@ class SeriesProvider():
         reason_string = ''
         if missing_results > 0:
             isComplete = False
-            reason_string = f'There were {missing_results} missing results!'
+            reason_string = f'There were {missing_results} missing results! {len(second_results.keys())}'
 
             # If a result was missing, an input was not mapped to that key. Thus its mapped to None. We remove the whole k:v pair as to not pollute the results with None.
             datetimeDict = {k : v for k, v in datetimeDict.items() if v is not None}
