@@ -6,17 +6,18 @@
 # Version 1.0
 #----------------------------------
 """This is a database migration script that will update to version
-    2.6 of the database. The intended change is adding user accounts
-    for the API, Semaphore-Core, and Semaphore team members. 
+    2.6 of the database. The intended change is adding three user accounts
+    one for the API, one for Semaphore-Core, and one for Semaphore team members. 
  """ 
 #----------------------------------
 # 
 #
 #Imports
 from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
-from DatabaseMigration.databaseMigrationUtility import KeywordType, DatabaseDeletionHelper, DatabaseUsersHelper
+from DatabaseMigration.databaseMigrationUtility import KeywordType, DatabaseDeletionHelper
 from sqlalchemy import Engine, MetaData, Table, delete, select, update
 from sqlalchemy.dialects.postgresql import insert 
+from sqlalchemy.sql import text
 import csv
 
 #Constants
@@ -26,7 +27,8 @@ CSV_FILE_PATHS = './tools/DatabaseMigration/2_6/init_data'
 class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
-        """This function updates the database to version 2.6 which adds user accounts.
+        """ This function updates the database to version 2.6 which adds user accounts
+            for the API, Semaphore-Core, and the CBI team.
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
@@ -34,36 +36,11 @@ class Migrator(IDatabaseMigration):
         # Setting engine
         self.__engine = databaseEngine
 
-        # Reflect the tables from the database that we want to add data too
-        metadata = MetaData()
-        metadata.reflect(bind=databaseEngine)
+        # Create and Set Users
+
+        # Check that Users are there 
         
-        ref_dataSeries = metadata.tables['ref_dataSeries']
-
-        # Read in the data based off of csv files
-        new_data = self.__readInitCSV('newRows.csv')
-        old_data = self.__readInitCSV('oldRows.csv')
-
-        results = self.__update_ref_data(old_data, new_data, ref_dataSeries)
-
-        return True if len(results) == 3 else False
-    
-
-    def __readInitCSV(self, csvFileName: str) -> list:
-        """This function reads in a CSV file with the data needed for the initialization 
-            of the database.
-
-            :param csvFileName: str - CSV file name
-            :return: list of dictionaries
-        """
-        csvFilePath = f'{CSV_FILE_PATHS}/{csvFileName}'
-        dictionaryList = []
-        with open(csvFilePath, mode = 'r') as infile:
-            csvDict = csv.DictReader(infile)
-            for dictionary in csvDict:
-                dictionaryList.append(dictionary)
-
-        return dictionaryList
+        # Return True if all users are there
     
 
     def rollback(self, databaseEngine: Engine) -> bool:
@@ -75,16 +52,66 @@ class Migrator(IDatabaseMigration):
         # Setting engine
         self.__engine = databaseEngine
 
-        # Reflect the tables from the database that we want to add data too
-        metadata = MetaData()
-        metadata.reflect(bind=databaseEngine)
+        # Check that Users are there 
         
-        ref_dataSeries = metadata.tables['ref_dataSeries']
+        # Remove Users
 
-        # Read in the data based off of csv files, but we swap old to new and new to old as this is a rollback
-        old_data = self.__readInitCSV('newRows.csv')
-        new_data = self.__readInitCSV('oldRows.csv')
+        # Check that Users are gone
 
-        results = self.__update_ref_data(old_data, new_data, ref_dataSeries)
+        # Return True
+    
 
-        return True if len(results) == 3 else False
+    def create_admin_user(self, user, password):
+        """Creates a database user with superuser privileges and sets permissions."""
+        with self.__engine.connect() as conn:
+            # Create a new user with superuser privileges
+            conn.execute(text(f"CREATE ROLE {user} WITH LOGIN SUPERUSER PASSWORD '{password}';"))
+            # Grant connect on the database to the new user
+            conn.execute(text(f"GRANT CONNECT ON DATABASE {database_name} TO {user};"))
+            # Grant all permissions on all tables in schema public to the new user
+            conn.execute(text(f"GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO {user};"))
+            # Grant all permissions on all sequences in public schema to the new user
+            conn.execute(text(f"GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO {user};"))
+            conn.commit()
+
+
+    def create_general_user(self, user, password):
+        """Creates a database user with read only permissions."""
+        with self.__engine.connect() as conn:
+            # Create a new user
+            conn.execute(text(f"CREATE USER {user} WITH PASSWORD '{password}';"))
+            # Grant connect on the database to the new user
+            conn.execute(text(f"GRANT CONNECT ON DATABASE {database_name} TO {user};"))
+            # Grant SELECT permissions on all tables in schema public to the new user
+            conn.execute(text(f"GRANT SELECT ON ALL TABLES IN SCHEMA public TO {user};"))
+            # Grant SELECT permissions on all sequences in public schema to the new user
+            conn.execute(text(f"GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO {user};"))
+            conn.commit()
+
+
+    def create_core_user(self, user, password):
+        """Creates a database user with read only permissions."""
+        with self.__engine.connect() as conn:
+            # Create a new user
+            conn.execute(text(f"CREATE USER {user} WITH PASSWORD '{password}';"))
+            # Grant connect on the database to the new user
+            conn.execute(text(f"GRANT CONNECT ON DATABASE {database_name} TO {user};"))
+            # Grant SELECT permissions on all tables in schema public to the new user
+            conn.execute(text(f"GRANT SELECT ON ALL TABLES IN SCHEMA public TO {user};"))
+            # Grant SELECT permissions on all sequences in public schema to the new user
+            conn.execute(text(f"GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO {user};"))
+            conn.commit()
+
+
+    def create_api_user(self, user, password):
+        """Creates a database user with superuser privileges and sets permissions."""
+        with self.__engine.connect() as conn:
+            # Create a new user with superuser privileges
+            conn.execute(text(f"CREATE ROLE {user} WITH LOGIN SUPERUSER PASSWORD '{password}';"))
+            # Grant connect on the database to the new user
+            conn.execute(text(f"GRANT CONNECT ON DATABASE {database_name} TO {user};"))
+            # Grant all permissions on all tables in schema public to the new user
+            conn.execute(text(f"GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO {user};"))
+            # Grant all permissions on all sequences in public schema to the new user
+            conn.execute(text(f"GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO {user};"))
+            conn.commit()

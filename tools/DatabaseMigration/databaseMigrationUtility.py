@@ -13,7 +13,6 @@
 #Imports
 from enum import Enum
 from sqlalchemy import Engine, MetaData, delete
-from sqlalchemy.sql import text
 
 class KeywordType(Enum):
     """A class to enumerate the different keyword types. 
@@ -132,43 +131,3 @@ class DatabaseDeletionHelper():
 
         # Delete keyword from reference table
         self.__delete_reference_row(keyword, keywordInfo["reference"])
-
-
-class DatabaseUsersHelper():
-    """ A class with helper functions to add different types of users
-        to the database. 
-        :param dataEngine - Engine - The database we are working with.
-    """
-
-    def __init__(self, databaseEngine: Engine):
-        self.__engine = databaseEngine
-        metadata = MetaData()
-        metadata.reflect(bind=databaseEngine)
-        self.__metadata = metadata
-        self.database_name = "semaphore-core?"
-
-    def create_admin_user_and_set_permissions(self, user, password):
-        """Creates a database user with superuser privileges and sets permissions."""
-        with self.__engine.connect() as conn:
-            # Create a new user with superuser privileges
-            conn.execute(text(f"CREATE ROLE {user} WITH LOGIN SUPERUSER PASSWORD '{password}';"))
-            # Grant connect on the database to the new user
-            conn.execute(text(f"GRANT CONNECT ON DATABASE {database_name} TO {user};"))
-            # Grant all permissions on all tables in schema public to the new user
-            conn.execute(text(f"GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO {user};"))
-            # Grant all permissions on all sequences in public schema to the new user
-            conn.execute(text(f"GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO {user};"))
-            conn.commit()
-
-    def create_civ_user_and_set_permissions(self, user, password):
-        """Creates a database user with read only permissions."""
-        with self.__engine.connect() as conn:
-            # Create a new user
-            conn.execute(text(f"CREATE USER {user} WITH PASSWORD '{password}';"))
-            # Grant connect on the database to the new user
-            conn.execute(text(f"GRANT CONNECT ON DATABASE {database_name} TO {user};"))
-            # Grant SELECT permissions on all tables in schema public to the new user
-            conn.execute(text(f"GRANT SELECT ON ALL TABLES IN SCHEMA public TO {user};"))
-            # Grant SELECT permissions on all sequences in public schema to the new user
-            conn.execute(text(f"GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO {user};"))
-            conn.commit()
