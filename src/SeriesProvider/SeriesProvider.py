@@ -243,9 +243,9 @@ class SeriesProvider():
         
         match LABEL:
             case 'equals':
-                validator = lambda inputs, value: inputs is not None and len(inputs) == value
+                validator = lambda inputs, value: inputs is not None and len(inputs) == int(value)
             case 'graterThanOrEqual':
-                validator = lambda inputs, value: inputs is not None and len(inputs) >= value
+                validator = lambda inputs, value: inputs is not None and len(inputs) >= int(value)
             case _:
                 log(f'Warning:: No matching validator for verification override label: {LABEL}')
 

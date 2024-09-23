@@ -53,6 +53,7 @@ def test_post_process_data():
     ppc.call = 'FourMaxMean'
     ppc.args = {
                 "target_inKey": "data",
+                "warning_trigger": "0",
                 "outkey": "fmm" 
                      
             }
