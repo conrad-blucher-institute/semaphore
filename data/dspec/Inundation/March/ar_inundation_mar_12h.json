@@ -25,6 +25,7 @@
             "unit": "seconds",
             "interval": 3600,
             "range": [0, -11],
+            "verificationOverride": 21,
             "outKey": "DPD_12"
         },
         { 
@@ -35,6 +36,7 @@
             "unit": "seconds",
             "interval": 3600,
             "range": [0, -11],
+            "verificationOverride": 21,
             "outKey": "APD_12"
         },
         { 
@@ -45,6 +47,7 @@
             "unit": "meter",
             "interval": 3600,
             "range": [0, -11],
+            "verificationOverride": 21,
             "outKey": "WVHT_12"
         },
         { 

@@ -123,10 +123,11 @@ class NDBC(IDataIngestion):
         :param timeDescription: TimeDescription - A data TimeDescription object with the information to pull 
         :param Series | None: A series containing the imported data or none if something went wrong
         """
+
+        print(seriesDescription)
         NDBC_location_code = self.seriesStorage.find_external_location_code(seriesDescription.dataSource, seriesDescription.dataLocation)
 
         df, units = self.__download_NDBC_data(NDBC_location_code)
-
         df_inTimeRange = df.loc[timeDescription.toDateTime:timeDescription.fromDateTime]
 
         inputs = []
@@ -146,6 +147,8 @@ class NDBC(IDataIngestion):
         
         series = Series(seriesDescription, True, timeDescription)
         series.data = inputs
+        print(inputs)
+        print(len(inputs))
         return series
     
 
