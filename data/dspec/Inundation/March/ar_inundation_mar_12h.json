@@ -25,7 +25,8 @@
             "unit": "seconds",
             "interval": 3600,
             "range": [0, -11],
-            "verificationOverride": 1
+            "verificationOverride": 21,
+            "outKey": "DPD_12"
         },
         { 
             "_name": "APD",
@@ -35,7 +36,8 @@
             "unit": "seconds",
             "interval": 3600,
             "range": [0, -11],
-            "verificationOverride": 1
+            "verificationOverride": 21,
+            "outKey": "APD_12"
         },
         { 
             "_name": "WVHT",
@@ -45,7 +47,8 @@
             "unit": "meter",
             "interval": 3600,
             "range": [0, -11],
-            "verificationOverride": 1
+            "verificationOverride": 21,
+            "outKey": "WVHT_12"
         },
         { 
             "_name": " Water Level",

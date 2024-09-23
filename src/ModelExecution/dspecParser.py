@@ -206,7 +206,7 @@ class dspec_sub_Parser_2_0:
                 dSeries.datum = dSeries_dict.get("datum")
                 dSeries.unit = dSeries_dict.get("unit")
                 dSeries.outKey = dSeries_dict.get("outKey")
-                dSeries.verificationMethod = dSeries_dict.get("verificationMethod", 'VALIDATE_BY_INTERVAL')
+                dSeries.verificationOverride = dSeries_dict.get("verificationOverride")
 
                 # If there is a data Integrity Call we parse it, else its set to None.
                 dataIntegrityDict = dSeries_dict.get("dataIntegrityCall")

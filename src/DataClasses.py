@@ -118,21 +118,20 @@ class SeriesDescription():
         :param limit: timedelta - The max gap distance allowed for interpolation
         :param dataDatum: str = None
         :param dataIntegrityDescription: DataIntegrityDescription = None - An object that contains the data integrity calls that should be handled.
-        :param verificationMethod: str = None - The class name to use to verify if this series is complete or not
     """
-    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None,  dataIntegrityDescription: DataIntegrityDescription = None, verificationMethod: str = None) -> None:
+    def __init__(self, dataSource: str, dataSeries: str, dataLocation: str, dataDatum: str = None,  dataIntegrityDescription: DataIntegrityDescription = None, verificationOverride: int = None) -> None:
         self.dataSource = dataSource
         self.dataSeries = dataSeries
         self.dataLocation = dataLocation
         self.dataDatum = dataDatum
         self.dataIntegrityDescription = dataIntegrityDescription
-        self.verificationMethod = verificationMethod
+        self.verificationOverride = verificationOverride
 
     def __str__(self) -> str:
-        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, dataIntegrityDescription: {self.dataIntegrityDescription}, verificationMethod: {self.verificationMethod}'
+        return f'\n[SeriesDescription] -> source: {self.dataSource}, series: {self.dataSeries}, location: {self.dataLocation}, datum: {self.dataDatum}, dataIntegrityDescription: {self.dataIntegrityDescription}, verificationOverride: {self.verificationOverride}'
     
     def __repr__(self) -> str:
-        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum}, {self.dataIntegrityDescription}, {self.verificationMethod})'
+        return f'\nSeriesDescription({self.dataSource}, {self.dataSeries}, {self.dataLocation}, {self.dataDatum}, {self.dataIntegrityDescription}, {self.verificationOverride})'
 
 
 class SemaphoreSeriesDescription():
