@@ -25,6 +25,7 @@
             "unit": "seconds",
             "interval": 3600,
             "range": [0, -23],
+            "verificationOverride": {"label": "graterThanOrEqual", "value": 4},
             "outKey": "DPD_24"
         },
         { 
@@ -35,6 +36,7 @@
             "unit": "seconds",
             "interval": 3600,
             "range": [0, -23],
+            "verificationOverride": {"label": "graterThanOrEqual", "value": 4},
             "outKey": "APD_24"
         },
         { 
@@ -45,6 +47,7 @@
             "unit": "meter",
             "interval": 3600,
             "range": [0, -23],
+            "verificationOverride": {"label": "graterThanOrEqual", "value": 4},
             "outKey": "WVHT_24"
         },
         { 
@@ -95,19 +98,19 @@
     ],
     "vectorOrder": [
         {
-            "key": "DPD_24",
+            "key": "fmm_DPD_1",
             "dType": "float"
         },
         {
-            "key": "APD_24",
+            "key": "fmm_APD_1",
             "dType": "float"
         },
         {
-            "key": "WVHT_24",
+            "key": "fmm_WVHT_1",
             "dType": "float"
         },
         {
-            "key": "dWl_24",
+            "key": "fmm_dWl_1",
             "dType": "float"
         }
     ]
