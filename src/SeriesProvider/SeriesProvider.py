@@ -237,14 +237,26 @@ class SeriesProvider():
         :param second: list[Input] - An optional list of results to merge then validate (NOTE::Likely should be DI results of both DB and DI are being provided)
         :return a validated series: Series
         """
-        first_valid = first is not None and len(first) == seriesDescription.verificationOverride
-        second_valid = second is not None and len(second) == seriesDescription.verificationOverride
+
+        LABEL = seriesDescription.verificationOverride.get('label')
+        VALUE = seriesDescription.verificationOverride.get('value')
+        
+        match LABEL:
+            case 'equals':
+                validator = lambda inputs, value: inputs is not None and len(inputs) == value
+            case 'graterThanOrEqual':
+                validator = lambda inputs, value: inputs is not None and len(inputs) >= value
+            case _:
+                log(f'Warning:: No matching validator for verification override label: {LABEL}')
+
+        first_valid = validator(first, VALUE)
+        second_valid = validator(second, VALUE)
 
         valid_list = None
         if second_valid: 
-            valid_list = second_valid
+            valid_list = second
         elif first_valid:
-            valid_list = first_valid
+            valid_list = first
 
         if valid_list is not None:
             result = Series(
