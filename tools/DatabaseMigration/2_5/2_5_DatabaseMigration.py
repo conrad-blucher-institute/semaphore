@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-#2_6_DatabaseMigration.py
+#2_5_DatabaseMigration.py
 #----------------------------------
 # Created By: Savannah Stephenson
 # Created Date: 09/19/2024
 # Version 1.0
 #----------------------------------
 """This is a database migration script that will update to version
-    2.6 of the database. The intended change is adding three user accounts
+    2.5 of the database. The intended change is adding three user accounts
     one for the API, one for Semaphore-Core, and one for Semaphore team members. 
  """ 
 #----------------------------------
@@ -26,7 +26,7 @@ load_dotenv()
 class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
-        """ This function updates the database to version 2.6 which adds user accounts
+        """ This function updates the database to version 2.5 which adds user accounts
             for the API, Semaphore-Core, and the CBI team.
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
@@ -57,16 +57,13 @@ class Migrator(IDatabaseMigration):
 
         # Check if users were added successfully
         if self.__check_user_exists(api_user) and self.__check_user_exists(core_user) and self.__check_user_exists(general_user):
-            # Update the yml file so that the different accounts are actually being used
-            self.__update_yml_file()
-            # Return True
             return True
         else:
             return False 
     
 
     def rollback(self, databaseEngine: Engine) -> bool:
-        """This function rolls the database from 2.6.
+        """This function rolls the database from 2.5.
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
@@ -90,9 +87,6 @@ class Migrator(IDatabaseMigration):
 
         # Check if users were removed successfully
         if not (self.__check_user_exists(api_user) or self.__check_user_exists(core_user) or self.__check_user_exists(general_user)):
-            # Update the yml file so that the one account we had before is being used
-            self.__rollback_yml_file()
-            # Return True
             return True
         else:
             return False
@@ -197,40 +191,6 @@ class Migrator(IDatabaseMigration):
             return result.fetchone() is not None
 
 
-    def __update_yml_file(self):
-        """ Updates the .yml file with new user details.
-        """
-        # Getting yml path
-        yml_path = os.path.join(os.path.dirname(__file__), 'docker-compose.yml')
-
-        # Opening the yml file
-        with open(yml_path, 'r') as file:
-            config = yaml.safe_load(file)
-
-        # Modify the container details to use correct connection strings
-        if 'services' in config and 'core' in config['services']:
-            service = config['services']['core']
-            if 'environment' in service:
-                # Update the DB_LOCATION_STRING
-                for i, env_var in enumerate(service['environment']):
-                    if env_var.startswith('DB_LOCATION_STRING'):
-                        service['environment'][i] = 'DB_LOCATION_STRING=${CORE_DB_LOCATION_STRING}'
-                        break
-        
-        if 'services' in config and 'api' in config['services']:
-            service = config['services']['api']
-            if 'environment' in service:
-                # Update the DB_LOCATION_STRING
-                for i, env_var in enumerate(service['environment']):
-                    if env_var.startswith('DB_LOCATION_STRING'):
-                        service['environment'][i] = 'DB_LOCATION_STRING=${API_DB_LOCATION_STRING}'
-                        break
-
-        # Write back the updated config
-        with open(yml_path, 'w') as file:
-            yaml.dump(config, file)
-
-
     def __remove_user(self, user: str):
         """ Removes a user from the database if it exists.
         
@@ -240,36 +200,3 @@ class Migrator(IDatabaseMigration):
             conn.execute(text(f"DROP ROLE IF EXISTS {user};"))
             conn.commit()
             
-
-    def __rollback_yml_file(self):
-        """ Updates the .yml file with new user details.
-        """
-        # Getting yml path
-        yml_path = os.path.join(os.path.dirname(__file__), 'docker-compose.yml')
-        
-        # Opening the yml file
-        with open(yml_path, 'r') as file:
-            config = yaml.safe_load(file)
-
-        # Modify the container details to use correct connection strings
-        if 'services' in config and 'core' in config['services']:
-            service = config['services']['core']
-            if 'environment' in service:
-                # Update the DB_LOCATION_STRING
-                for i, env_var in enumerate(service['environment']):
-                    if env_var.startswith('DB_LOCATION_STRING'):
-                        service['environment'][i] = 'DB_LOCATION_STRING=${DB_LOCATION_STRING}'
-                        break
-        
-        if 'services' in config and 'api' in config['services']:
-            service = config['services']['api']
-            if 'environment' in service:
-                # Update the DB_LOCATION_STRING
-                for i, env_var in enumerate(service['environment']):
-                    if env_var.startswith('DB_LOCATION_STRING'):
-                        service['environment'][i] = 'DB_LOCATION_STRING=${DB_LOCATION_STRING}'
-                        break
-
-        # Write back the updated config
-        with open(yml_path, 'w') as file:
-            yaml.dump(config, file, default_flow_style=False)

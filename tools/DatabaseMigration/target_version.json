@@ -1,4 +1,4 @@
 {
-    "Target Version" : "2.6",
+    "Target Version" : "2.5",
     "Description" : "Adding user acounts for the API, Semaphore-Core, and Semaphore team members."
 }
