@@ -23,6 +23,9 @@ import shutil
 # load variabesl from .env file
 load_dotenv()
 
+#Constants
+DOCKER_FILE_PATHS = './tools/DatabaseMigration/2_5/init_data'
+
 class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
@@ -216,16 +219,10 @@ class Migrator(IDatabaseMigration):
             the correct user accounts.
         """
         old_yml_file = './docker-compose.yml' 
-        new_yml_file = './new-docker-compose.yml'
-        backup_yml_file = './docker-compose.yml.bak'
+        new_yml_file = f'{DOCKER_FILE_PATHS}/new-docker-compose.yml'
 
         try:
-            # Create a backup of the original file
-            if os.path.exists(old_yml_file):
-                shutil.copyfile(old_yml_file, backup_yml_file)
-                print(f"Backup created: {backup_yml_file}")
-
-            # Step 2: Replace the old file with the new one
+            # Replace the old file with the new one
             shutil.copyfile(new_yml_file, old_yml_file)
             print(f"Replaced {old_yml_file} with {new_yml_file} so that new user accounts will be used")
 
@@ -238,7 +235,7 @@ class Migrator(IDatabaseMigration):
         """ A function to roll back to the old yml file using the backup.
         """
         old_yml_file = './docker-compose.yml'
-        backup_yml_file = './docker-compose.yml.bak'
+        backup_yml_file = f'{DOCKER_FILE_PATHS}/docker-compose.yml.bak'
 
         try:
             # Check if the backup exists
