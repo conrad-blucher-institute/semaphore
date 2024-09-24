@@ -17,7 +17,6 @@ from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
 from sqlalchemy import Engine
 from sqlalchemy.sql import text
 from dotenv import load_dotenv
-import yaml
 import os
 
 # load variabesl from .env file
