@@ -18,10 +18,6 @@ from DatabaseMigration.databaseMigrationUtility import KeywordType, DatabaseDele
 from sqlalchemy import Engine, MetaData, Table, delete, select, update
 from sqlalchemy.dialects.postgresql import insert 
 from sqlalchemy.sql import text
-import csv
-
-#Constants
-CSV_FILE_PATHS = './tools/DatabaseMigration/2_6/init_data'
 
 
 class Migrator(IDatabaseMigration):
