@@ -18,6 +18,7 @@ from sqlalchemy import Engine
 from sqlalchemy.sql import text
 from dotenv import load_dotenv
 import os
+import shutil
 
 # load variabesl from .env file
 load_dotenv()
@@ -56,6 +57,7 @@ class Migrator(IDatabaseMigration):
 
         # Check if users were added successfully
         if self.__check_user_exists(api_user) and self.__check_user_exists(core_user) and self.__check_user_exists(general_user):
+            self.__update_yml()
             return True
         else:
             return False 
@@ -86,6 +88,7 @@ class Migrator(IDatabaseMigration):
 
         # Check if users were removed successfully
         if not (self.__check_user_exists(api_user) or self.__check_user_exists(core_user) or self.__check_user_exists(general_user)):
+            self.__rollback_yml()
             return True
         else:
             return False
@@ -205,4 +208,47 @@ class Migrator(IDatabaseMigration):
             """))
             conn.execute(text(f"DROP ROLE IF EXISTS {user};"))
             conn.commit()
+
+    
+    def __update_yml(self):
+        """ A function to replace the existing yml file
+            with one that has the api and core containers use 
+            the correct user accounts.
+        """
+        old_yml_file = './docker-compose.yml' 
+        new_yml_file = './new-docker-compose.yml'
+        backup_yml_file = './docker-compose.yml.bak'
+
+        try:
+            # Create a backup of the original file
+            if os.path.exists(old_yml_file):
+                shutil.copyfile(old_yml_file, backup_yml_file)
+                print(f"Backup created: {backup_yml_file}")
+
+            # Step 2: Replace the old file with the new one
+            shutil.copyfile(new_yml_file, old_yml_file)
+            print(f"Replaced {old_yml_file} with {new_yml_file} so that new user accounts will be used")
+
+        except IOError as e:
+            print(f"Error during update: {e}")
+            return
+
+
+    def __rollback_yml(self):
+        """ A function to roll back to the old yml file using the backup.
+        """
+        old_yml_file = './docker-compose.yml'
+        backup_yml_file = './docker-compose.yml.bak'
+
+        try:
+            # Check if the backup exists
+            if os.path.exists(backup_yml_file):
+                # Restore the backup
+                shutil.copyfile(backup_yml_file, old_yml_file)
+                print(f"Rollback successful. Restored {old_yml_file} from {backup_yml_file}")
+            else:
+                print(f"No backup file found for rollback.")
+
+        except IOError as e:
+            print(f"Error during rollback: {e}")
             
