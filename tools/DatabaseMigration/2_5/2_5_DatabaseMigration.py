@@ -196,6 +196,13 @@ class Migrator(IDatabaseMigration):
             :param: user - str - The username of the account we are removing.
         """
         with self.__engine.connect() as conn:
+            conn.execute(text(f"""
+            REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM {user};
+            REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM {user};
+            REVOKE ALL PRIVILEGES ON DATABASE {os.getenv('POSTGRES_DB')} FROM {user};
+            ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM {user};
+            ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM {user};
+            """))
             conn.execute(text(f"DROP ROLE IF EXISTS {user};"))
             conn.commit()
             
