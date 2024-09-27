@@ -17,46 +17,96 @@ import argparse
 from dotenv import load_dotenv
 from os import path, getenv
 from datetime import datetime
-import traceback
-import sys
+from exceptions import Semaphore_Exception, Semaphore_Data_Exception, Semaphore_Ingestion_Exception
+from discord import Discord_Notify
 
 from ModelExecution.modelWrapper import ModelWrapper
+from ModelExecution.inputGatherer import InputGatherer
 from utility import log, construct_true_path
 
 
 load_dotenv()
 
 def run_semaphore(fileName: str, executionTime: datetime = None, toss: bool = False):
+    model_name = None
 
     try:
-        log('Init Semaphore...')
+        try:
+            log('Init Semaphore...')
 
-        if executionTime is None: 
-            executionTime = datetime.now()
+            if executionTime is None: 
+                executionTime = datetime.now()
+
+            IG = InputGatherer(fileName)
+            model_name = IG.get_dspec().modelName
+            MW = ModelWrapper(IG)
+
+            log(f'----Running {fileName} for {executionTime}! Toss: {toss}----')
+
+            if toss:
+                result = MW.make_prediction(executionTime)
+            else:
+                result = MW.make_and_save_prediction(executionTime)
 
 
-        MW = ModelWrapper(fileName)
-
-        log(f'----Running {fileName} for {executionTime}! Toss: {toss}----')
-
-        if toss:
-            result = MW.make_prediction(executionTime)
-        else:
-            result = MW.make_and_save_prediction(executionTime)
-
-
-        log(f'{result}')
-        log(f'{result.data if result != None else ""}')
-
+            log(f'{result}')
+            log(f'{result.data if result != None else ""}')
+            handle_successful_prediction(model_name, executionTime)
+            
+        except Exception:
+                raise Semaphore_Exception('Error:: An unknown error ocurred!')
         
+    except Semaphore_Exception as se:
+        log(f'Error:: Prediction failed due to Semaphore Exception\n{se}')
+        handle_failed_prediction(se, executionTime, model_name)
+    except Semaphore_Data_Exception as sde:
+        log(f'Warning:: Prediction failed due to lack of data.')
+        handle_failed_prediction(sde, executionTime, model_name)
+    except Semaphore_Ingestion_Exception as sie:
+        log(f'Error:: Prediction failed due to Semaphore Ingestion Exception\n{sie}')
+        handle_failed_prediction(sie, executionTime, model_name)
+
+
+def handle_failed_prediction(exception: Semaphore_Exception | Semaphore_Data_Exception | Semaphore_Ingestion_Exception, execution_time: datetime, model_name: str):
+
+    if execution_time is None: execution_time = datetime(0, 0, 0, 0, 0) # Execution time could not be instantiated yet
+    if model_name is None: model_name = 'Model Name Not Discovered Yet' # Model name might not be discovered if error was in dspec
+    error_code = exception.error_code
+    message = exception.message
+    
+    try: 
+        if int(getenv('DISCORD_NOTIFY')) == 1: # Discord notification enabled in env
+            if int(getenv('IS_DEV')) == 1: # is dev server or prod server
+                webhook = getenv('DISCORD_WEBHOOK_DEV')
+            else:
+                webhook = getenv('DISCORD_WEBHOOK_PROD')
+
+            # send notification
+            discord_notify = Discord_Notify(webhook)
+            discord_notify.send_notification(model_name, execution_time, error_code, message)
     except Exception as e:
-            log(f'Semaphore ran into an error: {e}')
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno) 
-            traceback.print_exc() 
-    finally:
-        log('Semaphore fin!')
+        log(Semaphore_Exception('ERROR:: An error occurred while trying to send a discord notification'))
+
+    log('Semaphore fin!')
+    exit(error_code)
+
+def handle_successful_prediction(model_name: str, execution_time: datetime):
+   
+    try: 
+        if int(getenv('DISCORD_NOTIFY')) == 1: # Discord notification enabled in env
+            if int(getenv('IS_DEV')) == 1: # is dev server or prod server
+                webhook = getenv('DISCORD_WEBHOOK_DEV')
+            else:
+                webhook = getenv('DISCORD_WEBHOOK_PROD')
+
+            # send notification
+            discord_notify = Discord_Notify(webhook)
+            discord_notify.send_notification(model_name, execution_time, 0, '')
+    except Exception as e:
+        log(Semaphore_Exception('ERROR:: An error occurred while trying to send a discord notification'))
+
+    log('Semaphore fin!')
+    exit(0)
 
 #argument parsing
 def main():
