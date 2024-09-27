@@ -15,6 +15,8 @@ services:
       - ISERIESSTORAGE_INSTANCE=${ISERIESSTORAGE_INSTANCE}
       - DSPEC_FOLDER_PATH=${DSPEC_FOLDER_PATH}
       - MODEL_FOLDER_PATH=${MODEL_FOLDER_PATH}
+      - DISCORD_WEBHOOK=${DISCORD_WEBHOOK}
+      - IS_DEV=${IS_DEV}
     depends_on:
       db:
         condition: service_healthy

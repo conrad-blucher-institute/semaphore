@@ -16,28 +16,40 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from datetime import datetime
 from utility import log
+from os import getenv
 
 class Discord_Notify:
     def __init__(self, webhook_url: str):
         self.webhook_url = webhook_url
+
+        # Ids are in the order 
+        DEV_THREAD_IDS = {"DI_failure": 1289283580823863437, "sem_failure": 1289283697325113444, "success": 1289283843840540809}
+        PROD_THREAD_IDS = {"DI_failure": 1289283334035214367, "sem_failure": 1289283470438436985, "success": 1289282912105136151}
+
+        if int(getenv('IS_DEV')) == 1:
+            utilized_thread_IDS = DEV_THREAD_IDS
+        else:
+            utilized_thread_IDS = PROD_THREAD_IDS
+
+
         self.webhook_parameters = {
             -1 : {
-                'thread_id': 1288529369886883840,
+                'thread_id': utilized_thread_IDS['DI_failure'],
                 'color': 'fcba03',
                 'base_desc': 'Model failed to run due to lacking data. Extra info provided: '
             },
             0 : {
-                'thread_id': 1288525052802764933,
+                'thread_id': utilized_thread_IDS['success'],
                 'color': '03fc2c',
-                'base_desc': 'Model ran successfully. Extra info provided: '
+                'base_desc': 'Model ran successfully.'
             },
             1 : {
-                'thread_id': 1288529471665602671,
+                'thread_id': utilized_thread_IDS['sem_failure'],
                 'color': 'fc0303',
                 'base_desc': 'Model failed to run due to ingestion error. Extra info provided: '
             },
             2 : {
-                'thread_id': 1288529471665602671,
+                'thread_id': utilized_thread_IDS['sem_failure'],
                 'color': 'fc0303',
                 'base_desc': 'Model failed to run due to semaphore error. Extra info provided: '
             },
