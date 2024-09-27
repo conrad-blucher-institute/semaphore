@@ -75,10 +75,13 @@ def handle_failed_prediction(exception: Semaphore_Exception | Semaphore_Data_Exc
     message = exception.message
     
     try: 
-        webhook = getenv('DISCORD_WEBHOOK')
-        if webhook is None:
-            log('Warning:: Discord notification attempted but webhook was None, no notification will be sent!')
-        else:
+        if int(getenv('DISCORD_NOTIFY')) == 1: # Discord notification enabled in env
+            if int(getenv('IS_DEV')) == 1: # is dev server or prod server
+                webhook = getenv('DISCORD_WEBHOOK_DEV')
+            else:
+                webhook = getenv('DISCORD_WEBHOOK_PROD')
+
+            # send notification
             discord_notify = Discord_Notify(webhook)
             discord_notify.send_notification(model_name, execution_time, error_code, message)
     except Exception as e:
@@ -86,15 +89,17 @@ def handle_failed_prediction(exception: Semaphore_Exception | Semaphore_Data_Exc
 
     log('Semaphore fin!')
     exit(error_code)
-    
 
 def handle_successful_prediction(model_name: str, execution_time: datetime):
    
     try: 
-        webhook = getenv('DISCORD_WEBHOOK')
-        if webhook is None:
-            log('Warning:: Discord notification attempted but webhook was None, no notification will be sent!')
-        else:
+        if int(getenv('DISCORD_NOTIFY')) == 1: # Discord notification enabled in env
+            if int(getenv('IS_DEV')) == 1: # is dev server or prod server
+                webhook = getenv('DISCORD_WEBHOOK_DEV')
+            else:
+                webhook = getenv('DISCORD_WEBHOOK_PROD')
+
+            # send notification
             discord_notify = Discord_Notify(webhook)
             discord_notify.send_notification(model_name, execution_time, 0, '')
     except Exception as e:
