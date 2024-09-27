@@ -23,7 +23,7 @@ class Discord_Notify:
         self.webhook_url = webhook_url
 
         # Ids are in the order 
-        DEV_THREAD_IDS = {"DI_failure": 1289283580823863437, "sem_failure": 1289283697325113444, "success": 1289283843840540809}
+        DEV_THREAD_IDS = {"DI_failure": 1289283697325113444, "sem_failure": 1289283580823863437, "success": 1289283843840540809}
         PROD_THREAD_IDS = {"DI_failure": 1289283334035214367, "sem_failure": 1289283470438436985, "success": 1289282912105136151}
 
         if int(getenv('IS_DEV')) == 1:

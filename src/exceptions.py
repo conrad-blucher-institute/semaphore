@@ -4,8 +4,9 @@ import sys
 
 class Semaphore_Data_Exception(BaseException):
     def __init__(self, message: str):
-        super().__init__(message)
         self.error_code = -1
+        self.message = message
+        super().__init__(message)
 
 class Semaphore_Ingestion_Exception(BaseException):
     def __init__(self, message: str):
