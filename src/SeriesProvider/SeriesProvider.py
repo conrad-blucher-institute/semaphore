@@ -242,9 +242,9 @@ class SeriesProvider():
 
         valid_list = None
         if second_valid: 
-            valid_list = second_valid
+            valid_list = second
         elif first_valid:
-            valid_list = first_valid
+            valid_list = first
 
         if valid_list is not None:
             result = Series(
