@@ -23,6 +23,9 @@ class Semaphore_Data_Exception(BaseException):
         self.message = message
         super().__init__(message)
 
+    def __str__(self) -> str:
+        return f'Error Code: {self.error_code} {self.message}'
+
 class Semaphore_Ingestion_Exception(BaseException):
     def __init__(self, message: str):
 
@@ -34,6 +37,9 @@ class Semaphore_Ingestion_Exception(BaseException):
         self.error_code = 1
         self.message = f'{message}\n{header}\n{traceback}'
         super().__init__(message)
+    
+    def __str__(self) -> str:
+        return f'Error Code: {self.error_code} {self.message}'
 
 class Semaphore_Exception(BaseException):
     def __init__(self, message: str):
@@ -46,3 +52,6 @@ class Semaphore_Exception(BaseException):
         self.error_code = 2
         self.message = f'{message}\n{header}\n{traceback}'
         super().__init__(message)
+
+    def __str__(self) -> str:
+        return f'Error Code: {self.error_code} {self.message}'
