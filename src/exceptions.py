@@ -1,0 +1,32 @@
+import os
+from traceback import format_exc
+import sys
+
+class Semaphore_Data_Exception(BaseException):
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.error_code = -1
+
+class Semaphore_Ingestion_Exception(BaseException):
+    def __init__(self, message: str):
+
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        header = f'{exc_type} {fname} {exc_tb.tb_lineno}'
+        traceback = format_exc()
+
+        self.error_code = 1
+        self.message = f'{message}\n{header}\n{traceback}'
+        super().__init__(message)
+
+class Semaphore_Exception(BaseException):
+    def __init__(self, message: str):
+
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        header = f'{exc_type} {fname} {exc_tb.tb_lineno}'
+        traceback = format_exc()
+
+        self.error_code = 2
+        self.message = f'{message}\n{header}\n{traceback}'
+        super().__init__(message)
