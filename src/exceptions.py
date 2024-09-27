@@ -1,3 +1,18 @@
+# -*- coding: utf-8 -*-
+#exceptions.py
+#----------------------------------
+# Created By : Matthew Kastl
+# Created Date: 09/25/2024
+# version 1.0
+#----------------------------------
+""" This file contains custom exceptions
+    that are semaphore specific and to be called
+    throughout the application
+ """ 
+#----------------------------------
+# 
+#
+#Imports
 import os
 from traceback import format_exc
 import sys

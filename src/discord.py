@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#semaphoreRunner.py
+#discord.py
 #----------------------------------
 # Created By : Matthew Kastl
 # Created Date: 09/25/2024
@@ -56,6 +56,13 @@ class Discord_Notify:
         }
 
     def send_notification(self, model_name: str, reference_time: datetime, error_code: int, description_info: str):
+        """This method sends a discord notification.
+
+            :param model_name: str - The name of the model the notification is for.
+            :param reference_time: datetime - The reference time this model is running for. 
+            :param error_code: int - The semaphore error code.
+            :param description_info: str - A string message to be concatenated along with the notification
+        """
 
 
         webhook = DiscordWebhook(self.webhook_url, rate_limit_retry=True, thread_id= self.webhook_parameters[error_code]['thread_id'])
