@@ -82,9 +82,36 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-volumes:
-  psql-data:
+
 # networks:
   # semaphore-net:
   #   driver: bridge
+
+  frontend:
+    container_name: semaphore-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - DB_LOCATION_STRING=${DB_LOCATION_STRING}
+      - ISERIESSTORAGE_INSTANCE=${ISERIESSTORAGE_INSTANCE}
+      - DSPEC_FOLDER_PATH=${DSPEC_FOLDER_PATH}
+      - MODEL_FOLDER_PATH=${MODEL_FOLDER_PATH}
+      - HOHONU_API_AUTH=${HOHONU_API_AUTH} 
+      - HOHONU_API_HOST=${HOHONU_API_HOST}
+    ports: 
+      - "${FRONTEND_HOST_PORT}:8080"
+    depends_on:
+      - core
+    volumes:
+      - ./data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  psql-data:
+
 
