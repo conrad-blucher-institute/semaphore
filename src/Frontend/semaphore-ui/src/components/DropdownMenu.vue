@@ -1,21 +1,36 @@
+/* 
+DropdownMenu.vue 
+----------------------------------
+ Created By: Anointiyae Beasley
+ Created Date: 09/23/2024
+ version 1.0
+----------------------------------
+This component constructs the drop down menu that will navigate to each page
+----------------------------------
+*/
 <template>
+  <!-- The button that displays 3 bars-->
     <div class="dropdown">
       <button class="dropbtn" @click="toggleDropdown">
         <div class="bar"></div>
         <div class="bar"></div>
         <div class="bar"></div>
       </button>
+      <!-- If the dropdown menu is open, show the different options passed from App.vue
+         and when one is clicked, the selectOption function is triggered -->
       <div class="dropdown-content" v-if="isOpen">
         <div v-for="option in options" :key="option" @click="selectOption(option)">
-          {{ option }}
+          {{ option }} <!-- Display each option -->
         </div>
       </div>
     </div>
   </template>
   
   <script>
+  /* The default export for the dropdown menu component */
   export default {
     name: "DropdownMenu",
+     /* options prop that defines the list of options for the dropdown menu */
     props: {
       options: {
         type: Array,
@@ -24,11 +39,12 @@
     },
     data() {
       return {
-        isOpen: false,
-        selectedOption: null,
+        isOpen: false,  // Tracks if the dropdown is open or closed
+        selectedOption: null, // Stores the currently selected option
       };
     },
     methods: {
+      /* Toggles the visibility of the dropdown menu */
       toggleDropdown() {
         this.isOpen = !this.isOpen;
       },
