@@ -25,7 +25,7 @@
             "unit": "seconds",
             "interval": 3600,
             "range": [0, -47],
-            "verificationOverride": {"label": "graterThanOrEqual", "value": 4},
+            "verificationOverride": {"label": "greaterThanOrEqual", "value": 4},
             "outKey": "DPD_48"
         },
         { 
@@ -36,7 +36,7 @@
             "unit": "seconds",
             "interval": 3600,
             "range": [0, -47],
-            "verificationOverride": {"label": "graterThanOrEqual", "value": 4},
+            "verificationOverride": {"label": "greaterThanOrEqual", "value": 4},
             "outKey": "APD_48"
         },
         { 
@@ -47,7 +47,7 @@
             "unit": "meter",
             "interval": 3600,
             "range": [0, -47],
-            "verificationOverride": {"label": "graterThanOrEqual", "value": 4},
+            "verificationOverride": {"label": "greaterThanOrEqual", "value": 4},
             "outKey": "WVHT_48"
         },
         { 
