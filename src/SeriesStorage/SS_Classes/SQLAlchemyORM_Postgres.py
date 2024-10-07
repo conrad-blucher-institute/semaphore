@@ -169,14 +169,14 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         resultSeries.data = self.__splice_input(result) #Turn tuple objects into actual objects
         return resultSeries
     
-    def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict]:
+    def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict | None]:
         """This method inserts actual/predictions into the output table and model run information into the model run table
             :param series: Series - A series object with a time description,  semaphore series description, and outputdata
             :param dateTime: execution_time - A datetime object set to the time this instance of semaphore was ran
             :param int: return_code - A int code for the run
             :return tuple[Series, dict]: 
                 - A series object that contains the actually inserted data
-                - A list of the pK ids the rows took
+                - The results from inserting into the model_runs table
         """
 
         output_series, output_ids = self.insert_output(output_series)
