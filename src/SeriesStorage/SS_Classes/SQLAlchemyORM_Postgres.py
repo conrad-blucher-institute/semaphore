@@ -472,7 +472,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 row[leadTimeIndex]
             ))
 
-        return dataPoints, 
+        return dataPoints 
 
     def insert_lat_lon_test(self, code: str, displayName: str, notes: str, latitude: str, longitude: str):
         """This method inserts lat and lon information
