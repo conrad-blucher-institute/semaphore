@@ -1,4 +1,5 @@
 {
+    "dspecVersion": "2.0",
     "modelName": "ar_inundation_may_12h",
     "modelVersion": "1.0.0",
     "author": "Marina VicensMiquel",
@@ -15,50 +16,106 @@
         "location": "Aransas",
         "unit" : "meter"
     },
-    "inputs": [
+    "dependentSeries": [
         { 
-            "_name": "4 Max Mean DPD",
+            "_name": "DPD",
             "location": "Freeport",
             "source": "NDBC",
-            "series": "d_12h_4mm_DPD",
+            "series": "DPD",
             "unit": "seconds",
-            "type": "float",
             "interval": 3600,
             "range": [0, -11],
-            "verificationOverride": 1
+            "verificationOverride": {"label": "greaterThanOrEqual", "value": 4},
+            "outKey": "DPD_12"
         },
         { 
-            "_name": "4 Max Mean APD",
+            "_name": "APD",
             "location": "Freeport",
             "source": "NDBC",
-            "series": "d_12h_4mm_APD",
+            "series": "APD",
             "unit": "seconds",
-            "type": "float",
             "interval": 3600,
             "range": [0, -11],
-            "verificationOverride": 1
+            "verificationOverride": {"label": "greaterThanOrEqual", "value": 4},
+            "outKey": "APD_12"
         },
         { 
-            "_name": "4 Max Mean WVHT",
+            "_name": "WVHT",
             "location": "Freeport",
             "source": "NDBC",
-            "series": "d_12h_4mm_WVHT",
+            "series": "WVHT",
             "unit": "meter",
-            "type": "float",
             "interval": 3600,
             "range": [0, -11],
-            "verificationOverride": 1
+            "verificationOverride": {"label": "greaterThanOrEqual", "value": 4},
+            "outKey": "WVHT_12"
         },
         { 
-            "_name": "4 Max Mean Water Level",
+            "_name": " Water Level",
             "location": "Aransas",
             "source": "NOAATANDC",
-            "series": "d_12h_4mm_wl",
+            "series": "dWl",
             "unit": "meter",
-            "type": "float",
             "datum": "NAVD",
             "interval": 3600,
             "range": [0, -11],
-            "verificationOverride": 1
+            "outKey": "dWl_12"
         }
-]}
+    ],
+    "postProcessCall": [
+        {
+            "call": "FourMaxMean",
+            "args": {
+                "target_inKey": "DPD_12",
+                "warning_trigger": "20",
+                "outkey": "fmm_DPD_1" 
+                     
+            }
+        },
+        {
+            "call": "FourMaxMean",
+            "args": {
+                "target_inKey": "APD_12",
+                "warning_trigger": "20",
+                "outkey": "fmm_APD_1" 
+                     
+            }
+        },
+        {
+            "call": "FourMaxMean",
+            "args": {
+                "target_inKey": "WVHT_12",
+                "warning_trigger": "20",
+                "outkey": "fmm_WVHT_1" 
+                     
+            }
+        },
+        {
+            "call": "FourMaxMean",
+            "args": {
+                "target_inKey": "dWl_12",
+                "warning_trigger": "11",
+                "outkey": "fmm_dWl_1" 
+                     
+            }
+        }
+    ],
+    "vectorOrder": [
+        {
+            "key": "fmm_DPD_1",
+            "dType": "float"
+        },
+        {
+            "key": "fmm_APD_1",
+            "dType": "float"
+        },
+        {
+            "key": "fmm_WVHT_1",
+            "dType": "float"
+        },
+        {
+            "key": "fmm_dWl_1",
+            "dType": "float"
+        }
+    ]
+}

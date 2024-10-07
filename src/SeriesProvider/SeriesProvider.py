@@ -54,13 +54,15 @@ class SeriesProvider():
             :returns series - The series containing as much data as could be found.
         """
         log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
-        
+
         # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 6 minutes
         timeDescription.interval = timedelta(minutes=6) if timeDescription.interval == None else timeDescription.interval
         
         # First we check the database to see if it has the data we need
         validated_DB_results, raw_DB_results = self.__data_base_query(seriesDescription, timeDescription)
-        if validated_DB_results.isComplete: 
+
+        # If there is a verification override, we have to always request new data, so we can return here
+        if validated_DB_results.isComplete and seriesDescription.verificationOverride is None: 
             return validated_DB_results
 
         # Next we start Data Ingestion, to go and get the data we need
@@ -216,7 +218,7 @@ class SeriesProvider():
         reason_string = ''
         if missing_results > 0:
             isComplete = False
-            reason_string = f'There were {missing_results} missing results!'
+            reason_string = f'There were {missing_results} missing results! {len(second_results.keys())}'
 
             # If a result was missing, an input was not mapped to that key. Thus its mapped to None. We remove the whole k:v pair as to not pollute the results with None.
             datetimeDict = {k : v for k, v in datetimeDict.items() if v is not None}
@@ -241,8 +243,20 @@ class SeriesProvider():
         :param second: list[Input] - An optional list of results to merge then validate (NOTE::Likely should be DI results of both DB and DI are being provided)
         :return a validated series: Series
         """
-        first_valid = first is not None and len(first) == seriesDescription.verificationOverride
-        second_valid = second is not None and len(second) == seriesDescription.verificationOverride
+
+        LABEL = seriesDescription.verificationOverride.get('label')
+        VALUE = seriesDescription.verificationOverride.get('value')
+        
+        match LABEL:
+            case 'equals':
+                validator = lambda inputs, value: inputs is not None and len(inputs) == int(value)
+            case 'greaterThanOrEqual':
+                validator = lambda inputs, value: inputs is not None and len(inputs) >= int(value)
+            case _:
+                log(f'Warning:: No matching validator for verification override label: {LABEL}')
+
+        first_valid = validator(first, VALUE)
+        second_valid = validator(second, VALUE)
 
         valid_list = None
         if second_valid: 
