@@ -54,13 +54,15 @@ class SeriesProvider():
             :returns series - The series containing as much data as could be found.
         """
         log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
-        
+
         # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 6 minutes
         timeDescription.interval = timedelta(minutes=6) if timeDescription.interval == None else timeDescription.interval
         
         # First we check the database to see if it has the data we need
         validated_DB_results, raw_DB_results = self.__data_base_query(seriesDescription, timeDescription)
-        if validated_DB_results.isComplete: 
+
+        # If there is a verification override, we have to always request new data, so we can return here
+        if validated_DB_results.isComplete and seriesDescription.verificationOverride is None: 
             return validated_DB_results
 
         # Next we start Data Ingestion, to go and get the data we need
@@ -244,7 +246,7 @@ class SeriesProvider():
         match LABEL:
             case 'equals':
                 validator = lambda inputs, value: inputs is not None and len(inputs) == int(value)
-            case 'graterThanOrEqual':
+            case 'greaterThanOrEqual':
                 validator = lambda inputs, value: inputs is not None and len(inputs) >= int(value)
             case _:
                 log(f'Warning:: No matching validator for verification override label: {LABEL}')
