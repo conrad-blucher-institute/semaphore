@@ -8,6 +8,10 @@
 """This is a database migration script that will update to version
     2.5 of the database. The intended change is adding three user accounts
     one for the API, one for Semaphore-Core, and one for Semaphore team members. 
+
+    Note that changes to the .env file have been done to facilitate this
+    database migration. The connection strings for all accounts must be set to 
+    the default connection string before running.
  """ 
 #----------------------------------
 # 
