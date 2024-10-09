@@ -16,15 +16,13 @@
 from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
 from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, Boolean, Interval, text
 from sqlalchemy.dialects.postgresql import insert
-import csv
 
-CSV_FILE_PATHS = './tools/DatabaseMigration/1_0/init_data'
 
 #Implementing methods of interface
 class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
-        """This function updates the database to version 1.0 which includes the base schema and data locations. 
+        """This function updates the database to version 2.6 which adds a model runs table and allows for nulled dataValues in the outputs table.
             :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
             :return: bool indicating successful update
         """
