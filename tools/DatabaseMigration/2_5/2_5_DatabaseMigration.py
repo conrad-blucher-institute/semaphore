@@ -17,14 +17,15 @@ from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
 from sqlalchemy import Engine
 from sqlalchemy.sql import text
 from dotenv import load_dotenv
+import dotenv
+from pathlib import Path
 import os
-import shutil
 
-# load variabesl from .env file
+# load variables from .env file
 load_dotenv()
-
-#Constants
-DOCKER_FILE_PATHS = './tools/DatabaseMigration/2_5/init_data'
+# Load variables of new connection strings from .env file
+new_connection_strings_dotenv_path = Path('./tools/DatabaseMigration/2_5/init_data/new_connection_strings.env')
+load_dotenv(dotenv_path=new_connection_strings_dotenv_path)
 
 class Migrator(IDatabaseMigration):
 
@@ -60,7 +61,7 @@ class Migrator(IDatabaseMigration):
 
         # Check if users were added successfully
         if self.__check_user_exists(api_user) and self.__check_user_exists(core_user) and self.__check_user_exists(general_user):
-            self.__update_yml()
+            self.__update_env()
             return True
         else:
             return False 
@@ -91,7 +92,7 @@ class Migrator(IDatabaseMigration):
 
         # Check if users were removed successfully
         if not (self.__check_user_exists(api_user) or self.__check_user_exists(core_user) or self.__check_user_exists(general_user)):
-            self.__rollback_yml()
+            self.__rollback_env()
             return True
         else:
             return False
@@ -108,7 +109,11 @@ class Migrator(IDatabaseMigration):
             'CORE_POSTGRES_PASSWORD',
             'GENERAL_POSTGRES_USER',
             'GENERAL_POSTGRES_PASSWORD',
-            'POSTGRES_DB'
+            'POSTGRES_DB', 
+            'DB_LOCATION_STRING',
+            'NEW_CORE_DB_LOCATION_STRING',
+            'NEW_API_DB_LOCATION_STRING',
+            'NEW_GENERAL_DB_LOCATION_STRING'
         ]
         
         missing_vars = []
@@ -213,39 +218,34 @@ class Migrator(IDatabaseMigration):
             conn.commit()
 
     
-    def __update_yml(self):
-        """ A function to replace the existing yml file
-            with one that has the api and core containers use 
-            the correct user accounts.
+    def __update_env(self):
+        """ A function to update the .env file with the new connection strings
+            for the database user accounts.
         """
-        old_yml_file = './docker-compose.yml' 
-        new_yml_file = f'{DOCKER_FILE_PATHS}/new-docker-compose.yml'
+        # The find_dotenv function finds the file named only .env
+        dotenv_file = dotenv.find_dotenv()
 
-        try:
-            # Replace the old file with the new one
-            shutil.copyfile(new_yml_file, old_yml_file)
-            print(f"Replaced {old_yml_file} with {new_yml_file} so that new user accounts will be used")
+        # Read in the new connection strings
+        updated_core_db_url = os.get('NEW_CORE_DB_LOCATION_STRING')
+        updated_api_db_url = os.get('NEW_API_DB_LOCATION_STRING')
+        updated_general_db_url = os.get('NEW_GENERAL_DB_LOCATION_STRING')
 
-        except IOError as e:
-            print(f"Error during update: {e}")
-            return
+        # Write changes to connection strings to the .env file.
+        dotenv.set_key(dotenv_file, "CORE_DB_LOCATION_STRING", updated_core_db_url)
+        dotenv.set_key(dotenv_file, "API_DB_LOCATION_STRING", updated_api_db_url)
+        dotenv.set_key(dotenv_file, "GENERAL_DB_LOCATION_STRING", updated_general_db_url)
 
 
-    def __rollback_yml(self):
-        """ A function to roll back to the old yml file using the backup.
+    def __rollback_env(self):
+        """ A function to roll back to the old database connection string.
         """
-        old_yml_file = './docker-compose.yml'
-        backup_yml_file = f'{DOCKER_FILE_PATHS}/docker-compose.yml.bak'
+        # The find_dotenv function finds the file named only .env
+        dotenv_file = dotenv.find_dotenv()
 
-        try:
-            # Check if the backup exists
-            if os.path.exists(backup_yml_file):
-                # Restore the backup
-                shutil.copyfile(backup_yml_file, old_yml_file)
-                print(f"Rollback successful. Restored {old_yml_file} from {backup_yml_file}")
-            else:
-                print(f"No backup file found for rollback.")
+        # Read in the new connection strings
+        old_db_url = os.get('DB_LOCATION_STRING')
 
-        except IOError as e:
-            print(f"Error during rollback: {e}")
-            
+        # Write changes to connection strings to the .env file.
+        dotenv.set_key(dotenv_file, "CORE_DB_LOCATION_STRING", old_db_url)
+        dotenv.set_key(dotenv_file, "API_DB_LOCATION_STRING", old_db_url)
+        dotenv.set_key(dotenv_file, "GENERAL_DB_LOCATION_STRING", old_db_url)   
