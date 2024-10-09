@@ -26,6 +26,7 @@ from SeriesStorage.ISeriesStorage import ISeriesStorage
 from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, Input, Output, TimeDescription
 from utility import log
 import random
+from datetime import datetime
 
 
 class TEST_SS(ISeriesStorage):
@@ -165,4 +166,6 @@ class TEST_SS(ISeriesStorage):
         # Perform list comprehension to generate a list of all the time steps we need plus another list of the same size this is all None
         return [generateTimestamp(initial_time, idx, timeDescription.interval) for idx in range(steps)]
             
-    
+
+    def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict]:
+        raise NotImplementedError()

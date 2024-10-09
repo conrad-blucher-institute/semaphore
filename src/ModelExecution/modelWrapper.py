@@ -17,8 +17,8 @@ Tenserflow related actions allowing us to run models from .H5
 from .inputGatherer import InputGatherer
 from .IOutputHandler import output_handler_factory
 from DataClasses import SemaphoreSeriesDescription, Series
-from SeriesStorage.ISeriesStorage import series_storage_factory
 from utility import log, construct_true_path
+from exceptions import Semaphore_Exception
 
 import datetime
 from os import path, getenv
@@ -42,8 +42,6 @@ class ModelWrapper:
         self.__inputGatherer = inputGatherer
         self.__load_model()
        
-        
-
 
     def __load_model(self) -> None:
         """Private method to load a model saves as an h5 file designated
@@ -90,7 +88,7 @@ class ModelWrapper:
         return reshape(inputs, shapeTarget) 
     
 
-    def make_prediction(self, dateTime: datetime) -> any:
+    def make_prediction(self, dateTime: datetime) -> Series:
         """Computes a prediction but does not save it to persistent storage"""
         #converting execution time to reference time
         referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
@@ -98,48 +96,8 @@ class ModelWrapper:
         log('Init get inputs....')
         inputs = self.__inputGatherer.get_inputs(referenceTime)
 
-        if inputs == -1: return None
-
-        if len(inputs) == 0: 
-            log('No inputs received for model.')
-            return None
-        
-
-        log('Init shape inputs....')
-        shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
-
-        log('Init compute prediction....')
-        prediction =  self._model.predict(shapedInputs) 
-
-        log('Init prediction post process....')
-        dspec = self.__inputGatherer.get_dspec()
-        outputInfo = dspec.outputInfo
-
-        predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, outputInfo.series, outputInfo.location, outputInfo.datum)
-
-        #Instantiate the right output handler method then post process the predictions
-        OH_Class = output_handler_factory(outputInfo.outputMethod)
-        processedOutputs = OH_Class.post_process_prediction(prediction, dspec, dateTime) 
-
-        #Put the post processed predictions in a series
-        series = Series(predictionDesc, True)
-        series.data = processedOutputs
-
-        return series
-
-
-        
-    def make_and_save_prediction(self, dateTime: datetime) -> any:
-        """Public method to generate a prediction given a datetime.
-        """
-        #converting execution time to reference time
-        referenceTime = self.__inputGatherer.calculate_referenceTime(dateTime)
-        
-        log('Init get inputs....')
-        inputs = self.__inputGatherer.get_inputs(referenceTime)
-        if len(inputs) == 0: 
-            log('No inputs received for model.')
-            return None
+        if inputs == -1 or len(inputs) == 0: 
+            raise Semaphore_Exception('Error:: No inputs received for model.')        
 
         log('Init shape inputs....')
         shapedInputs = self.__shape_data(inputs) #Ensure received inputs are shaped right for model
@@ -161,9 +119,4 @@ class ModelWrapper:
         series = Series(predictionDesc, True)
         series.data = processedOutputs
 
-        log('Init save post processed prediction....')
-
-        #Send the prediction to the database and return the result
-        SS_Class = series_storage_factory()
-        result = SS_Class.insert_output(series)
-        return result
+        return series
