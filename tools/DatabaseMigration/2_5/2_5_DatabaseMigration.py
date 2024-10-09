@@ -133,7 +133,6 @@ class Migrator(IDatabaseMigration):
             return False
         
         # If all variables are set, return True
-        print("All required environment variables are set.")
         return True
 
 
@@ -226,30 +225,42 @@ class Migrator(IDatabaseMigration):
         """ A function to update the .env file with the new connection strings
             for the database user accounts.
         """
-        # The find_dotenv function finds the file named only .env
-        dotenv_file = dotenv.find_dotenv()
+        env_path = dotenv.find_dotenv()
 
         # Read in the new connection strings
-        updated_core_db_url = os.get('NEW_CORE_DB_LOCATION_STRING')
-        updated_api_db_url = os.get('NEW_API_DB_LOCATION_STRING')
-        updated_general_db_url = os.get('NEW_GENERAL_DB_LOCATION_STRING')
+        updated_core_db_url = os.getenv('NEW_CORE_DB_LOCATION_STRING')
+        updated_api_db_url = os.getenv('NEW_API_DB_LOCATION_STRING')
+        updated_general_db_url = os.getenv('NEW_GENERAL_DB_LOCATION_STRING')
+
+        # Before
+        print(f'BEFORE CHANGING CONNECTION URLS')
+         # Load environment variables 
+        env_vars = dotenv.dotenv_values(env_path)
+        # Print each environment variable and its value
+        for key, value in env_vars.items():
+            print(f"{key}={value}")
 
         # Write changes to connection strings to the .env file.
-        dotenv.set_key(dotenv_file, "CORE_DB_LOCATION_STRING", updated_core_db_url)
-        dotenv.set_key(dotenv_file, "API_DB_LOCATION_STRING", updated_api_db_url)
-        dotenv.set_key(dotenv_file, "GENERAL_DB_LOCATION_STRING", updated_general_db_url)
+        dotenv.set_key(env_path, "CORE_DB_LOCATION_STRING", updated_core_db_url)
+        dotenv.set_key(env_path, "API_DB_LOCATION_STRING", updated_api_db_url)
+        dotenv.set_key(env_path, "GENERAL_DB_LOCATION_STRING", updated_general_db_url)
+
+        # Before
+        print(f'AFTER CHANGING CONNECTION URLS')
+        # Load environment variables from .env file
+        env_vars = dotenv.dotenv_values(env_path)
+        # Print each environment variable and its value
+        for key, value in env_vars.items():
+            print(f"{key}={value}")
 
 
     def __rollback_env(self):
         """ A function to roll back to the old database connection string.
         """
-        # The find_dotenv function finds the file named only .env
-        dotenv_file = dotenv.find_dotenv()
-
         # Read in the new connection strings
-        old_db_url = os.get('DB_LOCATION_STRING')
+        old_db_url = os.getenv('DB_LOCATION_STRING')
 
         # Write changes to connection strings to the .env file.
-        dotenv.set_key(dotenv_file, "CORE_DB_LOCATION_STRING", old_db_url)
-        dotenv.set_key(dotenv_file, "API_DB_LOCATION_STRING", old_db_url)
-        dotenv.set_key(dotenv_file, "GENERAL_DB_LOCATION_STRING", old_db_url)   
+        dotenv.set_key('.env', "CORE_DB_LOCATION_STRING", old_db_url)
+        dotenv.set_key('.env', "API_DB_LOCATION_STRING", old_db_url)
+        dotenv.set_key('.env', "GENERAL_DB_LOCATION_STRING", old_db_url)   
