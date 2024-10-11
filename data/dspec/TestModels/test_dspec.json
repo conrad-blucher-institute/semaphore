@@ -4,7 +4,7 @@
     "author": "John Doe",
     "modelFileName": "test_AI",
     "timingInfo":{
-        "active": true,
+        "active": false,
         "offset": 0,
         "interval": 3600
 
