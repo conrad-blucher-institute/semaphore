@@ -5,13 +5,12 @@
 # Created Date: 10/09/2024
 # Version 1.0
 #----------------------------------
-"""This is a database migration script that will update to version
-    2.5 of the database. The intended change is adding three user accounts
-    one for the API, one for Semaphore-Core, and one for Semaphore team members. 
+""" This is a tools script used to add three user accounts to the semaphore database
+    one for the API, one for Semaphore-Core, and one for read only team members. 
 
-    Note that changes to the .env file have been done to facilitate this
-    database migration. The connection strings for all accounts must be set to 
-    the default connection string before running.
+    To use: 
+    docker exec semaphore-core python3 tools/init_db_users.py --api-user "api_user" --api-password "api_password" --core-user "core_user" --core-password "core_password" --general-user "general_user" --general-password "general_password"
+
  """ 
 #----------------------------------
 # 
@@ -20,42 +19,11 @@
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.sql import text
 from dotenv import load_dotenv
-import dotenv
-from pathlib import Path
+import argparse
 import os
 
-# load variables from .env file
+# load database name from .env file
 load_dotenv()
-
-def check_env_variables()-> bool:
-    """Checks if all required environment variables are set."""
-    
-    # List of required environment variables
-    required_vars = [
-        'API_POSTGRES_USER',
-        'API_POSTGRES_PASSWORD',
-        'CORE_POSTGRES_USER',
-        'CORE_POSTGRES_PASSWORD',
-        'GENERAL_POSTGRES_USER',
-        'GENERAL_POSTGRES_PASSWORD',
-        'POSTGRES_DB'
-    ]
-    
-    missing_vars = []
-    
-    # Check each environment variable
-    for var in required_vars:
-        if os.getenv(var) is None:
-            missing_vars.append(var)
-    
-    # If there are missing variables, raise an error or print a message
-    if missing_vars:
-        print(f"Error: The following environment variables are missing: {', '.join(missing_vars)}")
-        return False
-    
-    # If all variables are set, return True
-    return True
-
 
 def create_general_user(engine: Engine, user: str, password: str):
     """ Creates a database user with read only permissions.
@@ -124,38 +92,43 @@ def check_user_exists(engine: Engine, user: str) -> bool:
         result = conn.execute(text(f"SELECT 1 FROM pg_roles WHERE rolname = '{user}';"))
         return result.fetchone() is not None
 
+def parse_args():
+    """Parses command-line arguments."""
+    parser = argparse.ArgumentParser(description="Database Accounts Script")
+    parser.add_argument('--api-user', required=True, help='API database username')
+    parser.add_argument('--api-password', required=True, help='API database password')
+    parser.add_argument('--core-user', required=True, help='Core database username')
+    parser.add_argument('--core-password', required=True, help='Core database password')
+    parser.add_argument('--general-user', required=True, help='General database username')
+    parser.add_argument('--general-password', required=True, help='General database password')
+    
+    return parser.parse_args()
 
 def main():
-    """ Main
+    """ The main function of init_db_users.py creates a database engine and 
+        uses it to make differnt database users. 
     """
+    # Get arguments
+    args = parse_args()
+
     # Load database location string
     DB_LOCATION_STRING = os.getenv('DB_LOCATION_STRING')
 
     # Create the database engine
     engine = create_engine(DB_LOCATION_STRING)
 
-    # Check if all environment variables are set
-    if not check_env_variables():
-        return False
-
-    # Read user credentials from environment variables
-    api_user = os.getenv('API_POSTGRES_USER')
-    api_password = os.getenv('API_POSTGRES_PASSWORD')
-    
-    core_user = os.getenv('CORE_POSTGRES_USER')
-    core_password = os.getenv('CORE_POSTGRES_PASSWORD')
-    
-    general_user = os.getenv('GENERAL_POSTGRES_USER')
-    general_password = os.getenv('GENERAL_POSTGRES_PASSWORD')
-    
-
     # Create and Set Users
-    create_api_user(engine, api_user, api_password)
-    create_core_user(engine, core_user, core_password)
-    create_general_user(engine, general_user, general_password)
+    create_api_user(engine, args.api_user, args.api_password)
+    create_core_user(engine, args.core_user, args.core_password)
+    create_general_user(engine, args.general_user, args.general_password)
+
+     # Print connection strings
+    print(f"API User connection string: postgresql+psycopg2://{args.api_user}:password_here@host.docker.internal:5435/semaphoredb")
+    print(f"Core User connection string: postgresql+psycopg2://{args.core_user}:password_here@host.docker.internal:5435/semaphoredb")
+    print(f"General User connection string: postgresql+psycopg2://{args.general_user}:password_here@host.docker.internal:5435/semaphoredb")
 
     # Check if users were added successfully
-    if check_user_exists(engine, api_user) and check_user_exists(engine, core_user) and check_user_exists(engine, general_user):
+    if check_user_exists(engine, args.api_user) and check_user_exists(engine, args.core_user) and check_user_exists(engine, args.general_user):
         return True
     else:
         return False 
