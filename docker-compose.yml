@@ -82,9 +82,29 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-volumes:
-  psql-data:
+
 # networks:
   # semaphore-net:
   #   driver: bridge
+
+  frontend:
+    container_name: semaphore-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    restart: always
+    env_file:
+      - .env
+    ports: 
+      - "${FRONTEND_HOST_PORT}:8080"
+    depends_on:
+      - core
+    volumes:
+      - ./data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  psql-data:
+
 
