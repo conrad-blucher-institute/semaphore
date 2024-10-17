@@ -16,6 +16,7 @@ from PostProcessing.IPostProcessing import IPostProcessing
 from DataClasses import Series, Input
 from ModelExecution.dspecParser import PostProcessCall
 from copy import deepcopy
+from utility import log
 
 class FourMaxMean(IPostProcessing):
     """
@@ -23,6 +24,8 @@ class FourMaxMean(IPostProcessing):
 
         args: 
                 target_inKey - The key for the to preform the operation on series.
+                warning_trigger - Parsed as int. If amount of data is less than this value before 
+                    fmm a warning will be triggered.
                 outkey - The key to save the series of four max mean as.
 
         json_copy:
@@ -30,6 +33,7 @@ class FourMaxMean(IPostProcessing):
             "call": "FourMaxMean",
             "args": {
                 "target_inKey": "",
+                "warning_trigger": "",
                 "outkey": "" 
                      
             }
@@ -53,6 +57,10 @@ class FourMaxMean(IPostProcessing):
         IN_SERIES_DATA = [float(input.dataValue) for input in IN_SERIES.data]
         OUT_KEY = args['outkey']
         
+
+        if len(IN_SERIES_DATA) <= int(args['warning_trigger']):
+            log(f'Warning:: Above FourMaxMean call has less values than the warning trigger. Trigger: {args["warning_trigger"]} Values Received: {len(IN_SERIES_DATA)}')
+
         # Compute the mean of the four highest data points
         four_highest = sorted(IN_SERIES_DATA)[-4:]
         mean_four_max_val = sum(four_highest) / 4.0

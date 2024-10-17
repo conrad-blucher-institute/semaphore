@@ -1,3 +1,3 @@
 {
-    "comment": "Magnolia water level model with a twelve hour lead time running every hour with a twenty minute offset for the initial model and a twenty five minute offset for the transform model."
+    "comment": "Magnolia water level model with a twelve hour lead time running every hour with a twenty minute offset for the initial model and a twenty two minute offset for the transform model."
 }
