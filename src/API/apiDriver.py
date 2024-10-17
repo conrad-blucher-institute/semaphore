@@ -15,6 +15,7 @@ from fastapi import FastAPI, HTTPException
 from datetime import datetime, timedelta
 from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription
 from SeriesProvider.SeriesProvider import SeriesProvider
+from utility import log
 
 load_dotenv()
 
@@ -138,6 +139,33 @@ async def get_output(modelName: str, modelVersion: str, series: str, location: s
     responseSeries = provider.request_output(requestDescription, timeDescription)
 
     return responseSeries
+
+
+@app.get('/latest_outputs/modelName={modelName}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
+async def get_latest_outputs(modelName: str, fromDateTime: str, toDateTime: str):
+    """
+    Retrieves output series object. It will look for the latest result under the name provided and use that to query the results
+    Args:
+        - `modelName` (string): The name of the model (e.g. "test AI")
+        - `fromDateTime` (string): "YYYYMMDDHH" Date to start at
+        - `toDateTime` (string): "YYYYMMDDHH" Date to end at
+
+    Returns:
+        Series: A Sereies that includes the model information as well as data found within time range or None if no data could be
+        found matching query.
+
+    Raises:
+        HTTPException: If the series is not found.
+    """ 
+    try:
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
+    except (ValueError, TypeError, OverflowError) as e:
+        raise HTTPException(status_code=404, detail=f'{e}')
+
+    provider = SeriesProvider()
+    responseData = provider.request_latest_outputs(modelName, fromDateTime, toDateTime)
+    return responseData
 
 @app.get("/health")
 def health_check():

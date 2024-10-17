@@ -169,3 +169,6 @@ class TEST_SS(ISeriesStorage):
 
     def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict]:
         raise NotImplementedError()
+    
+    def select_latest_output(self, model_name: str, from_time: datetime, to_time: datetime) -> Series | None: 
+        raise NotImplementedError()
