@@ -27,7 +27,7 @@ from tensorflow.keras.models import load_model
 
 
 class ModelWrapper:
-    def __init__(self, dspecFileName: str) -> None:
+    def __init__(self, inputGatherer: InputGatherer) -> None:
         """
         Uses the source attribute of a data request to dynamically import a module
         ------
@@ -39,7 +39,7 @@ class ModelWrapper:
         """Constructor generates an InputGatherer parse the dspec file 
         and attempts to load the model.
         """
-        self.__inputGatherer = InputGatherer(dspecFileName)
+        self.__inputGatherer = inputGatherer
         self.__load_model()
        
         

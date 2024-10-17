@@ -15,7 +15,7 @@ from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataIngestion.IDataIngestion import data_ingestion_factory
 from DataIntegrity.IDataIntegrity import data_integrity_factory
 from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription, Input
-
+from exceptions import Semaphore_Ingestion_Exception
 
 from utility import log
 from datetime import timedelta
@@ -120,7 +120,11 @@ class SeriesProvider():
         """
         log(f'Init DI Query...')
         data_ingestion_class = data_ingestion_factory(seriesDescription)
-        data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
+
+        try:
+            data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
+        except Exception:
+            raise Semaphore_Ingestion_Exception('Error:: A problem occurred attempting to ingest data!')
 
         if data_ingestion_results is None: return None, None # ingestion returns None if there was an error
 

@@ -19,6 +19,7 @@ from DataClasses import SeriesDescription, TimeDescription, Input, DataIntegrity
 from .dspecParser import DSPEC_Parser, Dspec, DependentSeries
 from utility import log, construct_true_path
 from PostProcessing.IPostProcessing import post_processing_factory
+from exceptions import Semaphore_Data_Exception, Semaphore_Exception
 
 #Libraries
 from os import path, getenv
@@ -86,7 +87,9 @@ class InputGatherer:
                     series.outKey
                 ))
             except Exception as e:
-               log(f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {series} Error= {e}')
+               err_msg = f'ERROR: There was a problem in the input generating input requests.\n\n InputInfo= {series} Error= {e}'
+               log(err_msg)
+               raise Semaphore_Exception(err_msg)
 
         # Set the series description list and series construction time
         self.__seriesDescriptionsTimeDescriptions = seriesDescriptionsTimeDescriptions
@@ -122,7 +125,7 @@ class InputGatherer:
             if responseSeries.isComplete:
                 dependentSeriesSeries[key] = responseSeries
             else: 
-                raise RuntimeError(f'ERROR: There was a problem with input gatherer making requests.\n\nResponse: \t{responseSeries}\n\n')
+                raise Semaphore_Data_Exception(f'ERROR: There was a problem with input gatherer making requests.\n\nResponse: \t{responseSeries}\n\n')
 
         self.__inputSeriesDict = dependentSeriesSeries
 
