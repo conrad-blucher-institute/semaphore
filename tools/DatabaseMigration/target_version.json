@@ -1,4 +1,4 @@
 {
-    "Target Version" : "2.5",
-    "Description" : "Adding base NDBC series."
+    "Target Version" : "2.6",
+    "Description" : "Meta table for predictions."
 }

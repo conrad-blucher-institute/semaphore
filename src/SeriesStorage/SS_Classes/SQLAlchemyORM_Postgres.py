@@ -169,12 +169,49 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         resultSeries.data = self.__splice_input(result) #Turn tuple objects into actual objects
         return resultSeries
     
+    def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict | None]:
+        """This method inserts actual/predictions into the output table and model run information into the model run table
+            :param series: Series - A series object with a time description,  semaphore series description, and outputdata
+            :param dateTime: execution_time - A datetime object set to the time this instance of semaphore was ran
+            :param int: return_code - A int code for the run
+            :return tuple[Series, dict]: 
+                - A series object that contains the actually inserted data
+                - The results from inserting into the model_runs table
+        """
+
+        output_series, output_ids = self.insert_output(output_series)
 
 
-    def insert_output(self, series: Series) -> Series:
+        if len(output_ids) == 0:
+            log('WARNING:: Series Storage was told to insert to both the output and model run table. This failed because no outputs were inserted. This could be caused by the prediction already existing in the database!')
+            return output_series, None
+
+        model_run_rows = []
+        for id in output_ids:
+            model_run_row = {"outputID": None, "executionTime": None, "returnCode": None}
+            model_run_row["outputID"] = id
+            model_run_row["executionTime"] = execution_time
+            model_run_row["returnCode"] = return_code
+            model_run_rows.append(model_run_row)
+
+        with self.__get_engine().connect() as conn:
+            cursor = conn.execute(insert(self.model_runs)
+                                  .returning(self.model_runs)
+                                  .values(model_run_rows)
+                                  )
+            model_run_result = cursor.fetchall()
+            conn.commit()
+
+
+        return output_series, model_run_result
+        
+
+    def insert_output(self, series: Series) -> tuple[Series, list[int]]:
         """This method inserts actual/predictions into the output table
             :param series: Series - A series object with a time description,  semaphore series description, and outputdata
-            :return Series - A series object that contains the actually inserted data
+            :return tuple[Series, list[int]]: 
+                - A series object that contains the actually inserted data
+                - A list of the pK ids the rows took
         """
 
         if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
@@ -205,7 +242,8 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         resultSeries = Series(series.description, True, series.timeDescription)
         resultSeries.data = self.__splice_output(result) #Turn tuple objects into actual objects
-        return resultSeries
+        ids = [row[0] for row in result]
+        return resultSeries, ids
 
     #############################################################################################
     ################################################################################## DB Managment Methods
@@ -284,6 +322,18 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"), nullable=True),
 
             # UniqueConstraint is made __create_constraints method
+        )
+
+        self.model_runs = Table(
+            "model_runs",
+            self._metadata,
+
+            Column("id", Integer, autoincrement=True, primary_key=True),
+            Column("outputID", Integer, ForeignKey("outputs.id"),nullable=False),  
+            Column("executionTime", DateTime, nullable=False), 
+            Column("returnCode", Integer, nullable=False),                                                               
+
+            UniqueConstraint("outputID", name='model_runs_AK00'),
         )
 
         #This table maps CBI location codes to location codes used by datasorces
@@ -417,6 +467,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         timeGeneratedIndex = 1
         leadTimeIndex = 2
         
+        ids = []
         dataPoints = []
         for row in results:
             dataPoints.append(Output(
@@ -426,7 +477,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 row[leadTimeIndex]
             ))
 
-        return dataPoints
+        return dataPoints 
 
     def insert_lat_lon_test(self, code: str, displayName: str, notes: str, latitude: str, longitude: str):
         """This method inserts lat and lon information

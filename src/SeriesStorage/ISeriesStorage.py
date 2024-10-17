@@ -12,6 +12,7 @@
 #
 #Imports
 from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
+from datetime import datetime
 
 from abc import ABC, abstractmethod
 from importlib import import_module
@@ -39,6 +40,10 @@ class ISeriesStorage(ABC):
     def insert_input(self, series: Series) -> Series:
         raise NotImplementedError()
     
+    @abstractmethod
+    def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict]:
+        raise NotImplementedError()
+
     @abstractmethod
     def insert_output(self, series: Series) -> Series:
         raise NotImplementedError()
