@@ -181,6 +181,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         output_series, output_ids = self.insert_output(output_series)
 
+
+        if len(output_ids) == 0:
+            log('WARNING:: Series Storage was told to insert to both the output and model run table. This failed because no outputs were inserted. This could be caused by the prediction already existing in the database!')
+            return output_series, None
+
         model_run_rows = []
         for id in output_ids:
             model_run_row = {"outputID": None, "executionTime": None, "returnCode": None}
