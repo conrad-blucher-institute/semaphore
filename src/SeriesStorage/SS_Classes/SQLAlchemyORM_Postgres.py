@@ -102,6 +102,50 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         series.data = outputResult
         return series
     
+
+    def select_latest_output(self, model_name: str, from_time: datetime, to_time: datetime) -> Series | None: 
+        ''' This selects outputs based just on a model name and a time range, all other information is inferred
+            :param model_name: str - The name of the model to query
+            :param to_time: datetime - The latest time to include
+            :param from_time: datetime - The earliest time to include
+        '''        
+
+        # Get the lead time for time calculations
+        # Because we are inferring model information
+        # We select the latest version of the model under that name
+        # and the lead time from its latest prediction
+        statement = (select(self.outputs.c.leadTime)
+                    .where(self.outputs.c.modelName == model_name)
+                    .order_by(self.outputs.c.modelVersion.desc())
+                    .order_by(self.outputs.c.timeGenerated.desc())
+                    )
+        leadTimes = self.__dbSelection(statement).fetchall()
+        if len(self.__dbSelection(statement).fetchall()) == 0: #If no lead time is found for some reason return nothing and log this
+            log(f'SQLAlchemyORM | select_latest_output | No leadtime found for model_name:{model_name}')
+            return None
+            
+        leadTime = leadTimes[0]
+        fromGeneratedTime = from_time - leadTime[0]
+        toGeneratedTime = to_time - leadTime[0]
+         
+        statement = (select(self.outputs)
+                    .where(self.outputs.c.modelName == model_name)
+                    .where(self.outputs.c.timeGenerated >= fromGeneratedTime)
+                    .where(self.outputs.c.timeGenerated <= toGeneratedTime)
+                    )
+        tupleishResult = self.__dbSelection(statement).fetchall()
+
+        if not tupleishResult: # If there are no results, no model information can be inferred 
+            return None    
+
+        outputResult = self.__splice_output(tupleishResult)
+
+        # Parse out model information from first output result
+        description = SemaphoreSeriesDescription(tupleishResult[0][3], tupleishResult[0][4], tupleishResult[0][4], tupleishResult[0][7], tupleishResult[0][6])
+        series = Series(description, False)
+        series.data = outputResult
+        return series
+    
     def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
         """Returns a data source location code based off of passed parameters
            :param sourceCode: str - the data source code (noaaT&C)
