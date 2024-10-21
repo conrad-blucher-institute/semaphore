@@ -154,7 +154,7 @@ def handle_failed_prediction(
 
             # Attempt to store both that in the outputs table and information about the model_run
             series_storage = series_storage_factory()
-            inserted_results, _ = series_storage.insert_output_and_model_run(result_series, execution_time, 0)
+            inserted_results, _ = series_storage.insert_output_and_model_run(result_series, execution_time, error_code)
 
             log(inserted_results)
             log(inserted_results.data if inserted_results is not None else '')
