@@ -19,7 +19,7 @@ from exceptions import Semaphore_Ingestion_Exception
 
 from utility import log
 from datetime import timedelta
-
+from datetime import datetime
 
 
 
@@ -93,6 +93,18 @@ class SeriesProvider():
         ###See if we can get the outputs from the database
         requestedSeries = self.seriesStorage.select_output(semaphoreSeriesDescription, timeDescription)
         return requestedSeries
+    
+
+    def request_latest_outputs(self, model_name: str, from_time: datetime, to_time: datetime) -> Series | None: 
+        ''' Takes a model name and time range trying to return output results that match. Will try and inferred model information
+            by assuming the latest version.
+            :param model_name: str - The name of the model to query
+            :param to_time: datetime - The latest time to include
+            :param from_time: datetime - The earliest time to include
+        '''
+
+        ###See if we can get the outputs from the database
+        return self.seriesStorage.select_latest_output(model_name, from_time, to_time)
     
 
     def __data_base_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> tuple[Series, Series]:
