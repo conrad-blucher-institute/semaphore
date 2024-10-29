@@ -44,7 +44,7 @@ class SeriesProvider():
         return returningSeries
           
     
-    def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series:
+    def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, saveIngestion: bool = True) -> Series:
         """This method attempts to return a series matching a series description and a time description.
             It will attempt first to get the series from series storage, kicking off data ingestion if series storage
             doesn't have all the data.
@@ -66,7 +66,7 @@ class SeriesProvider():
             return validated_DB_results
 
         # Next we start Data Ingestion, to go and get the data we need
-        validated_DI_results, raw_DI_results = self.__data_ingestion_query(seriesDescription, timeDescription)
+        validated_DI_results, raw_DI_results = self.__data_ingestion_query(seriesDescription, timeDescription, saveIngestion)
         if validated_DI_results is not None and validated_DI_results.isComplete: 
             return validated_DI_results
         
@@ -122,7 +122,7 @@ class SeriesProvider():
         return validated_series_storage_results, series_storage_results
         
 
-    def __data_ingestion_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> tuple[Series | None, Series | None]:
+    def __data_ingestion_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, saveIngestion: bool) -> tuple[Series | None, Series | None]:
         """ Handles the process of getting requested data from series storage, validating it, and returning both validated and raw results 
         :param seriesDescription: SeriesDescription - The semantic description of request
         :param timeDescription: TimeDescription - The temporal description of the request
@@ -140,8 +140,12 @@ class SeriesProvider():
 
         if data_ingestion_results is None: return None, None # ingestion returns None if there was an error
 
-        # If we actually got some data, that data should be new and we need to save it in the database.
-        if(data_ingestion_results.data and data_ingestion_results.description.dataSource != "SEMAPHORE"):
+        
+        # Check if we should be saving this data in the db.
+        hasData = len(data_ingestion_results.data) > 0 # If we actually got some data, 
+        isSemaphoreSource = data_ingestion_results.description.dataSource != "SEMAPHORE"  # If this data came from semaphore itself
+
+        if(saveIngestion and hasData and not isSemaphoreSource):
             inserted_series = self.seriesStorage.insert_input(data_ingestion_results)
             
             if(inserted_series is None or len(inserted_series.data) == 0): # A sanity check that the data is actually getting inserted!
