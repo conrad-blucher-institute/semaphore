@@ -10,7 +10,7 @@
 # 
 #
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 
 from datetime import datetime, timedelta
 from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription
@@ -77,9 +77,53 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     )
 
     provider = SeriesProvider()
-    responseSeries = provider.request_input(requestDescription, timeDescription)
+    responseSeries = provider.request_input(requestDescription, timeDescription, saveIngestion=False)
 
     return responseSeries
+
+
+@app.get('/output_latest/')
+async def get_outputs_latest(modelNames: list[str] = Query(None)):
+    """
+    Queries outputs for a for given models looking for the last prediction that was made with them.
+    Args:
+        - `modelNames` (string): The name of the model (e.g. "test AI"), you can repeat this parameter to request multiple models
+
+    Returns:
+        The results for each model index by the model name. If no data can be found for that model the value will be null.
+    """ 
+
+    provider = SeriesProvider()
+    results = {}
+    for modelName in modelNames:
+        results[modelName] = provider.request_output('LATEST', model_name= modelName)
+    return results
+
+
+@app.get('/output_time_span/')
+async def get_outputs_time_span(fromDateTime: str, toDateTime: str, modelNames: list[str] = Query(None)):
+    """
+    Queries outputs for a given time range for given models.
+    Args:
+        - `fromDateTime` (string): "YYYYMMDDHH" Date to start at
+        - `toDateTime` (string): "YYYYMMDDHH" Date to end at
+        - `modelNames` (string): The name of the model (e.g. "test AI"), you can repeat this parameter to request multiple models
+
+    Returns:
+        The results for each model index by the model name. If no data can be found for that model for the provided time range the value will be null.
+    """ 
+    try:
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
+    except (ValueError, TypeError, OverflowError) as e:
+        raise HTTPException(status_code=404, detail=f'{e}')
+
+    provider = SeriesProvider()
+    results = {}
+    for modelName in modelNames:
+        results[modelName] = provider.request_output('TIME_SPAN', model_name=modelName, from_time=fromDateTime, to_time=toDateTime)
+    return results
+
 
 
 @app.get('/output/modelName={modelName}/modelVersion={modelVersion}/series={series}/location={location}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
@@ -136,36 +180,10 @@ async def get_output(modelName: str, modelVersion: str, series: str, location: s
     )
 
     provider = SeriesProvider()
-    responseSeries = provider.request_output(requestDescription, timeDescription)
+    responseSeries = provider.request_output('SPECIFIC', semaphoreSeriesDescription=requestDescription, timeDescription=timeDescription)
 
     return responseSeries
 
-
-@app.get('/latest_outputs/modelName={modelName}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
-async def get_latest_outputs(modelName: str, fromDateTime: str, toDateTime: str):
-    """
-    Retrieves output series object. It will look for the latest result under the name provided and use that to query the results
-    Args:
-        - `modelName` (string): The name of the model (e.g. "test AI")
-        - `fromDateTime` (string): "YYYYMMDDHH" Date to start at
-        - `toDateTime` (string): "YYYYMMDDHH" Date to end at
-
-    Returns:
-        Series: A Sereies that includes the model information as well as data found within time range or None if no data could be
-        found matching query.
-
-    Raises:
-        HTTPException: If the series is not found.
-    """ 
-    try:
-        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
-        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
-    except (ValueError, TypeError, OverflowError) as e:
-        raise HTTPException(status_code=404, detail=f'{e}')
-
-    provider = SeriesProvider()
-    responseData = provider.request_latest_outputs(modelName, fromDateTime, toDateTime)
-    return responseData
 
 @app.get("/health")
 def health_check():

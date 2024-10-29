@@ -50,7 +50,7 @@ class SEMAPHORE(IDataIngestion):
         )
 
         # Fetch data through the ORM
-        result = self.series_storage.select_output(ssd, timeDescription)
+        result = self.series_storage.select_specific_output(ssd, timeDescription)
 
         # Repack the data with the original series description and return
         return_series = Series(seriesDescription, True, timeDescription)

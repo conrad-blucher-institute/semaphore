@@ -15,7 +15,7 @@ from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataIngestion.IDataIngestion import data_ingestion_factory
 from DataIntegrity.IDataIntegrity import data_integrity_factory
 from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription, Input
-from exceptions import Semaphore_Ingestion_Exception
+from exceptions import Semaphore_Ingestion_Exception, Semaphore_Exception
 
 from utility import log
 from datetime import timedelta
@@ -83,29 +83,45 @@ class SeriesProvider():
         return self.__data_interpolation(seriesDescription, timeDescription, validated_merged_results)
    
     
-    def request_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription: TimeDescription) -> Series: 
-        ''' Takes a description of an output series and attempts to return it
-            :param seriesDescription: SemaphoreSeriesDescription -A semaphore series description
-            :param timeDescription: TimeDescription - A description about the temporal parts of the output series
-            :return series
-        '''
-        
-        ###See if we can get the outputs from the database
-        requestedSeries = self.seriesStorage.select_output(semaphoreSeriesDescription, timeDescription)
-        return requestedSeries
-    
+    def request_output(self, method: str, **kwargs) -> Series | None: 
+        ''' Selects the correct method from the ORM, calling it, and passing it the correct args
+            :param method: str - This is a string value to select which style of request you are trying to make
+            :param **kwargs - This is python kwargs formatted depending on method, see below
+            :return series | None
 
-    def request_latest_outputs(self, model_name: str, from_time: datetime, to_time: datetime) -> Series | None: 
-        ''' Takes a model name and time range trying to return output results that match. Will try and inferred model information
-            by assuming the latest version.
-            :param model_name: str - The name of the model to query
-            :param to_time: datetime - The latest time to include
-            :param from_time: datetime - The earliest time to include
+            NOTE:: Latest assumes model version and time by just selecting the very last made prediction, will only return one value
+            method= 'LATEST'
+            request_output('LATEST', model_name=REQUESTED_MODEL_NAME)
+
+            NOTE:: Time span returns all the predictions for a model in a given time span, assumes model details from the last prediction
+            made from that model. 
+            method= 'TIME_SPAN'
+            request_output('TIME_SPAN', model_name= REQUESTED_MODEL_NAME, from_time= DATETIME, to_time= DATETIME)
+
+            NOTE:: Specific takes the most amount of detail in the request, taking a full semaphore series description and a full time description 
+            method= 'SPECIFIC'
+            request_output('SPECIFIC', semaphoreSeriesDescription= DESCRIPTION, timeDescription= DESCRIPTION)
         '''
 
-        ###See if we can get the outputs from the database
-        return self.seriesStorage.select_latest_output(model_name, from_time, to_time)
-    
+        match method:
+            case 'LATEST':
+                try:
+                    return self.seriesStorage.select_latest_output(**kwargs)
+                except TypeError:
+                    raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("LATEST", model_name=REQUESTED_MODEL_NAME)')
+            case 'TIME_SPAN':
+                try:
+                    return self.seriesStorage.select_output(**kwargs)
+                except TypeError:
+                    raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("TIME_SPAN", model_name= REQUESTED_MODEL_NAME, from_time= DATETIME, to_time= DATETIME)')
+            case 'SPECIFIC':
+                try:
+                    return self.seriesStorage.select_specific_output(**kwargs)
+                except TypeError:
+                    raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("SPECIFIC", semaphoreSeriesDescription= DESCRIPTION, timeDescription= DESCRIPTION)')
+            case _:
+                raise NotImplementedError(f'Method {method} has not been implemented in SeriesProvider.request_output')
+              
 
     def __data_base_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> tuple[Series, Series]:
         """ Handles the process of getting requested data from series storage, validating it, and returning both validated and raw results 

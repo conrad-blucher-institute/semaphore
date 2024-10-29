@@ -64,7 +64,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         series.data = inputResult
         return series
     
-    def select_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
+    def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
         """Selects an output series given a SemaphoreSeriesDescription and TimeDescription
            :param semaphoreSeriesDescription: SemaphoreSeriesDescription - A  semaphore series description object
            :param timeDescription: TimeDescription - A hydrated time description object
@@ -103,7 +103,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return series
     
 
-    def select_latest_output(self, model_name: str, from_time: datetime, to_time: datetime) -> Series | None: 
+    def select_output(self, model_name: str, from_time: datetime, to_time: datetime) -> Series | None: 
         ''' This selects outputs based just on a model name and a time range, all other information is inferred
             :param model_name: str - The name of the model to query
             :param to_time: datetime - The latest time to include
@@ -142,6 +142,32 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         # Parse out model information from first output result
         description = SemaphoreSeriesDescription(tupleishResult[0][3], tupleishResult[0][4], tupleishResult[0][4], tupleishResult[0][7], tupleishResult[0][6])
+        series = Series(description, False)
+        series.data = outputResult
+        return series
+    
+
+    def select_latest_output(self, model_name: str) -> Series | None: 
+        ''' This selects outputs based just on a model name and a time range, all other information is inferred
+            :param model_name: str - The name of the model to query
+
+            NOTE:: Things like model version and time will just be the latest in the DB
+        '''        
+
+        statement = (select(self.outputs)
+                    .where(self.outputs.c.modelName == model_name)
+                    .order_by(self.outputs.c.modelVersion.desc())
+                    .order_by(self.outputs.c.timeGenerated.desc())
+                    )
+        tupleishResult = self.__dbSelection(statement).first() # because of order this should be latest
+
+        if not tupleishResult: # If there are no results, no model information can't be inferred 
+            return None    
+
+        outputResult = self.__splice_output([tupleishResult])
+
+        # Parse out model information from first output result
+        description = SemaphoreSeriesDescription(tupleishResult[3], tupleishResult[4], tupleishResult[4], tupleishResult[7], tupleishResult[6])
         series = Series(description, False)
         series.data = outputResult
         return series
@@ -511,7 +537,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         timeGeneratedIndex = 1
         leadTimeIndex = 2
         
-        ids = []
         dataPoints = []
         for row in results:
             dataPoints.append(Output(
