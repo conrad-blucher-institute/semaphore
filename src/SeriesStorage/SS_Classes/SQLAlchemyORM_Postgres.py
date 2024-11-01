@@ -141,7 +141,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         outputResult = self.__splice_output(tupleishResult)
 
         # Parse out model information from first output result
-        description = SemaphoreSeriesDescription(tupleishResult[0][3], tupleishResult[0][4], tupleishResult[0][4], tupleishResult[0][7], tupleishResult[0][6])
+        description = SemaphoreSeriesDescription(tupleishResult[0][3], tupleishResult[0][4], tupleishResult[0][8], tupleishResult[0][7], tupleishResult[0][6])
         series = Series(description, False)
         series.data = outputResult
         return series
