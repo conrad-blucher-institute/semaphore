@@ -31,7 +31,7 @@ class InputGatherer:
     """ The InputGatherer class which sends the dspc to be parsed, gets the dependant series
         checks for and calls any post processing and creates an ordered vector by referencing the keys
     """
-    def __init__(self, dspecFileName: str) -> None:
+    def __init__(self, dspecFilePath: str) -> None:
         """Constructor sends the dspec file off to be loaded and parsed
         """
         self.__dspec = None
@@ -39,8 +39,6 @@ class InputGatherer:
         self.__seriesConstructionTime = None
         self.__inputSeriesDict = None
         self.__inputVector = None
-
-        dspecFilePath = construct_true_path(getenv('DSPEC_FOLDER_PATH')) + dspecFileName
 
         if not path.exists(dspecFilePath):
             log(f'{dspecFilePath} not found!')

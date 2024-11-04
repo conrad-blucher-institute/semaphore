@@ -40,8 +40,8 @@ def main():
                     epilog='End Help')
    
     #adding argument types to the parser
-    parser.add_argument("-d", "--dspec", type=str, required=True,
-                       help= "The name of the DSPEC file of the model you wish Semaphore to run. Should be a .json file.")
+    parser.add_argument("-d", "--dspec", nargs='+', type=str, required=True,
+                       help= "The name of the DSPEC file of the model you wish Semaphore to run. Should be a .json file. You can supply multiple DSPEC paths split by spaces. Will run the left most first and the rightmost last.")
     
     parser.add_argument("-p", "--past", type=str, required=False, default=None,
                         help = "The time we are executing this action with Semaphore. Should be entered in YYYYMMDDHHMM format. Should only be provided if you intend to run Semaphore in the past.")
@@ -52,15 +52,7 @@ def main():
     #parsing arguments
     args = parser.parse_args()
 
-    #checking that dspec file passed exists in the dspec folder
-    if not args.dspec.endswith('.json'): 
-        args.dspec = args.dspec + '.json'
-    dspecFilePath = construct_true_path(getenv('DSPEC_FOLDER_PATH')) + (args.dspec )
-    
-    if not path.exists(dspecFilePath):
-        log(f'{dspecFilePath} not found!')
-        raise FileNotFoundError
-  
+
     #if there is past time given
     if args.past is not None: 
         #checking that the past time passed is formatted correctly (stolen from Beto)
@@ -76,17 +68,22 @@ def main():
         
     else:
         execution_time = None
-    
-    run_semaphore(args.dspec, execution_time, args.toss)
+
+    # By default the dspecs will be run left -> right from the command
+    log('Semaphore start!')
+    for dspec in args.dspec:
+        dspec = clean_and_check_dspec(dspec)
+        run_semaphore(dspec, execution_time, args.toss)
+    log('Semaphore fin!')
 
 
 def run_semaphore(fileName: str, executionTime: datetime = None, toss: bool = False):
+    """Runs one dspec through semaphore protected to catch any possible error and handle results accordingly"""
     model_name = None
     input_gatherer = None
 
     try:
         try:
-            log('Init Semaphore...')
 
             if executionTime is None: 
                 executionTime = datetime.now()
@@ -122,6 +119,8 @@ def handle_failed_prediction(
                             input_gatherer: InputGatherer | None, 
                             toss: bool
                             ):
+    """Handles a failed predictions. This function handles semaphore in an unstable error state. It emmits a notification and 
+    ensures something is logged in the database."""
 
     if execution_time is None: execution_time = datetime(0, 0, 0, 0, 0) # Execution time could not be instantiated yet
     if model_name is None: model_name = 'Model Name Not Discovered Yet' # Model name might not be discovered if error was in dspec
@@ -162,10 +161,8 @@ def handle_failed_prediction(
         log(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))
 
 
-    log('Semaphore fin!')
-    exit(error_code)
-
 def handle_successful_prediction(model_name: str, execution_time: datetime, result_series: Series, toss: bool):
+    """Handels a successful run of semaphore, sending a notification and placing the result in the database."""
    
     try: 
         if int(getenv('DISCORD_NOTIFY')) == 1: # Discord notification enabled in env
@@ -191,10 +188,21 @@ def handle_successful_prediction(model_name: str, execution_time: datetime, resu
             log(inserted_results)
             log(inserted_results.data if inserted_results is not None else '')
     except:
-        log(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))
+        log(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))    
 
-    log('Semaphore fin!')
-    exit(0)
+
+def clean_and_check_dspec(dspec_path: str) -> str:
+    """Checks that a depsc path ends with the .json extension and that the file actually exists"""
+    #checking that dspec file passed exists in the dspec folder
+    if not dspec_path.endswith('.json'): 
+        dspec_path = dspec_path + '.json'
+
+    dspecFilePath = path.join(construct_true_path(getenv('DSPEC_FOLDER_PATH')), dspec_path)
+
+    if not path.exists(dspecFilePath):
+        log(f'{dspecFilePath} not found!')
+        raise FileNotFoundError
+    return dspecFilePath
 
 
 
