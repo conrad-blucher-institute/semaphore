@@ -85,7 +85,7 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
 @app.get('/output_latest/')
 async def get_outputs_latest(modelNames: list[str] = Query(None)):
     """
-    Queries outputs for a for given models looking for the last prediction that was made with them.
+    Queries outputs for a given models looking for the last prediction that was made with them.
     Args:
         - `modelNames` (string): The name of the model (e.g. "test AI"), you can repeat this parameter to request multiple models
 
