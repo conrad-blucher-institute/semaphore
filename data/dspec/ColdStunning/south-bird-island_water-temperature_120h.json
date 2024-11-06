@@ -1,0 +1,91 @@
+{
+    "dspecVersion": "2.0",
+    "modelName": "south-bird-island_water-temperature_120h",
+    "modelVersion": "1.0.0",
+    "author": "Christian Duff",
+    "modelFileName": "./south-bird-island_water-temperature_120h",
+    "timingInfo":{
+        "active": true,
+        "offset": 600,
+        "interval": 3600
+
+    },
+    "outputInfo": {
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 432000,
+        "series": "pWaterTmp",
+        "location": "SouthBirdIsland",
+        "unit" : "celsius"
+    },
+    "dependentSeries": [
+        { 
+            "_name": "Water Temp",
+            "location": "SBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [-1, -24],
+            "outKey": "south-bird-island_water-temp_24",
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"None"    
+                }
+            }
+        },
+        { 
+            "_name": "Air Temp",
+            "location": "SBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [-1, -24],
+            "outKey": "south-bird-island_air-temp_24",
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"None"    
+                }
+            }
+        },
+        { 
+            "_name": "Predicted Air Temp",
+            "location": "SBirdIsland",
+            "source": "NDFD_EXP",
+            "series": "pAirTemp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [126, 1],
+            "outKey": "south-bird-island_predicted_air-temp_126",
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"21600",
+                    "method":"linear",
+                    "limit_area":"None"    
+                }
+            }
+        }
+    ],
+    "postProcessCall": [],
+    "vectorOrder": [
+        {
+            "key": "south-bird-island_water-temp_24",
+            "dType": "float"
+        },
+        {
+            "key": "south-bird-island_air-temp_24",
+            "dType": "float"
+        },
+        {
+            "key": "south-bird-island_predicted_air-temp_126",
+            "dType": "float"
+        }
+    ]
+}
