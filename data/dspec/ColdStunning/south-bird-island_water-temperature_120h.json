@@ -61,7 +61,7 @@
             "series": "pAirTemp",
             "unit": "celsius",
             "interval": 3600,
-            "range": [126, 1],
+            "range": [120, 1],
             "outKey": "south-bird-island_predicted_air-temp_126",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
