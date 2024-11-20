@@ -68,7 +68,7 @@ class TEST_SS(ISeriesStorage):
                 return series
 
     
-    def select_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
+    def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
         match semaphoreSeriesDescription.dataSeries:
             case 'COMPLETE': 
                 return self.__make_complete_series(semaphoreSeriesDescription, timeDescription, False)
@@ -166,6 +166,11 @@ class TEST_SS(ISeriesStorage):
         # Perform list comprehension to generate a list of all the time steps we need plus another list of the same size this is all None
         return [generateTimestamp(initial_time, idx, timeDescription.interval) for idx in range(steps)]
             
-
     def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict]:
+        raise NotImplementedError()
+
+    def select_latest_output(self, model_name: str) -> Series | None: 
+        raise NotImplementedError()
+    
+    def select_output(self, model_name: str, from_time: datetime, to_time: datetime) -> Series | None: 
         raise NotImplementedError()
