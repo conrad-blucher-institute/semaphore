@@ -20,22 +20,17 @@ import pytest
 from src.utility import log, construct_true_path
 from src.ModelExecution.inputGatherer import InputGatherer
 
-@pytest.mark.parametrize("dspecFileName", [
-     ('TestModels/test_dspec.json'),
-     ('TestModels/test_dspec-2-0.json')
+@pytest.mark.parametrize("dspecFilePath", [
+     ('./data/dspec/TestModels/test_dspec.json'),
+     ('./data/dspec/TestModels/test_dspec-2-0.json')
 ])
-def test_parseDSPEC(dspecFileName: str):
+def test_parseDSPEC(dspecFilePath: str):
     """This function tests whether the specified DSPEC file
     is correctly parsed in the InputGatherer object
     """
 
-    inputGatherer = InputGatherer(dspecFileName)
+    inputGatherer = InputGatherer(dspecFilePath)
 
-    dspecFilePath = construct_true_path(getenv('DSPEC_FOLDER_PATH')) + dspecFileName
-    if not path.exists(dspecFilePath):
-        log(f'{dspecFilePath} not found!')
-        raise FileNotFoundError
-    
     # Read dspec from file and grab version
     with open(dspecFilePath) as dspecFile:
         dspec_json = load(dspecFile)

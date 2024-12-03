@@ -237,16 +237,24 @@ class dspec_sub_Parser_2_0:
 
     def __parse_vector_order(self):
 
-        vOrder = self.__dspec_json["vectorOrder"]
+        vOrder: list['dict'] = self.__dspec_json["vectorOrder"]
         keys = []
         dTypes = []
+        indexes = []
         for dict in vOrder:
             keys.append(dict['key'])
             dTypes.append(dict['dType'])
+            
+            index: list[int] | None  = dict.get('indexes')
+
+            # If there was no index object we will use None None to index the whole series
+            if index is None: indexes.append((None, None))
+            else: indexes.append(tuple(index))
 
         vectorOrder = VectorOrder()
         vectorOrder.keys = keys
         vectorOrder.dTypes = dTypes
+        vectorOrder.indexes = indexes
         self.__dspec.orderedVector = vectorOrder
 
             
@@ -338,12 +346,13 @@ class VectorOrder:
     def __init__(self) -> None:
         self.keys = []
         self.dTypes = []
+        self.indexes = []
 
     def __str__(self) -> str:
-        return f'\n[VectorOrder] -> keys: {self.keys}, dTypes: {self.dTypes}'
+        return f'\n[VectorOrder] -> keys: {self.keys}, dTypes: {self.dTypes}, indexes: {self.indexes}'
     
     def __repr__(self):
-        return f'\nVectorOrder({self.keys}, {self.dTypes})'
+        return f'\nVectorOrder({self.keys}, {self.dTypes}, {self.indexes})'
     
 
 class TimingInfo:
