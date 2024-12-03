@@ -22,7 +22,7 @@ from PostProcessing.IPostProcessing import post_processing_factory
 from exceptions import Semaphore_Data_Exception, Semaphore_Exception
 
 #Libraries
-from os import path, getenv
+from os import path, getenv, getcwd
 from json import load
 from datetime import datetime, timedelta
 
@@ -151,16 +151,19 @@ class InputGatherer:
         """
         target_keys = self.__dspec.orderedVector.keys
         data_types = self.__dspec.orderedVector.dTypes
+        indexes = self.__dspec.orderedVector.indexes
         input_vector = []
 
         log('Ordered Vector:')
-        for key, dtype in zip(target_keys, data_types):            
+        for key, dtype, index in zip(target_keys, data_types, indexes):            
 
             # Checking for each key in the input series dictionary 
             if key in self.__inputSeriesDict:
                 casted_data = self.__cast_data(self.__inputSeriesDict[key].data, dtype)
                 log(f'\t{key}: - amnt_found: {len(casted_data)}')
-                input_vector += casted_data
+
+                # Concatenate the designated slice of casted data into the input vector
+                input_vector += casted_data[index[0] : index[1]]
             else:
                 log(f'ERROR: There was a problem with input gatherer finding outKey {key} in {self.__inputSeriesDict}')
 
