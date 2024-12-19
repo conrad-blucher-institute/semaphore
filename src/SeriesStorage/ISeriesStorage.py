@@ -25,7 +25,15 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
     
     @abstractmethod
-    def select_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
+    def select_latest_output(self, model_name: str) -> Series | None: 
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def select_output(self, model_name: str, from_time: datetime, to_time: datetime) -> Series | None: 
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
         raise NotImplementedError()
     
     @abstractmethod
@@ -47,6 +55,7 @@ class ISeriesStorage(ABC):
     @abstractmethod
     def insert_output(self, series: Series) -> Series:
         raise NotImplementedError()
+
 
 def series_storage_factory() -> ISeriesStorage:
     """Imports the series storage class from the environment variable ISERIESSTORAGE_INSTANCE

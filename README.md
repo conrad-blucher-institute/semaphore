@@ -41,5 +41,6 @@ Currently, you can run Semaphore through the make_and_save_prediction and make_p
 * [@Beto Estrada](https://github.com/bestrada33) - bestrada4@islander.tamucc.edu
 * [@Savannah Stephenson](https://github.com/lovelysandlonelys) - sstephenson2@islander.tamucc.edu
 * [@Anointiyae Beasley](https://github.com/abeasley1722) - anointiyae.beasley@tamucc.edu
+* [@Jeremiah Sosa](https://github.com/jeremiahsosa77) - jsosa14@islander.tamucc.edu
 * [@Florence Tissot](https://github.com/ccftissot)
 

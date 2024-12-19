@@ -15,11 +15,11 @@ from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataIngestion.IDataIngestion import data_ingestion_factory
 from DataIntegrity.IDataIntegrity import data_integrity_factory
 from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription, Input
-from exceptions import Semaphore_Ingestion_Exception
+from exceptions import Semaphore_Ingestion_Exception, Semaphore_Exception
 
 from utility import log
 from datetime import timedelta
-
+from datetime import datetime
 
 
 
@@ -44,7 +44,7 @@ class SeriesProvider():
         return returningSeries
           
     
-    def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series:
+    def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, saveIngestion: bool = True) -> Series:
         """This method attempts to return a series matching a series description and a time description.
             It will attempt first to get the series from series storage, kicking off data ingestion if series storage
             doesn't have all the data.
@@ -66,7 +66,7 @@ class SeriesProvider():
             return validated_DB_results
 
         # Next we start Data Ingestion, to go and get the data we need
-        validated_DI_results, raw_DI_results = self.__data_ingestion_query(seriesDescription, timeDescription)
+        validated_DI_results, raw_DI_results = self.__data_ingestion_query(seriesDescription, timeDescription, saveIngestion)
         if validated_DI_results is not None and validated_DI_results.isComplete: 
             return validated_DI_results
         
@@ -83,17 +83,45 @@ class SeriesProvider():
         return self.__data_interpolation(seriesDescription, timeDescription, validated_merged_results)
    
     
-    def request_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription: TimeDescription) -> Series: 
-        ''' Takes a description of an output series and attempts to return it
-            :param seriesDescription: SemaphoreSeriesDescription -A semaphore series description
-            :param timeDescription: TimeDescription - A description about the temporal parts of the output series
-            :return series
+    def request_output(self, method: str, **kwargs) -> Series | None: 
+        ''' Selects the correct method from the ORM, calling it, and passing it the correct args
+            :param method: str - This is a string value to select which style of request you are trying to make
+            :param **kwargs - This is python kwargs formatted depending on method, see below
+            :return series | None
+
+            NOTE:: Latest assumes model version and time by just selecting the very last made prediction, will only return one value
+            method= 'LATEST'
+            request_output('LATEST', model_name=REQUESTED_MODEL_NAME)
+
+            NOTE:: Time span returns all the predictions for a model in a given time span, assumes model details from the last prediction
+            made from that model. 
+            method= 'TIME_SPAN'
+            request_output('TIME_SPAN', model_name= REQUESTED_MODEL_NAME, from_time= DATETIME, to_time= DATETIME)
+
+            NOTE:: Specific takes the most amount of detail in the request, taking a full semaphore series description and a full time description 
+            method= 'SPECIFIC'
+            request_output('SPECIFIC', semaphoreSeriesDescription= DESCRIPTION, timeDescription= DESCRIPTION)
         '''
-        
-        ###See if we can get the outputs from the database
-        requestedSeries = self.seriesStorage.select_output(semaphoreSeriesDescription, timeDescription)
-        return requestedSeries
-    
+
+        match method:
+            case 'LATEST':
+                try:
+                    return self.seriesStorage.select_latest_output(**kwargs)
+                except TypeError:
+                    raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("LATEST", model_name=REQUESTED_MODEL_NAME)')
+            case 'TIME_SPAN':
+                try:
+                    return self.seriesStorage.select_output(**kwargs)
+                except TypeError:
+                    raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("TIME_SPAN", model_name= REQUESTED_MODEL_NAME, from_time= DATETIME, to_time= DATETIME)')
+            case 'SPECIFIC':
+                try:
+                    return self.seriesStorage.select_specific_output(**kwargs)
+                except TypeError:
+                    raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("SPECIFIC", semaphoreSeriesDescription= DESCRIPTION, timeDescription= DESCRIPTION)')
+            case _:
+                raise NotImplementedError(f'Method {method} has not been implemented in SeriesProvider.request_output')
+              
 
     def __data_base_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> tuple[Series, Series]:
         """ Handles the process of getting requested data from series storage, validating it, and returning both validated and raw results 
@@ -110,7 +138,7 @@ class SeriesProvider():
         return validated_series_storage_results, series_storage_results
         
 
-    def __data_ingestion_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> tuple[Series | None, Series | None]:
+    def __data_ingestion_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, saveIngestion: bool) -> tuple[Series | None, Series | None]:
         """ Handles the process of getting requested data from series storage, validating it, and returning both validated and raw results 
         :param seriesDescription: SeriesDescription - The semantic description of request
         :param timeDescription: TimeDescription - The temporal description of the request
@@ -128,8 +156,12 @@ class SeriesProvider():
 
         if data_ingestion_results is None: return None, None # ingestion returns None if there was an error
 
-        # If we actually got some data, that data should be new and we need to save it in the database.
-        if(data_ingestion_results.data and data_ingestion_results.description.dataSource != "SEMAPHORE"):
+        
+        # Check if we should be saving this data in the db.
+        hasData = len(data_ingestion_results.data) > 0 # If we actually got some data, 
+        isSemaphoreSource = data_ingestion_results.description.dataSource != "SEMAPHORE"  # If this data came from semaphore itself
+
+        if(saveIngestion and hasData and not isSemaphoreSource):
             inserted_series = self.seriesStorage.insert_input(data_ingestion_results)
             
             if(inserted_series is None or len(inserted_series.data) == 0): # A sanity check that the data is actually getting inserted!
