@@ -1,0 +1,46 @@
+{
+    "dspecVersion": "2.0",
+    "modelName": "test_indexing",
+    "modelVersion": "1.0.0",
+    "author": "John Doe",
+    "modelFileName": "test_AI",
+    "timingInfo":{
+        "active": false,
+        "offset": 0,
+        "interval": 3600
+    },
+    "outputInfo": {
+        "outputMethod": "NA",
+        "leadTime": 86400,
+        "series": "NA",
+        "location": "NA",
+        "interval" : 3600, 
+        "datum": "NA",
+        "unit" : "NA"
+    },
+    "dependentSeries": [
+        { 
+            "_name": "TEST",
+            "location": "TEST",
+            "source": "TEST_DI",
+            "series": "COMPLETE",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [0, -11],
+            "outKey": "test_out"
+        }
+    ],
+    "postProcessCall": [],
+    "vectorOrder": [
+        {
+            "key": "test_out",
+            "dType": "float",
+            "indexes": [0, 3]
+        },
+        {
+            "key": "test_out",
+            "dType": "float",
+            "indexes": [4, 6]
+        }
+    ]
+}
