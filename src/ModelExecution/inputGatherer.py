@@ -160,10 +160,11 @@ class InputGatherer:
             # Checking for each key in the input series dictionary 
             if key in self.__inputSeriesDict:
                 casted_data = self.__cast_data(self.__inputSeriesDict[key].data, dtype)
-                log(f'\t{key}: - amnt_found: {len(casted_data)}')
+                indexed_data = casted_data[index[0] : index[1]]
+                log(f'\t{key}: - amnt_found: {len(casted_data)}, indexed_len: {len(indexed_data)}')
 
                 # Concatenate the designated slice of casted data into the input vector
-                input_vector += casted_data[index[0] : index[1]]
+                input_vector += indexed_data
             else:
                 log(f'ERROR: There was a problem with input gatherer finding outKey {key} in {self.__inputSeriesDict}')
 
