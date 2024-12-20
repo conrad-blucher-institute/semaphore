@@ -3,6 +3,7 @@
 #----------------------------------
 # Created By: Savannah Stephenson
 # Created Date: 10/09/2024
+# Version 1.0
 #----------------------------------
 """ This is a tools script used to add three user accounts to the semaphore database
     one for the API, one for Semaphore-Core, and one for read only team members. 
@@ -32,22 +33,16 @@ def create_general_user(engine: Engine, user: str, password: str):
     """
     with engine.begin() as conn:
         # Create a new user
-        conn.execute(text("CREATE USER :user WITH PASSWORD :password"),
-                     {"user": user, "password": password})
+        conn.execute(text(f"CREATE USER {user} WITH PASSWORD '{password}';"))
         # Grant connect on the database to the new user
-        conn.execute(text("GRANT CONNECT ON DATABASE :db TO :user"),
-                     {"db": os.getenv('POSTGRES_DB'), "user": user})
+        conn.execute(text(f"GRANT CONNECT ON DATABASE {os.getenv('POSTGRES_DB')} TO {user};"))
         # Grant SELECT permissions on all tables in schema public to the new user
-        conn.execute(text("GRANT SELECT ON ALL TABLES IN SCHEMA public TO :user"),
-                     {"user": user})
+        conn.execute(text(f"GRANT SELECT ON ALL TABLES IN SCHEMA public TO {user};"))
         # Grant SELECT permissions on all sequences in public schema to the new user
-        conn.execute(text("GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO :user"),
-                     {"user": user})
+        conn.execute(text(f"GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO {user};"))
         # Ensure that any future tables and sequences created in the 'public' schema also grant appropriate permissions
-        conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO :user"),
-                     {"user": user})
-        conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO :user"),
-                     {"user": user})
+        conn.execute(text(f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO {user};"))
+        conn.execute(text(f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO {user};"))
 
 
 def create_api_user(engine: Engine, user: str, password: str):
@@ -57,18 +52,17 @@ def create_api_user(engine: Engine, user: str, password: str):
         :param: password - str - The password for the user account.
     """
     with engine.begin() as conn:
-        conn.execute(text("CREATE USER :user WITH PASSWORD :password"),
-                     {"user": user, "password": password})
-        conn.execute(text("GRANT CONNECT ON DATABASE :db TO :user"),
-                     {"db": os.getenv('POSTGRES_DB'), "user": user})
-        conn.execute(text("GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO :user"),
-                     {"user": user})
-        conn.execute(text("GRANT SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO :user"),
-                     {"user": user})
-        conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE ON TABLES TO :user"),
-                     {"user": user})
-        conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, UPDATE ON SEQUENCES TO :user"),
-                     {"user": user})
+        # Create a new user
+        conn.execute(text(f"CREATE USER {user} WITH PASSWORD '{password}';"))
+        # Grant connect on the database to the new user
+        conn.execute(text(f"GRANT CONNECT ON DATABASE {os.getenv('POSTGRES_DB')} TO {user};"))
+        # Grant SELECT, INSERT, and UPDATE permissions on all tables in the 'public' schema
+        conn.execute(text(f"GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO {user};"))
+        # Grant SELECT and UPDATE permissions on all sequences (for auto-increment columns) in the 'public' schema
+        conn.execute(text(f"GRANT SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO {user};"))
+        # Ensure that any future tables and sequences created in the 'public' schema also grant appropriate permissions
+        conn.execute(text(f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE ON TABLES TO {user};"))
+        conn.execute(text(f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, UPDATE ON SEQUENCES TO {user};"))
 
 
 def create_core_user(engine: Engine, user: str, password: str):
@@ -78,14 +72,14 @@ def create_core_user(engine: Engine, user: str, password: str):
         :param: password - str - The password for the user account.
     """
     with engine.begin() as conn:
-        conn.execute(text("CREATE ROLE :user WITH LOGIN SUPERUSER PASSWORD :password"),
-                     {"user": user, "password": password})
-        conn.execute(text("GRANT CONNECT ON DATABASE :db TO :user"),
-                     {"db": os.getenv('POSTGRES_DB'), "user": user} )
-        conn.execute(text("GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO :user"),
-                     {"user": user} )
-        conn.execute(text("GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO :user"),
-                     {"user": user})
+        # Create a new user with superuser privileges
+        conn.execute(text(f"CREATE ROLE {user} WITH LOGIN SUPERUSER PASSWORD '{password}';"))
+        # Grant connect on the database to the new user
+        conn.execute(text(f"GRANT CONNECT ON DATABASE {os.getenv('POSTGRES_DB')} TO {user};"))
+        # Grant all permissions on all tables in schema public to the new user
+        conn.execute(text(f"GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO {user};"))
+        # Grant all permissions on all sequences in public schema to the new user
+        conn.execute(text(f"GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO {user};"))
 
 
 def check_user_exists(engine: Engine, user: str) -> bool:
