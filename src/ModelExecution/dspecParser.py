@@ -109,6 +109,7 @@ class dspec_sub_Parser_1_0:
 
             keys = []
             types = []
+            indexes = []
             for idx, inputJson in enumerate(inputsJson):
                 dseries = DependentSeries()
                 dseries.name = inputJson["_name"]
@@ -127,6 +128,7 @@ class dspec_sub_Parser_1_0:
                 # We record what is needed for the ordered vector
                 types.append(inputJson["type"])
                 keys.append(str(idx))
+                indexes.append((None, None))
 
                 dependentSeriesList.append(dseries)
             # Bind to dspec
@@ -135,6 +137,7 @@ class dspec_sub_Parser_1_0:
             vOrder = VectorOrder()
             vOrder.keys = keys
             vOrder.dTypes = types
+            vOrder.indexes = indexes
             self.__dspec.orderedVector = vOrder
 
 
