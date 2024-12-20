@@ -1,4 +1,4 @@
 {
-    "Target Version" : "2.7",
-    "Description" : "Updating output.modelName to a varchar(50)."
+    "Target Version" : "2.8",
+    "Description" : "NOAATANDC South Bird Island location mapping"
 }
