@@ -151,16 +151,15 @@ class SeriesProvider():
 
         try:
             data_ingestion_results = data_ingestion_class.ingest_series(seriesDescription, timeDescription)
+            
         except Exception:
             raise Semaphore_Ingestion_Exception('Error:: A problem occurred attempting to ingest data!')
-
         if data_ingestion_results is None: return None, None # ingestion returns None if there was an error
 
         
         # Check if we should be saving this data in the db.
         hasData = len(data_ingestion_results.data) > 0 # If we actually got some data, 
-        isSemaphoreSource = data_ingestion_results.description.dataSource != "SEMAPHORE"  # If this data came from semaphore itself
-
+        isSemaphoreSource = data_ingestion_results.description.dataSource == "SEMAPHORE"  # If this data came from semaphore itself
         if(saveIngestion and hasData and not isSemaphoreSource):
             inserted_series = self.seriesStorage.insert_input(data_ingestion_results)
             
