@@ -30,7 +30,9 @@ from dotenv import load_dotenv
     ("NOAATANDC", "dXWnCmp000D", "packChan", timedelta(seconds=360), "MHHW"), 
     ("NOAATANDC", "dYWnCmp000D", "packChan", timedelta(seconds=3600), "MHHW"), 
     ("NOAATANDC", "dYWnCmp000D", "packChan", timedelta(seconds=360), "MHHW"), 
-    ("NOAATANDC", "dSurge", "packChan", timedelta(seconds=3600), "MHHW")
+    ("NOAATANDC", "dSurge", "packChan", timedelta(seconds=3600), "MHHW"),
+    ("NOAATANDC", "dAirTmp", "packChan", timedelta(seconds=3600), "MHHW"),
+    ("NOAATANDC", "dWaterTmp", "packChan", timedelta(seconds=3600), "MHHW")
 ])
 
 def test_ingest_series(source: str, series: str, location: str, interval: timedelta, datum: str):
@@ -41,8 +43,8 @@ def test_ingest_series(source: str, series: str, location: str, interval: timede
     load_dotenv()
 
     
-    fromDate = datetime.combine(date(2023, 9, 5), time(11, 0))
-    toDate = datetime.combine(date(2023, 9, 5), time(17, 0))
+    fromDate = datetime.combine(date(2024, 12, 28), time(10, 0))
+    toDate = datetime.combine(date(2024, 12, 28), time(20, 0))
     
     #creating objects to pass
     seriesDescription = SeriesDescription(source, series, location, datum)
@@ -50,5 +52,6 @@ def test_ingest_series(source: str, series: str, location: str, interval: timede
 
     ingestSeries = data_ingestion_factory(seriesDescription)
     resultsSeries = ingestSeries.ingest_series(seriesDescription, timeDescription)
-
+    # Printing the result series with its name and content
+    print(f"Result Series for series '{series}': {resultsSeries.data}")
     assert resultsSeries.isComplete == True

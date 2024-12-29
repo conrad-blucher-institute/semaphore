@@ -55,6 +55,10 @@ class NOAATANDC(IDataIngestion):
                 return self.__fetch_WnSpd(seriesDescription, timeDescription)
             case 'dWnDir':
                 return self.__fetch_WnDir(seriesDescription, timeDescription)
+            case 'dAirTmp':
+                return self.__fetch_dAirTmp(seriesDescription, timeDescription)
+            case 'dWaterTmp':
+                return self.__fetch_dWaterTmp(seriesDescription, timeDescription)
             case _:
                 log(f'Data series: {seriesDescription.dataSeries}, not found for NOAAT&C for request: {seriesDescription}')
                 return None
@@ -360,5 +364,65 @@ class NOAATANDC(IDataIngestion):
 
         series = Series(seriesDescription, True, timeDescription)
         series.data = [input]
+
+        return series
+    
+    def __fetch_dAirTmp(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
+        data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'air_temperature')
+        if data is None: return None
+
+        inputs = []
+        for idx in data.index:
+
+            # parse
+            dt = idx.to_pydatetime()
+            value = data['v'][idx]
+
+            # If value is not on interval we ignore it
+            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
+                continue
+
+            dataPoints = Input(
+                dataValue= value,
+                dataUnit= 'celsius',
+                timeVerified= dt,
+                timeGenerated= dt, 
+                longitude= lat_lon[1],
+                latitude= lat_lon[0]
+            )
+            inputs.append(dataPoints)
+
+        series = Series(seriesDescription, True, timeDescription)
+        series.data = inputs
+
+        return series
+    
+    def __fetch_dWaterTmp(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
+        data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'water_temperature')
+        if data is None: return None
+
+        inputs = []
+        for idx in data.index:
+
+            # parse
+            dt = idx.to_pydatetime()
+            value = data['v'][idx]
+
+            # If value is not on interval we ignore it
+            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
+                continue
+
+            dataPoints = Input(
+                dataValue= value,
+                dataUnit= 'celsius',
+                timeVerified= dt,
+                timeGenerated= dt, 
+                longitude= lat_lon[1],
+                latitude= lat_lon[0]
+            )
+            inputs.append(dataPoints)
+
+        series = Series(seriesDescription, True, timeDescription)
+        series.data = inputs
 
         return series
