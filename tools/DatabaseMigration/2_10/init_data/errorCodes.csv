@@ -1,0 +1,5 @@
+code, result
+0, success
+-1, missing data error
+1, ingestion error
+2, semaphore error
