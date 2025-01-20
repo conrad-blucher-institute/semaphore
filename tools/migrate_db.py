@@ -155,10 +155,6 @@ def create_version_lists() -> tuple[list[str], list[tuple[int]]]:
     
     # Zips the two lists together, sorts them, unzips them
     versions, names = zip(*sorted(zip(versions, names)))
-
-    print(names)
-    print(versions)
-    
     return names, versions
 
 
