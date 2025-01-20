@@ -21,7 +21,39 @@ load_dotenv()
 TARGET_VERSION_FILEPATH = './tools/DatabaseMigration/target_version.json'
 DATABASE_MIGRATION_MODULE_PATH= './tools/DatabaseMigration'
 
-def get_current_database_version(engine: Engine) -> float:
+
+class Version():
+    def __init__(self, version_str: str, separator: str = '_'):
+        major, minor = map(int, version_str.split(separator))
+        self.major = major
+        self.minor = minor
+
+    @classmethod
+    def from_dot_separator(cls, version_str: str):
+        return cls(version_str, separator='.')
+
+    def __lt__(self, other):
+        if self.major == other.major:
+            return self.minor < other.minor
+        return self.major < other.major
+
+    def __gt__(self, other):
+        if self.major == other.major:
+            return self.minor > other.minor
+        return self.major > other.major
+
+    def __eq__(self, other):
+        return self.major == other.major and self.minor == other.minor
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __str__(self):
+        return f"{self.major}.{self.minor}"
+
+    
+
+def get_current_database_version(engine: Engine) -> Version:
     """This function get's the current version of the database from the database version table in the database.
             :param engine: Engine -The engine to connect to the database
     """
@@ -31,9 +63,9 @@ def get_current_database_version(engine: Engine) -> float:
     versionTableExists = inspector.has_table('deployed_database_version')
 
     if not dbExists:
-        return 0.0
+        return Version('0_0')
     if not versionTableExists:
-        return 1.0
+        return Version('1_0')
     
     #query the version table and return database version
     metadata_obj = MetaData()
@@ -44,8 +76,7 @@ def get_current_database_version(engine: Engine) -> float:
         cursor = connection.execute(stmt)
         version = cursor.fetchall()[0][0]
 
-    print(version)
-    return float(version)
+    return Version.from_dot_separator(version)
     
 def set_current_database_version(engine: Engine, version: float, description='') -> None:
     """This function sets the current database version to the passed version number
@@ -56,7 +87,7 @@ def set_current_database_version(engine: Engine, version: float, description='')
     """
 
     # The deployed_database_version isn't in the db till 2.0
-    if version == 1.0:
+    if version == Version.from_dot_separator('1.0'):
         return
 
     #set up table information
@@ -66,14 +97,14 @@ def set_current_database_version(engine: Engine, version: float, description='')
     with engine.begin() as connection:
         stmt = (update(version_table)
                        .values({
-                           version_table.c.versionNumber: str(version), 
+                           version_table.c.versionNumber: str(version.major) + '.' + str(version.minor), 
                            version_table.c.migrationTime: datetime.utcnow(), 
                            version_table.c.versionNotes: description
                        }))
         connection.execute(stmt)
         connection.commit()
 
-def get_target_version_info()-> tuple[float, str]:
+def get_target_version_info()-> tuple[Version, str]:
     """ This function returns the target version information by reading from the target
         version json file. 
             :return target_version, target_version_description: tuple[int,str] -The version number and description
@@ -84,7 +115,7 @@ def get_target_version_info()-> tuple[float, str]:
     
     with open(TARGET_VERSION_FILEPATH) as version_info:
         json = load(version_info)
-        target_version = float(json.get('Target Version'))
+        target_version = Version.from_dot_separator(json.get('Target Version'))
         target_version_description = json.get('Description')
         if not target_version or not target_version_description:
             raise KeyError(f'{TARGET_VERSION_FILEPATH} missing information.')
@@ -109,7 +140,7 @@ def find_next_version_idx(current_version: float, is_update: bool, version_list:
         #return the number to the left
         return current_version_idx - 1
 
-def create_version_lists() -> tuple[list[float], list[str]]:
+def create_version_lists() -> tuple[list[str], list[tuple[int]]]:
     '''
         The version directories have to be saved with _ instead of .
         This method processes the DatabaseMigration dir to unpack all the
@@ -120,12 +151,15 @@ def create_version_lists() -> tuple[list[float], list[str]]:
     # There is no 0_0 dir but that is the first theoretical version of the DB
 
     names = ['0_0'] + [entry for entry in listdir(base_path) if path.isdir(path.join(base_path, entry))]
-    float_versions = [float('.'.join(name.split('_'))) for name in names]
+    versions = [Version(name) for name in names]
     
     # Zips the two lists together, sorts them, unzips them
-    float_versions, names = zip(*sorted(zip(float_versions, names), key= lambda x: x[0]))
+    versions, names = zip(*sorted(zip(versions, names)))
+
+    print(names)
+    print(versions)
     
-    return names, float_versions
+    return names, versions
 
 
 def main():
