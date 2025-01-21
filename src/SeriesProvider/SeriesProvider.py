@@ -63,23 +63,19 @@ class SeriesProvider():
 
         # If there is a verification override, we have to always request new data, so we can return here
         if validated_DB_results.isComplete and seriesDescription.verificationOverride is None: 
-            log(f"Database Query Result: {validated_DB_results}, Raw DB Results: {raw_DB_results}")
             return validated_DB_results
 
         # Next we start Data Ingestion, to go and get the data we need
         validated_DI_results, raw_DI_results = self.__data_ingestion_query(seriesDescription, timeDescription, saveIngestion)
         if validated_DI_results is not None and validated_DI_results.isComplete: 
-            log(f"Data Ingestion Result: {validated_DI_results}, Raw DI Results: {validated_DI_results.data}")
             return validated_DI_results
         
         # If neither of those in isolation work we try merging them together
         validated_merged_results = self.__validate_series(seriesDescription, timeDescription, raw_DB_results.data, None if raw_DI_results is None else raw_DI_results.data)
         if validated_merged_results.isComplete: 
-            log(f"Data Merged Result: {validated_merged_results}")
             return validated_merged_results
         elif seriesDescription.dataIntegrityDescription is None:
             log(f'INFO:: Series is not complete and interpolation was not granted!')
-            print(f'INFO:: Series is not complete and interpolation was not granted!')
             return validated_merged_results
         
         # If we are allowed to interpolate, we interpolate the data and return that

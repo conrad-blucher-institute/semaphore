@@ -81,14 +81,9 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     responseSeries = provider.request_input(requestDescription, timeDescription, saveIngestion=False)
 
     # Change the nans in the responseSeries to Nones because fast api's jsonable_encoder cannot handle nans
-    print(f"Checking for Nans in the resposne series")
     for value in responseSeries.data:
-        print(f"Value: {value.dataValue}")
-        print(f"Value Type: {type(value.dataValue)}")
         if np.isnan(value.dataValue): 
-            print(f"The value is a nan: {value.dataValue}")
             value.dataValue = None
-            print(f"The value is now a None: {value.dataValue}")
 
     return responseSeries
 
