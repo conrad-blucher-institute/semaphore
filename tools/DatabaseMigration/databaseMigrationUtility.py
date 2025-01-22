@@ -106,6 +106,27 @@ class DatabaseDeletionHelper():
 
         # Write deleted data to file
         self.__deletion_data_dump(result)
+        
+    def delete_mapping_row(self, dataLocationCode: str, dataSourceCode: str):
+        """ A function to delete a SPECEFIC row from the mapping table without deleting rows from any other reference tables.
+            :param: dataLocationCode - str - The dataLocationCode for row to be deleted.
+            :param: dataSourceCode - str - The dataSourceCode for row to be deleted.
+            :param: tableName - str - The name of the table we want to delete from.
+        """
+        # Connect to the database and delete reference row
+        with self.__engine.connect() as conn:
+
+            # Reflect the table we want to delete from
+            table = self.__metadata.tables["dataLocation_dataSource_mapping"]
+            
+            # Now delete the reference data rows
+            delete_stmt = delete(table).where((table.c.dataSourceCode == dataSourceCode) & (table.c.dataLocationCode == dataLocationCode)).returning(table)
+            cursor = conn.execute(delete_stmt)
+            result = cursor.fetchall()  
+            conn.commit()
+
+        # Write deleted data to file
+        self.__deletion_data_dump(result)
 
     def __deletion_data_dump(self, result: any): 
         """ A function to write deleted database information to a file for safekeeping. 
