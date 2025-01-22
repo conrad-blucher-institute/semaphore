@@ -11,6 +11,7 @@
 #
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
+import numpy as np
 
 from datetime import datetime, timedelta
 from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription
@@ -78,6 +79,11 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
 
     provider = SeriesProvider()
     responseSeries = provider.request_input(requestDescription, timeDescription, saveIngestion=False)
+
+    # Change the nans in the responseSeries to Nones because fast api's jsonable_encoder cannot handle nans
+    for value in responseSeries.data:
+        if np.isnan(value.dataValue): 
+            value.dataValue = None
 
     return responseSeries
 
