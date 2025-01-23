@@ -6,7 +6,7 @@
 # Version 1.0
 #----------------------------------
 """This is a database migration script that will initialize version
-    2.11 of the database. The change from version 2.10 to 2.11 will 
+    2.10 of the database. The change from version 2.9 to 2.10 will 
     update the lagunamadre location longitude and latitude.
  """ 
 #----------------------------------
@@ -21,7 +21,7 @@ from datetime import datetime
 class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
-        """This function updates the database to version 2.11.
+        """This function updates the database to version 2.10.
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
         """
@@ -45,8 +45,8 @@ class Migrator(IDatabaseMigration):
         
 
     def rollback(self, databaseEngine: Engine) -> bool:
-        """This function rolls the database back to version 2.10 which involves
-           removing the changes associated with version 2.11 (The laguna madre latitude and longitude)
+        """This function rolls the database back to version 2.9 which involves
+           removing the changes associated with version 2.10 (The laguna madre latitude and longitude)
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
         """
