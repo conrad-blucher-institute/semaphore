@@ -111,7 +111,6 @@ class DatabaseDeletionHelper():
         """ A function to delete a SPECEFIC row from the mapping table without deleting rows from any other reference tables.
             :param: dataLocationCode - str - The dataLocationCode for row to be deleted.
             :param: dataSourceCode - str - The dataSourceCode for row to be deleted.
-            :param: tableName - str - The name of the table we want to delete from.
         """
         # Connect to the database and delete reference row
         with self.__engine.connect() as conn:
