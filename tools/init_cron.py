@@ -1,20 +1,72 @@
 # -*- coding: utf-8 -*-
-#init_cron.py
+#init_db.py
 #----------------------------------
 # Created By: Team
-# Created Date: 2/07/2023
-# Version: 3.0
+# Created Date: 1/23/2025
+# version 3.0
 #----------------------------------
-""" This file will update the local cron file with jobs (found in ./data/cron/semaphore.cron).
-    Updated on 5/21/2024 to version three which includes optimization. 
+"""This file generates the cron schedual for dspecs
  """ 
 #----------------------------------
 # 
-#
-# Imports
-import subprocess, os
-from os import path, listdir, getcwd, getenv
-from json import load, decoder
+import os
+import json
+import pandas as pd
+import argparse
+
+# python3 .\tools\init_cron.py -r ./data/dspec --max_dspec_per_command 10
+
+class DSPEC:
+    def __init__(self, name, full_path, interval, offset, isActive: bool):
+        self.name = name
+        self.full_path = full_path
+        self.interval = interval
+        self.offset = offset
+        self.isActive = isActive
+
+    def __str__(self):
+        return f'{self.name} - {self.full_path} - {self.interval} - {self.offset} - {self.isActive}'
+    
+    def __repr__(self):
+        return f'{self.name} - {self.full_path} - {self.interval} - {self.offset} - {self.isActive}'
+
+
+def process_model(filepath) -> DSPEC:
+    """Processes a DSPEC file loading it into a Model Object"""
+
+    filename = os.path.basename(filepath)
+    with open(filepath, 'r') as file:
+        data = json.load(file)
+    
+    timing_info =  data.get('timingInfo', None)
+
+    return DSPEC(
+        name=filename, 
+        full_path=filepath, 
+        interval=timing_info['interval'], 
+        offset=timing_info['offset'], 
+        isActive=timing_info['active']
+    )
+
+def recursive_directory_crawl(rootdir, models: list[DSPEC]) -> list[DSPEC]:
+    """
+    Recursively crawls the directory and processes each DSPEC.
+    """
+    for item in os.listdir(rootdir):
+        
+        next_path = os.path.join(rootdir, item)
+
+        if os.path.isdir(next_path):
+            recursive_directory_crawl(next_path, models)
+
+        else:
+            if item == 'comment.json':
+                continue
+
+            models.append(process_model(next_path))
+
+    return models
+
 
 def parse_seconds_to_components(seconds: int):
     """ This method takes a delta of seconds and converts it into
@@ -47,187 +99,57 @@ def format_timing(offset: int, interval: int) -> str:
     return str_cron
 
 
-def format_logging_string(dspec_path: str, modelName: str):
-    """ A function to format the logging string according to the model's information:
-        
-        mkdir -p ./logs/$(date "+\%Y")/$(date "+\%m")/Inundation/January
 
-    cronjob = 
-    """
+def drop_inactive_models(df: pd.DataFrame) -> pd.DataFrame:
+    """ This function drops all models that are inactive from the dataframe."""
+    inactive_df = df[~df['isActive']]
+    print(f'Dropping {len(inactive_df)} inactive models!')
+    return df[df['isActive']]
 
-    dspec_call_path = path.join(*(dspec_path.split(os.path.sep)[3:]))
-    return f'mkdir -p ./logs/{modelName} && docker exec semaphore-core python3 src/semaphoreRunner.py -d {dspec_call_path} >> ./logs/{modelName}/$(date "+\%Y")_$(date "+\%m")_{modelName}.log 2>> ./logs/CRON.log'
+def generate_grouped_jobs(df: pd.DataFrame, max_dspec_per_command: int = 10) -> list[str]:
+    """ This function groups the models by their interval and offset, and then
+        generates the cron job commands for each group.
+        Groups cannot exceed max_dspec_per_command. If they do they are split into
+        multiple commands."""
+    cron_file_lines = []
+    for (interval, offset), group in df.groupby(['interval', 'offset']):
+        print(f'Group: Interval={interval}, Offset={offset}, Length={len(group)}\n{group.to_string(index=False)}\n')
 
+        cron_file_lines.append(f'# {interval} {offset}')
+        for i in range(0, len(group), max_dspec_per_command):
+            
+            sub_group = group.iloc[i:i + max_dspec_per_command]
+            command = f"{format_timing(offset, interval)} docker exec semaphore-core python3 src/semaphoreRunner.py -d {' '.join(sub_group['full_path'])}"
+            print(command)
 
-def get_model_info(dspec_path: str):
-    """ Parses a dspec to read its timing info. Parses out its individual components.
-        :param dspec_path: str - The path of the dspec.
-        :returns a tuple of the components or None if something went wrong.
-            Returns components : modelName, active, offset, interval
-    """
-    timing_info = None
-    try:
-        with open(dspec_path) as dspecFile:
-            # Read json from file
-            dspec_json = load(dspecFile)
-        timing_info = dspec_json.get('timingInfo')
-        
-    except decoder.JSONDecodeError:
-        pass
-    finally:
-        if timing_info is None:
-            print(f'Warning: No timing found in {dspec_path}')
-            return None
+            cron_file_lines.append(command)
+            print('-' * 160)
+    return cron_file_lines
     
-
-    
-    name = dspec_json.get('modelName')
-    active = timing_info.get('active')
-    offset = timing_info.get('offset')
-    interval = timing_info.get('interval')
-
-    if name is None or active is None or offset is None or interval is None:
-        print(f'Warning: No timing is incorrectly formatted in {dspec_path}')
-        return None
-    
-    return name, active, int(offset), int(interval)
-    
-
-
-def process_dspec_file(dspec_path: str):
-    """Takes a dspec file path and builds a line for the cron file
-    Dependent on the timing information inside the dspec.
-    :returns str | bool - The line to put in the cron file as a string
-    OR True if there was no error, but the dspec is not active
-    OR False if the dspec was not able to be processed do to formatting error
-    """
-
-    model_info = get_model_info(dspec_path)
-    if model_info is None:
-        return False
-    
-    name, active, offset, interval = model_info
-    if active:
-        timing = format_timing(offset, interval)
-        logging_string = format_logging_string(dspec_path, name)
-        print('DSPEC Active: ', dspec_path)
-        return f'{timing} {logging_string}'
-    else:
-        print('DSPEC Dormant: ', dspec_path)
-        return True
-
-
-def read_comment_json(json_path: str):
-    """
-    Reads and returns the comment from a comment.json file found withing the
-    directory structure.
-    Returns true if an error occurred with reading the comment
-    """
-    with open(json_path) as commentJsonFile:
-        # Read json from file
-        comment_json = load(commentJsonFile)
-    comment =  comment_json.get('comment') # Return the comment
-    if comment is None:
-        print(f'Warning: {json_path} has no correctly formatted comment key.')
-        return None
-
-    return '# ' + comment
-
-def directory_crawl_recursive(directory_path: str, out, depth: int = 0):
-    """
-    This function recursively explores a directory generating the cron file.
-    It will print out comments found in comment.json's and report the file structure in the cron file.
-    It will generate cron strings for dspecs that are to be run.
-        :param directory_path:str - The current directory for this instance to explore
-        :param out: list[str] - A reference to a list of all the lines to write to the cron file.
-        :param depth: A control value for the recursive depth, used for formatting and failsafe.
-    """
-    # Depth failsafe
-    if depth > 1000:
-         return
-     
-    # Print our directory
-    dirname = path.basename(directory_path)
-    whitespace = '\t' * depth
-    out.append(f'#{whitespace}{dirname}')
-    # List everything in our directory
-    directory = listdir(directory_path)
-    next_directory_paths = []
-    model_strings = []
-    comment_strings = []
-    for item in directory:
-        item_path = path.join(directory_path, item)
-
-        # We save the next directories to recurse later.
-        # This is to insure comments and cron strings are printed in the
-        # right order.
-        if path.isdir(item_path):
-            next_directory_paths.append(item_path)
-        else:
-            # Look for comment.json and read/print
-            if item == 'comment.json':
-                result = read_comment_json(item_path)
-                if result is not None:
-                    comment_strings.append(result)
-            else:
-                result = process_dspec_file(item_path)
-
-                # The should be appended if there was an issue, or a strong was successfully made
-                # True means the dspec was turned off.
-                if result != True:
-                    model_strings.append(result)
-    
-    # We append comments before model strings, so they show up in the correct order
-    for string in comment_strings:
-        out.append(string)
-    for string in model_strings:
-        out.append(string)
-
-    # Recurse
-    for directory_path in next_directory_paths:
-        directory_crawl_recursive(directory_path, out, depth + 1)
-    return 
-
-
 
 def main():
-    """ The main function of init_cron.py reads through the despc folder to 
-        initialize cron jobs for models marked to run. 
-    """
-    print('Initializing Cron File...')
+    print(f'Working directory: {os.getcwd()}')
+    parser = argparse.ArgumentParser(description='Process DSPEC files and generate cron jobs.')
+    parser.add_argument('--root_directory', '-r', type=str, help='Root directory to start crawling for DSPEC files.')
+    parser.add_argument('--max_dspec_per_command', type=int, default=10, help='Maximum number of DSPECs per cron job command.')
+    args = parser.parse_args()
 
+    DSPECs = recursive_directory_crawl(args.root_directory, [])
 
-    base_dir = './data/dspec/'
-    cron_lines = []
-    directory_crawl_recursive(base_dir, cron_lines)
+    df = pd.DataFrame([DSPEC.__dict__ for DSPEC in DSPECs])
 
-    with open("./semaphore.cron", "w") as file:
-        for line in cron_lines: 
-            if line == False:
-                answer = ''
-                print('A problem occurred with one or more dspec files. The next stage will delete the old cron file. Abort? (Y/N)')
-                while True:
-                    answer = input().upper()
-                    if answer != 'Y' or answer != 'N':
-                        break
+    print(df.to_string())
+    print('*' * 160)
 
-                if answer == 'Y':
-                    print("Aborting...")
-                    exit(1)
-                else:
-                    continue
+    df = drop_inactive_models(df)
+    print('*' * 160)
 
-            file.write(line + "\n")
+    cron_file_lines = generate_grouped_jobs(df, args.max_dspec_per_command)
 
-        file.write('20 */1 * * * mkdir -p ./logs/Bird-Island_Water-Temperatue && docker exec semaphore-core python3 src/semaphoreRunner.py -d ColdStunning/Bird-Island_Water-Temperatue_120hr.json ColdStunning/Bird-Island_Water-Temperatue_114hr.json ColdStunning/Bird-Island_Water-Temperatue_108hr.json ColdStunning/Bird-Island_Water-Temperatue_102hr.json ColdStunning/Bird-Island_Water-Temperatue_96hr.json ColdStunning/Bird-Island_Water-Temperatue_90hr.json ColdStunning/Bird-Island_Water-Temperatue_84hr.json ColdStunning/Bird-Island_Water-Temperatue_78hr.json ColdStunning/Bird-Island_Water-Temperatue_72hr.json ColdStunning/Bird-Island_Water-Temperatue_66hr.json ColdStunning/Bird-Island_Water-Temperatue_60hr.json >> ./logs/Bird-Island_Water-Temperatue/$(date "+\%Y")_$(date "+\%m")_Bird-Island_Water-Temperatue.log 2>> ./logs/CRON.log\n')
-        file.write('25 */1 * * * mkdir -p ./logs/Bird-Island_Water-Temperatue && docker exec semaphore-core python3 src/semaphoreRunner.py -d ColdStunning/Bird-Island_Water-Temperatue_54hr.json ColdStunning/Bird-Island_Water-Temperatue_48hr.json ColdStunning/Bird-Island_Water-Temperatue_42hr.json ColdStunning/Bird-Island_Water-Temperatue_36hr.json ColdStunning/Bird-Island_Water-Temperatue_30hr.json ColdStunning/Bird-Island_Water-Temperatue_24hr.json ColdStunning/Bird-Island_Water-Temperatue_18hr.json ColdStunning/Bird-Island_Water-Temperatue_12hr.json ColdStunning/Bird-Island_Water-Temperatue_6hr.json ColdStunning/Bird-Island_Water-Temperatue_3hr.json >> ./logs/Bird-Island_Water-Temperatue/$(date "+\%Y")_$(date "+\%m")_Bird-Island_Water-Temperatue.log 2>> ./logs/CRON.log\n')
-        file.write("\n") # Make sure file ends with a new line
+    with open('sample_cron.txt', 'a') as cron_file:
+        for line in cron_file_lines:
+            cron_file.write(line + '\n')
+        cron_file.write('\n')
 
-    # Clear out the old cron file SAFELY
-    subprocess.run(['crontab', '-r'])
-
-    # Make a new cron file using the local file we have written to
-    subprocess.run(['crontab', './semaphore.cron'])
-    
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
