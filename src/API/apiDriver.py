@@ -55,9 +55,18 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     Raises:
         HTTPException: If the series is not found.
     """
+    print("------------------------------------------INPUT---------------------------------------")
+    print(f'Source:{source}')
+    print(f'Series:{series}')
+    print(f'Location:{location}')
+    print(f'From TIme:{fromDateTime}')
+    print(f'To Time:{toDateTime}')
+    print(f'Interval: {interval}')
+    print(f'Datum:{datum}')
     try:
         fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
         toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
+        
     except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
     
@@ -79,12 +88,16 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
 
     provider = SeriesProvider()
     responseSeries = provider.request_input(requestDescription, timeDescription, saveIngestion=False)
-
+    print('------------------------')
+    print(f'responseSeries:{responseSeries}')
     # Change the nans in the responseSeries to Nones because fast api's jsonable_encoder cannot handle nans
     for value in responseSeries.data:
-        if np.isnan(value.dataValue): 
-            value.dataValue = None
-
+        print('------------------------')
+        print(f'VALUE:{type(value.dataValue)}')
+        value.dataValue = str(value.dataValue)
+        
+    print('------------------------')
+    print(f'Final response series.data:{responseSeries.data}')
     return responseSeries
 
 

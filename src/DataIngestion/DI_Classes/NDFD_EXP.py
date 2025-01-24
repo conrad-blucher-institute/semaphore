@@ -173,8 +173,12 @@ class NDFD_EXP(IDataIngestion):
         """
         try:
             url = self.__create_url_pattern(seriesRequest, timeRequest, product)
-
+            print('')
+            print(f'---------------URL----------------:{url}')
             response = self.__api_request(url)
+            
+            print(f'-----------------------URL RESPONSE -----------------------')
+            print(response)
 
             if response is None:
                 log(f'NDFD_EXP | fetch_predictions | For unknown reason fetch failed for {seriesRequest}{timeRequest}')
