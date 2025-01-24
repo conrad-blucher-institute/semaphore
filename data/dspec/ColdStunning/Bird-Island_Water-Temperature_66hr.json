@@ -1,9 +1,9 @@
 {
     "dspecVersion": "2.0",
-    "modelName": "Bird-Island_Water-Temperatue_66hr",
+    "modelName": "Bird-Island_Water-Temperature_66hr",
     "modelVersion": "1.0.0",
     "author": "Christian Duff",
-    "modelFileName": "./ColdStunning/Bird-Island_Water-Temperatue_66hr",
+    "modelFileName": "./ColdStunning/Bird-Island_Water-Temperature_66hr",
     "timingInfo": {
         "active": false,
         "offset": 1200,
