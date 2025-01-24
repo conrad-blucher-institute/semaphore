@@ -80,10 +80,9 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     provider = SeriesProvider()
     responseSeries = provider.request_input(requestDescription, timeDescription, saveIngestion=False)
 
-    # Change the nans in the responseSeries to Nones because fast api's jsonable_encoder cannot handle nans
+    # Protect the API's JSON ENCODER from freaking out about floats sneaking from the ingestion class
     for value in responseSeries.data:
-        if np.isnan(value.dataValue): 
-            value.dataValue = None
+        value.dataValue = str(value.dataValue)
 
     return responseSeries
 
