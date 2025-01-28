@@ -5,7 +5,7 @@
 # Created Date: 1/23/2025
 # version 3.0
 #----------------------------------
-"""This file generates the cron schedual for dspecs
+"""This file generates the cron schedule for DSPECs
  """ 
 #----------------------------------
 # 
@@ -17,11 +17,12 @@ import argparse
 # python3 .\tools\init_cron.py -r ./data/dspec --max_dspec_per_command 10
 
 class DSPEC:
-    def __init__(self, name, full_path, interval, offset, isActive: bool):
+    def __init__(self, name: str, full_path: str, interval: int, offset: int, leadTime: int, isActive: bool):
         self.name = name
         self.full_path = full_path
         self.interval = interval
         self.offset = offset
+        self.leadTime = leadTime
         self.isActive = isActive
 
     def __str__(self):
@@ -39,12 +40,14 @@ def process_model(filepath) -> DSPEC:
         data = json.load(file)
     
     timing_info =  data.get('timingInfo', None)
+    outputInfo = data.get('outputInfo', None)
 
     return DSPEC(
         name=filename, 
         full_path=filepath, 
         interval=timing_info['interval'], 
         offset=timing_info['offset'], 
+        leadTime=outputInfo['leadTime'],
         isActive=timing_info['active']
     )
 
@@ -113,6 +116,11 @@ def generate_grouped_jobs(df: pd.DataFrame, max_dspec_per_command: int = 10) -> 
         multiple commands."""
     cron_file_lines = []
     for (interval, offset), group in df.groupby(['interval', 'offset']):
+
+        # Sort the group by lead time in descending order. With longer lead times running first
+        # they import the most data, hopefully fulfilling data requests of shorter lead time models.
+        group = group.sort_values(by='leadTime', ascending=False)
+
         print(f'Group: Interval={interval}, Offset={offset}, Length={len(group)}\n{group.to_string(index=False)}\n')
 
         cron_file_lines.append(f'# {interval} {offset}')
