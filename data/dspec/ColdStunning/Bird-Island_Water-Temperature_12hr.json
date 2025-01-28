@@ -1,9 +1,9 @@
 {
     "dspecVersion": "2.0",
-    "modelName": "Bird-Island_Water-Temperatue_48hr",
+    "modelName": "Bird-Island_Water-Temperature_12hr",
     "modelVersion": "1.0.0",
     "author": "Christian Duff",
-    "modelFileName": "./ColdStunning/Bird-Island_Water-Temperatue_48hr",
+    "modelFileName": "./ColdStunning/Bird-Island_Water-Temperature_12hr",
     "timingInfo": {
         "active": true,
         "offset": 1200,
@@ -11,7 +11,7 @@
     },
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
-        "leadTime": 172800,
+        "leadTime": 43200,
         "series": "pWaterTmp",
         "location": "SouthBirdIsland",
         "unit": "celsius"
@@ -67,10 +67,10 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                54,
+                18,
                 1
             ],
-            "outKey": "south-bird-island_predicted_air-temp_54",
+            "outKey": "south-bird-island_predicted_air-temp_18",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
@@ -92,11 +92,11 @@
             "dType": "float"
         },
         {
-            "key": "south-bird-island_predicted_air-temp_54",
+            "key": "south-bird-island_predicted_air-temp_18",
             "dType": "float",
             "indexes": [
                 0,
-                48
+                12
             ]
         }
     ]
