@@ -15,9 +15,6 @@ import pandas as pd
 import argparse
 import subprocess
 
-# python3 ./tools/init_cron.py -r ./data/dspec -i ./schedule --max_dspec_per_command 10
-# command = f"{format_timing(offset, interval)} docker exec semaphore-core python3 src/semaphoreRunner.py -d {' '.join(sub_group['full_path'])}"
-
 class DSPEC:
     def __init__(self, name: str, full_path: str, interval: int, offset: int, leadTime: int, isActive: bool):
         self.name = name
