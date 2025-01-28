@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-#init_db.py
+#init_cron.py
 #----------------------------------
 # Created By: Team
-# Created Date: 1/23/2025
+# Created Date: 1/28/2025
 # version 3.0
 #----------------------------------
 """This file generates the cron schedule for DSPECs
@@ -13,8 +13,10 @@ import os
 import json
 import pandas as pd
 import argparse
+import subprocess
 
-# python3 .\tools\init_cron.py -r ./data/dspec --max_dspec_per_command 10
+# python3 ./tools/init_cron.py -r ./data/dspec -i ./schedule --max_dspec_per_command 10
+# command = f"{format_timing(offset, interval)} docker exec semaphore-core python3 src/semaphoreRunner.py -d {' '.join(sub_group['full_path'])}"
 
 class DSPEC:
     def __init__(self, name: str, full_path: str, interval: int, offset: int, leadTime: int, isActive: bool):
@@ -50,6 +52,7 @@ def process_model(filepath) -> DSPEC:
         leadTime=outputInfo['leadTime'],
         isActive=timing_info['active']
     )
+
 
 def recursive_directory_crawl(rootdir, models: list[DSPEC]) -> list[DSPEC]:
     """
@@ -102,44 +105,107 @@ def format_timing(offset: int, interval: int) -> str:
     return str_cron
 
 
-
 def drop_inactive_models(df: pd.DataFrame) -> pd.DataFrame:
     """ This function drops all models that are inactive from the dataframe."""
     inactive_df = df[~df['isActive']]
     print(f'Dropping {len(inactive_df)} inactive models!')
     return df[df['isActive']]
 
-def generate_grouped_jobs(df: pd.DataFrame, max_dspec_per_command: int = 10) -> list[str]:
-    """ This function groups the models by their interval and offset, and then
-        generates the cron job commands for each group.
-        Groups cannot exceed max_dspec_per_command. If they do they are split into
-        multiple commands."""
-    cron_file_lines = []
+
+def generate_job_groups(df: pd.DataFrame, max_dspec_per_command: int = 999) -> dict[tuple[int]: list[str]]:
+    """
+    Groups models by their interval and offset ordered by lead time
+    Args:
+        df (pd.DataFrame): DataFrame containing model information with columns 'interval', 'offset', 'leadTime', and 'full_path'.
+        max_dspec_per_command (int, optional): Maximum number of model paths allowed per command. Defaults to 999.
+    Returns:
+        dict[tuple[int], list[str]]: Dictionary where keys are tuples of (offset, interval, sub_group_index) and values are lists of model paths.
+    The function performs the following steps:
+    1. Groups the DataFrame by 'interval' and 'offset'.
+    2. Sorts each group by 'leadTime' in descending order.
+    3. Splits each group into sub-groups, each containing up to `max_dspec_per_command` model paths.
+    4. Generates a unique key for each sub-group and stores the corresponding model paths in the dictionary.
+    """
+
+    job_groups = {}
     for (interval, offset), group in df.groupby(['interval', 'offset']):
 
         # Sort the group by lead time in descending order. With longer lead times running first
         # they import the most data, hopefully fulfilling data requests of shorter lead time models.
         group = group.sort_values(by='leadTime', ascending=False)
-
         print(f'Group: Interval={interval}, Offset={offset}, Length={len(group)}\n{group.to_string(index=False)}\n')
+        print('-' * 160)
 
-        cron_file_lines.append(f'# {interval} {offset}')
         for i in range(0, len(group), max_dspec_per_command):
-            
-            sub_group = group.iloc[i:i + max_dspec_per_command]
-            command = f"{format_timing(offset, interval)} docker exec semaphore-core python3 src/semaphoreRunner.py -d {' '.join(sub_group['full_path'])}"
-            print(command)
 
-            cron_file_lines.append(command)
-            print('-' * 160)
-    return cron_file_lines
+            # We sort the groups by offset and interval + a sub group index to ensure uniqueness
+            sub_group_key = (offset, interval, i // max_dspec_per_command)
+            
+            # Grab a number of model paths <= the max we allow per one command
+            sub_group = group.iloc[i:i + max_dspec_per_command]
+            model_paths = sub_group['full_path'].tolist()
+
+            job_groups[sub_group_key] = model_paths
+    return job_groups
+
+
+def write_intermediate_files(job_groups: dict[tuple[int], list[str]], folder_path: str) -> list[str]:
+    """
+    Writes job groups to intermediate JSON files for cron job processing.
+    Args:
+        job_groups (dict[tuple[int], list[str]]): A dictionary where each key is a tuple containing 
+            (offset, interval, sub_group_index) and each value is a list of model paths.
+        folder_path (str): The directory path where the intermediate files will be created.
+    Returns:
+        list[str]: A list of file paths to the created intermediate JSON files.
+    """
+
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    intermediate_files = []
+    for key, value in job_groups.items():
+        offset, interval, sub_group_index = key
+        file_path = f'{folder_path}/job_{offset}_{interval}_{sub_group_index}.json'
+
+        json_data = json.dumps(value, indent=4)
+
+        with open(file_path, 'w') as file:
+            file.write(json_data)
     
+        intermediate_files.append(file_path)
+    return intermediate_files
+
+def write_cron_jobs(job_groups: dict[tuple[int], list[str]], intermediate_file_paths: list[str]):
+    """
+    Writes cron job commands to a file based on the provided job groups and intermediate file paths.
+    Args:
+        job_groups (dict[tuple[int], list[str]]): A dictionary where the key is a tuple containing 
+            (offset, interval, sub_group_index) and the value is a list of job commands.
+        intermediate_file_paths (list[str]): A list of file paths to be used in the cron job commands.
+    Writes:
+        A file named 'sample_cron.txt' containing the cron job commands.
+    """
+
+    commands = []
+    for key, path in zip(job_groups.keys(), intermediate_file_paths):
+        offset, interval, _ = key
+        timing_str = format_timing(offset, interval)
+        command = f"{timing_str} ./tools/[insert_helper_script_command] {path}"
+
+        commands.append(command)
+
+    with open('./semaphore.cron', 'w') as file:
+        file.write('\n'.join(commands))
+        file.write('\n') # Extra new line to make the cron vile valid    
+
 
 def main():
-    print(f'Working directory: {os.getcwd()}')
     parser = argparse.ArgumentParser(description='Process DSPEC files and generate cron jobs.')
     parser.add_argument('--root_directory', '-r', type=str, help='Root directory to start crawling for DSPEC files.')
-    parser.add_argument('--max_dspec_per_command', type=int, default=10, help='Maximum number of DSPECs per cron job command.')
+    parser.add_argument('--intermediate_file_folder', '-i', type=str, help='Folder to write intermediate files for cron jobs.')
+    parser.add_argument('--max_dspec_per_command', type=int, default=999, help='Maximum number of DSPECs per cron job command.')
+    
     args = parser.parse_args()
 
     DSPECs = recursive_directory_crawl(args.root_directory, [])
@@ -152,12 +218,13 @@ def main():
     df = drop_inactive_models(df)
     print('*' * 160)
 
-    cron_file_lines = generate_grouped_jobs(df, args.max_dspec_per_command)
+    job_groups = generate_job_groups(df, args.max_dspec_per_command)
+    intermediate_files = write_intermediate_files(job_groups, args.intermediate_file_folder)
+    write_cron_jobs(job_groups, intermediate_files)
 
-    with open('sample_cron.txt', 'a') as cron_file:
-        for line in cron_file_lines:
-            cron_file.write(line + '\n')
-        cron_file.write('\n')
+    # Clear out the old cron file SAFELY and a new cron file.
+    subprocess.run(['crontab', '-r'])
+    subprocess.run(['crontab', './semaphore.cron'])
 
 if __name__ == '__main__':
     main()
