@@ -60,7 +60,8 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
-
 # Logs
-
 log.txt
+
+# Schedule
+/schedule/*
