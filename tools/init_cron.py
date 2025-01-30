@@ -188,7 +188,7 @@ def write_cron_jobs(job_groups: dict[tuple[int], list[str]], intermediate_file_p
     for key, path in zip(job_groups.keys(), intermediate_file_paths):
         offset, interval, _ = key
         timing_str = format_timing(offset, interval)
-        command = f"{timing_str} ./tools/[insert_helper_script_command] {path}"
+        command = f"{timing_str} python3 ./tools/group_runner.py -i {path}"
 
         commands.append(command)
 
