@@ -20,7 +20,7 @@ docker-compose build
 docker-compose up -d
 
 # Update the cron file on the VM
-python3 tools/init_cron.py 
+python3 tools/init_cron.py -r ./data/dspec -i ./schedule
 
 # initialize the db in the containers
 docker exec semaphore-core python3 tools/migrate_db.py 
