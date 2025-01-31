@@ -60,9 +60,8 @@ class NDFD_EXP(IDataIngestion):
 
         sleep(30)
 
-        time_check_result = __date_time_check(timeDescription)
-        print(f"result = {time_check_result}")
-        if not time_check_result:
+        validation_result = date_validation(timeDescription)
+        if not validation_result:
             return
 
         # Remove digits 
@@ -439,17 +438,16 @@ def iso8601_to_unixms(timestamp: str) -> int:
     except (ValueError, TypeError, AttributeError, OSError) as e:
         raise ValueError(f"Error converting timestamp to milliseconds: {e}")
     
-def __date_time_check(timeDescription : TimeDescription) -> bool:
+def date_validation(timeDescription : TimeDescription) -> bool:
     """Checks if date time passed is valid"""
-
     to_datetime = timeDescription.toDateTime
-    print(f"to date time is : {to_datetime}")
     from_datetime = timeDescription.fromDateTime
-    print(f"from date time is : {from_datetime}")
 
-    now = datetime.now()
-    if (from_datetime <= now) or (to_datetime <= now):
-        log("ERROR: Invalid Date Time Provided")
+    now = datetime.now().replace(minute=0, second=0, microsecond=0)
+
+    if from_datetime < now or to_datetime < now:
+        log("ERROR: Invalid Date Time Provided. API request not granted.")
+        log(f'From Time:{from_datetime} To Time:{to_datetime}')
         return False
     
     return True
