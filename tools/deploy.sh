@@ -9,11 +9,11 @@
 # Lower active containers
 docker-compose down
 
-# Fetch origin
-git fetch origin --tags $1
+# Fetch origin            vvvvvv - This will delete any tags that origin has deleted
+git fetch origin --tags --prune --prune-tags
 
-# Pull latest code 
-git pull
+# Checkout correct tag
+git checkout $1
 
 # Build new images and raise containers
 docker-compose build
