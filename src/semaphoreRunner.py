@@ -197,10 +197,12 @@ def clean_and_check_dspec(dspec_path: str) -> str:
     if not dspec_path.endswith('.json'): 
         dspec_path = dspec_path + '.json'
 
-    if not path.exists(dspec_path):
-        log(f'{dspec_path} not found!')
+    dspecFilePath = path.join(construct_true_path(getenv('DSPEC_FOLDER_PATH')), dspec_path)
+
+    if not path.exists(dspecFilePath):
+        log(f'{dspecFilePath} not found!')
         raise FileNotFoundError
-    return dspec_path
+    return dspecFilePath
 
 
 
