@@ -31,7 +31,7 @@ class DSPEC:
         return f'{self.name} - {self.full_path} - {self.interval} - {self.offset} - {self.isActive}'
 
 
-def process_model(filepath) -> DSPEC:
+def process_model(filepath):
     """Processes a DSPEC file loading it into a Model Object"""
 
     filename = os.path.basename(filepath)
@@ -51,7 +51,7 @@ def process_model(filepath) -> DSPEC:
     )
 
 
-def recursive_directory_crawl(rootdir, models: list[DSPEC]) -> list[DSPEC]:
+def recursive_directory_crawl(rootdir, models):
     """
     Recursively crawls the directory and processes each DSPEC.
     """
@@ -71,7 +71,7 @@ def recursive_directory_crawl(rootdir, models: list[DSPEC]) -> list[DSPEC]:
     return models
 
 
-def parse_seconds_to_components(seconds: int):
+def parse_seconds_to_components(seconds):
     """ This method takes a delta of seconds and converts it into
         the amnt of minutes, hours.
     """
@@ -81,7 +81,7 @@ def parse_seconds_to_components(seconds: int):
     return hours, minutes
 
 
-def format_timing(offset: int, interval: int) -> str:
+def format_timing(offset, interval):
     """ A function to format the timing information in a model's dspec into 
         the cron job format: 
         
@@ -102,14 +102,14 @@ def format_timing(offset: int, interval: int) -> str:
     return str_cron
 
 
-def drop_inactive_models(df: pd.DataFrame) -> pd.DataFrame:
+def drop_inactive_models(df):
     """ This function drops all models that are inactive from the dataframe."""
     inactive_df = df[~df['isActive']]
     print(f'Dropping {len(inactive_df)} inactive models!')
     return df[df['isActive']]
 
 
-def generate_job_groups(df: pd.DataFrame, max_dspec_per_command: int = 999) -> dict[tuple[int]: list[str]]:
+def generate_job_groups(df, max_dspec_per_command = 999):
     """
     Groups models by their interval and offset ordered by lead time
     Args:
@@ -146,7 +146,7 @@ def generate_job_groups(df: pd.DataFrame, max_dspec_per_command: int = 999) -> d
     return job_groups
 
 
-def write_intermediate_files(job_groups: dict[tuple[int], list[str]], folder_path: str) -> list[str]:
+def write_intermediate_files(job_groups, folder_path):
     """
     Writes job groups to intermediate JSON files for cron job processing.
     Args:
@@ -173,7 +173,7 @@ def write_intermediate_files(job_groups: dict[tuple[int], list[str]], folder_pat
         intermediate_files.append(file_path)
     return intermediate_files
 
-def write_cron_jobs(job_groups: dict[tuple[int], list[str]], intermediate_file_paths: list[str]):
+def write_cron_jobs(job_groups, intermediate_file_paths):
     """
     Writes cron job commands to a file based on the provided job groups and intermediate file paths.
     Args:
