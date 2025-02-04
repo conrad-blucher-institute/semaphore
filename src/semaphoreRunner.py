@@ -23,7 +23,7 @@ from discord import Discord_Notify
 from DataClasses import Series, SemaphoreSeriesDescription, Output
 from ModelExecution.modelWrapper import ModelWrapper
 from ModelExecution.inputGatherer import InputGatherer
-from utility import log, construct_true_path, LogLocationDirector
+from utility import log, construct_true_path
 from SeriesStorage.ISeriesStorage import series_storage_factory
 
 
@@ -92,7 +92,6 @@ def run_semaphore(fileName: str, executionTime: datetime = None, toss: bool = Fa
             model_name = input_gatherer.get_dspec().modelName
             MW = ModelWrapper(input_gatherer)
 
-            LogLocationDirector().set_log_target_path(getenv('LOG_BASE_PATH'), model_name)
             log(f'----Running {fileName} for {executionTime}! Toss: {toss}----')
 
 
