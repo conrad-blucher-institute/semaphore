@@ -5,7 +5,7 @@
     "author": "Christian Duff",
     "modelFileName": "./ColdStunning/Bird-Island_Water-Temperature_3hr",
     "timingInfo": {
-        "active": false,
+        "active": true,
         "offset": 1200,
         "interval": 3600
     },
