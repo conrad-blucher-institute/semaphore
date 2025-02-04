@@ -23,7 +23,7 @@ from discord import Discord_Notify
 from DataClasses import Series, SemaphoreSeriesDescription, Output
 from ModelExecution.modelWrapper import ModelWrapper
 from ModelExecution.inputGatherer import InputGatherer
-from utility import log, construct_true_path, LogLocationDirector
+from utility import log, construct_true_path
 from SeriesStorage.ISeriesStorage import series_storage_factory
 
 
@@ -92,7 +92,6 @@ def run_semaphore(fileName: str, executionTime: datetime = None, toss: bool = Fa
             model_name = input_gatherer.get_dspec().modelName
             MW = ModelWrapper(input_gatherer)
 
-            LogLocationDirector().set_log_target_path(getenv('LOG_BASE_PATH'), model_name)
             log(f'----Running {fileName} for {executionTime}! Toss: {toss}----')
 
 
@@ -198,10 +197,12 @@ def clean_and_check_dspec(dspec_path: str) -> str:
     if not dspec_path.endswith('.json'): 
         dspec_path = dspec_path + '.json'
 
-    if not path.exists(dspec_path):
-        log(f'{dspec_path} not found!')
+    dspecFilePath = path.join(construct_true_path(getenv('DSPEC_FOLDER_PATH')), dspec_path)
+
+    if not path.exists(dspecFilePath):
+        log(f'{dspecFilePath} not found!')
         raise FileNotFoundError
-    return dspec_path
+    return dspecFilePath
 
 
 
