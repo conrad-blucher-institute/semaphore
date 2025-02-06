@@ -10,13 +10,69 @@
  """ 
 #----------------------------------
 # 
-#
-# Imports
-import subprocess, os
-from os import path, listdir, getcwd, getenv
-from json import load, decoder
+import os
+import json
+import pandas as pd
+import argparse
+import subprocess
 
-def parse_seconds_to_components(seconds: int):
+class DSPEC:
+    def __init__(self, name: str, full_path: str, interval: int, offset: int, leadTime: int, isActive: bool):
+        self.name = name
+        self.full_path = full_path
+        self.interval = interval
+        self.offset = offset
+        self.leadTime = leadTime
+        self.isActive = isActive
+
+    def __str__(self):
+        return f'{self.name} - {self.full_path} - {self.interval} - {self.offset} - {self.isActive}'
+    
+    def __repr__(self):
+        return f'{self.name} - {self.full_path} - {self.interval} - {self.offset} - {self.isActive}'
+
+
+def process_model(filepath):
+    """Processes a DSPEC file loading it into a Model Object"""
+
+    filename = os.path.basename(filepath)
+    with open(filepath, 'r') as file:
+        data = json.load(file)
+    
+    timing_info =  data.get('timingInfo', None)
+    outputInfo = data.get('outputInfo', None)
+
+    return DSPEC(
+        name=filename, 
+        full_path=filepath, 
+        interval=timing_info['interval'], 
+        offset=timing_info['offset'], 
+        leadTime=outputInfo['leadTime'],
+        isActive=timing_info['active']
+    )
+
+
+def recursive_directory_crawl(rootdir, models):
+    """
+    Recursively crawls the directory and processes each DSPEC.
+    """
+    for item in os.listdir(rootdir):
+        
+        next_path = os.path.join(rootdir, item)
+
+        if os.path.isdir(next_path):
+            recursive_directory_crawl(next_path, models)
+
+        else:
+            if item == 'comment.json':
+                continue
+
+            models.append(process_model(next_path))
+
+    return models
+
+
+def parse_seconds_to_components(seconds):
     """ This method takes a delta of seconds and converts it into
         the amnt of minutes, hours.
     """
@@ -26,7 +82,7 @@ def parse_seconds_to_components(seconds: int):
     return hours, minutes
 
 
-def format_timing(offset: int, interval: int) -> str:
+def format_timing(offset, interval):
     """ A function to format the timing information in a model's dspec into 
         the cron job format: 
         
@@ -47,12 +103,14 @@ def format_timing(offset: int, interval: int) -> str:
     return str_cron
 
 
-def format_logging_string(dspec_path: str, modelName: str):
-    """ A function to format the logging string according to the model's information:
-        
-        mkdir -p ./logs/$(date "+\%Y")/$(date "+\%m")/Inundation/January
+def drop_inactive_models(df):
+    """ This function drops all models that are inactive from the dataframe."""
+    inactive_df = df[~df['isActive']]
+    print(f'Dropping {len(inactive_df)} inactive models!')
+    return df[df['isActive']]
 
-    cronjob = 
+
+def generate_job_groups(df, max_dspec_per_command = 999):
     """
 
     dspec_call_path = path.join(*(dspec_path.split(os.path.sep)[3:]))
@@ -94,12 +152,15 @@ def get_model_info(dspec_path: str):
     
 
 
-def process_dspec_file(dspec_path: str):
-    """Takes a dspec file path and builds a line for the cron file
-    Dependent on the timing information inside the dspec.
-    :returns str | bool - The line to put in the cron file as a string
-    OR True if there was no error, but the dspec is not active
-    OR False if the dspec was not able to be processed do to formatting error
+def write_intermediate_files(job_groups, folder_path):
+    """
+    Writes job groups to intermediate JSON files for cron job processing.
+    Args:
+        job_groups (dict[tuple[int], list[str]]): A dictionary where each key is a tuple containing 
+            (offset, interval, sub_group_index) and each value is a list of model paths.
+        folder_path (str): The directory path where the intermediate files will be created.
+    Returns:
+        list[str]: A list of file paths to the created intermediate JSON files.
     """
 
     model_info = get_model_info(dspec_path)
@@ -133,7 +194,8 @@ def read_comment_json(json_path: str):
 
     return '# ' + comment
 
-def directory_crawl_recursive(directory_path: str, out, depth: int = 0):
+
+def write_cron_jobs(job_groups, intermediate_file_paths):
     """
     This function recursively explores a directory generating the cron file.
     It will print out comments found in comment.json's and report the file structure in the cron file.
