@@ -188,7 +188,7 @@ def write_cron_jobs(job_groups, intermediate_file_paths):
     for key, path in zip(job_groups.keys(), intermediate_file_paths):
         offset, interval, _ = key
         timing_str = format_timing(offset, interval)
-        command = f"{timing_str} python3 ./tools/group_runner.py -i {path}"
+        command = f"{timing_str} cd semaphore && python3 ./tools/group_runner.py -i {path}"
 
         commands.append(command)
 
