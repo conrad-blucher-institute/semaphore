@@ -1,4 +1,4 @@
 {
-    "Target Version" : "2.10",
-    "Description" : "Updated laguna madre's latitude and longitude"
+    "Target Version" : "2.11",
+    "Description" : "Adding a reference table to map the error codes"
 }
