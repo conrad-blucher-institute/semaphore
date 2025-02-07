@@ -33,8 +33,8 @@ class Migrator(IDatabaseMigration):
         csvFilePath = f'{CSV_FILE_PATHS}/{csvFileName}'
         errorCodes = []
         with open(csvFilePath, mode = 'r') as infile:
-            csv = csv.DictReader(infile)
-            for row in csv:
+            csvDict = csv.DictReader(infile)
+            for row in csvDict:
                 errorCodes.append({
                     "code": int(row['code']),
                     "result": row['result']
@@ -43,7 +43,7 @@ class Migrator(IDatabaseMigration):
         return errorCodes
 
     def update(self, databaseEngine: Engine) -> bool:
-        """This function updates the database to version 2.10 which adds the
+        """This function updates the database to version 2.11 which adds the
            ref_predictionResults table. 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
@@ -52,8 +52,7 @@ class Migrator(IDatabaseMigration):
         self.__create_schema()
 
         #first row with error codes
-        first_row_error_codes = self.readInitCSV('errorCodes.csv')
-
+        error_codes = self.readInitCSV('errorCodes.csv')
 
         #starting a transaction
         with databaseEngine.begin() as connection:
@@ -61,7 +60,7 @@ class Migrator(IDatabaseMigration):
             self._metadata.create_all(connection)
             #insert the first row error codes
             connection.execute(insert(self.ref_predictionResults)
-                               .values(first_row_error_codes))
+                               .values(error_codes))
             connection.commit()
 
         return True
