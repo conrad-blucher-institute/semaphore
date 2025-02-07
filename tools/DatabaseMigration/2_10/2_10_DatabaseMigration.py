@@ -1,98 +1,70 @@
 # -*- coding: utf-8 -*-
 #2_10_DatabaseMigration.py
 #----------------------------------
-# Created By: Jeremiah Sosa
-# Created Date: 01/03/2025
+# Created By: Anointiyae Beasley
+# Created Date: 1/22/2024
 # Version 1.0
 #----------------------------------
 """This is a database migration script that will initialize version
-    2.10 of the database. The change from version 2.9 to 2.10 is that 
-    were adding a reference table to map the error codes.
+    2.10 of the database. The change from version 2.9 to 2.10 will 
+    update the lagunamadre location longitude and latitude.
  """ 
 #----------------------------------
 # 
 #
 #Imports
 from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
-from sqlalchemy import Table, Column, Integer, String, MetaData, Engine
-from sqlalchemy.dialects.postgresql import insert
-import csv
-
-#Constants
-CSV_FILE_PATHS = './tools/DatabaseMigration/2_10/init_data'
+from sqlalchemy import MetaData, Engine, update
+from datetime import datetime
 
 
 class Migrator(IDatabaseMigration):
 
-    def readInitCSV(self, csvFileName: str) -> list:
-        """This function reads in a CSV file
-            :param csvFileName: str - CSV file name
-            
-            :return: Semaphore error codes
-        """
-        csvFilePath = f'{CSV_FILE_PATHS}/{csvFileName}'
-        first_row_error_code = []
-        with open(csvFilePath, mode = 'r') as infile:
-            csv = csv.DictReader(infile)
-            for row in csv:
-                first_row_error_code.append({
-                    "code": int(row['code']),
-                    "result": row['result']
-                })
-
-        return first_row_error_code
-
     def update(self, databaseEngine: Engine) -> bool:
-        """This function updates the database to version 2.10 which adds the
-           ref_predictionResults table. 
+        """This function updates the database to version 2.10.
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
         """
-        #create the schema of the additional table 
-        self.__create_schema()
 
-        #first row with error codes
-        first_row_error_codes = self.readInitCSV()
-
+        # Reflect the tables from the database that we want to add data too
+        metadata = MetaData()
+        metadata.reflect(bind=databaseEngine)
+        
+        ref_dataLocation = metadata.tables['ref_dataLocation']
         
         #starting a transaction
         with databaseEngine.begin() as connection:
-            #add new table to the database
-            self._metadata.create_all(connection)
-            #insert the first row error codes
-            connection.execute(insert(self.ref_predictionResults)
-                               .values(first_row_error_codes))
-            connection.commit()
+
+            connection.execute(
+                update(ref_dataLocation)
+                .where(ref_dataLocation.c.code == 'lagunamadre')
+                .values(latitude=26.75, longitude=-97.4167)
+            )
         
         return True
-
-    def __create_schema(self) -> None:
-        """Builds the db schema for the version table in the metadata.
-        """
-
-        self._metadata = MetaData()
-        
-        #this table stores the current version of the database
-        self.ref_predictionResults = Table(
-            "ref_predictionResults",
-            self._metadata,
-
-            Column("code", Integer, primary_key=True),
-            Column("result", String(32), nullable=False)
-        )
         
 
     def rollback(self, databaseEngine: Engine) -> bool:
         """This function rolls the database back to version 2.9 which involves
-           removing the changes associated with version 2.10.
+           removing the changes associated with version 2.10 (The laguna madre latitude and longitude)
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
         """
 
-        self.__create_schema()
+        # Reflect the tables from the database that we want to add data too
+        metadata = MetaData()
+        metadata.reflect(bind=databaseEngine)
+        
+        ref_dataLocation = metadata.tables['ref_dataLocation']
+        
         #starting a transaction
         with databaseEngine.begin() as connection:
-            #dropping the table
-            self.ref_predictionResults.drop(connection)
+
+            connection.execute(
+                update(ref_dataLocation)
+                .where(ref_dataLocation.c.code == 'lagunamadre')
+                .values(latitude=0, longitude=0)
+            )
 
         return True
+        

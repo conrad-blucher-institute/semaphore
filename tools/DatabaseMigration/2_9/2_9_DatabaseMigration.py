@@ -6,7 +6,7 @@
 # Version 1.0
 #----------------------------------
 """This is a database migration script that will initialize version
-    2.9 of the database. The change from version 2.9 to 2.9 will add
+    2.9 of the database. The change from version 2.8 to 2.9 will add
     rows to the locations reference table and the location
     mapping reference table for Cold Stunning air and water temperature Measurements. 
  """ 
@@ -79,23 +79,22 @@ class Migrator(IDatabaseMigration):
             return result
 
     def rollback(self, databaseEngine: Engine) -> bool:
-        """This function rolls the database back to version 2.9 which involves removing the changes 
+        """This function rolls the database back to version 2.8 which involves removing the changes 
            associated with version 2.9.
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
         """
-        # Note that we only explicitly include the locations csv here
-        # because a part of the deep_delete protocol of the data locations
-        # table is to delete the location from the mapping table. 
-        fileNames = ['sbiLocations.csv']
-        fileTypes = [KeywordType.DATA_LOCATION]
-
+        dataLocationCode = "lagunamadre"
+        dataSourceCode = "NDFD_EXP"
+        
         # Using the utility helper class to delete any data dependent on the rows added in the 2.9 Migration
         helper = DatabaseDeletionHelper(databaseEngine)
+        
+        try:
+            helper.delete_mapping_row(dataLocationCode, dataSourceCode)
+        except Exception as e:
+            print(f"Failed to delete mapping row: {e}")
 
-        for file, type in zip(fileNames, fileTypes):
-            for rowDict in self.readInitCSV(file):
-                helper.deep_delete_keyword(rowDict["code"], type)
 
         return True

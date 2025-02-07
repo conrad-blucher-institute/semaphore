@@ -11,6 +11,7 @@
 #
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
+import numpy as np
 
 from datetime import datetime, timedelta
 from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription
@@ -78,6 +79,10 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
 
     provider = SeriesProvider()
     responseSeries = provider.request_input(requestDescription, timeDescription, saveIngestion=False)
+
+    # Protect the API's JSON ENCODER from freaking out about floats sneaking from the ingestion class
+    for value in responseSeries.data:
+        value.dataValue = str(value.dataValue)
 
     return responseSeries
 
