@@ -56,7 +56,7 @@ class SeriesProvider():
         log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
 
         # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 6 minutes
-        timeDescription.interval = timedelta(hours=1) if timeDescription.interval == None else timeDescription.interval
+        timeDescription.interval = timedelta(minutes=6) if timeDescription.interval == None else timeDescription.interval
         
         # First we check the database to see if it has the data we need
         validated_DB_results, raw_DB_results = self.__data_base_query(seriesDescription, timeDescription)
