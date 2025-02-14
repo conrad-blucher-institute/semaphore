@@ -34,6 +34,7 @@ from DataIngestion.IDataIngestion import IDataIngestion
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from utility import log
+from exceptions import Semaphore_Ingestion_Exception
 import re
 import traceback
 import os
@@ -443,8 +444,7 @@ def date_validation(timeDescription : TimeDescription) -> bool:
 
     now = datetime.now().replace(minute=0, second=0, microsecond=0)
 
-    try:
-        if from_datetime < now or to_datetime < now:
-            raise ValueError(f'Invalid Date Time Provided. Ingestion request cannot execute')
-    except Exception as err:
-        log(f'Unexpected error occured: {err} (could be an API or ingestion model)')
+    if from_datetime < now or to_datetime < now:
+        raise Semaphore_Ingestion_Exception(f'Invalid Date Time Provided. Ingestion request cannot execute')
+    
+    
