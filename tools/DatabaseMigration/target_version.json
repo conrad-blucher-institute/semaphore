@@ -1,4 +1,4 @@
 {
-    "Target Version" : "2.11",
-    "Description" : "Adding a reference table to map the error codes"
+    "Target Version" : "2.12",
+    "Description" : "Removes the artifact in the dataLocation_dataSource_mapping table"
 }
