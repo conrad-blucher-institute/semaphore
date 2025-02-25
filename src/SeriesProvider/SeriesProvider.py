@@ -48,15 +48,15 @@ class SeriesProvider():
         """This method attempts to return a series matching a series description and a time description.
             It will attempt first to get the series from series storage, kicking off data ingestion if series storage
             doesn't have all the data.
-            NOTE: If an interval is not provided in the time description, the interval will be assumed to be 6 minutes
+            NOTE: If an interval is not provided in the time description, the interval will be assumed to be 1 hour
             :param seriesDescription - A description of the wanted series.
             :param timeDescription - A description of the temporal information of the wanted series. 
             :returns series - The series containing as much data as could be found.
         """
         log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
 
-        # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 6 minutes
-        timeDescription.interval = timedelta(minutes=6) if timeDescription.interval == None else timeDescription.interval
+        # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 1 hour
+        timeDescription.interval = timedelta(hours=1) if timeDescription.interval == None else timeDescription.interval
         
         # First we check the database to see if it has the data we need
         validated_DB_results, raw_DB_results = self.__data_base_query(seriesDescription, timeDescription)
