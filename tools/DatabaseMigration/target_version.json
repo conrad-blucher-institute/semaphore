@@ -1,4 +1,4 @@
 {
-    "Target Version" : "2.12",
-    "Description" : " - - - - - - -"
+    "Target Version" : "2.10",
+    "Description" : "Removes the artifact in the dataLocation_dataSource_mapping table"
 }
