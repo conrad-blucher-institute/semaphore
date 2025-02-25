@@ -34,6 +34,7 @@ from DataIngestion.IDataIngestion import IDataIngestion
 from DataClasses import Series, SeriesDescription, Input, TimeDescription
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from utility import log
+from exceptions import Semaphore_Ingestion_Exception
 import re
 import traceback
 import os
@@ -59,7 +60,9 @@ class NDFD_EXP(IDataIngestion):
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
 
         sleep(30)
-        
+
+        date_validation(timeDescription)
+
         # Remove digits 
         processed_series = re.sub('\d', '', seriesDescription.dataSeries)
         match processed_series:
@@ -208,13 +211,14 @@ class NDFD_EXP(IDataIngestion):
                 data_dictionary.append([toDateTimestamp, closest_average])
             
             dataValueIndex = 1
-
+ 
             inputs = []
             for row in data_dictionary:
                 timeVerified = datetime.fromtimestamp(row[0])
                 if timeRequest.interval is not None:
                     if(timeVerified.timestamp() % timeRequest.interval.total_seconds() != 0):
                         continue
+
 
                 # NDFD over returns data, so we just clip any data that is before or after our requested date range.
                 if timeVerified > timeRequest.toDateTime or timeVerified < timeRequest.fromDateTime:
@@ -233,6 +237,7 @@ class NDFD_EXP(IDataIngestion):
             resultSeries.data = inputs
 
             return resultSeries
+
 
         except ValueError as err:
             log(f'Trouble fetching data: {err}')
@@ -431,3 +436,15 @@ def iso8601_to_unixms(timestamp: str) -> int:
     
     except (ValueError, TypeError, AttributeError, OSError) as e:
         raise ValueError(f"Error converting timestamp to milliseconds: {e}")
+    
+def date_validation(timeDescription : TimeDescription) -> bool:
+    """Checks if date time passed is valid"""
+    to_datetime = timeDescription.toDateTime
+    from_datetime = timeDescription.fromDateTime
+
+    now = datetime.now().replace(minute=0, second=0, microsecond=0)
+
+    if from_datetime < now or to_datetime < now:
+        raise Semaphore_Ingestion_Exception(f'Invalid Date Time Provided. Ingestion request cannot execute')
+    
+    

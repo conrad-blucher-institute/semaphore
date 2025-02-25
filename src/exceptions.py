@@ -30,13 +30,18 @@ class Semaphore_Ingestion_Exception(BaseException):
     def __init__(self, message: str):
 
         exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        header = f'{exc_type} {fname} {exc_tb.tb_lineno}'
-        traceback = format_exc()
+        
+        if exc_tb:
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            header = f'{exc_type} {fname} {exc_tb.tb_lineno}'
+            traceback_msg = format_exc()
+        else:
+            header = "No active exception"
+            traceback_msg = ''
 
         self.error_code = 1
-        self.message = f'{message}\n{header}\n{traceback}'
-        super().__init__(message)
+        self.message = f'{message}\n{header}\n{traceback_msg}'
+        super().__init__(self.message)
     
     def __str__(self) -> str:
         return f'Error Code: {self.error_code} {self.message}'
