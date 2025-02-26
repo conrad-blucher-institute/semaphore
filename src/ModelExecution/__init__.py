@@ -1,4 +1,4 @@
 from .dspecParser import *
-from .inputGatherer import *
+from .dataGatherer import *
 from .IOutputHandler import *
 from .modelWrapper import *
