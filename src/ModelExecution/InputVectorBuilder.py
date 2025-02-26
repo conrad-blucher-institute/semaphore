@@ -82,10 +82,15 @@ class InputVectorBuilder:
         ordered_dtypes = vectorOrder.dTypes
         ordered_indexes = vectorOrder.indexes
         multipliedKeys = vectorOrder.multipliedKeys
+        
+        
+        isFinished = False
 
-        while True:
+        while True:         
+            if isFinished: 
+                return None # Every possible vector has been generated
+            
             input_vector = []
-
             # We iterate over every series the input vector has in order
             for key, dtype, index in zip(ordered_keys, ordered_dtypes, ordered_indexes):            
                 
@@ -101,13 +106,15 @@ class InputVectorBuilder:
                 
                 # Grab all data, this changes if its a multi series or not
                 data = None
+                isFinished = True # Assume we are finished unless we find a multi series that has more data
                 if keyIsMulti:
                     if len(series.data) <= batchIndex: 
                         # We want the data for just this batch
                         data = [input.dataValue[batchIndex] for input in series.data]
+                        isFinished = False # There could be more vectors to make
                     else:
                         if batchIndex == 1: log("Warning:: build input vectors returning with a batch index of 1. This indicates a series was marked multi but only actually included one value per input!")
-                        return None # All possible vectors have been generated
+                        isFinished = True # All possible vectors have been generated
                 else:
                     data = [input.dataValue for input in series.data]
 
