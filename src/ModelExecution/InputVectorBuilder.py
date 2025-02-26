@@ -44,15 +44,12 @@ class InputVectorBuilder:
 
         # Parse VO
         vo: VectorOrder = dspec.orderedVector
-        self.ordered_keys = vo.keys
-        self.ordered_dtypes = vo.dTypes
-        self.ordered_indexes = vo.indexes
-        self.multipliedKeys = vo.multipliedKeys
-        self.amntExpectedVectors = vo.amntExpectedVectors
+        multipliedKeys = vo.multipliedKeys
+        amntExpectedVectors = vo.amntExpectedVectors
 
         # If no amntExpectedVectors assume 1
-        if self.amntExpectedVectors is None:
-            self.amntExpectedVectors = 1
+        if amntExpectedVectors is None:
+            amntExpectedVectors = 1
 
         # Build the batch
         batch = []
@@ -63,12 +60,12 @@ class InputVectorBuilder:
             else: batch.append(input_vector)
 
         # Check the batch is of the expected length
-        if len(batch) != self.amntExpectedVectors:
-            log(f'Warning: build_input_batch {self.amntExpectedVectors} vectors but only found {len(batch)}')
+        if len(batch) != amntExpectedVectors:
+            log(f'Warning: build_input_batch {amntExpectedVectors} vectors but only found {len(batch)}')
 
         return batch
 
-    def __buildInputVector(self, dataRepository: dict[str, Series]) -> Generator[list[any], None, None]:
+    def __buildInputVector(self, vectorOrder: VectorOrder, dataRepository: dict[str, Series]) -> Generator[list[any], None, None]:
         """ Builds a input vector based on the vector order specification.
         The function can be given a mix of series with single value inputs or multi value inputs. For series marked multi
         it will return the next index of the value each time the generator is called. It returns None when every possible vector has 
@@ -82,12 +79,15 @@ class InputVectorBuilder:
             :warns - If a series is marked multi but only has one value per input
         """
         batchIndex = 0 # Keeps track of what index vector we are on, to index multi inputs
+        ordered_keys = vectorOrder.keys
+        ordered_dtypes = vectorOrder.dTypes
+        ordered_indexes = vectorOrder.indexes
 
         while True:
             input_vector = []
 
             # We iterate over every series the input vector has in order
-            for key, dtype, index in zip(self.ordered_keys, self.ordered_dtypes, self.ordered_indexes):            
+            for key, dtype, index in zip(ordered_keys, ordered_dtypes, ordered_indexes):            
                 
                 log(f'\tVector batch index: {batchIndex} _______________________________________')
 
