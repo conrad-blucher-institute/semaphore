@@ -44,7 +44,6 @@ class InputVectorBuilder:
 
         # Parse VO
         vo: VectorOrder = dspec.orderedVector
-        multipliedKeys = vo.multipliedKeys
         amntExpectedVectors = vo.amntExpectedVectors
 
         # If no amntExpectedVectors assume 1
@@ -82,6 +81,7 @@ class InputVectorBuilder:
         ordered_keys = vectorOrder.keys
         ordered_dtypes = vectorOrder.dTypes
         ordered_indexes = vectorOrder.indexes
+        multipliedKeys = vectorOrder.multipliedKeys
 
         while True:
             input_vector = []
@@ -92,7 +92,7 @@ class InputVectorBuilder:
                 log(f'\tVector batch index: {batchIndex} _______________________________________')
 
                 # Check to see if this series is marked as a multi input series
-                keyIsMulti = key in self.multipliedKeys 
+                keyIsMulti = key in multipliedKeys 
 
                 # Get the Series from the data repository, error if its missing!
                 series = dataRepository.get(key)
