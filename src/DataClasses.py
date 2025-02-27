@@ -15,7 +15,7 @@ from typing import List
 
 class Input():
     """An Input is a data value of some environment variable that can be linked to a date time.
-        :param dataValue: str - The actual data value
+        :param dataValue: float - The actual data value or an array of data values
         :param dataUnit: str - The unit of measurement of the value
         :param timeVerified: datetime 
         :param timeGenerated: datetime
@@ -23,14 +23,17 @@ class Input():
         :param latitude: str = None
 
     """
-    def __init__(self, dataValue: str, dataUnit: str, timeVerified: datetime, timeGenerated: datetime,  longitude: str = None, latitude: str = None) -> None:
+    def __init__(self, dataValue: float | list[float], dataUnit: str, timeVerified: datetime, timeGenerated: datetime,  longitude: str = None, latitude: str = None) -> None:
+        
+        if isinstance(dataValue, list) and len(dataValue) <= 1:
+            raise ValueError("dataValue can't be a list containing 1 or less")
+        
         self.dataValue = dataValue
         self.dataUnit = dataUnit
         self.timeVerified = timeVerified
         self.timeGenerated = timeGenerated
         self.longitude = longitude
         self.latitude = latitude
-        
 
     def __str__(self) -> str:
         return f'\n[Input] -> value: {self.dataValue}, unit: {self.dataUnit},timeVerified:{self.timeVerified}, timeGenerated:{self.timeGenerated}, longitude: {self.longitude}. latitude: {self.latitude}'
@@ -51,12 +54,16 @@ class Input():
 
 class Output():
     """An output is a a predicted value created by the model semaphore is running.
-        :param dataValue: str - The actual data value
+        :param dataValue: float - The actual data value or an array of data values
         :param dataUnit: str - The unit of measurement of the value
         :param timeGenerated: datetime - The datetime that the value was created
         :parm leadTime: timedelta - The lead time for the model
     """
-    def __init__(self, dataValue: str, dataUnit: str, timeGenerated: datetime, leadTime: timedelta) -> None:
+    def __init__(self, dataValue: float | list[float], dataUnit: str, timeGenerated: datetime, leadTime: timedelta) -> None:
+        
+        if isinstance(dataValue, list) and len(dataValue) <= 1:
+            raise ValueError("dataValue can't be a list containing 1 or less")
+        
         self.dataValue = dataValue
         self.dataUnit = dataUnit
         self.timeGenerated = timeGenerated
