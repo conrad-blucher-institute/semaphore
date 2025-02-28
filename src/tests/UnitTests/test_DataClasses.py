@@ -29,7 +29,7 @@ class TestInput(unittest.TestCase):
     def test_input_creation_with_single_value(self):
         """Test creating an Input with a single value"""
         input_obj = Input(
-            dataValue=10.5,
+            dataValue='10.5',
             dataUnit="meters",
             timeVerified=self.time_verified,
             timeGenerated=self.time_generated,
@@ -37,7 +37,7 @@ class TestInput(unittest.TestCase):
             latitude="78.910"
         )
         
-        self.assertEqual(input_obj.dataValue, 10.5)
+        self.assertEqual(input_obj.dataValue, '10.5')
         self.assertEqual(input_obj.dataUnit, "meters")
         self.assertEqual(input_obj.timeVerified, self.time_verified)
         self.assertEqual(input_obj.timeGenerated, self.time_generated)
@@ -46,7 +46,7 @@ class TestInput(unittest.TestCase):
         
     def test_input_creation_with_list(self):
         """Test creating an Input with a list of values"""
-        values = [10.5, 11.2, 12.8]
+        values = ['10.5', '11.2', '12.8']
         input_obj = Input(
             dataValue=values,
             dataUnit="meters",
@@ -62,7 +62,7 @@ class TestInput(unittest.TestCase):
         """Test creating an Input with an invalid list (containing 1 or less elements)"""
         with self.assertRaises(ValueError):
             Input(
-                dataValue=[10.5],  # List with only one element
+                dataValue=['10.5'],  # List with only one element
                 dataUnit="meters",
                 timeVerified=self.time_verified,
                 timeGenerated=self.time_generated
@@ -79,7 +79,7 @@ class TestInput(unittest.TestCase):
     def test_input_equality(self):
         """Test that two identical Inputs are equal"""
         input1 = Input(
-            dataValue=10.5,
+            dataValue='10.5',
             dataUnit="meters",
             timeVerified=self.time_verified,
             timeGenerated=self.time_generated,
@@ -88,7 +88,7 @@ class TestInput(unittest.TestCase):
         )
         
         input2 = Input(
-            dataValue=10.5,
+            dataValue='10.5',
             dataUnit="meters",
             timeVerified=self.time_verified,
             timeGenerated=self.time_generated,
@@ -109,20 +109,20 @@ class TestOutput(unittest.TestCase):
     def test_output_creation_with_single_value(self):
         """Test creating an Output with a single value"""
         output_obj = Output(
-            dataValue=15.7,
+            dataValue='15.7',
             dataUnit="feet",
             timeGenerated=self.time_generated,
             leadTime=self.lead_time
         )
         
-        self.assertEqual(output_obj.dataValue, 15.7)
+        self.assertEqual(output_obj.dataValue, '15.7')
         self.assertEqual(output_obj.dataUnit, "feet")
         self.assertEqual(output_obj.timeGenerated, self.time_generated)
         self.assertEqual(output_obj.leadTime, self.lead_time)
         
     def test_output_creation_with_list(self):
         """Test creating an Output with a list of values"""
-        values = [15.7, 16.2, 17.3]
+        values = ['15.7', '16.2', '17.3']
         output_obj = Output(
             dataValue=values,
             dataUnit="feet",
@@ -136,7 +136,7 @@ class TestOutput(unittest.TestCase):
         """Test creating an Output with an invalid list (containing 1 or less elements)"""
         with self.assertRaises(ValueError):
             Output(
-                dataValue=[15.7],  # List with only one element
+                dataValue=['15.7'],  # List with only one element
                 dataUnit="feet",
                 timeGenerated=self.time_generated,
                 leadTime=self.lead_time
@@ -153,14 +153,14 @@ class TestOutput(unittest.TestCase):
     def test_output_equality(self):
         """Test that two identical Outputs are equal"""
         output1 = Output(
-            dataValue=15.7,
+            dataValue='15.7',
             dataUnit="feet",
             timeGenerated=self.time_generated,
             leadTime=self.lead_time
         )
         
         output2 = Output(
-            dataValue=15.7,
+            dataValue='15.7',
             dataUnit="feet",
             timeGenerated=self.time_generated,
             leadTime=self.lead_time
@@ -324,13 +324,13 @@ class TestSeries(unittest.TestCase):
         # Create sample data
         self.sample_data = [
             Input(
-                dataValue=10.5,
+                dataValue='10.5',
                 dataUnit="m/s",
                 timeVerified=datetime(2025, 2, 1, 12, 0),
                 timeGenerated=datetime(2025, 2, 1, 11, 30)
             ),
             Input(
-                dataValue=12.3,
+                dataValue='12.3',
                 dataUnit="m/s",
                 timeVerified=datetime(2025, 2, 1, 13, 0),
                 timeGenerated=datetime(2025, 2, 1, 12, 30)

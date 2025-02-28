@@ -23,7 +23,7 @@ class Input():
         :param latitude: str = None
 
     """
-    def __init__(self, dataValue: float | list[float], dataUnit: str, timeVerified: datetime, timeGenerated: datetime,  longitude: str = None, latitude: str = None) -> None:
+    def __init__(self, dataValue: str | list[str], dataUnit: str, timeVerified: datetime, timeGenerated: datetime,  longitude: str = None, latitude: str = None) -> None:
         
         if isinstance(dataValue, list) and len(dataValue) <= 1:
             raise ValueError("dataValue can't be a list containing 1 or less")
@@ -59,7 +59,7 @@ class Output():
         :param timeGenerated: datetime - The datetime that the value was created
         :parm leadTime: timedelta - The lead time for the model
     """
-    def __init__(self, dataValue: float | list[float], dataUnit: str, timeGenerated: datetime, leadTime: timedelta) -> None:
+    def __init__(self, dataValue: str | list[str], dataUnit: str, timeGenerated: datetime, leadTime: timedelta) -> None:
         
         if isinstance(dataValue, list) and len(dataValue) <= 1:
             raise ValueError("dataValue can't be a list containing 1 or less")
