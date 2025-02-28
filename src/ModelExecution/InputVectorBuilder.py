@@ -108,7 +108,7 @@ class InputVectorBuilder:
                 data = None
                 isFinished = True # Assume we are finished unless we find a multi series that has more data
                 if keyIsMulti:
-                    if len(series.data) <= batchIndex: 
+                    if len(series.data[0]) <= batchIndex: 
                         # We want the data for just this batch
                         data = [input.dataValue[batchIndex] for input in series.data]
                         isFinished = False # There could be more vectors to make
