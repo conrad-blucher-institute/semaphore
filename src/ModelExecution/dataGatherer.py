@@ -22,7 +22,7 @@ from exceptions import Semaphore_Data_Exception, Semaphore_Ingestion_Exception
 from datetime import datetime, timedelta
 
 
-class InputGatherer:
+class DataGatherer:
 
     def __init__(self) -> None:
         self.__seriesProvider = SeriesProvider()
@@ -41,11 +41,11 @@ class InputGatherer:
         """
 
         # Pull out the objects we need from the DSPEC
-        dependantSeries: list[DependentSeries] = dspec.dependantSeries
+        dependantSeries: list[DependentSeries] = dspec.dependentSeries
         postProcessCalls: list[PostProcessCall] = dspec.postProcessCall
 
         # Get Dependent Data
-        dependent_data_repository = self.__request_dependent_data(dependantSeries, postProcessCalls, referenceTime)
+        dependent_data_repository = self.__request_dependent_data(dependantSeries, referenceTime)
 
         # Call post processing 
         post_processed_series_repository = self.__post_process_data(dependent_data_repository, postProcessCalls)
@@ -53,7 +53,7 @@ class InputGatherer:
         return post_processed_series_repository
     
     
-    def __request_dependent_data(self, dependantSeries: list[DependentSeries], referenceTime: datetime) -> dict[str, Series]:
+    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime) -> dict[str, Series]:
         """This method handles the process of requesting the dependant series from the DSPEC. Its requests will be temporally
         referenced from the passed reference time. It will:
             - Build the series description
@@ -63,7 +63,7 @@ class InputGatherer:
             - Store the data with its specified outKey
             - Return the data repository
 
-        :param dependantSeries: list[DependentSeries] - The list of dependent series from the DSEPC
+        :param dependentSeries: list[DependentSeries] - The list of dependent series from the DSEPC
         :param referenceTime: datetime - The reference time to build the time description from.
         :returns: dict[str, Series] - The dictionary of the data it collected 
         :raises: Semaphore_Ingestion_Exception - If a series provider returns none for a series description
@@ -71,7 +71,7 @@ class InputGatherer:
         """
         
         series_repository: dict[str, Series] = {}
-        for dependentSeries in dependantSeries:
+        for dependentSeries in dependentSeriesList:
             
             # Build or description objects
             seriesDescription = self.__build_seriesDescription(dependentSeries)
@@ -84,7 +84,7 @@ class InputGatherer:
             # Verify the series is ok
             if series is None:
                 raise Semaphore_Ingestion_Exception(f'Series provider returned none for {seriesDescription}')
-            elif not series.isComplete():
+            elif not series.isComplete:
                 raise Semaphore_Data_Exception(f'Incomplete data found for {seriesDescription}')
             
             # Store the series in the repository
