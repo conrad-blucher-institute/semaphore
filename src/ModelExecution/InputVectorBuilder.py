@@ -52,7 +52,7 @@ class InputVectorBuilder:
 
         # Build the batch
         batch = []
-        input_vector_generator = self.__buildInputVector(dataRepository)
+        input_vector_generator = self.__buildInputVector(vo, dataRepository)
         while True:
             input_vector = next(input_vector_generator)
             if input_vector is None: break
@@ -85,16 +85,15 @@ class InputVectorBuilder:
         
         
         isFinished = False
-
-        while True:         
-            if isFinished: 
-                return None # Every possible vector has been generated
+        while True: 
+            if isFinished: # Every possible vector has been generated
+                yield None 
+            
+            log(f'\tVector batch index: {batchIndex} _______________________________________')
             
             input_vector = []
             # We iterate over every series the input vector has in order
             for key, dtype, index in zip(ordered_keys, ordered_dtypes, ordered_indexes):            
-                
-                log(f'\tVector batch index: {batchIndex} _______________________________________')
 
                 # Check to see if this series is marked as a multi input series
                 keyIsMulti = key in multipliedKeys 
@@ -107,27 +106,27 @@ class InputVectorBuilder:
                 # Grab all data, this changes if its a multi series or not
                 data = None
                 isFinished = True # Assume we are finished unless we find a multi series that has more data
-                if keyIsMulti:
-                    lengthOfMultiSeries = len(series.data[0].dataValue)
-                    if lengthOfMultiSeries <= batchIndex: 
-                        # We want the data for just this batch
-                        data = [input.dataValue[batchIndex] for input in series.data]
-                        isFinished = False # There could be more vectors to make
-                    else:
-                        if batchIndex == 1: log("Warning:: build input vectors returning with a batch index of 1. This indicates a series was marked multi but only actually included one value per input!")
-                        isFinished = True # All possible vectors have been generated
-                else:
+                if not keyIsMulti:
                     data = [input.dataValue for input in series.data]
+                else:
+                    data = [input.dataValue[batchIndex] for input in series.data] # We pull a slice of data determined by the batch index
+                    
+                    # If there is more data, then we need to generate another vector
+                    lengthOfMultiSeries = len(series.data[0].dataValue)
+                    if batchIndex < lengthOfMultiSeries - 1: 
+                        isFinished = False # There could be more vectors to make
+                    elif batchIndex == 1: log("Warning:: Build input vectors returning with a batch index of 1. This indicates a series was marked multi but only actually included one value per input!")
 
-                # Cast Data
-                casted_data = [self.__cast_value(d, dtype) for d in data]
+                if data is not None:
+                    # Cast Data
+                    casted_data = [self.__cast_value(d, dtype) for d in data]
 
-                # Select only the wanted data
-                indexed_data = casted_data[index[0] : index[1]]
-                
-                log(f'\t\t{key}: - amnt_found: {len(casted_data)}, indexed_len: {len(indexed_data)}')
-                # Concatenate the designated slice of casted data into the input vector
-                input_vector += indexed_data
+                    # Select only the wanted data
+                    indexed_data = casted_data[index[0] : index[1]]
+                    
+                    log(f'\t\t{key}: - amnt_found: {len(casted_data)}, indexed_len: {len(indexed_data)}')
+                    # Concatenate the designated slice of casted data into the input vector
+                    input_vector += indexed_data
 
             batchIndex += 1   
             yield input_vector
