@@ -22,7 +22,8 @@ from src.ModelExecution.inputGatherer import InputGatherer
 
 @pytest.mark.parametrize("dspecFilePath", [
      ('./data/dspec/TestModels/test_dspec.json'),
-     ('./data/dspec/TestModels/test_dspec-2-0.json')
+     ('./data/dspec/TestModels/test_dspec-2-0.json'),
+     ('./data/dspec/TestModels/test_multiVector.json')
 ])
 def test_parseDSPEC(dspecFilePath: str):
     """This function tests whether the specified DSPEC file
@@ -139,6 +140,10 @@ def sub_test_dspec_2_0(inputGatherer: InputGatherer, dspecFilePath: str):
         assert vectorOrder.keys[0] == vectorOrderJson[0]["key"]
         assert vectorOrder.dTypes[0] == vectorOrderJson[0]["dType"]
 
+        vectorSpecificationsJson = json.get("vectorSpecifications", {})
+        assert vectorOrder.multipliedKeys == vectorSpecificationsJson.get("multipliedKeys", [])
+        assert vectorOrder.amntExpectedVectors == vectorSpecificationsJson.get("amntExpectedVectors", None)
+        
         # Vector order Count
         assert len(dspec.orderedVector.keys) == 9
         assert len(dspec.orderedVector.dTypes) == 9
