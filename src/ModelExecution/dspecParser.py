@@ -110,6 +110,9 @@ class dspec_sub_Parser_1_0:
             keys = []
             types = []
             indexes = []
+            multipliedKeys = []
+            amntExpectedVectors = []
+            
             for idx, inputJson in enumerate(inputsJson):
                 dseries = DependentSeries()
                 dseries.name = inputJson["_name"]
@@ -129,6 +132,9 @@ class dspec_sub_Parser_1_0:
                 types.append(inputJson["type"])
                 keys.append(str(idx))
                 indexes.append((None, None))
+                multipliedKeys.append(None)
+                amntExpectedVectors.append(None)
+                
 
                 dependentSeriesList.append(dseries)
             # Bind to dspec
@@ -138,6 +144,8 @@ class dspec_sub_Parser_1_0:
             vOrder.keys = keys
             vOrder.dTypes = types
             vOrder.indexes = indexes
+            vOrder.multipliedKeys = multipliedKeys
+            vOrder.amntExpectedVectors = amntExpectedVectors
             self.__dspec.orderedVector = vOrder
 
 
@@ -241,24 +249,33 @@ class dspec_sub_Parser_2_0:
     def __parse_vector_order(self):
 
         vOrder: list['dict'] = self.__dspec_json["vectorOrder"]
+        vSpecifications = self.__dspec_json.get("vectorSpecifications", {})
         keys = []
         dTypes = []
         indexes = []
+        
+        
         for dict in vOrder:
             keys.append(dict['key'])
             dTypes.append(dict['dType'])
             
             index: list[int] | None  = dict.get('indexes')
 
-            # If there was no index object we will use None None to index the whole series
+            # If there is no index object we will use None None to index the whole series
             if index is None: indexes.append((None, None))
             else: indexes.append(tuple(index))
+
+        multipliedKeys: list[str] = vSpecifications.get("multipliedKeys", [])
+        amntExpectedVectors: int | None = vSpecifications.get("amntExpectedVectors", None)
 
         vectorOrder = VectorOrder()
         vectorOrder.keys = keys
         vectorOrder.dTypes = dTypes
         vectorOrder.indexes = indexes
+        vectorOrder.multipliedKeys = multipliedKeys
+        vectorOrder.amntExpectedVectors = amntExpectedVectors
         self.__dspec.orderedVector = vectorOrder
+        
 
             
 class Dspec:
@@ -350,12 +367,14 @@ class VectorOrder:
         self.keys = []
         self.dTypes = []
         self.indexes = []
+        self.multipliedKeys = []
+        self.amntExpectedVectors = None
 
     def __str__(self) -> str:
-        return f'\n[VectorOrder] -> keys: {self.keys}, dTypes: {self.dTypes}, indexes: {self.indexes}'
+        return f'\n[VectorOrder] -> keys: {self.keys}, dTypes: {self.dTypes}, indexes: {self.indexes}, multipliedKeys: {self.multipliedKeys}, amntExpectedVectors: {self.amntExpectedVectors}'
     
     def __repr__(self):
-        return f'\nVectorOrder({self.keys}, {self.dTypes}, {self.indexes})'
+        return f'\nVectorOrder({self.keys}, {self.dTypes}, {self.indexes}, {self.multipliedKeys}, {self.amntExpectedVectors})'
     
 
 class TimingInfo:
@@ -370,5 +389,6 @@ class TimingInfo:
     
     def __repr__(self):
         return f'\nTimingInfo({self.offset},{self.interval})'
+    
     
     
