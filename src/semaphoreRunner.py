@@ -2,8 +2,7 @@
 #semaphoreRunner.py
 #----------------------------------
 # Created By : Savannah Stephenson
-# Created Date: 10/02/2023
-# version 2.0
+# version 3.0
 #----------------------------------
 """ A file to run semaphore from the command line. 
     Run with: python3 src/semaphoreRunner.py -d test_dspec.json to run
@@ -18,9 +17,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 from orchestrator import Orchestrator
 
-
 load_dotenv()
-
 
 #argument parsing
 def main():
@@ -44,7 +41,6 @@ def main():
     #parsing arguments
     args = parser.parse_args()
 
-
     #if there is past time given
     if args.past is not None: 
         #checking that the past time passed is formatted correctly (stolen from Beto)
@@ -62,6 +58,7 @@ def main():
 
     #running semaphore
     Orchestrator().run_semaphore(args.dspec, execution_time, args.toss)
+
 
 if __name__ == '__main__':
     main()
