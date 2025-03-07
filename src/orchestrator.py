@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#semaphoreRunner.py
+#orchestrator.py
 #----------------------------------
 # Created By : Matthew Kastl
 # version 1.0
