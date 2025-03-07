@@ -70,7 +70,8 @@ class InputVectorBuilder:
         it will return the next index of the value each time the generator is called. It returns None when every possible vector has 
         been generated.
         
-        :param dataRepository: dict[str, Series] - The repository of all the data from input gatherer
+        :param vectorOrder: VectorOrder - The vector order object to read from.
+        :param dataRepository: dict[str, Series] - The repository of all the data from input gatherer.
         :returns: Generator[list[any], None, None]
             :yeild list[any] - The input vector
             :returns None - When every possible vector has been generated

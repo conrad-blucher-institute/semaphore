@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#.py
+#test_inputVectorBuilder.py
 #-------------------------------
 # Created By: Matthew Kastl
 # version 1.0

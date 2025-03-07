@@ -63,7 +63,7 @@ class DataGatherer:
             - Store the data with its specified outKey
             - Return the data repository
 
-        :param dependentSeries: list[DependentSeries] - The list of dependent series from the DSEPC
+        :param dependentSeriesList: list[DependentSeries] - The list of dependent series from the DSEPC
         :param referenceTime: datetime - The reference time to build the time description from.
         :returns: dict[str, Series] - The dictionary of the data it collected 
         :raises: Semaphore_Ingestion_Exception - If a series provider returns none for a series description
