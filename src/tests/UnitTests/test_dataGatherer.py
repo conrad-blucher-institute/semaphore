@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#.py
+#test_dataGatherer.py
 #-------------------------------
 # Created By: Matthew Kastl
 # version 1.0
