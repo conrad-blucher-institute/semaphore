@@ -134,15 +134,17 @@ def sub_test_dspec_2_0(inputGatherer: InputGatherer, dspecFilePath: str):
         # Post process Call count
         assert len(dspec.postProcessCall) == 2
 
-        # Vector order (Only the first one)
+        # Vector order 
         vectorOrderJson = json["vectorOrder"]
         vectorOrder = dspec.orderedVector
         assert vectorOrder.keys[0] == vectorOrderJson[0]["key"]
         assert vectorOrder.dTypes[0] == vectorOrderJson[0]["dType"]
-
-        vectorSpecificationsJson = json.get("vectorSpecifications", {})
-        assert vectorOrder.multipliedKeys == vectorSpecificationsJson.get("multipliedKeys", [])
-        assert vectorOrder.amntExpectedVectors == vectorSpecificationsJson.get("amntExpectedVectors", None)
+        
+        # Iterate through vectorOrderJson to ensure all values match
+        for i, entry in enumerate(vectorOrderJson):  
+            assert vectorOrder.multipliedKeys[i] == entry.get("multipliedKeys", [])  # Default to empty list
+            assert vectorOrder.ensembleMemberCount[i] == entry.get("ensembleMemberCount", None)  # Default to None
+   
         
         # Vector order Count
         assert len(dspec.orderedVector.keys) == 9

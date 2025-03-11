@@ -121,14 +121,12 @@
             }
         }
     ],
-    "vectorSpecifications":{
-        "multipliedKeys": ["Key_1","Key_2"],
-        "amntExpectedVectors": 100
-    },
     "vectorOrder": [
         {
             "key": "dXWnCmp000D_1hr",
-            "dType": "float"
+            "dType": "float",
+            "multipliedKeys": ["Key_1","Key_2"],
+            "ensembleMemberCount": 100
         },
         {
             "key": "dYWnCmp000D_1hr",
