@@ -30,7 +30,7 @@ class MultiPackedFloat(IOutputHandler):
         """
         
         return [Output(
-            dataValue=      str(list(map(str, predictions.ravel()))), 
+            dataValue=      list(map(str, predictions.ravel())), 
             dataUnit=       dspec.outputInfo.unit, 
             timeGenerated=  referenceTime, 
             leadTime=       timedelta(seconds=dspec.outputInfo.leadTime)
