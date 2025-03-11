@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#test_InputGatherer.py
+#test_dspecParser.py
 #-------------------------------
 # Created By: Matthew Kastl
 # Created Date: 5/14/2024
@@ -16,6 +16,8 @@ sys.path.append('/app/src')
 from json import load
 from os import path, getenv
 import pytest
+import json
+import tempfile
 
 from src.utility import log, construct_true_path
 from src.ModelExecution.inputGatherer import InputGatherer
@@ -43,10 +45,105 @@ def test_parseDSPEC(dspecFilePath: str):
             sub_test_dspec_2_0(inputGatherer, dspecFilePath)
         case _:
             raise NotImplementedError(f'No parser for dspec version {dspec_version} not found!')
-    
+
     assert True
 
+def test_invalid_vector_order():
+        """Test that a DSPEC file with multiple multipliedKeys or ensembleMemberCount entries fails."""
 
+        # Creating a fake vector order with duplicated multipliedKeys and ensembleMemberCount
+        fake_dspec = {
+            "dspecVersion": "2.0",
+            "modelName": "test_multiVector",
+            "modelVersion": "1.0.0",
+            "author": "John Doe",
+            "modelFileName": "test_AI",
+            "timingInfo": {
+                "active": False,
+                "offset": 0,
+                "interval": 3600
+            },
+            "outputInfo": {
+                "outputMethod": "OnePackedFloat",
+                "leadTime": 86400,
+                "series": "testSeries",
+                "location": "PortLavaca",
+                "interval": 3600, 
+                "datum": "test_datum",
+                "unit": "meter"
+            },
+            "dependentSeries": [
+                { 
+                    "_name": "WindSpeed",
+                    "location": "PortLavaca",
+                    "source": "LIGHTHOUSE",
+                    "series": "dWnSpd",
+                    "unit": "meter",
+                    "interval": 3600,
+                    "range": [0, 0],
+                    "outKey": "WindSpd_01"
+                },
+                {
+                    "_name": "Wind Direction",
+                    "location": "PortLavaca",
+                    "source": "LIGHTHOUSE",
+                    "series": "dWnDir",
+                    "unit": "degrees",
+                    "interval": 3600,
+                    "range": [0, 0],
+                    "outKey": "WindDir_01"
+                }
+            ],
+            "postProcessCall": [
+                {
+                    "call": "ResolveVectorComponents",
+                    "args": {
+                        "offset": 0,
+                        "targetMagnitude_inKey": "WindSpd_01",
+                        "targetDirection_inKey": "WindDir_01",
+                        "x_comp_outKey": "dXWnCmp000D_1hr", 
+                        "y_comp_outKey": "dYWnCmp000D_1hr"
+                    }
+                }
+            ],
+            "vectorOrder": [
+                {
+                    "key": "dXWnCmp000D_1hr",
+                    "dType": "float",
+                    "multipliedKeys": ["Key_1", "Key_2"],
+                    "ensembleMemberCount": 100
+                },
+                {
+                    "key": "dYWnCmp000D_1hr",
+                    "dType": "float",
+                    "multipliedKeys": ["Key_3"]  # Second multipliedKeys (Should trigger an error)
+                },
+                {
+                    "key": "dXWnCmp000D_12hr",
+                    "dType": "float",
+                    "ensembleMemberCount": 200  # Second ensembleMemberCount (Should trigger an error)
+                },
+                {
+                    "key": "dYWnCmp000D_12hr",
+                    "dType": "float"
+                },
+                {
+                    "key": "WindSpd_13",
+                    "dType": "float"
+                }
+            ]
+        }
+        
+        # Create a temporary JSON file
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as temp_file:
+            json.dump(fake_dspec, temp_file)
+            temp_file_path = temp_file.name
+
+        # Expecting a ValueError due to multiple multipliedKeys and ensembleMemberCount
+        with pytest.raises(ValueError, match="Error: More than one multipliedKey has been detected!|Error: More than one ensembleMemberCount has been detected!"):
+            inputGatherer = InputGatherer(temp_file_path)  
+            inputGatherer._InputGatherer__parse_vector_order()
+            
 def sub_test_dspec_1_0(inputGatherer: InputGatherer, dspecFilePath: str):
     dspec = inputGatherer.get_dspec()
     with open(dspecFilePath) as dspecFile:
@@ -149,3 +246,5 @@ def sub_test_dspec_2_0(inputGatherer: InputGatherer, dspecFilePath: str):
         # Vector order Count
         assert len(dspec.orderedVector.keys) == 9
         assert len(dspec.orderedVector.dTypes) == 9
+
+    
