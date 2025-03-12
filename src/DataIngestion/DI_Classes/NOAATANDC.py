@@ -16,14 +16,15 @@ https://api.tidesandcurrents.noaa.gov/api/prod/
 #----------------------------------
 # 
 #
-#Input
+# Imports
 from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataClasses import Series, SeriesDescription, Input, TimeDescription
+from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
 from math import cos, sin
 from noaa_coops import Station
 import re
+from pandas import DataFrame
 
 
 
@@ -81,7 +82,7 @@ class NOAATANDC(IDataIngestion):
             return None
 
     
-    def __fetch_NOAA_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, NOAAProduct: str) -> None | Series:
+    def __fetch_NOAA_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, NOAAProduct: str) -> None | DataFrame:
         
         stationID = self.__get_station_number(seriesDescription.dataLocation)
         if stationID == None: return None
@@ -123,7 +124,7 @@ class NOAATANDC(IDataIngestion):
         data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'water_level')
         if data is None: return None
 
-        inputs = []
+        df = get_input_dataFrame()
         for idx in data.index:
 
             # parse
@@ -134,18 +135,17 @@ class NOAATANDC(IDataIngestion):
             if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
                 continue
 
-            dataPoints = Input(
-                dataValue= value,
-                dataUnit= 'meter',
-                timeVerified= dt,
-                timeGenerated= dt, 
-                longitude= lat_lon[1],
-                latitude= lat_lon[0]
-            )
-            inputs.append(dataPoints)
+            df.loc[len(df)] = [
+                value,          # dataValue
+                'meter',        # dataUnit
+                dt,             # timeVerified
+                dt,             # timeGenerated
+                lat_lon[1],     # longitude
+                lat_lon[0]      # latitude
+            ]
 
         series = Series(seriesDescription, True, timeDescription)
-        series.data = inputs
+        series.dataFrame = df
 
         return series
     
@@ -154,7 +154,7 @@ class NOAATANDC(IDataIngestion):
         data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'predictions')
         if data is None: return None
 
-        inputs = []
+        df = get_input_dataFrame()
         for idx in data.index:
 
             # parse
@@ -165,18 +165,17 @@ class NOAATANDC(IDataIngestion):
             if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
                 continue
 
-            dataPoints = Input(
-                dataValue= value,
-                dataUnit= 'meter',
-                timeVerified= dt,
-                timeGenerated= dt, 
-                longitude= lat_lon[1],
-                latitude= lat_lon[0]
-            )
-            inputs.append(dataPoints)
+            df.loc[len(df)] = [
+                value,          # dataValue
+                'meter',        # dataUnit
+                dt,             # timeVerified
+                dt,             # timeGenerated
+                lat_lon[1],     # longitude
+                lat_lon[0]      # latitude
+            ]
 
         series = Series(seriesDescription, True, timeDescription)
-        series.data = inputs
+        series.dataFrame = df
 
         return series
     
@@ -192,7 +191,7 @@ class NOAATANDC(IDataIngestion):
         if pData is None: return None
         if wlData is None: return None
 
-        inputs = []
+        df = get_input_dataFrame()
         for idx in wlData.index:
 
             # parse
@@ -205,21 +204,20 @@ class NOAATANDC(IDataIngestion):
             if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
                 continue
 
-            dataPoints = Input(
-                dataValue= surge,
-                dataUnit= 'meter',
-                timeVerified= dt,
-                timeGenerated= dt, 
-                longitude= lat_lon[1],
-                latitude= lat_lon[0]
-            )
-            inputs.append(dataPoints)
+            df.loc[len(df)] = [
+                surge,          # dataValue
+                'meter',        # dataUnit
+                dt,             # timeVerified
+                dt,             # timeGenerated
+                lat_lon[1],     # longitude
+                lat_lon[0]      # latitude
+            ]
 
         # Surge is datum-less. A datum is required for ingesting water level but we remove it here
         seriesDescription.dataDatum = 'NA'
 
         series = Series(seriesDescription, True, timeDescription)
-        series.data = inputs
+        series.dataFrame = df
         return series
     
     def __fetch_WnDir(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
@@ -227,7 +225,7 @@ class NOAATANDC(IDataIngestion):
         data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'wind')
         if data is None: return None
 
-        wnDir_inputs = []
+        df = get_input_dataFrame()
         for idx in data.index:
 
             # parse
@@ -238,19 +236,17 @@ class NOAATANDC(IDataIngestion):
             if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
                 continue
 
-            dataPoints = Input(
-                dataValue= wind_dir,
-                dataUnit= 'degrees',
-                timeVerified= dt,
-                timeGenerated= dt, 
-                longitude= lat_lon[1],
-                latitude= lat_lon[0]
-            )
-            wnDir_inputs.append(dataPoints)
-
+            df.loc[len(df)] = [
+                wind_dir,          # dataValue
+                'degrees',        # dataUnit
+                dt,             # timeVerified
+                dt,             # timeGenerated
+                lat_lon[1],     # longitude
+                lat_lon[0]      # latitude
+            ]
 
         wnDir_series = Series(seriesDescription, True, timeDescription)
-        wnDir_series.data = wnDir_inputs
+        wnDir_series.dataFrame = df
 
         return wnDir_series
     
@@ -259,7 +255,7 @@ class NOAATANDC(IDataIngestion):
         data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'wind')
         if data is None: return None
 
-        wnSpd_inputs = []
+        df = get_input_dataFrame()
         for idx in data.index:
 
             # parse
@@ -270,19 +266,17 @@ class NOAATANDC(IDataIngestion):
             if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
                 continue
 
-            dataPoints = Input(
-                dataValue= wind_spd,
-                dataUnit= 'mps',
-                timeVerified= dt,
-                timeGenerated= dt, 
-                longitude= lat_lon[1],
-                latitude= lat_lon[0]
-            )
-            wnSpd_inputs.append(dataPoints)
-
+            df.loc[len(df)] = [
+                wind_spd,          # dataValue
+                'mps',           # dataUnit
+                dt,             # timeVerified
+                dt,             # timeGenerated
+                lat_lon[1],     # longitude
+                lat_lon[0]      # latitude
+            ]
 
         wnSpd_series = Series(seriesDescription, True, timeDescription)
-        wnSpd_series.data = wnSpd_inputs
+        wnSpd_series.dataFrame = df
 
         return wnSpd_series
     
@@ -295,8 +289,8 @@ class NOAATANDC(IDataIngestion):
         data, lat_lon = self.__fetch_NOAA_data(dWindDesc, timeDescription, 'wind')
         if data is None: return None
 
-        x_inputs = []
-        y_inputs = []
+        x_df = get_input_dataFrame()
+        y_df = get_input_dataFrame()
         for idx in data.index:
 
             # parse
@@ -310,35 +304,34 @@ class NOAATANDC(IDataIngestion):
             if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
                 continue
 
-            dataPoints = Input(
-                dataValue= x_comp,
-                dataUnit= 'mps',
-                timeVerified= dt,
-                timeGenerated= dt, 
-                longitude= lat_lon[1],
-                latitude= lat_lon[0]
-            )
-            x_inputs.append(dataPoints)
+            x_df.loc[len(x_df)] = [
+                x_comp,          # dataValue
+                'mps',           # dataUnit
+                dt,             # timeVerified
+                dt,             # timeGenerated
+                lat_lon[1],     # longitude
+                lat_lon[0]      # latitude
+            ]
 
-            dataPoints = Input(
-                dataValue= y_comp,
-                dataUnit= 'mps',
-                timeVerified= dt,
-                timeGenerated= dt, 
-                longitude= lat_lon[1],
-                latitude= lat_lon[0]
-            )
-            y_inputs.append(dataPoints)
+            y_df.loc[len(y_df)] = [
+                y_comp,          # dataValue
+                'mps',           # dataUnit
+                dt,             # timeVerified
+                dt,             # timeGenerated
+                lat_lon[1],     # longitude
+                lat_lon[0]      # latitude
+            ]
+
 
         #Changing the series description name back to what we will be saving in the database after calculations
         xCompDesc = SeriesDescription(seriesDescription.dataSource, f'dXWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
         yCompDesc = SeriesDescription(seriesDescription.dataSource, f'dYWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
 
         x_series = Series(xCompDesc, True, timeDescription)
-        x_series.data = x_inputs
+        x_series.dataFrame = x_df
 
         y_series = Series(yCompDesc, True, timeDescription)
-        y_series.data = y_inputs
+        y_series.dataFrame = y_df
 
         return x_series if isXWnCmp else y_series
     
@@ -353,17 +346,19 @@ class NOAATANDC(IDataIngestion):
         four_highest = sorted(input_data)[-4:]
         mean_four_max = sum(four_highest) / 4.0
 
-        input = Input(
-            dataValue= mean_four_max,
-            dataUnit= 'meter',
-            timeVerified= timeDescription.toDateTime,
-            timeGenerated= timeDescription.toDateTime, 
-            longitude= lat_lon[1],
-            latitude= lat_lon[0]
-        )
+
+        df = get_input_dataFrame()
+        df.loc[len(df)] = [
+            mean_four_max,                  # dataValue
+            'meter',                        # dataUnit
+            timeDescription.toDateTime,     # timeVerified
+            timeDescription.toDateTime,     # timeGenerated
+            lat_lon[1],                     # longitude
+            lat_lon[0]                      # latitude
+        ]
 
         series = Series(seriesDescription, True, timeDescription)
-        series.data = [input]
+        series.dataFrame = df
 
         return series
     
@@ -371,7 +366,7 @@ class NOAATANDC(IDataIngestion):
         data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'air_temperature')
         if data is None: return None
 
-        inputs = []
+        df = get_input_dataFrame()
         for idx in data.index:
 
             # parse
@@ -382,18 +377,17 @@ class NOAATANDC(IDataIngestion):
             if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
                 continue
 
-            dataPoints = Input(
-                dataValue= value,
-                dataUnit= 'celsius',
-                timeVerified= dt,
-                timeGenerated= dt, 
-                longitude= lat_lon[1],
-                latitude= lat_lon[0]
-            )
-            inputs.append(dataPoints)
+            df.loc[len(df)] = [
+                value,                  # dataValue
+                'celsius',              # dataUnit
+                dt,                     # timeVerified
+                dt,                     # timeGenerated
+                lat_lon[1],             # longitude
+                lat_lon[0]              # latitude
+            ]
 
         series = Series(seriesDescription, True, timeDescription)
-        series.data = inputs
+        series.dataFrame = df
 
         return series
     
@@ -401,7 +395,7 @@ class NOAATANDC(IDataIngestion):
         data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'water_temperature')
         if data is None: return None
 
-        inputs = []
+        df = get_input_dataFrame()
         for idx in data.index:
 
             # parse
@@ -412,17 +406,15 @@ class NOAATANDC(IDataIngestion):
             if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
                 continue
 
-            dataPoints = Input(
-                dataValue= value,
-                dataUnit= 'celsius',
-                timeVerified= dt,
-                timeGenerated= dt, 
-                longitude= lat_lon[1],
-                latitude= lat_lon[0]
-            )
-            inputs.append(dataPoints)
+            df.loc[len(df)] = [
+                value,                  # dataValue
+                'celsius',              # dataUnit
+                dt,                     # timeVerified
+                dt,                     # timeGenerated
+                lat_lon[1],             # longitude
+                lat_lon[0]              # latitude
+            ]
 
         series = Series(seriesDescription, True, timeDescription)
-        series.data = inputs
-
+        series.dataFrame = df
         return series

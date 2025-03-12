@@ -32,7 +32,7 @@ from lxml import etree # type: ignore
                        # since lxml has no type hints
 
 from DataIngestion.IDataIngestion import IDataIngestion
-from DataClasses import Series, SeriesDescription, Input, TimeDescription
+from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from utility import log
 import re
@@ -193,7 +193,7 @@ class NDFD(IDataIngestion):
             
             dataValueIndex = 1
 
-            inputs = []
+            df = get_input_dataFrame()
             for row in data_dictionary:
                 timeVerified = datetime.fromtimestamp(row[0])
                 if timeRequest.interval is not None:
@@ -204,17 +204,17 @@ class NDFD(IDataIngestion):
                 if timeVerified > timeRequest.toDateTime or timeVerified < timeRequest.fromDateTime:
                     continue
 
-                inputs.append(Input(
-                    str(row[dataValueIndex]),
-                    self.__unitMappingDict[NDFD_Predictions.unit],
-                    timeVerified,
-                    None,
-                    NDFD_Predictions.longitude,
-                    NDFD_Predictions.latitude
-                ))
+                df.loc[len(df)] = [
+                    str(row[dataValueIndex]),                       # dataValue
+                    self.__unitMappingDict[NDFD_Predictions.unit],  # dataUnit
+                    timeVerified,                                   # timeVerified
+                    None,                                           # timeGenerated
+                    NDFD_Predictions.longitude,                     # longitude
+                    NDFD_Predictions.latitude                       # latitude
+                ]
 
             resultSeries = Series(seriesRequest, True)
-            resultSeries.data = inputs
+            resultSeries.dataFrame = df
 
             return resultSeries
 
@@ -262,44 +262,45 @@ class NDFD(IDataIngestion):
         #Step One: Get the wind direction and the wind speed for the requested time period
         #Note: changing the name to be saved in the database to what the series actually is at retreval time
         seriesDescription.dataSeries = "pWnDir"
-        windDirection = self.fetch_predictions(seriesDescription, timeDescription, "wdir")
+        windDirection: Series = self.fetch_predictions(seriesDescription, timeDescription, "wdir")
         seriesDescription.dataSeries = "pWnSpd"
-        windSpeed = self.fetch_predictions(seriesDescription, timeDescription, "wspd")
+        windSpeed: Series = self.fetch_predictions(seriesDescription, timeDescription, "wspd")
         
         #Step Two: Calculate the Component 
         if (not windDirection or not windSpeed): 
             log('Fetch wind component predictions failed as wind directions or wind speed was none.')
             return None
         
-        if (len(windDirection.data) != len(windSpeed.data)): 
+        if (len(windDirection.dataFrame) != len(windSpeed.dataFrame)): 
             log('Fetch wind component predictions failed as wind direction and wind speed series were different lengths.')
             return None
         
-        windDirection = windDirection.data
-        windSpeed = windSpeed.data
+        windDirection = windDirection.dataFrame
+        windSpeed = windSpeed.dataFrame
 
-        xCompInputs = []
-        yCompInputs = []
+        xCompDF = get_input_dataFrame()
+        yCompDF = get_input_dataFrame()
         
         for idx in range(len(windDirection)): 
-            xComp = float(windSpeed[idx].dataValue)  * cos(radians(float(windDirection[idx].dataValue) - offset))
-            xCompInputs.append(Input(
-                    str(xComp),
-                    "mps",
-                    windDirection[idx].timeVerified,
-                    None,
-                    windDirection[idx].longitude,
-                    windDirection[idx].latitude
-                ))
-            yComp = float(windSpeed[idx].dataValue)  * sin(radians(float(windDirection[idx].dataValue) - offset))
-            yCompInputs.append(Input(
-                    str(yComp),
-                    "mps",
-                    windDirection[idx].timeVerified,
-                    None,
-                    windDirection[idx].longitude,
-                    windDirection[idx].latitude
-                ))
+            xComp = float(windSpeed[idx]['dataValue'])  * cos(radians(float(windDirection[idx]['dataValue']) - offset))
+            xCompDF.loc[len(xCompDF)] = [
+                str(xComp),                              # dataValue
+                "mps",                                  # dataUnit
+                windDirection[idx]['timeVerified'],     # timeVerified
+                None,                                   # timeGenerated
+                windDirection[idx]['longitude'],        # longitude
+                windDirection[idx]['latitude']          # latitude
+            ]
+
+            yComp = float(windSpeed[idx]['dataValue'])  * sin(radians(float(windDirection[idx]['dataValue']) - offset))
+            yCompDF.loc[len(yCompDF)] = [
+                str(yComp),                              # dataValue
+                "mps",                                  # dataUnit
+                windDirection[idx]['timeVerified'],     # timeVerified
+                None,                                   # timeGenerated
+                windDirection[idx]['longitude'],        # longitude
+            ]
+               
             
         #Changing the series description name back to what we will be saving in the database after calculations
         xCompDesc = SeriesDescription(seriesDescription.dataSource, f'pXWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
@@ -307,9 +308,9 @@ class NDFD(IDataIngestion):
 
         #Creating series objects with correct description information and inputs
         xCompSeries = Series(xCompDesc, True, timeDescription)
-        xCompSeries.data = xCompInputs
+        xCompSeries.data = xCompDF
         yCompSeries = Series(yCompDesc, True, timeDescription)
-        yCompSeries.data = yCompInputs
+        yCompSeries.data = yCompDF
         
         #Step three: Return it
         return xCompSeries if isXWindCmp else yCompSeries      
