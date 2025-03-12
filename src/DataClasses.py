@@ -10,9 +10,32 @@
 #----------------------------------
 # 
 #
-from datetime import datetime, timedelta, time
-from typing import List
+from datetime import datetime, timedelta
 from pandas import DataFrame
+
+
+def get_input_dataFrame() -> DataFrame:
+    """ Constructs a dataframe with the columns Semaphore would expect from a dataframe of inputs.
+    The columns are: 
+    - dataValue: The value of the data point AS A STRING!
+    - dataUnit: The unit of the data point
+    - timeVerified: The time the data was verified
+    - timeGenerated: The time the data was generated
+    - longitude: The longitude where the data was collected
+    - latitude: The latitude where the data was collected
+    """
+    return DataFrame(columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude'])
+
+
+def get_output_dataFrame() -> DataFrame:
+    """ Constructs a dataframe with the columns Semaphore would expect from a dataframe of outputs.
+    The columns are: 
+    - dataValue: The value of the data point AS A STRING!
+    - dataUnit: The unit of the data point
+    - timeGenerated: The time the data was generated
+    - leadTime: The lead time for the prediction
+    """
+    return DataFrame(columns=['dataValue', 'dataUnit', 'timeGenerated', 'leadTime'])
 
 class DataIntegrityDescription():
     """A time description should describe the data Integrity steps that should be taken
