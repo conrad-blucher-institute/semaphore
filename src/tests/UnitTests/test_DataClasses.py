@@ -15,159 +15,11 @@ import sys
 sys.path.append('/app/src')
 import unittest
 from datetime import datetime, timedelta
-from DataClasses import (Input, Output, DataIntegrityDescription, 
+from DataClasses import (DataIntegrityDescription, 
                         TimeDescription, SeriesDescription, 
                         SemaphoreSeriesDescription, Series)
-
-class TestInput(unittest.TestCase):
-    """Test cases for the Input class"""
-    
-    def setUp(self):
-        self.time_verified = datetime(2025, 2, 27, 12, 0, 0)
-        self.time_generated = datetime(2025, 2, 27, 11, 30, 0)
-        
-    def test_input_creation_with_single_value(self):
-        """Test creating an Input with a single value"""
-        input_obj = Input(
-            dataValue='10.5',
-            dataUnit="meters",
-            timeVerified=self.time_verified,
-            timeGenerated=self.time_generated,
-            longitude="123.456",
-            latitude="78.910"
-        )
-        
-        self.assertEqual(input_obj.dataValue, '10.5')
-        self.assertEqual(input_obj.dataUnit, "meters")
-        self.assertEqual(input_obj.timeVerified, self.time_verified)
-        self.assertEqual(input_obj.timeGenerated, self.time_generated)
-        self.assertEqual(input_obj.longitude, "123.456")
-        self.assertEqual(input_obj.latitude, "78.910")
-        
-    def test_input_creation_with_list(self):
-        """Test creating an Input with a list of values"""
-        values = ['10.5', '11.2', '12.8']
-        input_obj = Input(
-            dataValue=values,
-            dataUnit="meters",
-            timeVerified=self.time_verified,
-            timeGenerated=self.time_generated,
-            longitude="123.456",
-            latitude="78.910"
-        )
-        
-        self.assertEqual(input_obj.dataValue, values)
-        
-    def test_input_creation_with_invalid_list(self):
-        """Test creating an Input with an invalid list (containing 1 or less elements)"""
-        with self.assertRaises(ValueError):
-            Input(
-                dataValue=['10.5'],  # List with only one element
-                dataUnit="meters",
-                timeVerified=self.time_verified,
-                timeGenerated=self.time_generated
-            )
-            
-        with self.assertRaises(ValueError):
-            Input(
-                dataValue=[],  # Empty list
-                dataUnit="meters",
-                timeVerified=self.time_verified,
-                timeGenerated=self.time_generated
-            )
-            
-    def test_input_equality(self):
-        """Test that two identical Inputs are equal"""
-        input1 = Input(
-            dataValue='10.5',
-            dataUnit="meters",
-            timeVerified=self.time_verified,
-            timeGenerated=self.time_generated,
-            longitude="123.456",
-            latitude="78.910"
-        )
-        
-        input2 = Input(
-            dataValue='10.5',
-            dataUnit="meters",
-            timeVerified=self.time_verified,
-            timeGenerated=self.time_generated,
-            longitude="123.456",
-            latitude="78.910"
-        )
-        
-        self.assertEqual(input1, input2)
-
-
-class TestOutput(unittest.TestCase):
-    """Test cases for the Output class"""
-    
-    def setUp(self):
-        self.time_generated = datetime(2025, 2, 27, 12, 0, 0)
-        self.lead_time = timedelta(hours=24)
-        
-    def test_output_creation_with_single_value(self):
-        """Test creating an Output with a single value"""
-        output_obj = Output(
-            dataValue='15.7',
-            dataUnit="feet",
-            timeGenerated=self.time_generated,
-            leadTime=self.lead_time
-        )
-        
-        self.assertEqual(output_obj.dataValue, '15.7')
-        self.assertEqual(output_obj.dataUnit, "feet")
-        self.assertEqual(output_obj.timeGenerated, self.time_generated)
-        self.assertEqual(output_obj.leadTime, self.lead_time)
-        
-    def test_output_creation_with_list(self):
-        """Test creating an Output with a list of values"""
-        values = ['15.7', '16.2', '17.3']
-        output_obj = Output(
-            dataValue=values,
-            dataUnit="feet",
-            timeGenerated=self.time_generated,
-            leadTime=self.lead_time
-        )
-        
-        self.assertEqual(output_obj.dataValue, values)
-        
-    def test_output_creation_with_invalid_list(self):
-        """Test creating an Output with an invalid list (containing 1 or less elements)"""
-        with self.assertRaises(ValueError):
-            Output(
-                dataValue=['15.7'],  # List with only one element
-                dataUnit="feet",
-                timeGenerated=self.time_generated,
-                leadTime=self.lead_time
-            )
-            
-        with self.assertRaises(ValueError):
-            Output(
-                dataValue=[],  # Empty list
-                dataUnit="feet",
-                timeGenerated=self.time_generated,
-                leadTime=self.lead_time
-            )
-            
-    def test_output_equality(self):
-        """Test that two identical Outputs are equal"""
-        output1 = Output(
-            dataValue='15.7',
-            dataUnit="feet",
-            timeGenerated=self.time_generated,
-            leadTime=self.lead_time
-        )
-        
-        output2 = Output(
-            dataValue='15.7',
-            dataUnit="feet",
-            timeGenerated=self.time_generated,
-            leadTime=self.lead_time
-        )
-        
-        self.assertEqual(output1, output2)
-
+from pandas import DataFrame
+from pandas.util.testing import assert_frame_equal
 
 class TestDataIntegrityDescription(unittest.TestCase):
     """Test cases for the DataIntegrityDescription class"""
@@ -322,20 +174,7 @@ class TestSeries(unittest.TestCase):
         )
         
         # Create sample data
-        self.sample_data = [
-            Input(
-                dataValue='10.5',
-                dataUnit="m/s",
-                timeVerified=datetime(2025, 2, 1, 12, 0),
-                timeGenerated=datetime(2025, 2, 1, 11, 30)
-            ),
-            Input(
-                dataValue='12.3',
-                dataUnit="m/s",
-                timeVerified=datetime(2025, 2, 1, 13, 0),
-                timeGenerated=datetime(2025, 2, 1, 12, 30)
-            )
-        ]
+        self.sample_data = DataFrame([1, 2, 3])
         
     def test_creation_with_series_description(self):
         """Test creating a Series with SeriesDescription"""
@@ -349,7 +188,7 @@ class TestSeries(unittest.TestCase):
         self.assertTrue(series.isComplete)
         self.assertEqual(series.timeDescription, self.time_desc)
         self.assertIsNone(series.nonCompleteReason)
-        self.assertEqual(series.data, [])
+        self.assertEqual(series.dataFrame, None)
         
     def test_creation_with_semaphore_description(self):
         """Test creating a Series with SemaphoreSeriesDescription"""
@@ -363,7 +202,7 @@ class TestSeries(unittest.TestCase):
         self.assertTrue(series.isComplete)
         self.assertEqual(series.timeDescription, self.time_desc)
         self.assertIsNone(series.nonCompleteReason)
-        self.assertEqual(series.data, [])
+        self.assertEqual(series.dataFrame, None)
         
     def test_setting_data(self):
         """Test setting the data property of a Series"""
@@ -373,8 +212,8 @@ class TestSeries(unittest.TestCase):
             timeDescription=self.time_desc
         )
         
-        series.data = self.sample_data
-        self.assertEqual(series.data, self.sample_data)
+        series.dataFrame = self.sample_data
+        assert_frame_equal(series.dataFrame, self.sample_data)
 
 
 if __name__ == '__main__':
