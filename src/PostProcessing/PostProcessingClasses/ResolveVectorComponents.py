@@ -60,40 +60,29 @@ class ResolveVectorComponents(IPostProcessing):
         magnitude_series = preprocessedData[args['targetMagnitude_inKey']]
         direction_series = preprocessedData[args['targetDirection_inKey']]
 
-        # Itterate through the magnitude and direction data, calculating components, and saving results in Input objects
-        x_comps = []
-        y_comps = []
-        for mag_input, dir_input in zip(magnitude_series.data, direction_series.data):
+        df_mag = magnitude_series.dataFrame
+        df_mag['dataValue'] = df_mag['dataValue'].astype(float)
 
-            direction = float(dir_input.dataValue)
-            magnitude = float(mag_input.dataValue)
+        df_dir = direction_series.dataFrame
+        df_dir['dataValue'] = df_dir['dataValue'].astype(float)
 
-            # Direction must be in degrees for calculation
-            if(dir_input.dataUnit != 'degrees'): direction = degrees(direction)
+        # Offset is in degrees, so we have to make sure the data is degrees before adding offset
+        if df_dir['dataUnit'].iloc[0] != 'degrees':
+            df_dir['dataValue'] = df_dir['dataValue'].apply(degrees)
 
-            x_comp = magnitude * cos(radians(direction + offset))
-            y_comp = magnitude * sin(radians(direction + offset))
+        # Add the offset to the direction
+        df_dir['dataValue'] = df_dir['dataValue'] + offset
 
-            # Magnitude contains the correct metadata from resulting series
-            x_comps.append(Input(
-                dataValue=      str(x_comp),
-                dataUnit=       mag_input.dataUnit,
-                timeGenerated=  mag_input.timeGenerated,
-                timeVerified=   mag_input.timeVerified,
-                longitude=      mag_input.longitude,
-                latitude=       mag_input.latitude
-                )
-            )
+        # Calculate x and y components using vectorized operations
+        x_comp = df_mag['dataValue'] * df_dir['dataValue'].apply(radians).apply(cos)
+        y_comp = df_mag['dataValue'] * df_dir['dataValue'].apply(radians).apply(sin)
 
-            y_comps.append(Input(
-                dataValue=      str(y_comp),
-                dataUnit=       mag_input.dataUnit,
-                timeGenerated=  mag_input.timeGenerated,
-                timeVerified=   mag_input.timeVerified,
-                longitude=      mag_input.longitude,
-                latitude=       mag_input.latitude
-                )
-            )
+        # Copy the mag df for the result series
+        df_x_result = df_mag.copy(deep=True)
+        df_x_result['dataValue'] = x_comp.astype(str)
+
+        df_y_result = df_mag.copy(deep=True)
+        df_y_result['dataValue'] = y_comp.astype(str)
 
         
         # Repack component vectors as new series, reading the key from the arguments obj
@@ -102,13 +91,13 @@ class ResolveVectorComponents(IPostProcessing):
         x_comp_outKey = args['x_comp_outKey']
         desc.dataSeries = x_comp_outKey
         x_series = Series(desc, True, magnitude_series.timeDescription)
-        x_series.data = x_comps
+        x_series.dataFrame = df_x_result
         preprocessedData[x_comp_outKey] = x_series
 
         y_comp_outKey = args['y_comp_outKey']
         desc.dataSeries = y_comp_outKey
         y_series = Series(desc, True, magnitude_series.timeDescription)
-        y_series.data = y_comps
+        y_series.dataFrame = df_y_result
         preprocessedData[y_comp_outKey] = y_series
 
         return preprocessedData

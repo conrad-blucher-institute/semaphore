@@ -13,7 +13,7 @@ The post processing in this file preforms an arithmetic operation on two series.
 #
 #Imports
 from PostProcessing.IPostProcessing import IPostProcessing
-from DataClasses import Series, Input
+from DataClasses import Series
 from ModelExecution.dspecParser import PostProcessCall
 from copy import deepcopy
 import numpy as np
@@ -67,9 +67,9 @@ class ArithmeticOperation(IPostProcessing):
         SECOND_SERIES = preprocessedData[args['targetSecond_inKey']]
         OUT_KEY = args['outkey']
         
-        # Get the raw data as np.array[float]
-        first_data = np.array([float(input.dataValue) for input in FIRST_SERIES.data])
-        second_data = np.array([float(input.dataValue) for input in SECOND_SERIES.data])
+        # Unpack the data
+        first_data = FIRST_SERIES.dataFrame['dataValue'].astype(float).to_numpy()
+        second_data = SECOND_SERIES.dataFrame['dataValue'].astype(float).to_numpy()
 
         # Preform the requested operation on the data
         match OPERATION:
@@ -84,20 +84,17 @@ class ArithmeticOperation(IPostProcessing):
             case 'modulo':
                 out_data = np.mod(first_data, second_data)
 
-        # Repack the data as a list of inputs, using the first series inputs a template
-        # we use the first series for the meta information as no arithmetic operation should change this
-        out_input_list = []
-        for input_stencil, value in zip(FIRST_SERIES.data, out_data):
-            input: Input = deepcopy(input_stencil)
-            input.dataValue = value
-            out_input_list.append(input)
+        # Create a new DF to hold the results
+        df_result = FIRST_SERIES.dataFrame.copy(deep=True)
+        df_result['dataValue'] = out_data
+        df_result['dataValue'] = df_result['dataValue'].astype(str)
 
         # Repack average as new series, reading the key from the arguments obj
         timeDescription = deepcopy(FIRST_SERIES.timeDescription)
         seriesDescription = deepcopy(FIRST_SERIES.description)
         seriesDescription.dataSeries = OUT_KEY
         out_series = Series(seriesDescription, True, timeDescription)
-        out_series.data = out_input_list
+        out_series.dataFrame = df_result
 
         preprocessedData[OUT_KEY] = out_series
         return preprocessedData

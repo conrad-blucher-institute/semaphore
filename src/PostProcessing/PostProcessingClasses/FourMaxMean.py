@@ -13,7 +13,7 @@ The post processing in this file Computes the mean of the 4 highest values in a 
 #
 #Imports
 from PostProcessing.IPostProcessing import IPostProcessing
-from DataClasses import Series, Input
+from DataClasses import Series, get_input_dataFrame
 from ModelExecution.dspecParser import PostProcessCall
 from copy import deepcopy
 from utility import log
@@ -54,7 +54,7 @@ class FourMaxMean(IPostProcessing):
         # Unpack data and arguments from arg object
         args = postProcessCall.args
         IN_SERIES = preprocessedData[args['target_inKey']]
-        IN_SERIES_DATA = [float(input.dataValue) for input in IN_SERIES.data]
+        IN_SERIES_DATA = IN_SERIES.dataFrame['dataValue'].astype(float).to_list()
         OUT_KEY = args['outkey']
         
 
@@ -66,18 +66,17 @@ class FourMaxMean(IPostProcessing):
         mean_four_max_val = sum(four_highest) / 4.0
         
         # The four max mean operation changes none of the meta information
-        # TF we copy the last input from the in data and change the value 
-        # This is expected a List[Input]
-        mean_four_max: Input = deepcopy(IN_SERIES.data[-1])
-        mean_four_max.dataValue = str(mean_four_max_val)
-        mean_four_max_list = [mean_four_max]
+        # TF we copy the last row from the in data and just change the value 
+        df_fmm = get_input_dataFrame()
+        df_fmm.iloc[0] = IN_SERIES.dataFrame.iloc[-1] # copy the last row of the in to the out
+        df_fmm['dataValue'] = str(mean_four_max_val) # Replace the value
 
         # Repack average as new series, reading the key from the arguments obj
         timeDescription = deepcopy(IN_SERIES.timeDescription)
         seriesDescription = deepcopy(IN_SERIES.description)
         seriesDescription.dataSeries = OUT_KEY
         out_series = Series(seriesDescription, True, timeDescription)
-        out_series.data = mean_four_max_list
+        out_series.dataFrame = df_fmm
 
         preprocessedData[OUT_KEY] = out_series
         return preprocessedData
