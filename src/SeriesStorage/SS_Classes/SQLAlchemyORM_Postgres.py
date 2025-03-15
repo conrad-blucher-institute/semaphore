@@ -211,20 +211,20 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
      #  Construct DB row to insert
         now = datetime.now()
         insertionRows = []
-        for input in series.data:
+        for index in range(len(series.dataFrame)):
             insertionValueRow = {"isActual": None, "generatedTime": None, "isActual": None,"acquiredTime": None, "verifiedTime": None, "dataValue": None, "dataUnit": None, "dataSource": None, "dataLocation": None, "dataDatum": None, "latitude": None, "longitude": None}
-            insertionValueRow["generatedTime"] = input.timeGenerated
+            insertionValueRow["generatedTime"] = series.dataFrame[index]['timeGenerated']
             insertionValueRow["acquiredTime"] = now
-            insertionValueRow["verifiedTime"] = input.timeVerified
-            insertionValueRow["dataValue"] = input.dataValue
+            insertionValueRow["verifiedTime"] = series.dataFrame[index]['timeVerified']
+            insertionValueRow["dataValue"] = series.dataFrame[index]['dataValue']
             insertionValueRow["isActual"] = False if series.description.dataSeries[0] == 'p' else True
-            insertionValueRow["dataUnit"] = input.dataUnit
+            insertionValueRow["dataUnit"] = series.dataFrame[index]['timeVerified']
             insertionValueRow["dataSource"] = series.description.dataSource
             insertionValueRow["dataLocation"] = series.description.dataLocation
             insertionValueRow["dataSeries"] = series.description.dataSeries
             insertionValueRow["dataDatum"] = series.description.dataDatum
-            insertionValueRow["latitude"] = input.latitude
-            insertionValueRow["longitude"] = input.longitude
+            insertionValueRow["latitude"] = series.dataFrame[index]['latitude']
+            insertionValueRow["longitude"] = series.dataFrame[index]['latitude']
             insertionRows.append(insertionValueRow)
 
         with self.__get_engine().connect() as conn:
@@ -288,14 +288,14 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
 
         insertionValueRows = []
-        for output in series.data:
+        for index in range(len(series.dataFrame)):
             insertionValueRow = {"timeGenerated": None, "leadTime": None, "modelName": None, "dataValue": None, "dataUnit": None, "dataLocation": None, "dataSeries": None, "dataDatum": None}
-            insertionValueRow["timeGenerated"] = output.timeGenerated
-            insertionValueRow["leadTime"] = output.leadTime
+            insertionValueRow["timeGenerated"] = series.dataFrame[index]['timeGenerated']
+            insertionValueRow["leadTime"] = series.dataFrame[index]['leadTime']
             insertionValueRow["modelName"] = series.description.modelName
             insertionValueRow["modelVersion"] = series.description.modelVersion
-            insertionValueRow["dataValue"] = output.dataValue
-            insertionValueRow["dataUnit"] = output.dataUnit
+            insertionValueRow["dataValue"] = series.dataFrame[index]['dataValue']
+            insertionValueRow["dataUnit"] = series.dataFrame[index]['dataUnit']
             insertionValueRow["dataLocation"] = series.description.dataLocation
             insertionValueRow["dataSeries"] = series.description.dataSeries
             insertionValueRow["dataDatum"] = series.description.dataDatum
