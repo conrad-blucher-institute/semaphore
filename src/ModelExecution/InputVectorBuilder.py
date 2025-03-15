@@ -108,12 +108,12 @@ class InputVectorBuilder:
                 data = None
                 isFinished = True # Assume we are finished unless we find a multi series that has more data
                 if not keyIsMulti:
-                    data = [input.dataValue for input in series.data]
+                    data = series.dataFrame['dataValue'].to_list()
                 else:
-                    data = [input.dataValue[batchIndex] for input in series.data] # We pull a slice of data determined by the batch index
+                    data = [ensemble_members[batchIndex] for ensemble_members in series.dataFrame['dataValue']] # We pull a slice of data determined by the batch index
                     
                     # If there is more data, then we need to generate another vector
-                    lengthOfMultiSeries = len(series.data[0].dataValue)
+                    lengthOfMultiSeries = len(series.dataFrame.loc[0]['dataValue'])
                     if batchIndex < lengthOfMultiSeries - 1: 
                         isFinished = False # There could be more vectors to make
                     elif batchIndex == 1: log("Warning:: Build input vectors returning with a batch index of 1. This indicates a series was marked multi but only actually included one value per input!")
