@@ -17,11 +17,13 @@ from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
 from os import getenv
 from datetime import timedelta, datetime
+from pandas import DataFrame
 
 from SeriesStorage.ISeriesStorage import ISeriesStorage
 
-from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, Input, Output, TimeDescription
+from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, TimeDescription, get_input_dataFrame, get_output_dataFrame
 from utility import log
+
 
 class SQLAlchemyORM_Postgres(ISeriesStorage):
  
@@ -51,17 +53,17 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             .where(self.inputs.c.verifiedTime <= timeDescription.toDateTime)
             )
         tupleishResult = self.__dbSelection(statement).fetchall()
-        inputResult = self.__splice_input(tupleishResult)
+        df_inputResult = self.__splice_input(tupleishResult)
 
-        # If an interval was provided, we will mod each verified time against it
-        # any that fail we remove
+        # Prune the results removing any data that does not align with the interval that was requested
+        df_prunedInputs = df_inputResult.copy(deep=True)
         if timeDescription.interval != None and timeDescription.interval.total_seconds() != 0:
-            for input in inputResult:
-                if not (input.timeVerified.timestamp() % timeDescription.interval.total_seconds() == 0):
-                    inputResult.remove(input)
+            for i in range(len(df_inputResult)):
+                if not (df_inputResult[i]['timeVerified'].timestamp() % timeDescription.interval.total_seconds() == 0):
+                    df_prunedInputs.drop(input)
 
         series = Series(seriesDescription, True, timeDescription)
-        series.data = inputResult
+        series.dataFrame = df_prunedInputs
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
@@ -98,8 +100,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                     .where(self.outputs.c.timeGenerated <= toGeneratedTime)
                     )
         tupleishResult = self.__dbSelection(statement).fetchall()
-        outputResult = self.__splice_output(tupleishResult)
-        series.data = outputResult
+        series.dataFrame = self.__splice_output(tupleishResult)
         return series
     
 
@@ -143,7 +144,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # Parse out model information from first output result
         description = SemaphoreSeriesDescription(tupleishResult[0][3], tupleishResult[0][4], tupleishResult[0][8], tupleishResult[0][7], tupleishResult[0][6])
         series = Series(description, False)
-        series.data = outputResult
+        series.dataFrame = outputResult
         return series
     
 
@@ -169,7 +170,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # Parse out model information from first output result
         description = SemaphoreSeriesDescription(tupleishResult[3], tupleishResult[4], tupleishResult[8], tupleishResult[7], tupleishResult[6])
         series = Series(description, False)
-        series.data = outputResult
+        series.dataFrame = outputResult
         return series
     
     def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
@@ -236,7 +237,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             conn.commit()
 
         resultSeries = Series(series.description, True, series.timeDescription)
-        resultSeries.data = self.__splice_input(result) #Turn tuple objects into actual objects
+        resultSeries.dataFrame = self.__splice_input(result) #Turn tuple objects into actual objects
         return resultSeries
     
     def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict | None]:
@@ -311,7 +312,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             conn.commit()
 
         resultSeries = Series(series.description, True, series.timeDescription)
-        resultSeries.data = self.__splice_output(result) #Turn tuple objects into actual objects
+        resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
         ids = [row[0] for row in result]
         return resultSeries, ids
 
@@ -503,8 +504,8 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         return result
 
-    def __splice_input(self, results: list[tuple]) -> list[Input]:
-        """An Input is a data value of some environment variable that can be linked to a date time.
+    def __splice_input(self, results: list[tuple]) -> DataFrame:
+        """ Converts DB row results into a proper input dataframe to be packed into a series.
         :param list[tupleish] -a list of selections from the table formatted in tupleish
         """
         valueIndex = 4
@@ -514,22 +515,22 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         latitudeIndex = 11
         longitudeIndex = 12
 
-        dataPoints = []
+
+        df = get_input_dataFrame()
         for row in results:
-            dataPoints.append(Input(
-                row[valueIndex],
-                row[unitIndex],
-                row[verifiedTimeIndex],
-                row[generatedTimeIndex],
-                row[longitudeIndex],
-                row[latitudeIndex]
-            ))
+            df.loc[len(df)] = [
+                row[valueIndex],            # dataValue
+                row[unitIndex],             # dataUnit
+                row[verifiedTimeIndex],     # timeVerified
+                row[generatedTimeIndex],    # timeGenerated
+                row[longitudeIndex],        # longitude
+                row[latitudeIndex]          # latitude
+            ]
 
-        return dataPoints
+        return df
 
-    def __splice_output(self, results: list[tuple]) -> list[Output]:
-        """Splices up a list of DB results, pulling out only the data that changes per point,
-        and places them in a Prediction object.
+    def __splice_output(self, results: list[tuple]) -> DataFrame:
+        """Converts DB row results into a proper output dataframe to be packed into a series.
         param: list[tupleish] - a list of selections from the table formatted in tupleish
         """
         valueIndex = 5
@@ -537,16 +538,16 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         timeGeneratedIndex = 1
         leadTimeIndex = 2
         
-        dataPoints = []
+        df = get_output_dataFrame()
         for row in results:
-            dataPoints.append(Output(
-                row[valueIndex],
-                row[unitIndex],
-                row[timeGeneratedIndex],
-                row[leadTimeIndex]
-            ))
+            df.loc[len(df)] = [
+                row[valueIndex],            # dataValue
+                row[unitIndex],             # dataUnit
+                row[timeGeneratedIndex],    # timeGenerated
+                row[leadTimeIndex]          # leadtime
+            ]
 
-        return dataPoints 
+        return df 
 
     def insert_lat_lon_test(self, code: str, displayName: str, notes: str, latitude: str, longitude: str):
         """This method inserts lat and lon information
