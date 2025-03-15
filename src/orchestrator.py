@@ -18,7 +18,7 @@ from os import path, getenv
 from datetime import datetime, timedelta
 from exceptions import Semaphore_Exception, Semaphore_Data_Exception, Semaphore_Ingestion_Exception
 from discord import Discord_Notify
-from DataClasses import Series, SemaphoreSeriesDescription, Output
+from DataClasses import Series, SemaphoreSeriesDescription, get_output_dataFrame
 from utility import log, LogLocationDirector
 
 from SeriesStorage.ISeriesStorage import series_storage_factory
@@ -70,7 +70,7 @@ class Orchestrator:
                 for dspecPath in checked_dspecs:
                 
                     DSPEC = self.DSPEC_parser.parse_dspec(dspecPath)
-                    model_name = DSPEC.modelName
+                    model_name: str = DSPEC.modelName
 
                     LogLocationDirector().set_log_target_path(getenv('LOG_BASE_PATH'), model_name)
                     log(f'----Running {dspecPaths} for {executionTime}! Toss: {toss}----')
@@ -141,7 +141,7 @@ class Orchestrator:
                 inserted_results, _ = series_storage.insert_output_and_model_run(result_series, execution_time, 0)
 
                 log(inserted_results)
-                log(inserted_results.data if inserted_results is not None else '')
+                log(inserted_results.dataFrame if inserted_results is not None else '')
         except:
             log(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))    
 
@@ -177,14 +177,18 @@ class Orchestrator:
                 # Reconstruct the expected predictions information with a nulled result
                 predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, dspec.outputInfo.series, dspec.outputInfo.location, dspec.outputInfo.datum)
                 result_series = Series(predictionDesc, True)
-                result_series.data = [Output(None, dspec.outputInfo.unit, self.__calculate_referenceTime(execution_time), timedelta(seconds=dspec.outputInfo.leadTime))]
+
+                # Generate null output
+                df_output = get_output_dataFrame() 
+                df_output.loc[0] = [None, dspec.outputInfo.unit, self.__calculate_referenceTime(execution_time), timedelta(seconds=dspec.outputInfo.leadTime)]
+                result_series.dataFrame = df_output
 
                 # Attempt to store both that in the outputs table and information about the model_run
                 series_storage = series_storage_factory()
                 inserted_results, _ = series_storage.insert_output_and_model_run(result_series, execution_time, exception.error_code)
 
                 log(inserted_results)
-                log(inserted_results.data if inserted_results is not None else '')
+                log(inserted_results.dataFrame if inserted_results is not None else '')
         except:
             log(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))
     
