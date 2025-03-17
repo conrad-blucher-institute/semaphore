@@ -72,7 +72,7 @@ class SeriesProvider():
             return validated_DI_results
         
         # If neither of those in isolation work we try merging them together
-        validated_merged_results = self.__validate_series(seriesDescription, timeDescription, raw_DB_results.data, None if raw_DI_results is None else raw_DI_results.data)
+        validated_merged_results = self.__validate_series(seriesDescription, timeDescription, raw_DB_results.dataFrame, None if raw_DI_results is None else raw_DI_results.dataFrame)
         if validated_merged_results.isComplete: 
             return validated_merged_results
         elif seriesDescription.dataIntegrityDescription is None:
@@ -135,7 +135,7 @@ class SeriesProvider():
 
         log(f'Init DB Query...')
         series_storage_results = self.seriesStorage.select_input(seriesDescription, timeDescription)
-        validated_series_storage_results = self.__validate_series(seriesDescription, timeDescription, series_storage_results.data)
+        validated_series_storage_results = self.__validate_series(seriesDescription, timeDescription, series_storage_results.dataFrame)
         return validated_series_storage_results, series_storage_results
         
 
@@ -159,15 +159,15 @@ class SeriesProvider():
 
         
         # Check if we should be saving this data in the db.
-        hasData = len(data_ingestion_results.data) > 0 # If we actually got some data, 
+        hasData = len(data_ingestion_results.dataFrame) > 0 # If we actually got some data, 
         isSemaphoreSource = data_ingestion_results.description.dataSource == "SEMAPHORE"  # If this data came from semaphore itself
         if(saveIngestion and hasData and not isSemaphoreSource):
             inserted_series = self.seriesStorage.insert_input(data_ingestion_results)
             
-            if(inserted_series is None or len(inserted_series.data) == 0): # A sanity check that the data is actually getting inserted!
+            if(inserted_series is None or len(inserted_series.dataFrame) == 0): # A sanity check that the data is actually getting inserted!
                 log('WARNING:: A data insertion was triggered but no data was actually inserted!')
 
-        validated_data_ingestion_result = self.__validate_series(seriesDescription, timeDescription, data_ingestion_results.data)
+        validated_data_ingestion_result = self.__validate_series(seriesDescription, timeDescription, data_ingestion_results.dataFrame)
         return validated_data_ingestion_result, data_ingestion_results
     
 
@@ -181,7 +181,7 @@ class SeriesProvider():
         log(f'Init Interpolation...')
         integrityClass = data_integrity_factory(seriesDescription.dataIntegrityDescription.call)
         interpolation_results = integrityClass.exec(validated_merged_result)
-        interpolated_results = self.__validate_series(seriesDescription, timeDescription, interpolation_results.data)
+        interpolated_results = self.__validate_series(seriesDescription, timeDescription, interpolation_results.dataFrame)
     
         if (not interpolated_results.isComplete):
                 log('WARNING:: Series is not complete after interpolation!')
@@ -220,7 +220,7 @@ class SeriesProvider():
 
         # Generate a dataframe with an index of the datetimes we are expecting, everything else is nulls
         datetimeList = self.__generate_expected_timestamp_list(timeDescription) # A list with every time stamp we expect, with a value of none
-        df_expected: DataFrame = get_input_dataFrame(datetimeList)
+        df_expected: DataFrame = get_input_dataFrame()
         df_expected['timeVerified'] = datetimeList
         df_expected.set_index('timeVerified', inplace=True)
 
@@ -242,7 +242,7 @@ class SeriesProvider():
         # Create a result series that is either complete or not dependant on if there were missing values
         if missing_value_count <= 0:
             result = Series(
-                seriesDescription=  seriesDescription, 
+                description=  seriesDescription, 
                 isComplete=         True, 
                 timeDescription=    timeDescription, 
                 nonCompleteReason=  ''
@@ -252,7 +252,7 @@ class SeriesProvider():
         else:
             # No log here, as this method will be used to also detect if Data Ingestion should be kicked off
             result = Series(
-                seriesDescription=  seriesDescription, 
+                description=  seriesDescription, 
                 isComplete=         False, 
                 timeDescription=    timeDescription, 
                 nonCompleteReason=  f'There were {missing_value_count} missing results!'
