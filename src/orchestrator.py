@@ -63,7 +63,6 @@ class Orchestrator:
         checked_dspecs = [self.__clean_and_check_dspec(dspec) for dspec in dspecPaths]
         if executionTime is None: 
                     executionTime = datetime.now()
-        reference_time = self.__calculate_referenceTime(executionTime, DSPEC)
 
         try:
             try:
@@ -71,6 +70,7 @@ class Orchestrator:
                 
                     DSPEC = self.DSPEC_parser.parse_dspec(dspecPath)
                     model_name: str = DSPEC.modelName
+                    reference_time = self.__calculate_referenceTime(executionTime, DSPEC)
 
                     LogLocationDirector().set_log_target_path(getenv('LOG_BASE_PATH'), model_name)
                     log(f'----Running {dspecPaths} for {executionTime}! Toss: {toss}----')
@@ -119,6 +119,7 @@ class Orchestrator:
         :param dspec: Dspec - the dspec object.
         :returns: datetime - the reference time.
         '''
+
         return datetime.utcfromtimestamp(execution_time.timestamp() - (execution_time.timestamp() % dspec.timingInfo.interval))
 
 
@@ -180,7 +181,7 @@ class Orchestrator:
 
                 # Generate null output
                 df_output = get_output_dataFrame() 
-                df_output.loc[0] = [None, dspec.outputInfo.unit, self.__calculate_referenceTime(execution_time), timedelta(seconds=dspec.outputInfo.leadTime)]
+                df_output.loc[0] = [None, dspec.outputInfo.unit, self.__calculate_referenceTime(execution_time, dspec), timedelta(seconds=dspec.outputInfo.leadTime)]
                 result_series.dataFrame = df_output
 
                 # Attempt to store both that in the outputs table and information about the model_run
@@ -193,7 +194,7 @@ class Orchestrator:
             log(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))
     
 
-    def __safe_discord_notification(model_name: str, execution_time: datetime, error_code: int, message: str):
+    def __safe_discord_notification(self, model_name: str, execution_time: datetime, error_code: int, message: str):
         """Safely sends a discord notification if the user has enabled it in the environment variables. Ensures 
         that if an error occurs while sending the notification, it is logged and not thrown and this method returns.
 
