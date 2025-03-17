@@ -225,20 +225,23 @@ class SeriesProvider():
         df_expected.set_index('timeVerified', inplace=True)
 
         # second exists we merge it with expected where datetimes match and only on nulls
-        if second is not None:
+        if second is not None and len(second) > 0:
             second.set_index('timeVerified', inplace=True)
             df_expected = df_expected.combine_first(second)
+            second.reset_index(inplace=True)
 
         # we merge first with expected where datetimes match and only on nulls to insure second has priority
-        first.set_index('timeVerified', inplace=True)
-        df_expected = df_expected.combine_first(first)
+        if first is not None and len(first) > 0:
+            first.set_index('timeVerified', inplace=True)
+            df_expected = df_expected.combine_first(first)
+            first.reset_index(inplace=True)
 
         # Put time verified back into a column from the index
         df_expected.reset_index(inplace=True)
 
         # If there are still null values, then there are missing values
         missing_value_count = df_expected['dataValue'].isnull().sum()
-        df_expected.dropna(inplace=True) # We dont want to return any NA values we generated
+        df_expected.dropna(subset=['dataValue'], inplace=True) # Drop rows only if 'dataValue' column is None or NaN
 
         # Create a result series that is either complete or not dependant on if there were missing values
         if missing_value_count <= 0:
