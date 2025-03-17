@@ -141,6 +141,7 @@ class NDBC(IDataIngestion):
                     dateTime,   # timeVerified
                     dateTime,   # timeGenerated
                 ]
+        df['dataValue'] = df['dataValue'].astype(str)
         
         series = Series(seriesDescription, True, timeDescription)
         series.dataFrame = df

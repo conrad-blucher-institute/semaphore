@@ -213,6 +213,8 @@ class NDFD(IDataIngestion):
                     NDFD_Predictions.latitude                       # latitude
                 ]
 
+            df['dataValue'] = df['dataValue'].astype(str)
+
             resultSeries = Series(seriesRequest, True)
             resultSeries.dataFrame = df
 
@@ -308,9 +310,9 @@ class NDFD(IDataIngestion):
 
         #Creating series objects with correct description information and inputs
         xCompSeries = Series(xCompDesc, True, timeDescription)
-        xCompSeries.data = xCompDF
+        xCompSeries.dataFrame = xCompDF
         yCompSeries = Series(yCompDesc, True, timeDescription)
-        yCompSeries.data = yCompDF
+        yCompSeries.dataFrame = yCompDF
         
         #Step three: Return it
         return xCompSeries if isXWindCmp else yCompSeries      

@@ -233,6 +233,8 @@ class NDFD_EXP(IDataIngestion):
                     NDFD_Predictions.latitude                       # latitude
                 ]
 
+            df['dataValue'] = df['dataValue'].astype(str)
+
             resultSeries = Series(seriesRequest, True)
             resultSeries.dataFrame = df
 

@@ -142,6 +142,8 @@ class LIGHTHOUSE(IDataIngestion):
             ]
 
         if(len(df) > 0):
+            df['dataValue'] = df['dataValue'].astype(str)
+
             ### Build Series, return data
             resultSeries = Series(seriesDescription, timeDescription)
             resultSeries.dataFrame = df

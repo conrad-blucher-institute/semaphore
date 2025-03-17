@@ -144,6 +144,8 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[0]      # latitude
             ]
 
+        df['dataValue'] = df['dataValue'].astype(str)
+
         series = Series(seriesDescription, True, timeDescription)
         series.dataFrame = df
 
@@ -173,6 +175,8 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[1],     # longitude
                 lat_lon[0]      # latitude
             ]
+
+        df['dataValue'] = df['dataValue'].astype(str)
 
         series = Series(seriesDescription, True, timeDescription)
         series.dataFrame = df
@@ -213,6 +217,8 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[0]      # latitude
             ]
 
+        df['dataValue'] = df['dataValue'].astype(str)
+
         # Surge is datum-less. A datum is required for ingesting water level but we remove it here
         seriesDescription.dataDatum = 'NA'
 
@@ -245,6 +251,8 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[0]      # latitude
             ]
 
+        df['dataValue'] = df['dataValue'].astype(str)
+
         wnDir_series = Series(seriesDescription, True, timeDescription)
         wnDir_series.dataFrame = df
 
@@ -274,6 +282,8 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[1],     # longitude
                 lat_lon[0]      # latitude
             ]
+
+        df['dataValue'] = df['dataValue'].astype(str)
 
         wnSpd_series = Series(seriesDescription, True, timeDescription)
         wnSpd_series.dataFrame = df
@@ -327,11 +337,15 @@ class NOAATANDC(IDataIngestion):
         xCompDesc = SeriesDescription(seriesDescription.dataSource, f'dXWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
         yCompDesc = SeriesDescription(seriesDescription.dataSource, f'dYWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
 
+        x_df['dataValue'] = x_df['dataValue'].astype(str)
+        y_df['dataValue'] = y_df['dataValue'].astype(str)
+
         x_series = Series(xCompDesc, True, timeDescription)
         x_series.dataFrame = x_df
 
         y_series = Series(yCompDesc, True, timeDescription)
         y_series.dataFrame = y_df
+
 
         return x_series if isXWnCmp else y_series
     
@@ -357,6 +371,7 @@ class NOAATANDC(IDataIngestion):
             lat_lon[0]                      # latitude
         ]
 
+        df['dataValue'] = df['dataValue'].astype(str)
         series = Series(seriesDescription, True, timeDescription)
         series.dataFrame = df
 
@@ -386,6 +401,7 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[0]              # latitude
             ]
 
+        df['dataValue'] = df['dataValue'].astype(str)
         series = Series(seriesDescription, True, timeDescription)
         series.dataFrame = df
 
@@ -414,6 +430,8 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[1],             # longitude
                 lat_lon[0]              # latitude
             ]
+
+        df['dataValue'] = df['dataValue'].astype(str)
 
         series = Series(seriesDescription, True, timeDescription)
         series.dataFrame = df
