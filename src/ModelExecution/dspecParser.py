@@ -280,15 +280,12 @@ class dspec_sub_Parser_2_0:
                 found_ensembleMemberCount = True
             ensembleMemberCount.append(ensembleMember)  
                     
-            
-
-            
         vectorOrder = VectorOrder()
         vectorOrder.keys = keys
         vectorOrder.dTypes = dTypes
         vectorOrder.indexes = indexes
         vectorOrder.multipliedKeys = multipliedKeys
-        vectorOrder.ensembleMemberCount = ensembleMemberCount
+        vectorOrder.ensembleMemberCount = 1 if len(ensembleMemberCount) <= 0 else ensembleMemberCount[0]
         self.__dspec.orderedVector = vectorOrder
         
 
