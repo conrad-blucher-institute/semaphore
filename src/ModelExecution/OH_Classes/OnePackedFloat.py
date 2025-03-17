@@ -31,15 +31,15 @@ class OnePackedFloat(IOutputHandler):
         Returns:
            DataFrame
         """
-        for index in range(predictions):
 
-            df = get_output_dataFrame()
-            df.iloc[index] = [
-                str(self.__unpack(predictions[index])),         # dataValue
-                dspec.outputInfo.unit,                          # dataUnit
-                referenceTime,                                  # timeGenerated
-                timedelta(seconds=dspec.outputInfo.leadTime)    # leadtime
-            ]
+
+        df = get_output_dataFrame()
+        df.loc[0] = [
+            str(self.__unpack(predictions)),                # dataValue
+            dspec.outputInfo.unit,                          # dataUnit
+            referenceTime,                                  # timeGenerated
+            timedelta(seconds=dspec.outputInfo.leadTime)    # leadtime
+        ]
 
         return df
     

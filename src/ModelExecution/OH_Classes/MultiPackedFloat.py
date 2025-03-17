@@ -31,7 +31,7 @@ class MultiPackedFloat(IOutputHandler):
         """
 
         df = get_output_dataFrame()
-        df.iloc[0] = [
+        df.loc[0] = [
             list(map(str, predictions.ravel())),            # dataValue
             dspec.outputInfo.unit,                          # dataUnit
             referenceTime,                                  # timeGenerated
