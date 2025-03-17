@@ -20,7 +20,8 @@ from json import load
 
 
 class DSPEC_Parser:
-    def __init__(self, fPath: str) -> None:
+
+    def parse_dspec(self, fPath: str) -> 'Dspec':
 
         if not exists(fPath):
             print(f'{fPath} not found!')
@@ -31,8 +32,6 @@ class DSPEC_Parser:
             dspec_json = load(dspecFile)
             self.__dspec_version = dspec_json.get('dspecVersion', '1.0')
             self.__dspec_json = dspec_json
-
-    def parse_dspec(self) -> 'Dspec':
         
         match self.__dspec_version:
             case '1.0':
