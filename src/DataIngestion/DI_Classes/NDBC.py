@@ -129,22 +129,24 @@ class NDBC(IDataIngestion):
 
         df_inTimeRange = df.loc[timeDescription.toDateTime:timeDescription.fromDateTime]
 
-        df = get_input_dataFrame()
+        df_result = get_input_dataFrame()
         for dt_idx, row in df_inTimeRange.iterrows():
             dataValue = row[seriesDescription.dataSeries]
             dataUnit = self.unitConversionDict[units[df.columns.get_loc(seriesDescription.dataSeries)]]
             dateTime = dt_idx
             if dataValue != 'MM':
-                df.loc[len(df)] = [
+                df_result.loc[len(df_result)] = [
                     dataValue,  # dataValue
                     dataUnit,   # dataUnit
                     dateTime,   # timeVerified
                     dateTime,   # timeGenerated
+                    None,       # lon
+                    None        # lat
                 ]
-        df['dataValue'] = df['dataValue'].astype(str)
+        df_result['dataValue'] = df_result['dataValue'].astype(str)
         
         series = Series(seriesDescription, True, timeDescription)
-        series.dataFrame = df
+        series.dataFrame = df_result
         return series
     
 
