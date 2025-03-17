@@ -131,8 +131,6 @@ class dspec_sub_Parser_1_0:
                 types.append(inputJson["type"])
                 keys.append(str(idx))
                 indexes.append((None, None))
-                multipliedKeys.append([])
-                ensembleMemberCount.append(None)
                 
 
                 dependentSeriesList.append(dseries)
@@ -143,8 +141,8 @@ class dspec_sub_Parser_1_0:
             vOrder.keys = keys
             vOrder.dTypes = types
             vOrder.indexes = indexes
-            vOrder.multipliedKeys = multipliedKeys
-            vOrder.ensembleMemberCount = ensembleMemberCount
+            vOrder.multipliedKeys = []
+            vOrder.ensembleMemberCount = 1
             self.__dspec.orderedVector = vOrder
 
 
