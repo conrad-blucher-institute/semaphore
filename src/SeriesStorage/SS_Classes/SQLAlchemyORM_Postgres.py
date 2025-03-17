@@ -224,7 +224,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             insertionValueRow["dataSeries"] = series.description.dataSeries
             insertionValueRow["dataDatum"] = series.description.dataDatum
             insertionValueRow["latitude"] = series.dataFrame.iloc[index]['latitude']
-            insertionValueRow["longitude"] = series.dataFrame.iloc[index]['latitude']
+            insertionValueRow["longitude"] = series.dataFrame.iloc[index]['longitude']
             insertionRows.append(insertionValueRow)
 
 
