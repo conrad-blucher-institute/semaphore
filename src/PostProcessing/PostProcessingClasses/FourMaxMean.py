@@ -68,7 +68,7 @@ class FourMaxMean(IPostProcessing):
         # The four max mean operation changes none of the meta information
         # TF we copy the last row from the in data and just change the value 
         df_fmm = get_input_dataFrame()
-        df_fmm.iloc[0] = IN_SERIES.dataFrame.iloc[-1] # copy the last row of the in to the out
+        df_fmm.loc[0] = IN_SERIES.dataFrame.iloc[-1] # copy the last row of the in to the out
         df_fmm['dataValue'] = str(mean_four_max_val) # Replace the value
 
         # Repack average as new series, reading the key from the arguments obj

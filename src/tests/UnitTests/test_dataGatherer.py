@@ -5,6 +5,8 @@
 # version 1.0
 #----------------------------------
 """ This provides unit tests for the dataGatherer class
+
+docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_dataGatherer.py
  """ 
 #----------------------------------
 # 

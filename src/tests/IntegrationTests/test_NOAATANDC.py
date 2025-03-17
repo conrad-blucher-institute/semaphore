@@ -18,7 +18,7 @@ sys.path.append('/app/src')
 import pytest
 
 from datetime import datetime, timedelta, time, date
-from src.DataClasses import Input, Series, TimeDescription, SeriesDescription
+from src.DataClasses import Series, TimeDescription, SeriesDescription
 from src.DataIngestion.IDataIngestion import data_ingestion_factory
 from dotenv import load_dotenv
 from utility import log

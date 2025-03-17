@@ -5,6 +5,8 @@
 # version 1.0
 #----------------------------------
 """ This provides unit tests for the modelRunner class
+
+run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_modelRunner.py
  """ 
 #----------------------------------
 # 
@@ -12,7 +14,7 @@
 import sys
 sys.path.append('/app/src')
 
-from datetime import datetime, timedelta
+from datetime import datetime
 import sys
 import pytest
 from unittest.mock import MagicMock, patch
@@ -20,8 +22,6 @@ from src.ModelExecution.modelRunner import ModelRunner
 from src.ModelExecution.dspecParser import Dspec, OutputInfo
 from src.DataClasses import Series, SemaphoreSeriesDescription
 from numpy import array, float32
-
-
 
 def mock_outputHandlerFactory(mocked_returnClass: MagicMock):
     # The mock factory should return a mock class
@@ -58,7 +58,7 @@ def equate_series(left: Series, right: Series):
 
     assert left.isComplete == right.isComplete, "isComplete doesn't match"
 
-    assert left.data == right.data, "Series data does not match"
+    assert left.dataFrame == right.dataFrame, "Series data does not match"
     
     leftD = left.description
     rightD = right.description
@@ -82,7 +82,7 @@ TEST_DESCRIPTION = SemaphoreSeriesDescription(
 )
 TEST_SERIES = Series(TEST_DESCRIPTION, True)
 RESULT_DATA = 0
-TEST_SERIES.data = RESULT_DATA
+TEST_SERIES.dataFrame = RESULT_DATA
 
 SINGLE_VECTOR = [[num for num in range(87)]]
 SINGLE_VECTOR_EXPECTED_OUTPUT = array([[[0.7075105]]], dtype=float32)

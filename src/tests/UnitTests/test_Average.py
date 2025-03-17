@@ -6,6 +6,8 @@
 # version 1.0
 #----------------------------------
 """This file tests the Average module 
+
+run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_Average.py
  """ 
 #----------------------------------
 # 
@@ -17,24 +19,19 @@ from datetime import datetime, timedelta
 
 from src.PostProcessing.IPostProcessing import post_processing_factory
 from src.ModelExecution.dspecParser import PostProcessCall
-from src.DataClasses import Series, SeriesDescription, Input, TimeDescription
-import copy
+from src.DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from math import isclose
 
 
+def build_series_obj(data: list[float]) -> Series:
+    """Build  series with a filled Dataframe"""
+    test_series = Series(SeriesDescription('Test', 'Test', 'Test'), True, TimeDescription(datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=3),  timedelta(hours=1)))
+    df = get_input_dataFrame()
+    for index in range(len(data)):
+        df.loc[index] = [data[index], 'degrees', 'Test', 'Test', 'Test', 'Test']
 
-def hydrate_series_data(data: list[float], series: Series, input_stencil: Input):
-    """Fills a series obj with a list of data using the same input object"""
-    inputs = []
-    for data_val in data:
-        input_stencil.dataValue = data_val
-        inputs.append(copy.deepcopy(input_stencil))
-    series.data = inputs
-    return copy.deepcopy(series)
-
-# Stencil objects
-test_series = Series(SeriesDescription('Test', 'Test', 'Test'), True, TimeDescription(datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=3),  timedelta(hours=1)))
-test_input = Input('Test', 'degrees', 'Test', 'Test', 'Test', 'Test')
+    test_series.dataFrame = df
+    return test_series
 
 # Numeric test data
 first = [1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5]
@@ -43,8 +40,8 @@ average = [1.25, 2.25, 3.25, 4.25, 5.25, 6.25, 7.25, 8.25, 9.25, 10.25, 11.25]
 
 # Fake input data 
 test_preprocess_data = {
-    'first' : hydrate_series_data(first, test_series, test_input),
-    'second' : hydrate_series_data(second, test_series, test_input)
+    'first' : build_series_obj(first),
+    'second' : build_series_obj(second)
 }
 
 def test_post_process_data():
@@ -68,8 +65,6 @@ def test_post_process_data():
     average_test = result['avg']
 
     # Iterate through the resulting components checking if they were calculated correctly
-    for a, a_test in zip(average, average_test.data):
+    for a, a_test in zip(average, average_test.dataFrame['dataValue']):
         tolerance = 1e-5
-        if not isclose(a, float(a_test.dataValue), abs_tol=tolerance):
-            assert False
-    assert True
+        assert isclose(a, float(a_test), abs_tol=tolerance), "Data Missmatch"

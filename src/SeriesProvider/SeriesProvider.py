@@ -238,6 +238,7 @@ class SeriesProvider():
 
         # If there are still null values, then there are missing values
         missing_value_count = df_expected['dataValue'].isnull().sum()
+        df_expected.dropna(inplace=True) # We dont want to return any NA values we generated
 
         # Create a result series that is either complete or not dependant on if there were missing values
         if missing_value_count <= 0:

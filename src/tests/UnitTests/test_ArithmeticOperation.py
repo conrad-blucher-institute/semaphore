@@ -6,6 +6,8 @@
 # version 1.0
 #----------------------------------
 """This file tests the ArithmeticOperation PPC 
+
+run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_ArithmeticOperation.py
  """ 
 #----------------------------------
 # 
@@ -17,25 +19,21 @@ from datetime import datetime, timedelta
 
 from src.PostProcessing.IPostProcessing import post_processing_factory
 from src.ModelExecution.dspecParser import PostProcessCall
-from src.DataClasses import Series, SeriesDescription, Input, TimeDescription
-import copy
+from src.DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 import pytest
 from math import isclose
 
 
+def build_series_obj(data: list[float]) -> Series:
+    """Build  series with a filled Dataframe"""
+    test_series = Series(SeriesDescription('Test', 'Test', 'Test'), True, TimeDescription(datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=3),  timedelta(hours=1)))
+    df = get_input_dataFrame()
+    for index in range(len(data)):
+        df.loc[index] = [data[index], 'degrees', 'Test', 'Test', 'Test', 'Test']
 
-def hydrate_series_data(data: list[float], series: Series, input_stencil: Input):
-    """Fills a series obj with a list of data using the same input object"""
-    inputs = []
-    for data_val in data:
-        input_stencil.dataValue = data_val
-        inputs.append(copy.deepcopy(input_stencil))
-    series.data = inputs
-    return copy.deepcopy(series)
+    test_series.dataFrame = df
+    return test_series
 
-# Stencil objects
-test_series = Series(SeriesDescription('Test', 'Test', 'Test'), True, TimeDescription(datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=3),  timedelta(hours=1)))
-test_input = Input('Test', 'degrees', 'Test', 'Test', 'Test', 'Test')
 
 # Numeric test data
 first = [1.5, 2.5, 3.5, 4.5, 5.5]
@@ -48,8 +46,8 @@ modulo = [.5, .5, .5, .5, .5]
 
 # Fake input data 
 test_preprocess_data = {
-    'first' : hydrate_series_data(first, test_series, test_input),
-    'second' : hydrate_series_data(second, test_series, test_input)
+    'first' : build_series_obj(first),
+    'second' : build_series_obj(second)
 }
 
 @pytest.mark.parametrize("test_preprocess_data, operation, expected_results", [
@@ -62,6 +60,7 @@ test_preprocess_data = {
 def test_post_process_data(test_preprocess_data, operation, expected_results):
     """This function tests the post process method in the Arithmetic Operation post process class.
     """
+
     # Create a post process call
     ppc= PostProcessCall()
     ppc.call = 'ArithmeticOperation'
@@ -78,10 +77,8 @@ def test_post_process_data(test_preprocess_data, operation, expected_results):
 
     # Unpack the resulting components
     result = pp_result['result']
-
     # Iterate through the resulting components checking if they were calculated correctly
-    for actual, expected in zip(result.data, expected_results):
+    for actual, expected in zip(result.dataFrame['dataValue'].tolist(), expected_results):
         tolerance = 1e-5
-        if not isclose(float(actual.dataValue), expected, abs_tol=tolerance):
-            assert False
-    assert True
+        assert isclose(float(actual), expected, abs_tol=tolerance), "Data missmatch"
+

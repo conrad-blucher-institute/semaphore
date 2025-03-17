@@ -15,7 +15,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 from DataIntegrity.IDataIntegrity import IDataIntegrity
-from DataClasses import Series, Input
+from DataClasses import Series
 from utility import log
 
 

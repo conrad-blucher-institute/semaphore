@@ -6,6 +6,8 @@
 # version 1.0
 #----------------------------------
 """This file tests the dspec parsing parsing a 1.0 and 2.0 dspec
+
+docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_dspecParser.py
  """ 
 #----------------------------------
 # 
@@ -14,13 +16,12 @@ import sys
 sys.path.append('/app/src')
 
 from json import load
-from os import path, getenv
 import pytest
 import json
 import tempfile
 
 from src.utility import log, construct_true_path
-from src.ModelExecution.inputGatherer import InputGatherer
+from src.ModelExecution.dspecParser import DSPEC_Parser
 
 @pytest.mark.parametrize("dspecFilePath", [
      ('./data/dspec/TestModels/test_dspec.json'),
@@ -32,17 +33,15 @@ def test_parseDSPEC(dspecFilePath: str):
     is correctly parsed in the InputGatherer object
     """
 
-    inputGatherer = InputGatherer(dspecFilePath)
-
     # Read dspec from file and grab version
     with open(dspecFilePath) as dspecFile:
         dspec_json = load(dspecFile)
     dspec_version = dspec_json.get('dspecVersion', '1.0')
     match dspec_version:
         case '1.0':
-            sub_test_dspec_1_0(inputGatherer, dspecFilePath)
+            sub_test_dspec_1_0(dspecFilePath)
         case '2.0':
-            sub_test_dspec_2_0(inputGatherer, dspecFilePath)
+            sub_test_dspec_2_0(dspecFilePath)
         case _:
             raise NotImplementedError(f'No parser for dspec version {dspec_version} not found!')
 
@@ -141,11 +140,13 @@ def test_invalid_vector_order():
 
         # Expecting a ValueError due to multiple multipliedKeys and ensembleMemberCount
         with pytest.raises(ValueError, match="Error: More than one multipliedKey has been detected!|Error: More than one ensembleMemberCount has been detected!"):
-            inputGatherer = InputGatherer(temp_file_path)  
-            inputGatherer._InputGatherer__parse_vector_order()
+            dspecParser = DSPEC_Parser()
+            dspecParser.parse_dspec(temp_file_path)
             
-def sub_test_dspec_1_0(inputGatherer: InputGatherer, dspecFilePath: str):
-    dspec = inputGatherer.get_dspec()
+def sub_test_dspec_1_0(dspecFilePath: str):
+
+    dspecParser = DSPEC_Parser()
+    dspec = dspecParser.parse_dspec(dspecFilePath)
     with open(dspecFilePath) as dspecFile:
         json = load(dspecFile)
         # Metadata
@@ -191,8 +192,10 @@ def sub_test_dspec_1_0(inputGatherer: InputGatherer, dspecFilePath: str):
 
 
 
-def sub_test_dspec_2_0(inputGatherer: InputGatherer, dspecFilePath: str):
-    dspec = inputGatherer.get_dspec()
+def sub_test_dspec_2_0(dspecFilePath: str):
+
+    dspecParser = DSPEC_Parser()
+    dspec = dspecParser.parse_dspec(dspecFilePath)
     with open(dspecFilePath) as dspecFile:
         json = load(dspecFile)
         # Metadata

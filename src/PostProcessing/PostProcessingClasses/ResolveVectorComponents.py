@@ -14,7 +14,7 @@ into series of its components.
 #
 #Imports
 from PostProcessing.IPostProcessing import IPostProcessing
-from DataClasses import Series, Input
+from DataClasses import Series
 from ModelExecution.dspecParser import PostProcessCall
 from math import cos, sin, radians, degrees
 
