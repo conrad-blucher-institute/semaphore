@@ -44,7 +44,7 @@ class InputVectorBuilder:
 
         # Parse VO
         vo: VectorOrder = dspec.orderedVector
-        amntExpectedVectors = vo.amntExpectedVectors
+        amntExpectedVectors = vo.ensembleMemberCount
 
         # If no amntExpectedVectors assume 1
         if amntExpectedVectors is None:
@@ -60,7 +60,7 @@ class InputVectorBuilder:
 
         # Check the batch is of the expected length
         if len(batch) != amntExpectedVectors:
-            log(f'Warning: build_input_batch {amntExpectedVectors} vectors but only found {len(batch)}')
+            log(f'Warning: build_input_batch expected {amntExpectedVectors} vectors but only found {len(batch)}')
 
         return batch
 

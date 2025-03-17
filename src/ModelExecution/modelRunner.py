@@ -60,7 +60,7 @@ class ModelRunner:
             ), 
             isComplete= True
         )
-        series.data = processedOutputs
+        series.dataFrame= processedOutputs
 
         return series
     
