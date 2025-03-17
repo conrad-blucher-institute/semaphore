@@ -54,5 +54,5 @@ def test_ingest_series(source: str, series: str, location: str, interval: timede
     ingestSeries = data_ingestion_factory(seriesDescription)
     resultsSeries = ingestSeries.ingest_series(seriesDescription, timeDescription)
     # Printing the result series with its name and content
-    log(f"Result Series for series '{series}': {resultsSeries.data}")
+    log(f"Result Series for series '{series}': {resultsSeries.dataFrame}")
     assert resultsSeries.isComplete == True
