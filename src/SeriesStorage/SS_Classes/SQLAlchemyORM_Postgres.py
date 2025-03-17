@@ -59,7 +59,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         df_prunedInputs = df_inputResult.copy(deep=True)
         if timeDescription.interval != None and timeDescription.interval.total_seconds() != 0:
             for i in range(len(df_inputResult)):
-                if not (df_inputResult[i]['timeVerified'].timestamp() % timeDescription.interval.total_seconds() == 0):
+                if not (df_inputResult.iloc[i]['timeVerified'].timestamp() % timeDescription.interval.total_seconds() == 0):
                     df_prunedInputs.drop(input)
 
         series = Series(seriesDescription, True, timeDescription)
@@ -213,19 +213,20 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         insertionRows = []
         for index in range(len(series.dataFrame)):
             insertionValueRow = {"isActual": None, "generatedTime": None, "isActual": None,"acquiredTime": None, "verifiedTime": None, "dataValue": None, "dataUnit": None, "dataSource": None, "dataLocation": None, "dataDatum": None, "latitude": None, "longitude": None}
-            insertionValueRow["generatedTime"] = series.dataFrame[index]['timeGenerated']
+            insertionValueRow["generatedTime"] = series.dataFrame.iloc[index]['timeGenerated']
             insertionValueRow["acquiredTime"] = now
-            insertionValueRow["verifiedTime"] = series.dataFrame[index]['timeVerified']
-            insertionValueRow["dataValue"] = series.dataFrame[index]['dataValue']
+            insertionValueRow["verifiedTime"] = series.dataFrame.iloc[index]['timeVerified']
+            insertionValueRow["dataValue"] = series.dataFrame.iloc[index]['dataValue']
             insertionValueRow["isActual"] = False if series.description.dataSeries[0] == 'p' else True
-            insertionValueRow["dataUnit"] = series.dataFrame[index]['timeVerified']
+            insertionValueRow["dataUnit"] = series.dataFrame.iloc[index]['dataUnit']
             insertionValueRow["dataSource"] = series.description.dataSource
             insertionValueRow["dataLocation"] = series.description.dataLocation
             insertionValueRow["dataSeries"] = series.description.dataSeries
             insertionValueRow["dataDatum"] = series.description.dataDatum
-            insertionValueRow["latitude"] = series.dataFrame[index]['latitude']
-            insertionValueRow["longitude"] = series.dataFrame[index]['latitude']
+            insertionValueRow["latitude"] = series.dataFrame.iloc[index]['latitude']
+            insertionValueRow["longitude"] = series.dataFrame.iloc[index]['latitude']
             insertionRows.append(insertionValueRow)
+
 
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.inputs)
@@ -286,16 +287,18 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
 
         if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
+        data_value_length = self.outputs.c.dataValue.type.length  # Get the maximum length of the dataValue column
 
         insertionValueRows = []
         for index in range(len(series.dataFrame)):
+
             insertionValueRow = {"timeGenerated": None, "leadTime": None, "modelName": None, "dataValue": None, "dataUnit": None, "dataLocation": None, "dataSeries": None, "dataDatum": None}
-            insertionValueRow["timeGenerated"] = series.dataFrame[index]['timeGenerated']
-            insertionValueRow["leadTime"] = series.dataFrame[index]['leadTime']
+            insertionValueRow["timeGenerated"] = series.dataFrame.iloc[index]['timeGenerated']
+            insertionValueRow["leadTime"] = series.dataFrame.iloc[index]['leadTime']
             insertionValueRow["modelName"] = series.description.modelName
             insertionValueRow["modelVersion"] = series.description.modelVersion
-            insertionValueRow["dataValue"] = series.dataFrame[index]['dataValue']
-            insertionValueRow["dataUnit"] = series.dataFrame[index]['dataUnit']
+            insertionValueRow["dataValue"] = series.dataFrame.iloc[index]['dataValue']
+            insertionValueRow["dataUnit"] = series.dataFrame.iloc[index]['dataUnit']
             insertionValueRow["dataLocation"] = series.description.dataLocation
             insertionValueRow["dataSeries"] = series.description.dataSeries
             insertionValueRow["dataDatum"] = series.description.dataDatum
