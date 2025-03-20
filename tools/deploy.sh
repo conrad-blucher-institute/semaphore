@@ -7,7 +7,7 @@
 
 
 # Lower active containers
-docker-compose down
+docker compose down
 
 # Fetch origin            vvvvvv - This will delete any tags that origin has deleted
 git fetch origin --tags --prune --prune-tags
@@ -16,8 +16,8 @@ git fetch origin --tags --prune --prune-tags
 git checkout $1
 
 # Build new images and raise containers
-docker-compose build
-docker-compose up -d
+docker compose build
+docker compose up -d
 
 # Update the cron file on the VM
 python3 tools/init_cron.py -r ./data/dspec -i ./schedule
