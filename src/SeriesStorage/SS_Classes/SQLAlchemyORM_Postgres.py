@@ -17,6 +17,7 @@ from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
 from os import getenv
 from datetime import timedelta, datetime
+import pandas as pd
 
 from SeriesStorage.ISeriesStorage import ISeriesStorage
 
@@ -211,21 +212,31 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         now = datetime.now()
         insertionRows = []
         for input in series.data:
-            insertionValueRow = {"isActual": None, "generatedTime": None, "isActual": None,"acquiredTime": None, "verifiedTime": None, "dataValue": None, "dataUnit": None, "dataSource": None, "dataLocation": None, "dataDatum": None, "latitude": None, "longitude": None}
-            insertionValueRow["generatedTime"] = input.timeGenerated
-            insertionValueRow["acquiredTime"] = now
-            insertionValueRow["verifiedTime"] = input.timeVerified
-            insertionValueRow["dataValue"] = input.dataValue
-            insertionValueRow["isActual"] = False if series.description.dataSeries[0] == 'p' else True
-            insertionValueRow["dataUnit"] = input.dataUnit
-            insertionValueRow["dataSource"] = series.description.dataSource
-            insertionValueRow["dataLocation"] = series.description.dataLocation
-            insertionValueRow["dataSeries"] = series.description.dataSeries
-            insertionValueRow["dataDatum"] = series.description.dataDatum
-            insertionValueRow["latitude"] = input.latitude
-            insertionValueRow["longitude"] = input.longitude
-            insertionRows.append(insertionValueRow)
+            # input can be a str or a list of str's, ensuring its a list of str's so we can iterate over it
+            isEnsemble = isinstance(input.dataValue, list)
 
+            if not isEnsemble:
+                values = [input.dataValue]
+            else:
+                values = input.dataValue
+
+            for index, value in enumerate(values):
+                insertionValueRow = {"isActual": None, "generatedTime": None, "isActual": None,"acquiredTime": None, "verifiedTime": None, "dataValue": None, "dataUnit": None, "dataSource": None, "dataLocation": None, "dataDatum": None, "latitude": None, "longitude": None, "ensembleMemberID": None}
+                insertionValueRow["generatedTime"] = input.timeGenerated
+                insertionValueRow["acquiredTime"] = now
+                insertionValueRow["verifiedTime"] = input.timeVerified
+                insertionValueRow["dataValue"] = value
+                insertionValueRow["isActual"] = False if series.description.dataSeries[0] == 'p' else True
+                insertionValueRow["dataUnit"] = input.dataUnit
+                insertionValueRow["dataSource"] = series.description.dataSource
+                insertionValueRow["dataLocation"] = series.description.dataLocation
+                insertionValueRow["dataSeries"] = series.description.dataSeries
+                insertionValueRow["dataDatum"] = series.description.dataDatum
+                insertionValueRow["latitude"] = input.latitude
+                insertionValueRow["longitude"] = input.longitude
+                insertionValueRow["ensembleMemberID"] = index if isEnsemble else None
+                insertionRows.append(insertionValueRow)
+        
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.inputs)
                                     .on_conflict_do_nothing('inputs_AK00')
@@ -288,18 +299,28 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         insertionValueRows = []
         for output in series.data:
-            insertionValueRow = {"timeGenerated": None, "leadTime": None, "modelName": None, "dataValue": None, "dataUnit": None, "dataLocation": None, "dataSeries": None, "dataDatum": None}
-            insertionValueRow["timeGenerated"] = output.timeGenerated
-            insertionValueRow["leadTime"] = output.leadTime
-            insertionValueRow["modelName"] = series.description.modelName
-            insertionValueRow["modelVersion"] = series.description.modelVersion
-            insertionValueRow["dataValue"] = output.dataValue
-            insertionValueRow["dataUnit"] = output.dataUnit
-            insertionValueRow["dataLocation"] = series.description.dataLocation
-            insertionValueRow["dataSeries"] = series.description.dataSeries
-            insertionValueRow["dataDatum"] = series.description.dataDatum
-            
-            insertionValueRows.append(insertionValueRow)
+            # output can be a str or a list of str's, ensuring its a list of str's so we can iterate over it
+            isEnsemble = isinstance(output.dataValue, list)
+
+            if not isEnsemble:
+                values = [output.dataValue]
+            else:
+                values = output.dataValue
+
+            for index, value in enumerate(values):
+                insertionValueRow = {"timeGenerated": None, "leadTime": None, "modelName": None, "dataValue": None, "dataUnit": None, "dataLocation": None, "dataSeries": None, "dataDatum": None, "ensembleMemberID": None}
+                insertionValueRow["timeGenerated"] = output.timeGenerated
+                insertionValueRow["leadTime"] = output.leadTime
+                insertionValueRow["modelName"] = series.description.modelName
+                insertionValueRow["modelVersion"] = series.description.modelVersion
+                insertionValueRow["dataValue"] = value
+                insertionValueRow["dataUnit"] = output.dataUnit
+                insertionValueRow["dataLocation"] = series.description.dataLocation
+                insertionValueRow["dataSeries"] = series.description.dataSeries
+                insertionValueRow["dataDatum"] = series.description.dataDatum
+                insertionValueRow["ensembleMemberID"] = index if isEnsemble else None
+                
+                insertionValueRows.append(insertionValueRow)
 
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.outputs)
@@ -507,22 +528,33 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """An Input is a data value of some environment variable that can be linked to a date time.
         :param list[tupleish] -a list of selections from the table formatted in tupleish
         """
-        valueIndex = 4
-        unitIndex = 6
-        generatedTimeIndex = 1
-        verifiedTimeIndex = 3
-        latitudeIndex = 11
-        longitudeIndex = 12
+
+        # Converting tuples to dataframe 
+        df_results = pd.DataFrame(results, columns=["id", "isActual", "generatedTime", "isActual","acquiredTime",
+                                                    "verifiedTime", "dataValue", "dataUnit", "dataSource", "dataLocation", 
+                                                    "dataDatum", "latitude", "longitude", "ensembleMemberID"])
 
         dataPoints = []
-        for row in results:
+        # Grouping by verified time 
+        for groupID, group in df_results.groupby("verifiedTime"):
+            # Finds first row in group to determine if it's an ensemble input
+            firstRow = group.ilooc[0]
+            isEnsemble = firstRow["ensembleMemberID"] is not None
+            
+            if isEnsemble:
+                # If an ensemble, sort by ensembleMemberID and collect values as list
+                group = group.sort_values(by=("ensembleMemberID"))
+                dataValues = group["dataValue"].to_list()
+            else:
+                dataValues = group["dataValue"].ilooc[0]
+            
             dataPoints.append(Input(
-                row[valueIndex],
-                row[unitIndex],
-                row[verifiedTimeIndex],
-                row[generatedTimeIndex],
-                row[longitudeIndex],
-                row[latitudeIndex]
+                dataValues,
+                firstRow["dataUnit"],
+                firstRow["verifiedTime"],
+                firstRow["generatedTime"],
+                firstRow["longitude"],
+                firstRow["latitude"]
             ))
 
         return dataPoints
@@ -532,18 +564,29 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         and places them in a Prediction object.
         param: list[tupleish] - a list of selections from the table formatted in tupleish
         """
-        valueIndex = 5
-        unitIndex = 6
-        timeGeneratedIndex = 1
-        leadTimeIndex = 2
+        df_results = pd.DataFrame(results, columns=["ID", "timeGenerated", "leadTime", "modelName", "dataValue", "dataUnit",
+                                                     "dataLocation", "dataSeries", "dataDatum"])
         
         dataPoints = []
-        for row in results:
-            dataPoints.append(Output(
-                row[valueIndex],
-                row[unitIndex],
-                row[timeGeneratedIndex],
-                row[leadTimeIndex]
+        # Grouping by leadTime
+        for groupID, group in df_results.groupby("leadTime"):
+    
+            firstRow = group.iloc[0]
+            isEnsemble = len(group) > 1
+            
+            if isEnsemble:
+                # If an ensemble, sort by modelName and collect values as list
+                group = group.sort_values(by=("modelName"))
+                dataValues = group["dataValue"].to_list()
+            else:
+                dataValues = group["dataValue"].iloc[0]
+            
+            dataPoints.append(Input(
+                dataValues,
+                firstRow["dataValue"],
+                firstRow["dataUnit"],
+                firstRow["timeGenerated"],
+                firstRow["leadTime"]
             ))
 
         return dataPoints 
