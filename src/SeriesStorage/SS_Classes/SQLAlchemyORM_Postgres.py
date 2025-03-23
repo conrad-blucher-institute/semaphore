@@ -17,6 +17,7 @@ from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
 from os import getenv
 from datetime import timedelta, datetime
+import pandas as pd
 from pandas import DataFrame
 
 from SeriesStorage.ISeriesStorage import ISeriesStorage
@@ -511,23 +512,34 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """ Converts DB row results into a proper input dataframe to be packed into a series.
         :param list[tupleish] -a list of selections from the table formatted in tupleish
         """
-        valueIndex = 4
-        unitIndex = 6
-        generatedTimeIndex = 1
-        verifiedTimeIndex = 3
-        latitudeIndex = 11
-        longitudeIndex = 12
+
+        # Converting tuples to dataframe 
+        df_results = pd.DataFrame(results, columns=["id", "isActual", "generatedTime", "isActual","acquiredTime",
+                                                    "verifiedTime", "dataValue", "dataUnit", "dataSource", "dataLocation", 
+                                                    "dataDatum", "latitude", "longitude", "ensembleMemberID"])
 
 
         df = get_input_dataFrame()
-        for row in results:
+        # Grouping by verified time 
+        for groupID, group in df_results.groupby("verifiedTime"):
+            # Finds first row in group to determine if it's an ensemble input
+            firstRow = group.ilooc[0]
+            isEnsemble = firstRow["ensembleMemberID"] is not None
+            
+            if isEnsemble:
+                # If an ensemble, sort by ensembleMemberID and collect values as list
+                group = group.sort_values(by=("ensembleMemberID"))
+                dataValues = group["dataValue"].to_list()
+            else:
+                dataValues = group["dataValue"].ilooc[0]
+            
             df.loc[len(df)] = [
-                row[valueIndex],            # dataValue
-                row[unitIndex],             # dataUnit
-                row[verifiedTimeIndex],     # timeVerified
-                row[generatedTimeIndex],    # timeGenerated
-                row[longitudeIndex],        # longitude
-                row[latitudeIndex]          # latitude
+                dataValues,            # dataValue
+                firstRow["dataUnit"],             # dataUnit
+                firstRow["verifiedTime"],     # timeVerified
+                firstRow["generatedTime"],    # timeGenerated
+                firstRow["longitude"],        # longitude
+                firstRow["latitude"]          # latitude
             ]
 
         return df
@@ -536,19 +548,30 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """Converts DB row results into a proper output dataframe to be packed into a series.
         param: list[tupleish] - a list of selections from the table formatted in tupleish
         """
-        valueIndex = 5
-        unitIndex = 6
-        timeGeneratedIndex = 1
-        leadTimeIndex = 2
+        df_results = pd.DataFrame(results, columns=["ID", "timeGenerated", "leadTime", "modelName", "dataValue", "dataUnit",
+                                                     "dataLocation", "dataSeries", "dataDatum"])
         
-        df = get_output_dataFrame()
-        for row in results:
-            df.loc[len(df)] = [
-                row[valueIndex],            # dataValue
-                row[unitIndex],             # dataUnit
-                row[timeGeneratedIndex],    # timeGenerated
-                row[leadTimeIndex]          # leadtime
-            ]
+        dataPoints = []
+        # Grouping by leadTime
+        for groupID, group in df_results.groupby("leadTime"):
+    
+            firstRow = group.iloc[0]
+            isEnsemble = len(group) > 1
+            
+            if isEnsemble:
+                # If an ensemble, sort by modelName and collect values as list
+                group = group.sort_values(by=("modelName"))
+                dataValues = group["dataValue"].to_list()
+            else:
+                dataValues = group["dataValue"].iloc[0]
+            
+            dataPoints.append(Input(
+                dataValues,
+                firstRow["dataValue"],
+                firstRow["dataUnit"],
+                firstRow["timeGenerated"],
+                firstRow["leadTime"]
+            ))
 
         return df 
 
