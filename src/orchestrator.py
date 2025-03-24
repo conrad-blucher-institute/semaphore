@@ -24,7 +24,7 @@ from utility import log, LogLocationDirector
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from ModelExecution.dataGatherer import DataGatherer
 from ModelExecution.InputVectorBuilder import InputVectorBuilder
-from ModelExecution.modelWrapper import ModelWrapper
+from ModelExecution.modelRunner import ModelRunner
 from ModelExecution.dspecParser import DSPEC_Parser, Dspec
 
 
@@ -34,7 +34,7 @@ class Orchestrator:
         self.DSPEC_parser = DSPEC_Parser()
         self.dataGatherer = DataGatherer()
         self.inputVectorBuilder = InputVectorBuilder()
-        self.modelWrapper = ModelWrapper()
+        self.modelRunner = ModelRunner()
 
 
     def run_semaphore(self, dspecPaths: list[str], executionTime: datetime = None, toss: bool = False):
@@ -77,7 +77,7 @@ class Orchestrator:
 
                     data_repository = self.dataGatherer.get_data_repository(DSPEC, reference_time)
                     input_vectors = self.inputVectorBuilder.build_batch(DSPEC, data_repository)
-                    result = self.modelWrapper.make_prediction(DSPEC, input_vectors, executionTime)
+                    result = self.modelRunner.make_predictions(DSPEC, input_vectors, reference_time)
 
                     self.__handle_successful_prediction(model_name, reference_time, result, toss)
                 
