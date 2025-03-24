@@ -10,71 +10,32 @@
 #----------------------------------
 # 
 #
-from datetime import datetime, timedelta, time
-from typing import List
+from datetime import datetime, timedelta
+from pandas import DataFrame
 
-class Input():
-    """An Input is a data value of some environment variable that can be linked to a date time.
-        :param dataValue: str - The actual data value
-        :param dataUnit: str - The unit of measurement of the value
-        :param timeVerified: datetime 
-        :param timeGenerated: datetime
-        :param longitude: str = None
-        :param latitude: str = None
 
+def get_input_dataFrame() -> DataFrame:
+    """ Constructs a dataframe with the columns Semaphore would expect from a dataframe of inputs.
+    The columns are: 
+    - dataValue: The value of the data point AS A STRING!
+    - dataUnit: The unit of the data point
+    - timeVerified: The time the data was verified
+    - timeGenerated: The time the data was generated
+    - longitude: The longitude where the data was collected
+    - latitude: The latitude where the data was collected
     """
-    def __init__(self, dataValue: str, dataUnit: str, timeVerified: datetime, timeGenerated: datetime,  longitude: str = None, latitude: str = None) -> None:
-        self.dataValue = dataValue
-        self.dataUnit = dataUnit
-        self.timeVerified = timeVerified
-        self.timeGenerated = timeGenerated
-        self.longitude = longitude
-        self.latitude = latitude
-        
-
-    def __str__(self) -> str:
-        return f'\n[Input] -> value: {self.dataValue}, unit: {self.dataUnit},timeVerified:{self.timeVerified}, timeGenerated:{self.timeGenerated}, longitude: {self.longitude}. latitude: {self.latitude}'
-    
-    def __repr__(self) -> str:
-        return f'\nInput({self.dataValue}, {self.dataUnit}, {self.timeVerified},{self.timeGenerated}, {self.longitude}, {self.latitude})'
-    
-    def __eq__(self, __value: object) -> bool:
-        if (self.dataValue == __value.dataValue and 
-            self.dataUnit == __value.dataUnit and 
-            self.timeVerified == __value.timeVerified and
-            self.timeGenerated == __value.timeGenerated and
-            self.longitude == __value.longitude and 
-            self.latitude == __value.latitude):
-            return True
-        else: return False
+    return DataFrame(columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude'])
 
 
-class Output():
-    """An output is a a predicted value created by the model semaphore is running.
-        :param dataValue: str - The actual data value
-        :param dataUnit: str - The unit of measurement of the value
-        :param timeGenerated: datetime - The datetime that the value was created
-        :parm leadTime: timedelta - The lead time for the model
+def get_output_dataFrame() -> DataFrame:
+    """ Constructs a dataframe with the columns Semaphore would expect from a dataframe of outputs.
+    The columns are: 
+    - dataValue: The value of the data point AS A STRING!
+    - dataUnit: The unit of the data point
+    - timeGenerated: The time the data was generated
+    - leadTime: The lead time for the prediction
     """
-    def __init__(self, dataValue: str, dataUnit: str, timeGenerated: datetime, leadTime: timedelta) -> None:
-        self.dataValue = dataValue
-        self.dataUnit = dataUnit
-        self.timeGenerated = timeGenerated
-        self.leadTime = leadTime
-        
-    def __str__(self) -> str:
-        return f'\n[Output] -> Value: {self.dataValue}, Unit: {self.dataUnit}, TimeGenerated: {self.timeGenerated}, LeadTime: {self.leadTime}'
-    
-    def __repr__(self):
-        return f'\nOutput({self.dataValue}, {self.dataUnit}, {self.timeGenerated}, {self.leadTime})'
-    
-    def __eq__(self, __value: object) -> bool:
-        if (self.dataValue == __value.dataValue and 
-            self.dataUnit == __value.dataUnit and  
-            self.timeGenerated == __value.timeGenerated and
-            self.leadTime == __value.leadTime):
-            return True
-        else: return False
+    return DataFrame(columns=['dataValue', 'dataUnit', 'timeGenerated', 'leadTime'])
 
 class DataIntegrityDescription():
     """A time description should describe the data Integrity steps that should be taken
@@ -169,15 +130,15 @@ class Series():
         self.isComplete = isComplete
         self.timeDescription = timeDescription
         self.nonCompleteReason = nonCompleteReason
-        self.__data = []
+        self.__dataFrame = None
 
     @property
-    def data(self):
-        return self.__data
+    def dataFrame(self):
+        return self.__dataFrame
     
-    @data.setter
-    def data(self, data: List[Input | Output]) -> None:
-        self.__data = data
+    @dataFrame.setter
+    def dataFrame(self, dataFrame: DataFrame) -> None:
+        self.__dataFrame = dataFrame
 
     def __str__(self) -> str:
         return f'\n[Series] -> description: {self.description}, wasSuccessful: {self.isComplete}, timeDescription: {self.timeDescription}, errorReason: {self.nonCompleteReason}'

@@ -18,7 +18,7 @@ sys.path.append('/app/src')
 import pytest
 
 from datetime import datetime, timedelta, time, date
-from src.DataClasses import Input, Series, TimeDescription, SeriesDescription
+from src.DataClasses import Series, TimeDescription, SeriesDescription
 from src.DataIngestion.IDataIngestion import data_ingestion_factory
 from dotenv import load_dotenv
 from utility import log
@@ -54,5 +54,5 @@ def test_ingest_series(source: str, series: str, location: str, interval: timede
     ingestSeries = data_ingestion_factory(seriesDescription)
     resultsSeries = ingestSeries.ingest_series(seriesDescription, timeDescription)
     # Printing the result series with its name and content
-    log(f"Result Series for series '{series}': {resultsSeries.data}")
+    log(f"Result Series for series '{series}': {resultsSeries.dataFrame}")
     assert resultsSeries.isComplete == True
