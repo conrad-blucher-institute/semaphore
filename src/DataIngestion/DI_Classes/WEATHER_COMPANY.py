@@ -50,7 +50,7 @@ class WEATHER_COMPANY(IDataIngestion):
         Calls the API, processes the response, and returns the Series object.
         """
         url = self.__build_url()
-        api_response = self.__api_request()
+        api_response = self.__api_request(url)
         wc_series = self.__process_response(api_response)
         return wc_series
 
@@ -66,21 +66,23 @@ class WEATHER_COMPANY(IDataIngestion):
         # probabilistic = requesting probabilistic forecast data.
         # ? = the start of query parameters, everything after ? refines the query.
         # format=json = requests the response in JSON format.
-        # units=e = specifies the unit system. ####################################### should this be m for metric rather than e for english?
-        # getting location information from ____
+        # units=m = specifies the unit system. m for metric.
+        # getting location information from ____ 
+            # not sure what the lat/lon is will need to ask after that but we still get a response with 0 0
         lat = 0    
         lon = 0
         # the location the request is for.
         lat_lon = f'geocode=${lat},${lon}'
         # the range of probabilistic percentiles for temperature from the 
-        # 5th percentile (cooler end) to the 95th percentile (warmer end).
-        prob_per = f'percentiles=temperature:5:95'
+        # 1th percentile (cooler end) to the 100th percentile (warmer end).
+        prob_per = f'percentiles=temperature:1:100'
         # retrieves 100 individual temperature forecasts for each forecast hour.
         # we currently assume 100 for all weather company requests.
         num_proto = f'prototypes=temperature:100'
-        # retrieves 100 prototype temperature forecasts.
+        # the api key
         api_permission = f'apiKey={self.api_key}'
-        endpoint = f'https://api.weather.com/v3/wx/forcast/probabilistic?format=json&units=e&{lat_lon}&{prob_per}&{num_proto}&{api_permission}'
+        endpoint = f'https://api.weather.com/v3/wx/forcast/probabilistic?format=json&units=m&{lat_lon}&{prob_per}&{num_proto}&{api_permission}'
+        return endpoint
 
 
     def __api_request(self, url: str) -> dict | None:
@@ -101,8 +103,50 @@ class WEATHER_COMPANY(IDataIngestion):
             log("ERROR: Failed to decode JSON response.")
         return None
 
+
     def __process_response(self, response: dict, seriesDescription: SeriesDescription) -> Series:
         """
         Processes API response and converts it into a Series object.
+        Extracts probabilistic temperature forecasts with timestamps.
+
+        This is the roughest function, I didn't get to do any testing.
         """
-        
+        if not response:
+            log("ERROR: Empty API response received.")
+            return None
+
+        try:
+            # Extract forecast timestamps
+            timestamps = response["forecasts1Hour"]["fcstValid"]
+            time_series = [datetime.utcfromtimestamp(ts) for ts in timestamps]
+
+            # Extract temperature forecasts (assuming first prototype)
+            prototypes = response["forecasts1Hour"]["prototypes"]
+            if not prototypes:
+                log("ERROR: No prototype data found in response.")
+                return None
+
+            # Assume using the first prototype (this can be adjusted if needed)
+            temperature_data = prototypes[0]["forecast"]
+
+            if len(temperature_data) != len(time_series):
+                log("ERROR: Mismatch between temperature data and timestamps.")
+                return None
+
+            # Create Input objects for each timestamp-temperature pair
+            inputs = [Input(time=time_series[i], value=temperature_data[i]) for i in range(len(time_series))]
+
+            # Create the Series object
+            wc_series = Series(
+                seriesDescription=seriesDescription,
+                inputs=inputs
+            )
+
+            return wc_series
+
+        except KeyError as e:
+            log(f"ERROR: Missing key in API response: {e}")
+            return None
+        except (IndexError, ValueError) as e:
+            log(f"ERROR: Failed to process API response: {e}")
+            return None
