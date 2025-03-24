@@ -107,36 +107,46 @@ class WEATHER_COMPANY(IDataIngestion):
     def __process_response(self, response: dict, seriesDescription: SeriesDescription) -> Series:
         """
         Processes API response and converts it into a Series object.
-        Extracts probabilistic temperature forecasts with timestamps.
+        Assumes the response contains probabilistic temperature forecasts.
 
-        This is the roughest function, I didn't get to do any testing.
+         This is the roughest function, I didn't get to do any testing.
         """
         if not response:
             log("ERROR: Empty API response received.")
             return None
-
+        
         try:
-            # Extract forecast timestamps
-            timestamps = response["forecasts1Hour"]["fcstValid"]
+            # Extract timestamps
+            timestamps = response.get("forecasts1Hour", {}).get("fcstValid", [])
+            if not timestamps:
+                log("ERROR: Missing valid timestamps (fcstValid) in response.")
+                return None
+
+            # Convert timestamps to datetime objects
             time_series = [datetime.utcfromtimestamp(ts) for ts in timestamps]
 
-            # Extract temperature forecasts (assuming first prototype)
-            prototypes = response["forecasts1Hour"]["prototypes"]
-            if not prototypes:
-                log("ERROR: No prototype data found in response.")
+            # Locate the temperature forecast inside 'prototypes'
+            temp_forecast = None
+            for prototype in response.get("forecasts1Hour", {}).get("prototypes", []):
+                if prototype.get("parameter") == "temperature":
+                    temp_forecast = prototype.get("forecast", [])
+                    break  # Stop after finding the first match
+            
+            if temp_forecast is None:
+                log("ERROR: No temperature data found in 'prototypes'.")
                 return None
 
-            # Assume using the first prototype (this can be adjusted if needed)
-            temperature_data = prototypes[0]["forecast"]
+            # Ensure data length matches
+            if len(time_series) != len(temp_forecast):
+                log(f"WARNING: Mismatch between timestamps ({len(time_series)}) and forecasts ({len(temp_forecast)}).")
+                min_len = min(len(time_series), len(temp_forecast))
+                time_series = time_series[:min_len]
+                temp_forecast = temp_forecast[:min_len]
 
-            if len(temperature_data) != len(time_series):
-                log("ERROR: Mismatch between temperature data and timestamps.")
-                return None
+            # Convert to Input objects
+            inputs = [Input(time=time_series[i], value=temp_forecast[i]) for i in range(len(time_series))]
 
-            # Create Input objects for each timestamp-temperature pair
-            inputs = [Input(time=time_series[i], value=temperature_data[i]) for i in range(len(time_series))]
-
-            # Create the Series object
+            # Construct the Series object
             wc_series = Series(
                 seriesDescription=seriesDescription,
                 inputs=inputs
@@ -144,9 +154,6 @@ class WEATHER_COMPANY(IDataIngestion):
 
             return wc_series
 
-        except KeyError as e:
-            log(f"ERROR: Missing key in API response: {e}")
-            return None
-        except (IndexError, ValueError) as e:
+        except (KeyError, IndexError, ValueError) as e:
             log(f"ERROR: Failed to process API response: {e}")
             return None
