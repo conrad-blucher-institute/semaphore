@@ -16,9 +16,8 @@
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
-from utility import log
 from exceptions import Semaphore_Ingestion_Exception
-from numpy import array, ndarray
+from numpy import ndarray
 import numpy as np
 
 from datetime import datetime
