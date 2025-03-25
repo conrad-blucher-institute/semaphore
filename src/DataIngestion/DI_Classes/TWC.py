@@ -98,7 +98,6 @@ class TWC(IDataIngestion):
         Makes an HTTP request to the API and returns the parsed JSON response.
         """
         try:
-            log(url)
             with urlopen(url) as response:
                 data = json.load(response)
                 return data
@@ -126,7 +125,7 @@ class TWC(IDataIngestion):
             },
             "forecasts1Hour": {
                 "fcstValid": [int, int, int, ...],
-                "prototypes": []
+                "prototypes": [
                     "forecast": [
                         [float, float, float, ...],
                         [float, float, float, ...],
@@ -144,13 +143,11 @@ class TWC(IDataIngestion):
         # Get the validation times for the data we requested
         unix_validation_timestamps: list[int] = response_data['fcstValid']
         validation_timestamps = [datetime.utcfromtimestamp(ts) for ts in unix_validation_timestamps]
-        print(validation_timestamps)
 
         # Get ensemble members shaped (ensemble_member_index, time_index), indexing first value b/c we only requested one prototype (temperature)
         data_buckets: list[list[float]] = response_data['prototypes'][0]['forecast']
         data_buckets: ndarray[float] = np.array(data_buckets).T     # Transpose to (time_index, ensemble_member_index), easier to work with
         data_buckets: ndarray[str] = data_buckets.astype(str)       # Cast to string as expected by the input dataFrame
-        print(data_buckets)
 
         # Pack data into input dataframe
         out_df = get_input_dataFrame()
