@@ -127,11 +127,13 @@ class TWC(IDataIngestion):
             "forecasts1Hour": {
                 "fcstValid": [int, int, int, ...],
                 "prototypes": [
-                    "forecast": [
-                        [float, float, float, ...],
-                        [float, float, float, ...],
-                        ...
-                    ]
+                    {
+                        "forecast": [
+                            [float, float, float, ...],
+                            [float, float, float, ...],
+                            ...
+                        ]
+                    }
                 ]
             }
         }
