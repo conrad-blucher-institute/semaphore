@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#test_dataGatherer.py
+#test_TWC.py
 #-------------------------------
 # Created By: Matthew Kastl
 # version 1.0
