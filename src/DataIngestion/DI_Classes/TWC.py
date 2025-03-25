@@ -17,7 +17,7 @@ from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
-from exceptions import Semaphore_Data_Exception
+from exceptions import Semaphore_Ingestion_Exception
 from numpy import array, ndarray
 import numpy as np
 
@@ -37,9 +37,11 @@ class TWC(IDataIngestion):
         Initializes the ingestion class with API key and series storage.
         """
         self.seriesStorage = series_storage_factory()
-        self.api_key = getenv('WEATHER_COMPANY_KEY')
-        if not self.api_key:
-            raise Semaphore_Data_Exception("WARNING: Weather Company API key not set in environment variables")
+        api_key = getenv('WEATHER_COMPANY_KEY')
+
+        if api_key is not None:
+            self.api_key = api_key
+        else: raise Semaphore_Ingestion_Exception("WARNING: Weather Company API key not set in environment variables")
         
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
