@@ -104,11 +104,11 @@ class TWC(IDataIngestion):
                 data = json.load(response)
                 return data
         except HTTPError as e:
-            raise Semaphore_Data_Exception(f"HTTPError: {e.code} - {e.reason}")
+            raise Semaphore_Ingestion_Exception(f"HTTPError: {e.code} - {e.reason}")
         except URLError as e:
-            raise Semaphore_Data_Exception(f"URLError: {e.reason}")
+            raise Semaphore_Ingestion_Exception(f"URLError: {e.reason}")
         except json.JSONDecodeError:
-            raise Semaphore_Data_Exception("ERROR: Failed to decode JSON response.")
+            raise Semaphore_Ingestion_Exception("ERROR: Failed to decode JSON response.")
 
 
     def __process_response(self, response: dict, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series:
