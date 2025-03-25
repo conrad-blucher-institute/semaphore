@@ -139,8 +139,10 @@ class TWC(IDataIngestion):
         """
         
         # Parse response from major headers
-        response_metadata = response['metadata']
-        response_data = response['forecasts1Hour']
+        response_metadata = response.get('metadata')
+        response_data = response.get('forecasts1Hour')
+        if response_metadata is None or response_data is None:
+            raise Semaphore_Ingestion_Exception(f'ERROR: Unexpected response structure from Weather Company API. Response:\n{response}')
 
         # Get the validation times for the data we requested
         unix_validation_timestamps: list[int] = response_data['fcstValid']
