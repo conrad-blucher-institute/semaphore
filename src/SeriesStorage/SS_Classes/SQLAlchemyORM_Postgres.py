@@ -169,7 +169,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         if not tupleishResult: # If there are no results, no model information can't be inferred 
             return None    
 
-        outputResult = self.__splice_output(tupleishResult)
+        outputResult = self.__splice_output([tupleishResult]) # Splice output expects a list of tuples
 
         # Parse out model information from first output result
         description = SemaphoreSeriesDescription(tupleishResult[3], tupleishResult[4], tupleishResult[8], tupleishResult[7], tupleishResult[6])
@@ -284,9 +284,10 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             model_run_row["returnCode"] = return_code
             model_run_rows.append(model_run_row)
 
+        model_runs = self.__metadata.tables['model_runs']
         with self.__get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.model_runs)
-                                  .returning(self.model_runs)
+            cursor = conn.execute(insert(model_runs)
+                                  .returning(model_runs)
                                   .values(model_run_rows)
                                   )
             model_run_result = cursor.fetchall()
