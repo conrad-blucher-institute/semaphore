@@ -11,12 +11,11 @@
 #
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
-import numpy as np
 
 from datetime import datetime, timedelta
-from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription
+from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription, Series
 from SeriesProvider.SeriesProvider import SeriesProvider
-from utility import log
+from fastapi.encoders import jsonable_encoder
 
 load_dotenv()
 
@@ -84,7 +83,7 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     for value in responseSeries.data:
         value.dataValue = str(value.dataValue)
 
-    return responseSeries
+    return serialize_series(responseSeries)
 
 
 @app.get('/output_latest/')
@@ -100,8 +99,8 @@ async def get_outputs_latest(modelNames: list[str] = Query(None)):
 
     provider = SeriesProvider()
     results = {}
-    for modelName in modelNames:
-        results[modelName] = provider.request_output('LATEST', model_name= modelName)
+    for modelName in modelNames: 
+        results[modelName] = serialize_series(provider.request_output('LATEST', model_name= modelName))
     return results
 
 
@@ -126,7 +125,7 @@ async def get_outputs_time_span(fromDateTime: str, toDateTime: str, modelNames: 
     provider = SeriesProvider()
     results = {}
     for modelName in modelNames:
-        results[modelName] = provider.request_output('TIME_SPAN', model_name=modelName, from_time=fromDateTime, to_time=toDateTime)
+        results[modelName] = serialize_series(provider.request_output('TIME_SPAN', model_name=modelName, from_time=fromDateTime, to_time=toDateTime))
     return results
 
 
@@ -187,9 +186,128 @@ async def get_output(modelName: str, modelVersion: str, series: str, location: s
     provider = SeriesProvider()
     responseSeries = provider.request_output('SPECIFIC', semaphoreSeriesDescription=requestDescription, timeDescription=timeDescription)
 
-    return responseSeries
+    return serialize_series(responseSeries)
 
 
 @app.get("/health")
 def health_check():
     return {"status": "up"}
+
+
+def serialize_series(series: Series) -> dict[any]:
+    """ A custom serializer for the series object. This allows us to change
+    the series data structure but keep our API responses the same as to not break
+    anything downstream
+    """
+
+    if isinstance(series.description, SemaphoreSeriesDescription):
+        return serialize_output_series(series)
+
+    elif isinstance(series.description, SeriesDescription):
+        return serialize_input_series(series)
+    
+    else:
+        raise NotImplementedError("The series description is not supported")
+    
+
+def serialize_input_series(series: Series) -> dict[any]:
+    """ Serializes an input series into a dictionary.
+    param: series - Series The input series to serialize.
+    return: A dictionary representation of the input series.
+
+    NOTE:: Expected input series serialization
+    {
+        "description": {
+            "dataSource": "NOAATANDC",
+            "dataSeries": "dWl",
+            "dataLocation": "Aransas",
+            "dataDatum": "NAVD",
+            "dataIntegrityDescription": null,
+            "verificationOverride": null
+        },
+        "isComplete": series.isComplete,
+        "timeDescription": {
+            "fromDateTime": "2025-03-26T00:00:00",
+            "toDateTime": "2025-03-26T03:00:00",
+            "interval": 3600.0
+        },
+        "nonCompleteReason": null,
+        "_Series__data": [
+            {
+                "dataValue": "0.178",
+                "dataUnit": "meter",
+                "timeVerified": "2025-03-26T00:00:00",
+                "timeGenerated": "2025-03-26T00:00:00",
+                "longitude": "-97.0391",
+                "latitude": "27.8366"
+            },
+        ]
+    }
+    """
+
+    # Serialize the series object
+    serialized: dict[any] = jsonable_encoder(series)
+
+    # Remove the automatically serialized dataFrame
+    del serialized['_Series__dataFrame']
+
+    # Serialize the dataFrame by our own rules
+    serialized_data = []
+    for _, row in series.dataFrame.iterrows():
+        serialized_data.append({
+            "dataValue":      jsonable_encoder(row['dataValue']),
+            "dataUnit":       jsonable_encoder(row['dataUnit']),
+            "timeVerified":  jsonable_encoder(row['timeVerified']),
+            "timeGenerated":  jsonable_encoder(row['timeGenerated']),
+            "longitude":       jsonable_encoder(row['longitude']),
+            "latitude":       jsonable_encoder(row['latitude'])
+        })
+    serialized['_Series__data'] = serialized_data # Add it back to the response
+    return serialized
+
+
+def serialize_output_series(series: Series) -> dict[any]:
+    """ Serializes an output series into a dictionary.
+    param: series - Series The output series to serialize.
+    return: A dictionary representation of the output series.
+
+    NOTE:: Expected out series serialization
+    {
+        "description": {
+            "modelName": "Bird-Island_Water-Temperature_102hr",
+            "modelVersion": "1.0.0",
+            "dataSeries": "pWaterTmp",
+            "dataLocation": "SouthBirdIsland",
+            "dataDatum": "celsius"
+        },
+        "isComplete": series.isComplete,
+        "timeDescription": null,
+        "nonCompleteReason": null,
+        "_Series__data": [
+            {
+                "dataValue": "23.878",
+                "dataUnit": "celsius",
+                "timeGenerated": "2025-03-26T18:00:00",
+                "leadTime": 367200
+            },  
+        ]
+    }
+    """
+
+    # Serialize the series object
+    serialized: dict[any] = jsonable_encoder(series)
+
+    # Remove the automatically serialized dataFrame
+    del serialized['_Series__dataFrame']
+
+    # Serialize the dataFrame by our own rules
+    serialized_data = []
+    for _, row in series.dataFrame.iterrows():
+        serialized_data.append({
+            "dataValue":      jsonable_encoder(row['dataValue']),
+            "dataUnit":       jsonable_encoder(row['dataUnit']),
+            "timeGenerated":  jsonable_encoder(row['timeGenerated']),
+            "leadTime":       jsonable_encoder(row['leadTime'])
+        })
+    serialized['_Series__data'] = serialized_data # Add it back to the response
+    return serialized
