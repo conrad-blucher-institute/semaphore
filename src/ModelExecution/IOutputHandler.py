@@ -14,18 +14,17 @@ Methods. And Factory to get instance
 #Imports
 
 from .dspecParser import Dspec
-from DataClasses import Output
 
 from abc import ABC, abstractmethod
 from importlib import import_module
+from datetime import datetime
+from pandas import DataFrame
 
 class IOutputHandler(ABC):
    
     @abstractmethod
-    def post_process_prediction(self, prediction: list[any], dspec: Dspec ) -> list[Output]:
-        raise NotImplementedError()
-             
-       
+    def post_process_prediction(self, prediction: list[any], dspec: Dspec, referenceTime: datetime) -> DataFrame:
+        raise NotImplementedError()       
 
 def output_handler_factory(method: str) -> IOutputHandler:
     """Uses the source attribute of a data request to dynamically import a module

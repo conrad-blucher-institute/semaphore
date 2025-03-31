@@ -17,7 +17,7 @@ from dotenv import load_dotenv
     
 import pytest
 from datetime import datetime, timedelta
-from src.SeriesProvider.SeriesProvider import SeriesProvider, TimeDescription, Series, SeriesDescription, SemaphoreSeriesDescription,Input
+from src.SeriesProvider.SeriesProvider import SeriesProvider, TimeDescription, Series, SeriesDescription, SemaphoreSeriesDescription
 
 
 @pytest.mark.parametrize("seriesDescription, timeDescription", [

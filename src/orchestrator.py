@@ -18,13 +18,13 @@ from os import path, getenv
 from datetime import datetime, timedelta
 from exceptions import Semaphore_Exception, Semaphore_Data_Exception, Semaphore_Ingestion_Exception
 from discord import Discord_Notify
-from DataClasses import Series, SemaphoreSeriesDescription, Output
+from DataClasses import Series, SemaphoreSeriesDescription, get_output_dataFrame
 from utility import log, LogLocationDirector
 
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from ModelExecution.dataGatherer import DataGatherer
 from ModelExecution.InputVectorBuilder import InputVectorBuilder
-from ModelExecution.modelWrapper import ModelWrapper
+from ModelExecution.modelRunner import ModelRunner
 from ModelExecution.dspecParser import DSPEC_Parser, Dspec
 
 
@@ -34,7 +34,7 @@ class Orchestrator:
         self.DSPEC_parser = DSPEC_Parser()
         self.dataGatherer = DataGatherer()
         self.inputVectorBuilder = InputVectorBuilder()
-        self.modelWrapper = ModelWrapper()
+        self.modelRunner = ModelRunner()
 
 
     def run_semaphore(self, dspecPaths: list[str], executionTime: datetime = None, toss: bool = False):
@@ -63,21 +63,21 @@ class Orchestrator:
         checked_dspecs = [self.__clean_and_check_dspec(dspec) for dspec in dspecPaths]
         if executionTime is None: 
                     executionTime = datetime.now()
-        reference_time = self.__calculate_referenceTime(executionTime, DSPEC)
 
         try:
             try:
                 for dspecPath in checked_dspecs:
                 
                     DSPEC = self.DSPEC_parser.parse_dspec(dspecPath)
-                    model_name = DSPEC.modelName
+                    model_name: str = DSPEC.modelName
+                    reference_time = self.__calculate_referenceTime(executionTime, DSPEC)
 
                     LogLocationDirector().set_log_target_path(getenv('LOG_BASE_PATH'), model_name)
                     log(f'----Running {dspecPaths} for {executionTime}! Toss: {toss}----')
 
                     data_repository = self.dataGatherer.get_data_repository(DSPEC, reference_time)
                     input_vectors = self.inputVectorBuilder.build_batch(DSPEC, data_repository)
-                    result = self.modelWrapper.make_prediction(DSPEC, input_vectors, executionTime)
+                    result = self.modelRunner.make_predictions(DSPEC, input_vectors, reference_time)
 
                     self.__handle_successful_prediction(model_name, reference_time, result, toss)
                 
@@ -119,6 +119,7 @@ class Orchestrator:
         :param dspec: Dspec - the dspec object.
         :returns: datetime - the reference time.
         '''
+
         return datetime.utcfromtimestamp(execution_time.timestamp() - (execution_time.timestamp() % dspec.timingInfo.interval))
 
 
@@ -141,7 +142,7 @@ class Orchestrator:
                 inserted_results, _ = series_storage.insert_output_and_model_run(result_series, execution_time, 0)
 
                 log(inserted_results)
-                log(inserted_results.data if inserted_results is not None else '')
+                log(inserted_results.dataFrame if inserted_results is not None else '')
         except:
             log(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))    
 
@@ -177,19 +178,23 @@ class Orchestrator:
                 # Reconstruct the expected predictions information with a nulled result
                 predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, dspec.outputInfo.series, dspec.outputInfo.location, dspec.outputInfo.datum)
                 result_series = Series(predictionDesc, True)
-                result_series.data = [Output(None, dspec.outputInfo.unit, self.__calculate_referenceTime(execution_time), timedelta(seconds=dspec.outputInfo.leadTime))]
+
+                # Generate null output
+                df_output = get_output_dataFrame() 
+                df_output.loc[0] = [None, dspec.outputInfo.unit, self.__calculate_referenceTime(execution_time, dspec), timedelta(seconds=dspec.outputInfo.leadTime)]
+                result_series.dataFrame = df_output
 
                 # Attempt to store both that in the outputs table and information about the model_run
                 series_storage = series_storage_factory()
                 inserted_results, _ = series_storage.insert_output_and_model_run(result_series, execution_time, exception.error_code)
 
                 log(inserted_results)
-                log(inserted_results.data if inserted_results is not None else '')
+                log(inserted_results.dataFrame if inserted_results is not None else '')
         except:
             log(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))
     
 
-    def __safe_discord_notification(model_name: str, execution_time: datetime, error_code: int, message: str):
+    def __safe_discord_notification(self, model_name: str, execution_time: datetime, error_code: int, message: str):
         """Safely sends a discord notification if the user has enabled it in the environment variables. Ensures 
         that if an error occurs while sending the notification, it is logged and not thrown and this method returns.
 

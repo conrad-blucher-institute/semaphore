@@ -17,7 +17,7 @@ import re
 
 
 from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataClasses import Series, SeriesDescription, Input, TimeDescription
+from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
 
@@ -129,23 +129,24 @@ class NDBC(IDataIngestion):
 
         df_inTimeRange = df.loc[timeDescription.toDateTime:timeDescription.fromDateTime]
 
-        inputs = []
+        df_result = get_input_dataFrame()
         for dt_idx, row in df_inTimeRange.iterrows():
             dataValue = row[seriesDescription.dataSeries]
             dataUnit = self.unitConversionDict[units[df.columns.get_loc(seriesDescription.dataSeries)]]
             dateTime = dt_idx
             if dataValue != 'MM':
-                inputs.append(Input(
-                            dataValue=dataValue,
-                            dataUnit=dataUnit,
-                            timeGenerated=dateTime,
-                            timeVerified=dateTime,
-                            longitude=None,
-                            latitude=None
-                        ))
+                df_result.loc[len(df_result)] = [
+                    dataValue,  # dataValue
+                    dataUnit,   # dataUnit
+                    dateTime,   # timeVerified
+                    dateTime,   # timeGenerated
+                    None,       # lon
+                    None        # lat
+                ]
+        df_result['dataValue'] = df_result['dataValue'].astype(str)
         
         series = Series(seriesDescription, True, timeDescription)
-        series.data = inputs
+        series.dataFrame = df_result
         return series
     
 
@@ -166,9 +167,9 @@ class NDBC(IDataIngestion):
 
         four_max_series_name = seriesDescription.dataSeries # save old name
         seriesDescription.dataSeries = self.fourMaxMeanConversionDict[seriesDescription.dataSeries] # query the NDBC name
-        full_series_inputs = self.__get_NDBC(seriesDescription, timeDescription).data # request the data
+        full_dataFrame = self.__get_NDBC(seriesDescription, timeDescription).dataFrame # request the data
 
-        if not full_series_inputs:  # check that data has been provided
+        if not full_dataFrame:  # check that data has been provided
             log(f"Warning: NDBC returned no data! Possibly an NDBC outage.")
             # Noted here as likely being an outage because semaphore has only
             # experienced issues with NDBC for limited periods of time
@@ -177,23 +178,26 @@ class NDBC(IDataIngestion):
         
         seriesDescription.dataSeries = four_max_series_name # switch the name back
 
-        # We convert the data from strings to float, sort it, take the four highest, and take their mean
-        input_data = [float(input.dataValue) for input in full_series_inputs]
-        input_data = list(filter(lambda item: item is not None, input_data)) # Removing any Nones from the list
-        four_highest = sorted(input_data)[-4:] # Get the four highest values
-        mean_four_max = sum(four_highest) / 4.0
 
-        # we return a series with a single input
-        last_input = full_series_inputs[-1]
-        input = Input(
-            dataValue= str(mean_four_max),
-            dataUnit= last_input.dataUnit,
-            timeGenerated= timeDescription.toDateTime,
-            timeVerified= timeDescription.toDateTime,
-        )
+        # Build a data frame containing one row that has all the same metadata
+        # Convert the dataValue column to float
+        full_dataFrame['dataValue'] = full_dataFrame['dataValue'].astype(float)
+
+        # Sort the DataFrame by dataValue in descending order
+        sorted_df = full_dataFrame.sort_values(by='dataValue', ascending=False)
+
+        # Take the mean of the four highest rows
+        mean_four_max = sorted_df.head(4)['dataValue'].mean()
+
+        # Get the last row to copy the meta data and set its value to the fmm
+        one_row_df = full_dataFrame.iloc[[-1]].copy()
+        one_row_df['dataValue'] = mean_four_max
+
+        # Cast back to string
+        one_row_df['dataValue'].astype(str)
 
         series = Series(seriesDescription, True, timeDescription)
-        series.data = [input]
+        series.dataFrame = one_row_df
         return series
 
 

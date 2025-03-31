@@ -1,4 +1,4 @@
 {
-    "Target Version" : "2.12",
-    "Description" : "Removes the artifact in the dataLocation_dataSource_mapping table"
+    "Target Version" : "3.0",
+    "Description" : "Add the ensembleMemberID column and update the AK in inputs and outputs"
 }

@@ -20,9 +20,10 @@
 #Input
 
 from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataClasses import Series, SeriesDescription, Input, TimeDescription, SemaphoreSeriesDescription, Output
+from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription, SemaphoreSeriesDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
+from pandas import DataFrame
 
 class SEMAPHORE(IDataIngestion):
 
@@ -54,26 +55,15 @@ class SEMAPHORE(IDataIngestion):
 
         # Repack the data with the original series description and return
         return_series = Series(seriesDescription, True, timeDescription)
-        return_series.data = self.__convert_output_to_input(result.data) # Cast outputs to inputs
+        return_series.dataFrame = self.__convert_output_to_input(result.dataFrame) # Cast output frame to input frame
         return return_series
     
 
-    def __convert_output_to_input(self, outputs: list[Output]) -> list[Input]:
+    def __convert_output_to_input(self, df_outputs: DataFrame) -> DataFrame:
         """A simple method to cast and output object into an input object"""
-        inputs = []
-        for output in outputs:
-
-            value = output.dataValue
-            unit = output.dataUnit
-            timeGenerated = output.timeGenerated
-            leadTime = output.leadTime
-
-            inputs.append(
-                Input(
-                    value,
-                    unit,
-                    timeGenerated + leadTime, # Verified Time
-                    timeGenerated
-                )
-            )
-        return inputs
+        df_inputs = get_input_dataFrame()
+        df_inputs['dataValue'] = df_outputs['dataValue'] 
+        df_inputs['dataUnit'] = df_outputs['dataUnit'] 
+        df_inputs['timeVerified'] = df_outputs['timeGenerated'] + df_outputs['leadTime']
+        df_inputs['timeGenerated'] = df_outputs['timeGenerated']
+        return df_inputs

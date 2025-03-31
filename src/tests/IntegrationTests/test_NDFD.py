@@ -23,31 +23,6 @@ from DataClasses import TimeDescription, SeriesDescription
 from DataIngestion.DI_Classes.NDFD import NDFD
 
 load_dotenv()
-
-@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
-
-@pytest.mark.parametrize("source, series, location, interval, datum", [
-    ("NDFD", "pAirTemp", "SBirdIsland", None, None),
-    ("NDFD", "pAirTemp", "SBirdIsland", timedelta(seconds=3600), None),
-    ("NDFD", "pAirTemp", "SBirdIsland", timedelta(seconds=10800), None)
-])
-def test_ingest_series(source: str, series: str, location: str, interval: timedelta, datum: str):
-    """This function tests whether each case in the ingest_series
-        function is complete.
-        NOTE:: This test depends on DBM.insert_lat_lon_test('SBirdIsland', 'South Bird Island', None, '27.4844', '-97.318') pre-existing in db
-    """
-    fromDateTime = datetime.now()
-    toDateTime = fromDateTime + timedelta(days=2)
-    
-    seriesDescription = SeriesDescription(source, series, location, datum)
-    timeDescription = TimeDescription(fromDateTime, toDateTime, interval)
-
-    ingestSeries = NDFD()
-    resultsSeries = ingestSeries.ingest_series(seriesDescription, timeDescription)
-
-    assert resultsSeries.isComplete is True
-
-
 @pytest.mark.parametrize("data_dictionary, toDateTime", [
     ([[1704520800, 13], [1704531600, 12]], datetime(2024, 1, 6, 2)),
     ([[1704531600, 12]], datetime(2024, 1, 6, 2)),

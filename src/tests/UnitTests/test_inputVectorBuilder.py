@@ -5,6 +5,8 @@
 # version 1.0
 #----------------------------------
 """ Tests the InputVectorBuilder class
+
+run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_inputVectorBuilder.py
  """ 
 #----------------------------------
 # 
@@ -15,7 +17,7 @@ import sys
 from unittest.mock import MagicMock
 from src.ModelExecution.InputVectorBuilder import InputVectorBuilder
 from src.ModelExecution.dspecParser import Dspec, VectorOrder
-from src.DataClasses import Series, Input
+from src.DataClasses import Series, get_input_dataFrame
 
 
 ## Mocks
@@ -24,13 +26,11 @@ def get_single_value_series():
     """
     series = MagicMock(spec=Series)
 
-    data = []
-    for val in range(5):
-        input = MagicMock(spec=Input) 
-        input.dataValue = str(val)
-        data.append(input)
+    df = get_input_dataFrame()
+    for index in range(5):
+        df.loc[index] = [str(index), 'degrees', 'Test', 'Test', 'Test', 'Test']
 
-    series.data = data
+    series.dataFrame = df
     return series
 
 
@@ -39,13 +39,11 @@ def get_multi_value_series():
     """
     series = MagicMock(spec=Series)
 
-    data = []
-    for val in range(5):
-        input = MagicMock(spec=Input) 
-        input.dataValue = [str(val * sub_val) for sub_val in range(5)]
-        data.append(input)
+    df = get_input_dataFrame()
+    for index in range(5):
+        df.loc[index] = [[str(index * sub_val) for sub_val in range(5)], 'degrees', 'Test', 'Test', 'Test', 'Test']
 
-    series.data = data
+    series.dataFrame = df
     return series
 
 
@@ -81,7 +79,7 @@ def test_build_batch_multi_value_input():
     vectorOrder.configure_mock(dTypes= ['float', 'float'])
     vectorOrder.configure_mock(indexes=[(None, None), (None, None)])
     vectorOrder.configure_mock(multipliedKeys=['Series2'])
-    vectorOrder.configure_mock(amntExpectedVectors=5)
+    vectorOrder.configure_mock(ensembleMemberCount=5)
     dspec = mock_dspec(vectorOrder)
 
     # Run test
@@ -112,7 +110,7 @@ def test_build_batch_single_value_input():
     vectorOrder.configure_mock(dTypes= ['float', 'float'])
     vectorOrder.configure_mock(indexes=[(None, None), (None, None)])
     vectorOrder.configure_mock(multipliedKeys=[])
-    vectorOrder.configure_mock(amntExpectedVectors=None)
+    vectorOrder.configure_mock(ensembleMemberCount=None)
     dspec = mock_dspec(vectorOrder)
 
     # Run test
@@ -144,7 +142,7 @@ def test_build_batch_indexing():
     vectorOrder.configure_mock(dTypes= ['float', 'float'])
     vectorOrder.configure_mock(indexes=[(None, None), (1, 4)]) # We index the second series
     vectorOrder.configure_mock(multipliedKeys=[])
-    vectorOrder.configure_mock(amntExpectedVectors=None)
+    vectorOrder.configure_mock(ensembleMemberCount=None)
     dspec = mock_dspec(vectorOrder)
 
     # Run test
