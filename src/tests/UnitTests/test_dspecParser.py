@@ -109,13 +109,13 @@ def test_invalid_vector_order():
                 {
                     "key": "dXWnCmp000D_1hr",
                     "dType": "float",
-                    "multipliedKeys": ["Key_1", "Key_2"],
+                    "isMultipliedKey": True,
                     "ensembleMemberCount": 100
                 },
                 {
                     "key": "dYWnCmp000D_1hr",
                     "dType": "float",
-                    "multipliedKeys": ["Key_3"]  # Second multipliedKeys (Should trigger an error)
+                    "isMultipliedKey": True  # Second multipliedKeys (Should trigger an error)
                 },
                 {
                     "key": "dXWnCmp000D_12hr",
@@ -139,7 +139,7 @@ def test_invalid_vector_order():
             temp_file_path = temp_file.name
 
         # Expecting a ValueError due to multiple multipliedKeys and ensembleMemberCount
-        with pytest.raises(ValueError, match="Error: More than one multipliedKey has been detected!|Error: More than one ensembleMemberCount has been detected!"):
+        with pytest.raises(ValueError, match="DSPEC Parsing Error: More than one key has been marked multiplied. This is not supported by the current implementation!"):
             dspecParser = DSPEC_Parser()
             dspecParser.parse_dspec(temp_file_path)
             
@@ -241,9 +241,11 @@ def sub_test_dspec_2_0(dspecFilePath: str):
         assert vectorOrder.dTypes[0] == vectorOrderJson[0]["dType"]
         
         # Iterate through vectorOrderJson to ensure all values match
-        for i, entry in enumerate(vectorOrderJson):  
-            assert vectorOrder.multipliedKeys[i] == entry.get("multipliedKeys", [])  # Default to empty list
-            assert vectorOrder.ensembleMemberCount[i] == entry.get("ensembleMemberCount", None)  # Default to None
+        for i, entry in enumerate(vectorOrderJson): 
+            key = entry.get("key", [])  
+            if entry.get("isMultipliedKeys", False):
+                assert vectorOrder.multipliedKeys[i] == key # Default to empty list
+                assert vectorOrder.ensembleMemberCount == entry.get("ensembleMemberCount", None)  # Default to 0
    
         
         # Vector order Count

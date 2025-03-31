@@ -250,10 +250,7 @@ class dspec_sub_Parser_2_0:
         dTypes = []
         indexes = []
         multipliedKeys = []
-        ensembleMemberCount = []
-        found_multipliedKeys = False
-        found_ensembleMemberCount = False
-                
+        ensembleMemberCount = []             
         
         for dict in vOrder:
             keys.append(dict['key'])
@@ -265,21 +262,18 @@ class dspec_sub_Parser_2_0:
             if index is None: indexes.append((None, None))
             else: indexes.append(tuple(index))
             
-            #Ensure an error is thrown if there is a multipliedKey and ensembleMemberCount in more than one vector
-            multipliedKey: list[str] = dict.get("multipliedKeys", [])  # Default to []
-            if "multipliedKeys" in dict:
-                if found_multipliedKeys:
-                    raise ValueError("Error: More than one multipliedKey has been detected!")
-                found_multipliedKeys = True
-            multipliedKeys.append(multipliedKey) 
+            # Parsing for multiplied keys (AKA. Ensemble data)
+            isMultipliedKey: bool = dict.get("isMultipliedKey", False) 
+            if isMultipliedKey:
+                multipliedKeys.append(dict['key']) 
+                ensembleMember: int | None = dict.get("ensembleMemberCount", None) 
+                if ensembleMemberCount is not None: ensembleMemberCount.append(ensembleMember)  
 
-            ensembleMember: int | None = dict.get("ensembleMemberCount", None)  # Default to None
-            if "ensembleMemberCount" in dict:
-                if found_ensembleMemberCount:
-                    raise ValueError("Error: More than one ensembleMemberCount has been detected!")
-                found_ensembleMemberCount = True
-            ensembleMemberCount.append(ensembleMember)  
-                    
+        # Throw parsing errors if the multiplied keys and ensemble member are not configured correctly
+        if len(multipliedKeys) > 1:                         raise ValueError("DSPEC Parsing Error: More than one key has been marked multiplied. This is not supported by the current implementation!")
+        if len(ensembleMemberCount) > 1:                    raise ValueError("DSPEC Parsing Error: More than one ensembleMemberCount has been detected. This is not supported by the current implementation!")
+        if len(multipliedKeys) != len(ensembleMemberCount): raise ValueError("DSPEC Parsing Error: If there is a multiplied key there should be 1 and only 1 ensembleMemberCount!")
+        
         vectorOrder = VectorOrder()
         vectorOrder.keys = keys
         vectorOrder.dTypes = dTypes
