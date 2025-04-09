@@ -13,7 +13,7 @@
 #
 #Imports
 from PostProcessing.IPostProcessing import IPostProcessing
-from DataClasses import Series, Input
+from DataClasses import Series
 from ModelExecution.dspecParser import PostProcessCall
 
 class MagnoliaPredictionsPostProcess(IPostProcessing):
@@ -54,23 +54,26 @@ class MagnoliaPredictionsPostProcess(IPostProcessing):
         magnolia_predHarmFirst = preprocessedData[args['predHarmFirst_inKey']]
         magnolia_predHarmSecond = preprocessedData[args['predHarmSecond_inKey']]
         magnolia_Preds = preprocessedData[args['magnolia_Pred_inKey']]
-        transformeds = []
-        for first, second, magnolia_pred in zip(magnolia_predHarmFirst.data, magnolia_predHarmSecond.data, magnolia_Preds.data):
-            
-            # Average the hermonics and add it to the predicted surge
-            average = (float(first.dataValue) + float(second.dataValue)) / 2
-            transformed = float(magnolia_pred.dataValue) + average
 
-            # Magnitude contains the correct metadata from resulting series
-            transformeds.append(Input(
-                dataValue=      str(transformed),
-                dataUnit=       magnolia_pred.dataUnit,
-                timeGenerated=  magnolia_pred.timeGenerated,
-                timeVerified=   magnolia_pred.timeVerified,
-                longitude=      magnolia_pred.longitude,
-                latitude=       magnolia_pred.latitude
-                )
-            )
+        # Unpack and cast the data to float
+        df_magnolia_predHarmFirst = magnolia_predHarmFirst.dataFrame
+        df_magnolia_predHarmFirst['dataValue'] = df_magnolia_predHarmFirst['dataValue'].astype(float)
+
+        df_magnolia_predHarmSecond = magnolia_predHarmSecond.dataFrame
+        df_magnolia_predHarmSecond['dataValue'] = df_magnolia_predHarmSecond['dataValue'].astype(float)
+
+        df_magnolia_Preds = magnolia_Preds.dataFrame
+        df_magnolia_Preds['dataValue'] = df_magnolia_Preds['dataValue'].astype(float)
+
+        # Create a result df from the magnolia preds df, catches meta data
+        df_result = magnolia_Preds.dataFrame.copy(deep=True)
+
+        # Preform the calculation
+        average = (df_magnolia_predHarmFirst['dataValue'] + df_magnolia_predHarmSecond['dataValue']) / 2
+        df_result['dataValue'] = df_magnolia_Preds['dataValue'] + average
+
+        # Cast the result back to sting
+        df_result['dataValue'] = df_result['dataValue'].astype(str)
 
         # Repack transformed values in a new Series
         desc = magnolia_Preds.description
@@ -78,7 +81,7 @@ class MagnoliaPredictionsPostProcess(IPostProcessing):
         transformed_outkey = args['Magnolia_WL_outKey']
         desc.dataSeries = transformed_outkey
         transformed_series = Series(desc, True, magnolia_predHarmSecond.timeDescription)
-        transformed_series.data = transformeds
+        transformed_series.dataFrame = df_result
         preprocessedData[transformed_outkey] = transformed_series
 
         return preprocessedData

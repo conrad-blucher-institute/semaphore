@@ -17,11 +17,14 @@ from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
 from os import getenv
 from datetime import timedelta, datetime
+import pandas as pd
+from pandas import DataFrame
 
 from SeriesStorage.ISeriesStorage import ISeriesStorage
 
-from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, Input, Output, TimeDescription
+from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, TimeDescription, get_input_dataFrame, get_output_dataFrame
 from utility import log
+
 
 class SQLAlchemyORM_Postgres(ISeriesStorage):
  
@@ -51,17 +54,17 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             .where(self.inputs.c.verifiedTime <= timeDescription.toDateTime)
             )
         tupleishResult = self.__dbSelection(statement).fetchall()
-        inputResult = self.__splice_input(tupleishResult)
-
-        # If an interval was provided, we will mod each verified time against it
-        # any that fail we remove
+        df_inputResult = self.__splice_input(tupleishResult)
+        
+        # Prune the results removing any data that does not align with the interval that was requested
+        df_prunedInputs = df_inputResult.copy(deep=True)
         if timeDescription.interval != None and timeDescription.interval.total_seconds() != 0:
-            for input in inputResult:
-                if not (input.timeVerified.timestamp() % timeDescription.interval.total_seconds() == 0):
-                    inputResult.remove(input)
+            for i in range(len(df_inputResult)):
+                if not (df_inputResult.iloc[i]['timeVerified'].timestamp() % timeDescription.interval.total_seconds() == 0):
+                    df_prunedInputs.drop(i, inplace=True)
 
         series = Series(seriesDescription, True, timeDescription)
-        series.data = inputResult
+        series.dataFrame = df_prunedInputs
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
@@ -98,8 +101,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                     .where(self.outputs.c.timeGenerated <= toGeneratedTime)
                     )
         tupleishResult = self.__dbSelection(statement).fetchall()
-        outputResult = self.__splice_output(tupleishResult)
-        series.data = outputResult
+        series.dataFrame = self.__splice_output(tupleishResult)
         return series
     
 
@@ -143,7 +145,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # Parse out model information from first output result
         description = SemaphoreSeriesDescription(tupleishResult[0][3], tupleishResult[0][4], tupleishResult[0][8], tupleishResult[0][7], tupleishResult[0][6])
         series = Series(description, False)
-        series.data = outputResult
+        series.dataFrame = outputResult
         return series
     
 
@@ -164,12 +166,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         if not tupleishResult: # If there are no results, no model information can't be inferred 
             return None    
 
-        outputResult = self.__splice_output([tupleishResult])
+        outputResult = self.__splice_output(tupleishResult)
 
         # Parse out model information from first output result
         description = SemaphoreSeriesDescription(tupleishResult[3], tupleishResult[4], tupleishResult[8], tupleishResult[7], tupleishResult[6])
         series = Series(description, False)
-        series.data = outputResult
+        series.dataFrame = outputResult
         return series
     
     def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
@@ -207,25 +209,37 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         if(type(series.description).__name__ != 'SeriesDescription'): raise ValueError('Description should be type SeriesDescription')
 
-     #  Construct DB row to insert
+        # If dataValue is a list its an ensemble
+        isEnsemble = isinstance(series.dataFrame['dataValue'].iloc[0], list) 
+
         now = datetime.now()
         insertionRows = []
-        for input in series.data:
-            insertionValueRow = {"isActual": None, "generatedTime": None, "isActual": None,"acquiredTime": None, "verifiedTime": None, "dataValue": None, "dataUnit": None, "dataSource": None, "dataLocation": None, "dataDatum": None, "latitude": None, "longitude": None}
-            insertionValueRow["generatedTime"] = input.timeGenerated
-            insertionValueRow["acquiredTime"] = now
-            insertionValueRow["verifiedTime"] = input.timeVerified
-            insertionValueRow["dataValue"] = input.dataValue
-            insertionValueRow["isActual"] = False if series.description.dataSeries[0] == 'p' else True
-            insertionValueRow["dataUnit"] = input.dataUnit
-            insertionValueRow["dataSource"] = series.description.dataSource
-            insertionValueRow["dataLocation"] = series.description.dataLocation
-            insertionValueRow["dataSeries"] = series.description.dataSeries
-            insertionValueRow["dataDatum"] = series.description.dataDatum
-            insertionValueRow["latitude"] = input.latitude
-            insertionValueRow["longitude"] = input.longitude
-            insertionRows.append(insertionValueRow)
+        for df_index, row in series.dataFrame.iterrows():
 
+            # We need to iterate over every value in dataValue if it is an ensemble
+            # but non ensemble inputs are just a single value so we convert them
+            # temporarily to a list to make the iteration easier
+            dataValues = row["dataValue"] if isEnsemble else [ row["dataValue"] ] 
+
+            for value_index, value in enumerate(dataValues):
+                new_row = {
+                    "generatedTime": series.dataFrame.iloc[df_index]['timeGenerated'], 
+                    "acquiredTime": now, 
+                    "verifiedTime": series.dataFrame.iloc[df_index]['timeVerified'], 
+                    "dataValue": value, 
+                    "isActual": False if series.description.dataSeries[0] == 'p' else True, 
+                    "dataUnit": series.dataFrame.iloc[df_index]['dataUnit'], 
+                    "dataSource": series.description.dataSource, 
+                    "dataLocation": series.description.dataLocation,
+                    "dataSeries": series.description.dataSeries, 
+                    "dataDatum": series.description.dataDatum, 
+                    "latitude": series.dataFrame.iloc[df_index]['latitude'], 
+                    "longitude": series.dataFrame.iloc[df_index]['longitude'],
+                    "ensembleMemberID": value_index if isEnsemble else None # Only set for ensemble inputs
+                }
+                insertionRows.append(new_row)          
+
+        # Insert the rows into the inputs table returning what is inserted as a sanity check
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.inputs)
                                     .on_conflict_do_nothing('inputs_AK00')
@@ -234,9 +248,10 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                                 )
             result = cursor.fetchall()
             conn.commit()
-
+        
+        # Create a series object to return with the inserted data
         resultSeries = Series(series.description, True, series.timeDescription)
-        resultSeries.data = self.__splice_input(result) #Turn tuple objects into actual objects
+        resultSeries.dataFrame = self.__splice_input(result) #Turn tuple objects into actual objects
         return resultSeries
     
     def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict | None]:
@@ -286,32 +301,45 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
 
-        insertionValueRows = []
-        for output in series.data:
-            insertionValueRow = {"timeGenerated": None, "leadTime": None, "modelName": None, "dataValue": None, "dataUnit": None, "dataLocation": None, "dataSeries": None, "dataDatum": None}
-            insertionValueRow["timeGenerated"] = output.timeGenerated
-            insertionValueRow["leadTime"] = output.leadTime
-            insertionValueRow["modelName"] = series.description.modelName
-            insertionValueRow["modelVersion"] = series.description.modelVersion
-            insertionValueRow["dataValue"] = output.dataValue
-            insertionValueRow["dataUnit"] = output.dataUnit
-            insertionValueRow["dataLocation"] = series.description.dataLocation
-            insertionValueRow["dataSeries"] = series.description.dataSeries
-            insertionValueRow["dataDatum"] = series.description.dataDatum
-            
-            insertionValueRows.append(insertionValueRow)
+        # If dataValue is a list its an ensemble
+        isEnsemble = isinstance(series.dataFrame['dataValue'].iloc[0], list) 
 
+        insertionRows = []
+        for df_index, row in series.dataFrame.iterrows():
+
+            # We need to iterate over every value in dataValue if it is an ensemble
+            # but non ensemble inputs are just a single value so we convert them
+            # temporarily to a list to make the iteration easier
+            dataValues = row["dataValue"] if isEnsemble else [ row["dataValue"] ] 
+
+            for value_index, value in enumerate(dataValues):
+                insertionValueRow = {
+                    "timeGenerated": series.dataFrame.iloc[df_index]['timeGenerated'], 
+                    "leadTime": series.dataFrame.iloc[df_index]['leadTime'], 
+                    "modelName": series.description.modelName, 
+                    "modelVersion": series.description.modelVersion, 
+                    "dataValue": value, 
+                    "dataUnit": series.dataFrame.iloc[df_index]['dataUnit'], 
+                    "dataLocation": series.description.dataLocation,
+                    "dataSeries": series.description.dataSeries, 
+                    "dataDatum": series.description.dataDatum, 
+                    "ensembleMemberID": value_index if isEnsemble else None # Only set for ensemble inputs
+                }
+                insertionRows.append(insertionValueRow)  
+
+        # Insert the rows into the outputs table returning what is inserted as a sanity check
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.outputs)
                                   .on_conflict_do_nothing('outputs_AK00')
                                   .returning(self.outputs)
-                                  .values(insertionValueRows)
+                                  .values(insertionRows)
                                   )
             result = cursor.fetchall()
             conn.commit()
 
+        # Create a series object to return with the inserted data
         resultSeries = Series(series.description, True, series.timeDescription)
-        resultSeries.data = self.__splice_output(result) #Turn tuple objects into actual objects
+        resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
         ids = [row[0] for row in result]
         return resultSeries, ids
 
@@ -369,6 +397,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             
             Column("latitude", String(16), nullable=True),
             Column("longitude", String(16), nullable=True),
+            Column("ensembleMemberID", Integer, nullable=True), # This is used to store ensemble data
             # UniqueConstraint is made __create_constraints method
         )
 
@@ -390,6 +419,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             Column("dataLocation", String(25), ForeignKey("ref_dataLocation.code"), nullable=False),   
             Column("dataSeries", String(25), ForeignKey("ref_dataSeries.code"), nullable=False),         
             Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"), nullable=True),
+            Column("ensembleMemberID", Integer, nullable=True), # This is used to store ensemble data
 
             # UniqueConstraint is made __create_constraints method
         )
@@ -503,50 +533,98 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         return result
 
-    def __splice_input(self, results: list[tuple]) -> list[Input]:
-        """An Input is a data value of some environment variable that can be linked to a date time.
+    def __splice_input(self, results: list[tuple]) -> DataFrame:
+        """ Converts DB rows to a proper input dataframe to be packed into a series.
+        This method also handles ensemble data by grouping them into single rows as expected by Semaphore.
         :param list[tupleish] -a list of selections from the table formatted in tupleish
+        :return: DataFrame - a dataframe with the data formatted for use in a series
         """
-        valueIndex = 4
-        unitIndex = 6
-        generatedTimeIndex = 1
-        verifiedTimeIndex = 3
-        latitudeIndex = 11
-        longitudeIndex = 12
 
-        dataPoints = []
-        for row in results:
-            dataPoints.append(Input(
-                row[valueIndex],
-                row[unitIndex],
-                row[verifiedTimeIndex],
-                row[generatedTimeIndex],
-                row[longitudeIndex],
-                row[latitudeIndex]
-            ))
+        # Convert returned DB rows into a dataframe to make manipulation easier 
+        df_results = pd.DataFrame(
+            data=results, 
+            columns=[   
+                "id", "generatedTime", "acquiredTime", "verifiedTime", "dataValue", 
+                "isActual", "dataUnit", "dataSource", "dataLocation", "dataSeries", 
+                "dataDatum", "latitude", "longitude", "ensembleMemberID"
+            ]
+        )
 
-        return dataPoints
+        # A formatted dataframe to place the spliced data 
+        df_out = get_input_dataFrame()
 
-    def __splice_output(self, results: list[tuple]) -> list[Output]:
-        """Splices up a list of DB results, pulling out only the data that changes per point,
-        and places them in a Prediction object.
+        # We have to post process the results as this could be ensemble data or not
+        # grouping by verifiedTime groups the data by time point
+        for _, group in df_results.groupby("verifiedTime"):
+
+            # ensembleMemberID is None if not an ensemble, so we check the first row of the group
+            firstRow = group.iloc[0]
+            isEnsemble = firstRow["ensembleMemberID"] is not None
+            
+            # If its an ensemble the dataValue is all the values sorted by there ID (to ensure correct order)
+            # If not an ensemble we just take the solitary dataValue
+            if isEnsemble:
+                group = group.sort_values(by=("ensembleMemberID"))
+                dataValues = group["dataValue"].to_list()
+            else:
+                dataValues = group["dataValue"].iloc[0]
+            
+            # Pack the data into the out dataframe
+            df_out.loc[len(df_out)] = [
+                dataValues,                   # dataValue
+                firstRow["dataUnit"],         # dataUnit
+                firstRow["verifiedTime"],     # timeVerified
+                firstRow["generatedTime"],    # timeGenerated
+                firstRow["longitude"],        # longitude
+                firstRow["latitude"]          # latitude
+            ]
+
+        return df_out
+
+
+    def __splice_output(self, results: list[tuple]) -> DataFrame:
+        """Converts DB row results into a proper output dataframe to be packed into a series.
         param: list[tupleish] - a list of selections from the table formatted in tupleish
+        returns: DataFrame - a dataframe with the data formatted for use in a series
         """
-        valueIndex = 5
-        unitIndex = 6
-        timeGeneratedIndex = 1
-        leadTimeIndex = 2
-        
-        dataPoints = []
-        for row in results:
-            dataPoints.append(Output(
-                row[valueIndex],
-                row[unitIndex],
-                row[timeGeneratedIndex],
-                row[leadTimeIndex]
-            ))
 
-        return dataPoints 
+        # Convert returned DB rows into a dataframe to make manipulation easier 
+        df_results = pd.DataFrame(
+            data=results, 
+            columns=[
+                "ID", "timeGenerated", "leadTime", "modelName", "modelVersion", "dataValue", 
+                "dataUnit", "dataLocation", "dataSeries", "dataDatum", "ensembleMemberID"
+            ]
+        )
+        
+        # A formatted dataframe to place the spliced data 
+        df_out = get_output_dataFrame()
+
+        # We have to post process the results as this could be ensemble data or not
+        # we group data with identical temporal information    
+        for _, group in df_results.groupby(["timeGenerated", "leadTime"]):
+    
+            firstRow = group.iloc[0]
+            isEnsemble = firstRow["ensembleMemberID"] is not None
+            
+            # If its an ensemble the dataValue is all the values sorted by there ID (to ensure correct order)
+            # If not an ensemble we just take the solitary dataValue
+            if isEnsemble:
+                group = group.sort_values(by=("modelName"))
+                dataValues = group["dataValue"].to_list()
+            else:
+                dataValues = group["dataValue"].iloc[0]
+            
+            # Pack the data into the out dataframe
+            df_out.loc[len(df_out)] = [
+                dataValues,                 # dataValue    
+                firstRow["dataUnit"],       # dataUnit
+                firstRow["timeGenerated"],  # timeGenerated
+                firstRow["leadTime"]        # leadTime
+            ]
+
+        return df_out
+
 
     def insert_lat_lon_test(self, code: str, displayName: str, notes: str, latitude: str, longitude: str):
         """This method inserts lat and lon information

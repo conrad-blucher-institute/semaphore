@@ -16,7 +16,7 @@ import numpy as np
 from datetime import datetime, timedelta
 
 from DataIntegrity.IDataIntegrity import IDataIntegrity
-from DataClasses import Series, Input
+from DataClasses import Series
 from utility import log
 
 
@@ -55,7 +55,7 @@ class AngleInterpolation(IDataIntegrity):
         dataIntegrityDescription = seriesDescription.dataIntegrityDescription
     
         # If there is only one Input (only one data point) then we do not interpolate
-        if(len(inSeries.data) <= 1):
+        if(len(inSeries.dataFrame) <= 1):
             log(f'''Interpolation error,
                 Reason: Only one Input found in series.
             ''')
@@ -69,7 +69,7 @@ class AngleInterpolation(IDataIntegrity):
         
         limit = timedelta(seconds = limit)
     
-        input_df = pd.DataFrame([input.__dict__ for input in inSeries.data])
+        input_df = inSeries.dataFrame
         
         input_df.set_index('timeVerified', inplace=True)
         
@@ -122,19 +122,11 @@ class AngleInterpolation(IDataIntegrity):
         # Forward-fill the remaining columns that are NaN.
         filled_input_df = filled_input_df.ffill()
 
-        inputs = [] 
-        for __, row in filled_input_df.iterrows():
-            inputs.append(Input(
-                dataValue=row["dataValue"],
-                dataUnit=row["dataUnit"],
-                timeGenerated=row["timeGenerated"],
-                timeVerified=row["timeVerified"],
-                longitude=row["longitude"],
-                latitude=row["latitude"]
-            ))
-    
+        # Reset the index on the DF
+        filled_input_df.reset_index(inplace=True)
+
         outSeries = Series(seriesDescription, True, timeDescription)
-        outSeries.data = inputs
+        outSeries.dataFrame = filled_input_df
 
         return outSeries
      
