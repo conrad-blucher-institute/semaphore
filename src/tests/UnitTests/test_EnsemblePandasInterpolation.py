@@ -83,7 +83,6 @@ def test_interpolate_series(dependent_series: list, timeDescription: TimeDescrip
         )
     )
 
-    print(inputs.to_string())
     
     inSeries = Series(description = seriesDescription, isComplete = False, timeDescription = timeDescription)
 
