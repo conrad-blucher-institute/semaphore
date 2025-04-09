@@ -1,9 +1,9 @@
 {
     "dspecVersion": "2.0",
-    "modelName": "MRE_Bird-Island_Water-Temperatue_78hr",
+    "modelName": "Bird-Island_Water-Temperature_78hr",
     "modelVersion": "1.0.0",
     "author": "Christian Duff",
-    "modelFileName": "./ColdStunning/MRE_Bird-Island_Water-Temperatue_78hr",
+    "modelFileName": "./ColdStunning/Bird-Island_Water-Temperature_78hr",
     "timingInfo": {
         "active": true,
         "offset": 1200,
@@ -60,9 +60,9 @@
             }
         },
         {
-            "_name": "Ensemble Air Temp",
+            "_name": "Predicted Air Temp",
             "location": "SBirdIsland",
-            "source": "TWC",
+            "source": "NDFD_EXP",
             "series": "pAirTemp",
             "unit": "celsius",
             "interval": 3600,

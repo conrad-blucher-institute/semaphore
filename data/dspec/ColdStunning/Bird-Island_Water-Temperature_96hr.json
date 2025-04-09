@@ -1,9 +1,9 @@
 {
     "dspecVersion": "2.0",
-    "modelName": "MRE_Bird-Island_Water-Temperatue_78hr",
+    "modelName": "Bird-Island_Water-Temperature_96hr",
     "modelVersion": "1.0.0",
     "author": "Christian Duff",
-    "modelFileName": "./ColdStunning/MRE_Bird-Island_Water-Temperatue_78hr",
+    "modelFileName": "./ColdStunning/Bird-Island_Water-Temperature_96hr",
     "timingInfo": {
         "active": true,
         "offset": 1200,
@@ -11,7 +11,7 @@
     },
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
-        "leadTime": 280800,
+        "leadTime": 345600,
         "series": "pWaterTmp",
         "location": "SouthBirdIsland",
         "unit": "celsius"
@@ -60,17 +60,17 @@
             }
         },
         {
-            "_name": "Ensemble Air Temp",
+            "_name": "Predicted Air Temp",
             "location": "SBirdIsland",
-            "source": "TWC",
+            "source": "NDFD_EXP",
             "series": "pAirTemp",
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                84,
+                102,
                 1
             ],
-            "outKey": "south-bird-island_predicted_air-temp_84",
+            "outKey": "south-bird-island_predicted_air-temp_102",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
@@ -92,11 +92,11 @@
             "dType": "float"
         },
         {
-            "key": "south-bird-island_predicted_air-temp_84",
+            "key": "south-bird-island_predicted_air-temp_102",
             "dType": "float",
             "indexes": [
                 0,
-                78
+                96
             ]
         }
     ]

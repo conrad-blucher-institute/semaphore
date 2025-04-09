@@ -62,7 +62,7 @@
         {
             "_name": "Ensemble Air Temp",
             "location": "SBirdIsland",
-            "source": "WEATHER_COMPANY",
+            "source": "TWC",
             "series": "pAirTemp",
             "unit": "celsius",
             "interval": 3600,
