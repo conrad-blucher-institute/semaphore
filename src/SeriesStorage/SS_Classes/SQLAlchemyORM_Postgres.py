@@ -216,16 +216,14 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         # If dataValue is a list its an ensemble
         isEnsemble = isinstance(series.dataFrame['dataValue'].iloc[0], list) 
-
         now = datetime.now()
         insertionRows = []
-        for df_index, row in series.dataFrame.iterrows():
 
+        for df_index, row in series.dataFrame.iterrows():
             # We need to iterate over every value in dataValue if it is an ensemble
             # but non ensemble inputs are just a single value so we convert them
             # temporarily to a list to make the iteration easier
             dataValues = row["dataValue"] if isEnsemble else [ row["dataValue"] ] 
-
             for value_index, value in enumerate(dataValues):
                 new_row = {
                     "generatedTime": series.dataFrame.iloc[df_index]['timeGenerated'], 
@@ -242,8 +240,8 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                     "longitude": series.dataFrame.iloc[df_index]['longitude'],
                     "ensembleMemberID": value_index if isEnsemble else None # Only set for ensemble inputs
                 }
-                insertionRows.append(new_row)          
-
+                insertionRows.append(new_row)         
+        
         # Insert the rows into the inputs table returning what is inserted as a sanity check
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.__metadata.tables['inputs'])
