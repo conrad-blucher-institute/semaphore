@@ -10,7 +10,7 @@ for HOUR in HOURs:
     dspec["modelName"] = f"MRE_Bird-Island_Water-Temperature_{HOUR}hr"
     dspec["modelVersion"] = "1.0.0"
     dspec["author"] = "Christian Duff"
-    dspec["modelFileName"] = f"./ColdStunning/MRE_Bird-Island_Water-Temperature_{HOUR}hr"
+    dspec["modelFileName"] = f"./ColdStunning/Bird-Island_Water-Temperature_{HOUR}hr"
 
     dspec['timingInfo'] = {
         "active": True,

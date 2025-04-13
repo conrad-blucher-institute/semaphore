@@ -78,7 +78,7 @@ class SeriesProvider():
         elif seriesDescription.dataIntegrityDescription is None:
             log(f'INFO:: Series is not complete and interpolation was not granted!')
             return validated_merged_results
-        
+        print(validated_merged_results.dataFrame.to_string())
         # If we are allowed to interpolate, we interpolate the data and return that
         # This does not guarantee all the data is there, but there is nothing more we can do.
         return self.__data_interpolation(seriesDescription, timeDescription, validated_merged_results)

@@ -3,7 +3,7 @@
     "modelName": "MRE_Bird-Island_Water-Temperature_60hr",
     "modelVersion": "1.0.0",
     "author": "Christian Duff",
-    "modelFileName": "./ColdStunning/MRE_Bird-Island_Water-Temperature_60hr",
+    "modelFileName": "./ColdStunning/Bird-Island_Water-Temperature_60hr",
     "timingInfo": {
         "active": true,
         "offset": 1200,
