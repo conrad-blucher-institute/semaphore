@@ -67,10 +67,10 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                66,
+                60,
                 1
             ],
-            "outKey": "ensemble-south-bird-island_predicted_air-temp_66",
+            "outKey": "ensemble-south-bird-island_predicted_air-temp_60",
             "dataIntegrityCall": {
                 "call": "EnsemblePandasInterpolation",
                 "args": {
@@ -92,7 +92,7 @@
             "dType": "float"
         },
         {
-            "key": "ensemble-south-bird-island_predicted_air-temp_66",
+            "key": "ensemble-south-bird-island_predicted_air-temp_60",
             "dType": "float",
             "indexes": [
                 0,

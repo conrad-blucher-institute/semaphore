@@ -87,8 +87,8 @@ class TWC(IDataIngestion):
         now = datetime.utcnow().replace(minute=0, second=0, microsecond=0)
         # if timeDescription.fromDateTime < now:
         #     raise Semaphore_Ingestion_Exception("ERROR: Requested time range starts in the past. Please provide a valid time range.")
-        # The number of hours we want to request {Integer 24 - 360}
-        num_hours = f'hours={int((timeDescription.toDateTime - timeDescription.fromDateTime).total_seconds() // 3600)}'
+        # The number of hours we want to request {Integer 24 - 360}, we add one to make it inclusive of both to and from time
+        num_hours = f'hours={int((timeDescription.toDateTime - timeDescription.fromDateTime).total_seconds() // 3600) + 1}'
 
         endpoint = f'https://api.weather.com/v3/wx/forecast/probabilistic?format=json&units=m&{num_hours}&{lat_lon}&{num_proto}&{api_permission}'
         return endpoint
