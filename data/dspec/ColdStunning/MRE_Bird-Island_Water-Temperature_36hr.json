@@ -1,17 +1,17 @@
 {
     "dspecVersion": "2.0",
-    "modelName": "MRE_Bird-Island_Water-Temperatue_12hr",
+    "modelName": "MRE_Bird-Island_Water-Temperature_36hr",
     "modelVersion": "1.0.0",
     "author": "Christian Duff",
-    "modelFileName": "./ColdStunning/MRE_Bird-Island_Water-Temperatue_12hr",
+    "modelFileName": "./ColdStunning/MRE_Bird-Island_Water-Temperature_36hr",
     "timingInfo": {
         "active": true,
         "offset": 1200,
         "interval": 3600
     },
     "outputInfo": {
-        "outputMethod": "OnePackedFloat",
-        "leadTime": 43200,
+        "outputMethod": "MultiPackedFloat",
+        "leadTime": 129600,
         "series": "pWaterTmp",
         "location": "SouthBirdIsland",
         "unit": "celsius"
@@ -67,12 +67,12 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                18,
+                42,
                 1
             ],
-            "outKey": "south-bird-island_predicted_air-temp_18",
+            "outKey": "ensemble-south-bird-island_predicted_air-temp_42",
             "dataIntegrityCall": {
-                "call": "PandasInterpolation",
+                "call": "EnsemblePandasInterpolation",
                 "args": {
                     "limit": "21600",
                     "method": "linear",
@@ -92,12 +92,14 @@
             "dType": "float"
         },
         {
-            "key": "south-bird-island_predicted_air-temp_18",
+            "key": "ensemble-south-bird-island_predicted_air-temp_42",
             "dType": "float",
             "indexes": [
                 0,
-                12
-            ]
+                36
+            ],
+            "isMultipliedKey": true,
+            "ensembleMemberCount": 100
         }
     ]
 }
