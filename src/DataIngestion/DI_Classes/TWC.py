@@ -85,8 +85,9 @@ class TWC(IDataIngestion):
 
         # Ensure the requested time range is not in the past
         now = datetime.utcnow().replace(minute=0, second=0, microsecond=0)
-        # if timeDescription.fromDateTime < now:
-        #     raise Semaphore_Ingestion_Exception("ERROR: Requested time range starts in the past. Please provide a valid time range.")
+        if timeDescription.fromDateTime < now:
+            raise Semaphore_Ingestion_Exception("ERROR: Requested time range starts in the past. Please provide a valid time range.")
+        
         # The number of hours we want to request {Integer 24 - 360}, we add one to make it inclusive of both to and from time
         num_hours = f'hours={int((timeDescription.toDateTime - timeDescription.fromDateTime).total_seconds() // 3600) + 1}'
 
