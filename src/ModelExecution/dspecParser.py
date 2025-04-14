@@ -20,7 +20,8 @@ from json import load
 
 
 class DSPEC_Parser:
-    def __init__(self, fPath: str) -> None:
+
+    def parse_dspec(self, fPath: str) -> 'Dspec':
 
         if not exists(fPath):
             print(f'{fPath} not found!')
@@ -31,8 +32,6 @@ class DSPEC_Parser:
             dspec_json = load(dspecFile)
             self.__dspec_version = dspec_json.get('dspecVersion', '1.0')
             self.__dspec_json = dspec_json
-
-    def parse_dspec(self) -> 'Dspec':
         
         match self.__dspec_version:
             case '1.0':
@@ -110,6 +109,9 @@ class dspec_sub_Parser_1_0:
             keys = []
             types = []
             indexes = []
+            multipliedKeys = []
+            ensembleMemberCount = []
+            
             for idx, inputJson in enumerate(inputsJson):
                 dseries = DependentSeries()
                 dseries.name = inputJson["_name"]
@@ -129,6 +131,7 @@ class dspec_sub_Parser_1_0:
                 types.append(inputJson["type"])
                 keys.append(str(idx))
                 indexes.append((None, None))
+                
 
                 dependentSeriesList.append(dseries)
             # Bind to dspec
@@ -138,6 +141,8 @@ class dspec_sub_Parser_1_0:
             vOrder.keys = keys
             vOrder.dTypes = types
             vOrder.indexes = indexes
+            vOrder.multipliedKeys = []
+            vOrder.ensembleMemberCount = 1
             self.__dspec.orderedVector = vOrder
 
 
@@ -244,21 +249,39 @@ class dspec_sub_Parser_2_0:
         keys = []
         dTypes = []
         indexes = []
+        multipliedKeys = []
+        ensembleMemberCount = []             
+        
         for dict in vOrder:
             keys.append(dict['key'])
             dTypes.append(dict['dType'])
             
             index: list[int] | None  = dict.get('indexes')
 
-            # If there was no index object we will use None None to index the whole series
+            # If there is no index object we will use None None to index the whole series
             if index is None: indexes.append((None, None))
             else: indexes.append(tuple(index))
+            
+            # Parsing for multiplied keys (AKA. Ensemble data)
+            isMultipliedKey: bool = dict.get("isMultipliedKey", False) 
+            if isMultipliedKey:
+                multipliedKeys.append(dict['key']) 
+                ensembleMember: int | None = dict.get("ensembleMemberCount", None) 
+                if ensembleMemberCount is not None: ensembleMemberCount.append(ensembleMember)  
 
+        # Throw parsing errors if the multiplied keys and ensemble member are not configured correctly
+        if len(multipliedKeys) > 1:                         raise ValueError("DSPEC Parsing Error: More than one key has been marked multiplied. This is not supported by the current implementation!")
+        if len(ensembleMemberCount) > 1:                    raise ValueError("DSPEC Parsing Error: More than one ensembleMemberCount has been detected. This is not supported by the current implementation!")
+        if len(multipliedKeys) != len(ensembleMemberCount): raise ValueError("DSPEC Parsing Error: If there is a multiplied key there should be 1 and only 1 ensembleMemberCount!")
+        
         vectorOrder = VectorOrder()
         vectorOrder.keys = keys
         vectorOrder.dTypes = dTypes
         vectorOrder.indexes = indexes
+        vectorOrder.multipliedKeys = multipliedKeys
+        vectorOrder.ensembleMemberCount = 1 if len(ensembleMemberCount) <= 0 else ensembleMemberCount[0]
         self.__dspec.orderedVector = vectorOrder
+        
 
             
 class Dspec:
@@ -350,12 +373,14 @@ class VectorOrder:
         self.keys = []
         self.dTypes = []
         self.indexes = []
+        self.multipliedKeys = []
+        self.ensembleMemberCount = None
 
     def __str__(self) -> str:
-        return f'\n[VectorOrder] -> keys: {self.keys}, dTypes: {self.dTypes}, indexes: {self.indexes}'
+        return f'\n[VectorOrder] -> keys: {self.keys}, dTypes: {self.dTypes}, indexes: {self.indexes}, multipliedKeys: {self.multipliedKeys}, ensembleMemberCount: {self.ensembleMemberCount}'
     
     def __repr__(self):
-        return f'\nVectorOrder({self.keys}, {self.dTypes}, {self.indexes})'
+        return f'\nVectorOrder({self.keys}, {self.dTypes}, {self.indexes}, {self.multipliedKeys}, {self.ensembleMemberCount})'
     
 
 class TimingInfo:
@@ -370,5 +395,6 @@ class TimingInfo:
     
     def __repr__(self):
         return f'\nTimingInfo({self.offset},{self.interval})'
+    
     
     

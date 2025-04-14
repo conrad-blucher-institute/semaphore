@@ -13,28 +13,35 @@ and initiates the saving process.
 # 
 #
 #Imports
-from DataClasses import Output
+from DataClasses import get_output_dataFrame
 from ModelExecution.IOutputHandler import IOutputHandler
 from ..dspecParser import Dspec
 
 from datetime import datetime, timedelta
+from pandas import DataFrame
 
 class OnePackedFloat(IOutputHandler):
 
 
-    def post_process_prediction(self, predictions: list[any], dspec: Dspec, referenceTime: datetime) -> list[Output]:
+    def post_process_prediction(self, predictions: list[any], dspec: Dspec, referenceTime: datetime) -> DataFrame:
         """Unpacks the prediction value before saving them to the db
         Parameters:
             prediction: list[]
             dspec: Dspec
         Returns:
-            The Response from the series provider 
+           DataFrame
         """
-        outputs =[]
-        for prediction in predictions:
-            outputs.append(Output(str(self.__unpack(prediction)), dspec.outputInfo.unit, referenceTime, timedelta(seconds=dspec.outputInfo.leadTime)))
 
-        return outputs
+
+        df = get_output_dataFrame()
+        df.loc[0] = [
+            str(self.__unpack(predictions)),                # dataValue
+            dspec.outputInfo.unit,                          # dataUnit
+            referenceTime,                                  # timeGenerated
+            timedelta(seconds=dspec.outputInfo.leadTime)    # leadtime
+        ]
+
+        return df
     
     def __unpack(self, packedValue: any) -> any:
         """Flattens any dimensions of array and indexes and returns the first time, unpacking it.

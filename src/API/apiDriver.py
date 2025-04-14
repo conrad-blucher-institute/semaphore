@@ -33,19 +33,12 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     Retrieves input series object
 
     Args:
-
         - `source` (string): The data's source (e.g. "noaaT&C")
-
         - `series` (string): The series name (e.g. "dXWnCmp")
-
         - `location` (string): The location of the data (e.g. "packChan")
-
         - `fromDateTime` (string): "YYYYMMDDHH" Date to start at
-
         - `toDateTime` (string): "YYYYMMDDHH" Date to end at
-
         - `datum` (string): Optional
-
         - `interval` (int): Optional. The time step separating the data points in seconds (e.g. 3600 for hourly)
 
     Returns:
@@ -80,8 +73,7 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     responseSeries = provider.request_input(requestDescription, timeDescription, saveIngestion=False)
 
     # Protect the API's JSON ENCODER from freaking out about floats sneaking from the ingestion class
-    for value in responseSeries.data:
-        value.dataValue = str(value.dataValue)
+    responseSeries.dataFrame['dataValue'] = responseSeries.dataFrame['dataValue'].astype(str)
 
     return serialize_series(responseSeries)
 
@@ -137,21 +129,13 @@ async def get_output(modelName: str, modelVersion: str, series: str, location: s
     Retrieves output series object
 
     Args:
-
         - `modelName` (string): The name of the model (e.g. "test AI")
-
         - `modelVersion` (string): The version of the model (e.g. "1.0.0")
-
         - `series` (string): The series name (e.g. "waterHeight")
-
         - `location` (string): The location of the data (e.g. "packChan")
-
         - `fromDateTime` (string): "YYYYMMDDHH" Date to start at
-
         - `toDateTime` (string): "YYYYMMDDHH" Date to end at
-
         - `datum` (string): Optional
-
         - `interval` (int): Optional. The time step separating the data points in seconds (e.g. 3600 for hourly)
 
     Returns:

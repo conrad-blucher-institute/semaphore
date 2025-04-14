@@ -12,7 +12,7 @@
 #
 #Input
 from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataClasses import Series, SeriesDescription, Input, TimeDescription
+from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
 
@@ -20,6 +20,7 @@ from datetime import datetime
 from urllib.error import HTTPError
 from urllib.request import urlopen
 import json
+from pandas import DataFrame
 
 
 class LIGHTHOUSE(IDataIngestion):
@@ -113,35 +114,39 @@ class LIGHTHOUSE(IDataIngestion):
         ### Convert data to a list of inputs
         dataValueIndex = 1
         dataTimestampIndex = 0
-        inputs = []
+        df = get_input_dataFrame()
         for dataPoint in data:
-            if(dataPoint[dataValueIndex] != None): # If lighthouse does not have a requested value, it will return None
-                
-                #Filter data via interval if one was provided
-                # Lighthouse returns epoch time in milliseconds
-                epochTimeStamp = dataPoint[dataTimestampIndex]/1000
-                if timeDescription.interval != None:
-                    if epochTimeStamp % timeDescription.interval.total_seconds() != 0:
-                        continue    
+            if(dataPoint[dataValueIndex] == None): # If lighthouse does not have a requested value, it will return None
+                continue
+            
+            #Filter data via interval if one was provided
+            # Lighthouse returns epoch time in milliseconds
+            epochTimeStamp = dataPoint[dataTimestampIndex]/1000
+            if timeDescription.interval != None:
+                if epochTimeStamp % timeDescription.interval.total_seconds() != 0:
+                    continue    
 
-                # Lighthouse over returns data, so we just clip any data that is before or after our requested date range.
-                if epochTimeStamp > timeDescription.toDateTime.timestamp() or epochTimeStamp < timeDescription.fromDateTime.timestamp():
-                    continue
+            # Lighthouse over returns data, so we just clip any data that is before or after our requested date range.
+            if epochTimeStamp > timeDescription.toDateTime.timestamp() or epochTimeStamp < timeDescription.fromDateTime.timestamp():
+                continue
 
-                dt = datetime.utcfromtimestamp(epochTimeStamp)
-                inputs.append(Input(
-                    dataPoint[dataValueIndex],
-                    seriesInfoMap[SIMSeriesUnitIndex],
-                    dt, # Validation time and generated time are the same as these are data points
-                    dt,
-                    lon,
-                    lat
-                ))
+            dt = datetime.utcfromtimestamp(epochTimeStamp)
 
-        if(len(inputs) > 0):
+            df.loc[len(df)] = [
+                dataPoint[dataValueIndex],          # dataValue
+                seriesInfoMap[SIMSeriesUnitIndex],  # dataUnit
+                dt,                                 # timeVerified
+                dt,                                 # timeGenerated
+                lon,                                # longitude
+                lat                                 # latitude
+            ]
+
+        if(len(df) > 0):
+            df['dataValue'] = df['dataValue'].astype(str)
+
             ### Build Series, return data
             resultSeries = Series(seriesDescription, timeDescription)
-            resultSeries.data = inputs
+            resultSeries.dataFrame = df
             return resultSeries
         else:
             log("Lighthouse returned no non null inputs")

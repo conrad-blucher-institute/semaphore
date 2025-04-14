@@ -17,11 +17,14 @@ from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
 from os import getenv
 from datetime import timedelta, datetime
+import pandas as pd
+from pandas import DataFrame
 
 from SeriesStorage.ISeriesStorage import ISeriesStorage
 
-from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, Input, Output, TimeDescription
+from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, TimeDescription, get_input_dataFrame, get_output_dataFrame
 from utility import log
+
 
 class SQLAlchemyORM_Postgres(ISeriesStorage):
  
@@ -29,8 +32,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """Constructor generates an a db schema. Automatically creates the 
         metadata object holding the defined schema.
         """
-        self.__create_schema()
         self.__create_engine(getenv('DB_LOCATION_STRING'), False)
+        self.__metadata = MetaData()
+        self.__metadata.reflect(bind=self.__get_engine())
 
     #############################################################################################
     ################################################################################## Public methods
@@ -41,27 +45,27 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param seriesDescription: SeriesDescription - A series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
-
-        statement = (select(self.inputs)
-            .where(self.inputs.c.dataSource == seriesDescription.dataSource)
-            .where(self.inputs.c.dataLocation == seriesDescription.dataLocation)
-            .where(self.inputs.c.dataSeries == seriesDescription.dataSeries)
-            .where(self.inputs.c.dataDatum == seriesDescription.dataDatum)
-            .where(self.inputs.c.verifiedTime >= timeDescription.fromDateTime)
-            .where(self.inputs.c.verifiedTime <= timeDescription.toDateTime)
+        inputTable = self.__metadata.tables['inputs']
+        statement = (select(inputTable)
+            .where(inputTable.c.dataSource == seriesDescription.dataSource)
+            .where(inputTable.c.dataLocation == seriesDescription.dataLocation)
+            .where(inputTable.c.dataSeries == seriesDescription.dataSeries)
+            .where(inputTable.c.dataDatum == seriesDescription.dataDatum)
+            .where(inputTable.c.verifiedTime >= timeDescription.fromDateTime)
+            .where(inputTable.c.verifiedTime <= timeDescription.toDateTime)
             )
         tupleishResult = self.__dbSelection(statement).fetchall()
-        inputResult = self.__splice_input(tupleishResult)
-
-        # If an interval was provided, we will mod each verified time against it
-        # any that fail we remove
+        df_inputResult = self.__splice_input(tupleishResult)
+        
+        # Prune the results removing any data that does not align with the interval that was requested
+        df_prunedInputs = df_inputResult.copy(deep=True)
         if timeDescription.interval != None and timeDescription.interval.total_seconds() != 0:
-            for input in inputResult:
-                if not (input.timeVerified.timestamp() % timeDescription.interval.total_seconds() == 0):
-                    inputResult.remove(input)
+            for i in range(len(df_inputResult)):
+                if not (df_inputResult.iloc[i]['timeVerified'].timestamp() % timeDescription.interval.total_seconds() == 0):
+                    df_prunedInputs.drop(i, inplace=True)
 
         series = Series(seriesDescription, True, timeDescription)
-        series.data = inputResult
+        series.dataFrame = df_prunedInputs
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
@@ -73,12 +77,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         series = Series(semaphoreSeriesDescription, True, timeDescription)
         
 
+        outputTable = self.__metadata.tables['outputs']
         #Get the lead time for time calculations
-        statement = (select(distinct(self.outputs.c.leadTime))
-                    .where(self.outputs.c.dataLocation == semaphoreSeriesDescription.dataLocation)
-                    .where(self.outputs.c.dataSeries == semaphoreSeriesDescription.dataSeries)
-                    .where(self.outputs.c.dataDatum == semaphoreSeriesDescription.dataDatum)
-                    .where(self.outputs.c.modelName == semaphoreSeriesDescription.modelName)
+        statement = (select(distinct(outputTable.c.leadTime))
+                    .where(outputTable.c.dataLocation == semaphoreSeriesDescription.dataLocation)
+                    .where(outputTable.c.dataSeries == semaphoreSeriesDescription.dataSeries)
+                    .where(outputTable.c.dataDatum == semaphoreSeriesDescription.dataDatum)
+                    .where(outputTable.c.modelName == semaphoreSeriesDescription.modelName)
                     )
         leadTimes = self.__dbSelection(statement).fetchall()
         if len(self.__dbSelection(statement).fetchall()) == 0: #If no lead time is found for some reason return nothing and log this
@@ -89,17 +94,16 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         fromGeneratedTime = timeDescription.fromDateTime - leadTime[0]
         toGeneratedTime = timeDescription.toDateTime - leadTime[0]
          
-        statement = (select(self.outputs)
-                    .where(self.outputs.c.modelName == semaphoreSeriesDescription.modelName)
-                    .where(self.outputs.c.dataLocation == semaphoreSeriesDescription.dataLocation)
-                    .where(self.outputs.c.dataSeries == semaphoreSeriesDescription.dataSeries)
-                    .where(self.outputs.c.dataDatum == semaphoreSeriesDescription.dataDatum)
-                    .where(self.outputs.c.timeGenerated >= fromGeneratedTime)
-                    .where(self.outputs.c.timeGenerated <= toGeneratedTime)
+        statement = (select(outputTable)
+                    .where(outputTable.c.modelName == semaphoreSeriesDescription.modelName)
+                    .where(outputTable.c.dataLocation == semaphoreSeriesDescription.dataLocation)
+                    .where(outputTable.c.dataSeries == semaphoreSeriesDescription.dataSeries)
+                    .where(outputTable.c.dataDatum == semaphoreSeriesDescription.dataDatum)
+                    .where(outputTable.c.timeGenerated >= fromGeneratedTime)
+                    .where(outputTable.c.timeGenerated <= toGeneratedTime)
                     )
         tupleishResult = self.__dbSelection(statement).fetchall()
-        outputResult = self.__splice_output(tupleishResult)
-        series.data = outputResult
+        series.dataFrame = self.__splice_output(tupleishResult)
         return series
     
 
@@ -114,10 +118,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # Because we are inferring model information
         # We select the latest version of the model under that name
         # and the lead time from its latest prediction
-        statement = (select(self.outputs.c.leadTime)
-                    .where(self.outputs.c.modelName == model_name)
-                    .order_by(self.outputs.c.modelVersion.desc())
-                    .order_by(self.outputs.c.timeGenerated.desc())
+        outputTable = self.__metadata.tables['outputs']
+        statement = (select(outputTable.c.leadTime)
+                    .where(outputTable.c.modelName == model_name)
+                    .order_by(outputTable.c.modelVersion.desc())
+                    .order_by(outputTable.c.timeGenerated.desc())
                     )
         leadTimes = self.__dbSelection(statement).fetchall()
         if len(self.__dbSelection(statement).fetchall()) == 0: #If no lead time is found for some reason return nothing and log this
@@ -128,10 +133,10 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         fromGeneratedTime = from_time - leadTime[0]
         toGeneratedTime = to_time - leadTime[0]
          
-        statement = (select(self.outputs)
-                    .where(self.outputs.c.modelName == model_name)
-                    .where(self.outputs.c.timeGenerated >= fromGeneratedTime)
-                    .where(self.outputs.c.timeGenerated <= toGeneratedTime)
+        statement = (select(outputTable)
+                    .where(outputTable.c.modelName == model_name)
+                    .where(outputTable.c.timeGenerated >= fromGeneratedTime)
+                    .where(outputTable.c.timeGenerated <= toGeneratedTime)
                     )
         tupleishResult = self.__dbSelection(statement).fetchall()
 
@@ -143,7 +148,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # Parse out model information from first output result
         description = SemaphoreSeriesDescription(tupleishResult[0][3], tupleishResult[0][4], tupleishResult[0][8], tupleishResult[0][7], tupleishResult[0][6])
         series = Series(description, False)
-        series.data = outputResult
+        series.dataFrame = outputResult
         return series
     
 
@@ -153,23 +158,23 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
             NOTE:: Things like model version and time will just be the latest in the DB
         '''        
-
-        statement = (select(self.outputs)
-                    .where(self.outputs.c.modelName == model_name)
-                    .order_by(self.outputs.c.modelVersion.desc())
-                    .order_by(self.outputs.c.timeGenerated.desc())
+        outputTable = self.__metadata.tables['outputs']
+        statement = (select(outputTable)
+                    .where(outputTable.c.modelName == model_name)
+                    .order_by(outputTable.c.modelVersion.desc())
+                    .order_by(outputTable.c.timeGenerated.desc())
                     )
         tupleishResult = self.__dbSelection(statement).first() # because of order this should be latest
 
         if not tupleishResult: # If there are no results, no model information can't be inferred 
             return None    
 
-        outputResult = self.__splice_output([tupleishResult])
+        outputResult = self.__splice_output([tupleishResult]) # Splice output expects a list of tuples
 
         # Parse out model information from first output result
         description = SemaphoreSeriesDescription(tupleishResult[3], tupleishResult[4], tupleishResult[8], tupleishResult[7], tupleishResult[6])
         series = Series(description, False)
-        series.data = outputResult
+        series.dataFrame = outputResult
         return series
     
     def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
@@ -178,10 +183,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param location: str - the local location name 
            :param priorityOrder: int - priority of which locations to go to if one is unavailable 
         """
-        statement = (select(self.dataLocation_dataSource_mapping.c.dataSourceLocationCode)
-                     .where(self.dataLocation_dataSource_mapping.c.dataSourceCode == sourceCode)
-                     .where(self.dataLocation_dataSource_mapping.c.dataLocationCode == location)
-                     .where(self.dataLocation_dataSource_mapping.c.priorityOrder == priorityOrder)
+        dataLocation_dataSource_mapping = self.__metadata.tables['dataLocation_dataSource_mapping']
+        statement = (select(dataLocation_dataSource_mapping.c.dataSourceLocationCode)
+                     .where(dataLocation_dataSource_mapping.c.dataSourceCode == sourceCode)
+                     .where(dataLocation_dataSource_mapping.c.dataLocationCode == location)
+                     .where(dataLocation_dataSource_mapping.c.priorityOrder == priorityOrder)
                     )
         dataSourceLocationCode = self.__dbSelection(statement).fetchall()[0]
         return dataSourceLocationCode[0]
@@ -192,8 +198,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param location: str - the local location name 
            :param priorityOrder: int - priority of which locations to go to if one is unavailable 
         """
-        statement = (select(self.ref_dataLocation.c.latitude, self.ref_dataLocation.c.longitude)
-                     .where(self.ref_dataLocation.c.code == locationCode)
+        ref_dataLocationTable = self.__metadata.tables['ref_dataLocation']
+        statement = (select(ref_dataLocationTable.c.latitude, ref_dataLocationTable.c.longitude)
+                     .where(ref_dataLocationTable.c.code == locationCode)
                     )
         latLon = self.__dbSelection(statement).first()
         return (latLon[0], latLon[1])
@@ -207,36 +214,47 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         if(type(series.description).__name__ != 'SeriesDescription'): raise ValueError('Description should be type SeriesDescription')
 
-     #  Construct DB row to insert
+        # If dataValue is a list its an ensemble
+        isEnsemble = isinstance(series.dataFrame['dataValue'].iloc[0], list) 
         now = datetime.now()
         insertionRows = []
-        for input in series.data:
-            insertionValueRow = {"isActual": None, "generatedTime": None, "isActual": None,"acquiredTime": None, "verifiedTime": None, "dataValue": None, "dataUnit": None, "dataSource": None, "dataLocation": None, "dataDatum": None, "latitude": None, "longitude": None}
-            insertionValueRow["generatedTime"] = input.timeGenerated
-            insertionValueRow["acquiredTime"] = now
-            insertionValueRow["verifiedTime"] = input.timeVerified
-            insertionValueRow["dataValue"] = input.dataValue
-            insertionValueRow["isActual"] = False if series.description.dataSeries[0] == 'p' else True
-            insertionValueRow["dataUnit"] = input.dataUnit
-            insertionValueRow["dataSource"] = series.description.dataSource
-            insertionValueRow["dataLocation"] = series.description.dataLocation
-            insertionValueRow["dataSeries"] = series.description.dataSeries
-            insertionValueRow["dataDatum"] = series.description.dataDatum
-            insertionValueRow["latitude"] = input.latitude
-            insertionValueRow["longitude"] = input.longitude
-            insertionRows.append(insertionValueRow)
 
+        for df_index, row in series.dataFrame.iterrows():
+            # We need to iterate over every value in dataValue if it is an ensemble
+            # but non ensemble inputs are just a single value so we convert them
+            # temporarily to a list to make the iteration easier
+            dataValues = row["dataValue"] if isEnsemble else [ row["dataValue"] ] 
+            for value_index, value in enumerate(dataValues):
+                new_row = {
+                    "generatedTime": series.dataFrame.iloc[df_index]['timeGenerated'], 
+                    "acquiredTime": now, 
+                    "verifiedTime": series.dataFrame.iloc[df_index]['timeVerified'], 
+                    "dataValue": value, 
+                    "isActual": False if series.description.dataSeries[0] == 'p' else True, 
+                    "dataUnit": series.dataFrame.iloc[df_index]['dataUnit'], 
+                    "dataSource": series.description.dataSource, 
+                    "dataLocation": series.description.dataLocation,
+                    "dataSeries": series.description.dataSeries, 
+                    "dataDatum": series.description.dataDatum, 
+                    "latitude": series.dataFrame.iloc[df_index]['latitude'], 
+                    "longitude": series.dataFrame.iloc[df_index]['longitude'],
+                    "ensembleMemberID": value_index if isEnsemble else None # Only set for ensemble inputs
+                }
+                insertionRows.append(new_row)         
+        
+        # Insert the rows into the inputs table returning what is inserted as a sanity check
         with self.__get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.inputs)
+            cursor = conn.execute(insert(self.__metadata.tables['inputs'])
                                     .on_conflict_do_nothing('inputs_AK00')
-                                    .returning(self.inputs)
+                                    .returning(self.__metadata.tables['inputs'])
                                     .values(insertionRows)
                                 )
             result = cursor.fetchall()
             conn.commit()
-
+        
+        # Create a series object to return with the inserted data
         resultSeries = Series(series.description, True, series.timeDescription)
-        resultSeries.data = self.__splice_input(result) #Turn tuple objects into actual objects
+        resultSeries.dataFrame = self.__splice_input(result) #Turn tuple objects into actual objects
         return resultSeries
     
     def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict | None]:
@@ -264,9 +282,10 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             model_run_row["returnCode"] = return_code
             model_run_rows.append(model_run_row)
 
+        model_runs = self.__metadata.tables['model_runs']
         with self.__get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.model_runs)
-                                  .returning(self.model_runs)
+            cursor = conn.execute(insert(model_runs)
+                                  .returning(model_runs)
                                   .values(model_run_rows)
                                   )
             model_run_result = cursor.fetchall()
@@ -286,32 +305,46 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
 
-        insertionValueRows = []
-        for output in series.data:
-            insertionValueRow = {"timeGenerated": None, "leadTime": None, "modelName": None, "dataValue": None, "dataUnit": None, "dataLocation": None, "dataSeries": None, "dataDatum": None}
-            insertionValueRow["timeGenerated"] = output.timeGenerated
-            insertionValueRow["leadTime"] = output.leadTime
-            insertionValueRow["modelName"] = series.description.modelName
-            insertionValueRow["modelVersion"] = series.description.modelVersion
-            insertionValueRow["dataValue"] = output.dataValue
-            insertionValueRow["dataUnit"] = output.dataUnit
-            insertionValueRow["dataLocation"] = series.description.dataLocation
-            insertionValueRow["dataSeries"] = series.description.dataSeries
-            insertionValueRow["dataDatum"] = series.description.dataDatum
-            
-            insertionValueRows.append(insertionValueRow)
+        # If dataValue is a list its an ensemble
+        isEnsemble = isinstance(series.dataFrame['dataValue'].iloc[0], list) 
 
+        insertionRows = []
+        for df_index, row in series.dataFrame.iterrows():
+
+            # We need to iterate over every value in dataValue if it is an ensemble
+            # but non ensemble inputs are just a single value so we convert them
+            # temporarily to a list to make the iteration easier
+            dataValues = row["dataValue"] if isEnsemble else [ row["dataValue"] ] 
+
+            for value_index, value in enumerate(dataValues):
+                insertionValueRow = {
+                    "timeGenerated": series.dataFrame.iloc[df_index]['timeGenerated'], 
+                    "leadTime": series.dataFrame.iloc[df_index]['leadTime'], 
+                    "modelName": series.description.modelName, 
+                    "modelVersion": series.description.modelVersion, 
+                    "dataValue": value, 
+                    "dataUnit": series.dataFrame.iloc[df_index]['dataUnit'], 
+                    "dataLocation": series.description.dataLocation,
+                    "dataSeries": series.description.dataSeries, 
+                    "dataDatum": series.description.dataDatum, 
+                    "ensembleMemberID": value_index if isEnsemble else None # Only set for ensemble inputs
+                }
+                insertionRows.append(insertionValueRow)  
+
+        # Insert the rows into the outputs table returning what is inserted as a sanity check
+        outputTable = self.__metadata.tables['outputs']
         with self.__get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.outputs)
+            cursor = conn.execute(insert(outputTable)
                                   .on_conflict_do_nothing('outputs_AK00')
-                                  .returning(self.outputs)
-                                  .values(insertionValueRows)
+                                  .returning(outputTable)
+                                  .values(insertionRows)
                                   )
             result = cursor.fetchall()
             conn.commit()
 
+        # Create a series object to return with the inserted data
         resultSeries = Series(series.description, True, series.timeDescription)
-        resultSeries.data = self.__splice_output(result) #Turn tuple objects into actual objects
+        resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
         ids = [row[0] for row in result]
         return resultSeries, ids
 
@@ -339,153 +372,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         else:
             return self._engine
 
-    def __create_schema(self) -> None:
-        """Builds the db schema in the metadata.
-        """
-
-        self._metadata = MetaData()
-        
-        #this table stores the actual data values as retrieved or received 
-        self.inputs = Table(
-            "inputs",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
-
-            Column("generatedTime", DateTime, nullable=True),
-            Column("acquiredTime", DateTime, nullable=False),
-            Column("verifiedTime", DateTime, nullable=False), 
-
-            Column("dataValue", String(25), nullable=False), 
-
-            Column("isActual", Boolean, nullable=False),
-
-            Column("dataUnit", String(10), ForeignKey("ref_dataUnit.code"), nullable=False),  
-            
-            Column("dataSource", String(10), ForeignKey("ref_dataSource.code"), nullable=False),
-            Column("dataLocation", String(25), ForeignKey("ref_dataLocation.code"), nullable=False), 
-            Column("dataSeries", String(25), ForeignKey("ref_dataSeries.code"), nullable=False), 
-            Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"),  nullable=True),
-            
-            Column("latitude", String(16), nullable=True),
-            Column("longitude", String(16), nullable=True),
-            # UniqueConstraint is made __create_constraints method
-        )
-
-        
-        self.outputs = Table(
-            "outputs",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
-            
-            Column("timeGenerated", DateTime, nullable=False),
-
-            Column("leadTime", Interval, nullable=False),
-
-            Column("modelName", String(25), nullable=False), 
-            Column("modelVersion", String(10), nullable=False),
-            Column("dataValue", String(25), nullable=False), 
-            Column("dataUnit", String(10), ForeignKey("ref_dataUnit.code"), nullable=False), 
-            Column("dataLocation", String(25), ForeignKey("ref_dataLocation.code"), nullable=False),   
-            Column("dataSeries", String(25), ForeignKey("ref_dataSeries.code"), nullable=False),         
-            Column("dataDatum", String(10), ForeignKey("ref_dataDatum.code"), nullable=True),
-
-            # UniqueConstraint is made __create_constraints method
-        )
-
-        self.model_runs = Table(
-            "model_runs",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
-            Column("outputID", Integer, ForeignKey("outputs.id"),nullable=False),  
-            Column("executionTime", DateTime, nullable=False), 
-            Column("returnCode", Integer, nullable=False),                                                               
-
-            UniqueConstraint("outputID", name='model_runs_AK00'),
-        )
-
-        #This table maps CBI location codes to location codes used by datasorces
-        self.dataLocation_dataSource_mapping = Table(
-            "dataLocation_dataSource_mapping",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
-            
-            Column("dataLocationCode", String(25), ForeignKey("ref_dataLocation.code"),nullable=False),  
-            Column("dataSourceCode", String(10), ForeignKey("ref_dataSource.code"), nullable=False), 
-            Column("dataSourceLocationCode", String(255), nullable=False),                            
-            Column("priorityOrder", Integer, nullable=False),                                         
-
-            UniqueConstraint("dataLocationCode", "dataSourceCode", "dataSourceLocationCode", "priorityOrder", name='dataLocation_dataSource_mapping_AK00'),
-        )
-
-
-        #The rest of these tables are reference tables for values stored in the tables above. They all contain
-        # ID - Automated id
-        # code - that mapped code
-        # display name - a non compressed pretty name
-        # notes - more information about that item
-        self.ref_dataLocation = Table(
-            "ref_dataLocation",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
-            
-            Column("code", String(25), nullable=False, unique=True),
-            Column("displayName", String(30), nullable=False),
-            Column("notes", String(250), nullable=True),
-            Column("latitude", String(16), nullable=False),
-            Column("longitude", String(16), nullable=False),
-
-        )
-
-        self.ref_dataSource = Table(
-            "ref_dataSource",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
-            
-            Column("code", String(10), nullable=False, unique=True),
-            Column("displayName", String(30), nullable=False),
-            Column("notes", String(250), nullable=True),
-
-        )
-
-        self.ref_dataSeries = Table(
-            "ref_dataSeries",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
-            
-            Column("code", String(25), nullable=False, unique=True),
-            Column("displayName", String(30), nullable=False),
-            Column("notes", String(250), nullable=True),
-        )
-
-        self.ref_dataUnit = Table(
-            "ref_dataUnit",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
-            
-            Column("code", String(10), nullable=False, unique=True),
-            Column("displayName", String(30), nullable=False),
-            Column("notes", String(250), nullable=True),
-        )
-
-        self.ref_dataDatum = Table(
-            "ref_dataDatum",
-            self._metadata,
-
-            Column("id", Integer, autoincrement=True, primary_key=True),
-            
-            Column("code", String(10), nullable=False, unique=True),
-            Column("displayName", String(30), nullable=False),
-            Column("notes", String(250), nullable=True),
-        )
-
     #############################################################################################
     ################################################################################## DB Interaction private methods
     #############################################################################################
@@ -503,50 +389,98 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         return result
 
-    def __splice_input(self, results: list[tuple]) -> list[Input]:
-        """An Input is a data value of some environment variable that can be linked to a date time.
+    def __splice_input(self, results: list[tuple]) -> DataFrame:
+        """ Converts DB rows to a proper input dataframe to be packed into a series.
+        This method also handles ensemble data by grouping them into single rows as expected by Semaphore.
         :param list[tupleish] -a list of selections from the table formatted in tupleish
+        :return: DataFrame - a dataframe with the data formatted for use in a series
         """
-        valueIndex = 4
-        unitIndex = 6
-        generatedTimeIndex = 1
-        verifiedTimeIndex = 3
-        latitudeIndex = 11
-        longitudeIndex = 12
 
-        dataPoints = []
-        for row in results:
-            dataPoints.append(Input(
-                row[valueIndex],
-                row[unitIndex],
-                row[verifiedTimeIndex],
-                row[generatedTimeIndex],
-                row[longitudeIndex],
-                row[latitudeIndex]
-            ))
+        # Convert returned DB rows into a dataframe to make manipulation easier 
+        df_results = pd.DataFrame(
+            data=results, 
+            columns=[   
+                "id", "generatedTime", "acquiredTime", "verifiedTime", "dataValue", 
+                "isActual", "dataUnit", "dataSource", "dataLocation", "dataSeries", 
+                "dataDatum", "latitude", "longitude", "ensembleMemberID"
+            ]
+        )
 
-        return dataPoints
+        # A formatted dataframe to place the spliced data 
+        df_out = get_input_dataFrame()
 
-    def __splice_output(self, results: list[tuple]) -> list[Output]:
-        """Splices up a list of DB results, pulling out only the data that changes per point,
-        and places them in a Prediction object.
+        # We have to post process the results as this could be ensemble data or not
+        # grouping by verifiedTime groups the data by time point
+        for _, group in df_results.groupby("verifiedTime"):
+
+            # ensembleMemberID is None if not an ensemble, so we check the first row of the group
+            firstRow = group.iloc[0]
+            isEnsemble = firstRow["ensembleMemberID"] is not None
+            
+            # If its an ensemble the dataValue is all the values sorted by there ID (to ensure correct order)
+            # If not an ensemble we just take the solitary dataValue
+            if isEnsemble:
+                group = group.sort_values(by=("ensembleMemberID"))
+                dataValues = group["dataValue"].to_list()
+            else:
+                dataValues = group["dataValue"].iloc[0]
+            
+            # Pack the data into the out dataframe
+            df_out.loc[len(df_out)] = [
+                dataValues,                   # dataValue
+                firstRow["dataUnit"],         # dataUnit
+                firstRow["verifiedTime"],     # timeVerified
+                firstRow["generatedTime"],    # timeGenerated
+                firstRow["longitude"],        # longitude
+                firstRow["latitude"]          # latitude
+            ]
+
+        return df_out
+
+
+    def __splice_output(self, results: list[tuple]) -> DataFrame:
+        """Converts DB row results into a proper output dataframe to be packed into a series.
         param: list[tupleish] - a list of selections from the table formatted in tupleish
+        returns: DataFrame - a dataframe with the data formatted for use in a series
         """
-        valueIndex = 5
-        unitIndex = 6
-        timeGeneratedIndex = 1
-        leadTimeIndex = 2
-        
-        dataPoints = []
-        for row in results:
-            dataPoints.append(Output(
-                row[valueIndex],
-                row[unitIndex],
-                row[timeGeneratedIndex],
-                row[leadTimeIndex]
-            ))
 
-        return dataPoints 
+        # Convert returned DB rows into a dataframe to make manipulation easier 
+        df_results = pd.DataFrame(
+            data=results, 
+            columns=[
+                "ID", "timeGenerated", "leadTime", "modelName", "modelVersion", "dataValue", 
+                "dataUnit", "dataLocation", "dataSeries", "dataDatum", "ensembleMemberID"
+            ]
+        )
+        
+        # A formatted dataframe to place the spliced data 
+        df_out = get_output_dataFrame()
+
+        # We have to post process the results as this could be ensemble data or not
+        # we group data with identical temporal information    
+        for _, group in df_results.groupby(["timeGenerated", "leadTime"]):
+    
+            firstRow = group.iloc[0]
+            isEnsemble = firstRow["ensembleMemberID"] is not None
+            
+            # If its an ensemble the dataValue is all the values sorted by there ID (to ensure correct order)
+            # If not an ensemble we just take the solitary dataValue
+            if isEnsemble:
+                group = group.sort_values(by=("modelName"))
+                dataValues = group["dataValue"].to_list()
+            else:
+                dataValues = group["dataValue"].iloc[0]
+            
+            # Pack the data into the out dataframe
+            df_out.loc[len(df_out)] = [
+                dataValues,                 # dataValue    
+                firstRow["dataUnit"],       # dataUnit
+                firstRow["timeGenerated"],  # timeGenerated
+                firstRow["leadTime"]        # leadTime
+            ]
+
+        return df_out
+
 
     def insert_lat_lon_test(self, code: str, displayName: str, notes: str, latitude: str, longitude: str):
         """This method inserts lat and lon information
@@ -555,7 +489,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         insertionValueRow = {"code": code, "displayName": displayName, "notes": notes, "latitude": latitude, "longitude": longitude}
         
         with self.__get_engine().connect() as conn:
-            conn.execute(insert(self.ref_dataLocation)
+            conn.execute(insert(self.__metadata.tables['ref_dataLocation'])
                         .values(insertionValueRow))
             conn.commit()
 
@@ -566,6 +500,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         insertionValueRow = {"dataLocationCode": dataLocationCode, "dataSourceCode": dataSourceCode, "dataSourceLocationCode": dataSourceLocationCode, "priorityOrder": priorityOrder}
         
         with self.__get_engine().connect() as conn:
-            conn.execute(insert(self.dataLocation_dataSource_mapping)
+            conn.execute(insert(self.__metadata.tables['dataLocation_dataSource_mapping'])
                         .values(insertionValueRow))
             conn.commit()

@@ -13,7 +13,7 @@ The post processing in this file averages two series.
 #
 #Imports
 from PostProcessing.IPostProcessing import IPostProcessing
-from DataClasses import Series, Input
+from DataClasses import Series
 from ModelExecution.dspecParser import PostProcessCall
 
 class Average(IPostProcessing):
@@ -53,30 +53,25 @@ class Average(IPostProcessing):
         first_series = preprocessedData[args['targetAvgFirst_inKey']]
         second_series = preprocessedData[args['targetAvgSecond_inKey']]
 
-        # Iterate through the both series taking their average
-        averages = []
-        for first, second in zip(first_series.data, second_series.data):
+        # Unpack data and cast it to float
+        df_first = first_series.dataFrame
+        df_first['dataValue'] = df_first['dataValue'].astype(float)
 
-            average = (float(first.dataValue) + float(second.dataValue)) / 2
+        df_second = second_series.dataFrame
+        df_second['dataValue'] = df_second['dataValue'].astype(float)
 
-            # Magnitude contains the correct metadata from resulting series
-            averages.append(Input(
-                dataValue=      str(average),
-                dataUnit=       first.dataUnit,
-                timeGenerated=  first.timeGenerated,
-                timeVerified=   first.timeVerified,
-                longitude=      first.longitude,
-                latitude=       first.latitude
-                )
-            )
+        # Copy a place for the result to go, then calculate the item wise average. Finally cast it back to str
+        df_result = df_first.copy(deep=True)
+        df_result['dataValue'] = (df_first['dataValue'] + df_second['dataValue']) / 2
+        df_result['dataValue'] = df_result['dataValue'].astype(str)
+
 
         # Repack average as new series, reading the key from the arguments obj
         desc = first_series.description
-
         average_outKey = args['avg_outkey']
         desc.dataSeries = average_outKey
         a_series = Series(desc, True, first_series.timeDescription)
-        a_series.data = averages
+        a_series.dataFrame = df_result
         preprocessedData[average_outKey] = a_series
 
         return preprocessedData

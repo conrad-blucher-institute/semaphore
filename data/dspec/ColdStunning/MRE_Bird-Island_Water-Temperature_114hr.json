@@ -1,0 +1,105 @@
+{
+    "dspecVersion": "2.0",
+    "modelName": "MRE_Bird-Island_Water-Temperature_114hr",
+    "modelVersion": "1.0.0",
+    "author": "Christian Duff",
+    "modelFileName": "./ColdStunning/Bird-Island_Water-Temperature_114hr",
+    "timingInfo": {
+        "active": true,
+        "offset": 1200,
+        "interval": 3600
+    },
+    "outputInfo": {
+        "outputMethod": "MultiPackedFloat",
+        "leadTime": 410400,
+        "series": "pWaterTmp",
+        "location": "SouthBirdIsland",
+        "unit": "celsius"
+    },
+    "dependentSeries": [
+        {
+            "_name": "Water Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                0,
+                -24
+            ],
+            "outKey": "south-bird-island_water-temp_25",
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit": "3600",
+                    "method": "linear",
+                    "limit_area": "inside"
+                }
+            }
+        },
+        {
+            "_name": "Air Temp",
+            "location": "SouthBirdIsland",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                0,
+                -24
+            ],
+            "outKey": "south-bird-island_air-temp_25",
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit": "3600",
+                    "method": "linear",
+                    "limit_area": "inside"
+                }
+            }
+        },
+        {
+            "_name": "Ensemble Air Temp",
+            "location": "SBirdIsland",
+            "source": "TWC",
+            "series": "pAirTemp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                114,
+                1
+            ],
+            "outKey": "ensemble-south-bird-island_predicted_air-temp_114",
+            "dataIntegrityCall": {
+                "call": "EnsemblePandasInterpolation",
+                "args": {
+                    "limit": "21600",
+                    "method": "linear",
+                    "limit_area": "inside"
+                }
+            }
+        }
+    ],
+    "postProcessCall": [],
+    "vectorOrder": [
+        {
+            "key": "south-bird-island_water-temp_25",
+            "dType": "float"
+        },
+        {
+            "key": "south-bird-island_air-temp_25",
+            "dType": "float"
+        },
+        {
+            "key": "ensemble-south-bird-island_predicted_air-temp_114",
+            "dType": "float",
+            "indexes": [
+                0,
+                114
+            ],
+            "isMultipliedKey": true,
+            "ensembleMemberCount": 100
+        }
+    ]
+}

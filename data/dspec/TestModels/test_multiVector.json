@@ -1,0 +1,164 @@
+{
+    "dspecVersion": "2.0",
+    "modelName": "test_multiVector",
+    "modelVersion": "1.0.0",
+    "author": "John Doe",
+    "modelFileName": "test_AI",
+    "timingInfo":{
+        "active": false,
+        "offset": 0,
+        "interval": 3600
+
+    },
+    "outputInfo": {
+        "outputMethod": "OnePackedFloat",
+        "leadTime": 86400,
+        "series": "testSeries",
+        "location": "PortLavaca",
+        "interval" : 3600, 
+        "datum": "test_datum",
+        "unit" : "meter"
+    },
+    "dependentSeries": [
+        { 
+            "_name": "WindSpeed",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
+            "series": "dWnSpd",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [0, 0],
+            "outKey": "WindSpd_01"
+            
+            
+        },
+        {
+            "_name": "Wind Direction",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
+            "series": "dWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [0, 0],
+            "outKey": "WindDir_01"
+            
+
+        },
+        {
+            "_name": "Wind Speed",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
+            "series": "dWnSpd",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [0, -11],
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"inside"      
+                }
+            },
+            "outKey": "WindSpd_12"
+        },
+        {
+            "_name": "Wind Direction",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
+            "series": "dWnDir",
+            "unit": "degrees",
+            "interval": 3600,
+            "range": [0, -11],
+            "dataIntegrityCall": {
+                "call": "AngleInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"inside"  
+                }
+            },
+            "outKey": "WindDir_12"
+        },
+        {
+            "_name": "Wind Speed",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
+            "series": "dWnSpd",
+            "unit": "meter",
+            "interval": 3600,
+            "range": [0, -12],
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit":"3600",
+                    "method":"linear",
+                    "limit_area":"inside"    
+                }
+            },
+            "outKey": "WindSpd_13"
+        }
+    ],
+    "postProcessCall": [
+        {
+            "call": "ResolveVectorComponents",
+            "args": {
+                "offset": 0,
+                "targetMagnitude_inKey":"WindSpd_01",
+                "targetDirection_inKey":"WindDir_01",
+                "x_comp_outKey": "dXWnCmp000D_1hr", 
+                "y_comp_outKey": "dYWnCmp000D_1hr"      
+            }
+        },
+        {
+            "call": "ResolveVectorComponents",
+            "args": {
+                "offset": 0,
+                "targetMagnitude_inKey":"WindSpd_12",
+                "targetDirection_inKey":"WindDir_12",
+                "x_comp_outKey": "dXWnCmp000D_12hr", 
+                "y_comp_outKey": "dYWnCmp000D_12hr"      
+            }
+        }
+    ],
+    "vectorOrder": [
+        {
+            "key": "dXWnCmp000D_1hr",
+            "dType": "float",
+            "isMultipliedKey": true,
+            "ensembleMemberCount": 10
+        },
+        {
+            "key": "dYWnCmp000D_1hr",
+            "dType": "float"
+        },
+        {
+            "key": "dXWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "dYWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "dXWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "dYWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "dXWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "dYWnCmp000D_12hr",
+            "dType": "float"
+        },
+        {
+            "key": "WindSpd_13",
+            "dType": "float"
+        }
+    ]
+}
