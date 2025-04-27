@@ -193,22 +193,6 @@ class NDFD_EXP(IDataIngestion):
             data: ZippedDataset[int, int] = NDFD_Predictions.map(iso8601_to_unixms, int).zipped()
 
             data_dictionary = json.loads(json.dumps(data[0][1]))
-
-            toDateTimestamp = int(timeRequest.toDateTime.timestamp())
-
-            # Sometimes, you can request a certain date range from NDFD and the toDateTime will be missing since the interval
-            # has changed from 3 hours to 6 hours. A good example is you ask for 2024-01-04 12:00:00 as your toDateTime, but
-            # the interval changed to 6 hours at 2024-01-04 09:00:00 so the next datetime available after 2024-01-04 09:00:00
-            # is 2024-01-04 15:00:00. Well the code below checks for this and finds the average of the two surrounding datetimes
-            # and sets that as the value for the desired toDateTime
-            toDateTime_exists = any(timestamp[0] == toDateTimestamp for timestamp in data_dictionary)
-            if not toDateTime_exists:
-                closest_average = self.find_closest_average(data_dictionary, toDateTimestamp)
-
-                if closest_average is None: return None
-                
-                # Add toDateTimestamp and averaged data point to data_dictionary
-                data_dictionary.append([toDateTimestamp, closest_average])
             
             dataValueIndex = 1
  
