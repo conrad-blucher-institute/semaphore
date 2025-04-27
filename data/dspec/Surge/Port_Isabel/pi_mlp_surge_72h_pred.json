@@ -109,7 +109,7 @@
             "series": "pWnSpd",
             "unit": "mps",
             "interval": 3600,
-            "range": [72, 1],
+            "range": [78, 1],
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
@@ -118,7 +118,7 @@
                     "limit_area":"inside"    
                 }
             },
-            "outKey": "WSPD_FUTR_72"
+            "outKey": "WSPD_FUTR_78"
         },
         {
             "_name": "wind direction future",
@@ -127,7 +127,7 @@
             "series": "pWnDir",
             "unit": "degrees",
             "interval": 3600,
-            "range": [72, 1],
+            "range": [78, 1],
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
@@ -136,7 +136,7 @@
                     "limit_area":"inside"    
                 }
             },
-            "outKey": "WDIR_FUTR_72"
+            "outKey": "WDIR_FUTR_78"
         }
     ],
     "postProcessCall": [
@@ -164,10 +164,10 @@
             "call": "ResolveVectorComponents",
             "args": {
                 "offset": 0,
-                "targetMagnitude_inKey":"WSPD_FUTR_72",
-                "targetDirection_inKey":"WDIR_FUTR_72",
-                "x_comp_outKey": "x_DWNDCMP_FUTR_72", 
-                "y_comp_outKey": "y_DWNDCMP_FUTR_72"      
+                "targetMagnitude_inKey":"WSPD_FUTR_78",
+                "targetDirection_inKey":"WDIR_FUTR_78",
+                "x_comp_outKey": "x_DWNDCMP_FUTR_78", 
+                "y_comp_outKey": "y_DWNDCMP_FUTR_78"      
             }
         },
         {
@@ -215,12 +215,20 @@
             "dType": "float"
         },
         {
-            "key": "x_DWNDCMP_FUTR_72",
-            "dType": "float"
+            "key": "x_DWNDCMP_FUTR_78",
+            "dType": "float",
+            "indexes": [
+                0,
+                78
+            ]
         },
         {
-            "key": "y_DWNDCMP_FUTR_72",
-            "dType": "float"
+            "key": "y_DWNDCMP_FUTR_78",
+            "dType": "float",
+            "indexes": [
+                0,
+                78
+            ]
         }
     ]
 }
