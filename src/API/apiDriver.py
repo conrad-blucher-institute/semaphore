@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription, Series
 from SeriesProvider.SeriesProvider import SeriesProvider
 from fastapi.encoders import jsonable_encoder
+import pandas as pd
 
 load_dotenv()
 
@@ -74,6 +75,13 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
 
     # Protect the API's JSON ENCODER from freaking out about floats sneaking from the ingestion class
     responseSeries.dataFrame['dataValue'] = responseSeries.dataFrame['dataValue'].astype(str)
+
+    # Set display options
+    pd.set_option('display.max_rows', 3)        # Show 3 rows
+    pd.set_option('display.max_columns', None)     # Show all columns
+    pd.set_option('display.width', None)           # Don't wrap columns
+    pd.set_option('display.max_colwidth', None)    # Show full content in columns
+    print(responseSeries.dataFrame)
 
     return serialize_series(responseSeries)
 
@@ -238,14 +246,22 @@ def serialize_input_series(series: Series) -> dict[any]:
     # Serialize the dataFrame by our own rules
     serialized_data = []
     for _, row in series.dataFrame.iterrows():
-        serialized_data.append({
-            "dataValue":      jsonable_encoder(row['dataValue']),
-            "dataUnit":       jsonable_encoder(row['dataUnit']),
-            "timeVerified":  jsonable_encoder(row['timeVerified']),
-            "timeGenerated":  jsonable_encoder(row['timeGenerated']),
-            "longitude":       jsonable_encoder(row['longitude']),
-            "latitude":       jsonable_encoder(row['latitude'])
-        })
+        row_dict = {
+            "dataValue":        row['dataValue'],
+            "dataUnit":         row['dataUnit'],
+            "timeVerified":     row['timeVerified'],
+            "timeGenerated":    row['timeGenerated'],
+            "longitude":        row['longitude'],
+            "latitude":         row['latitude']
+        }
+
+        #Replace NaNs with Nones so that jasonable_encoder doesn't freak out
+        row_dict = {k: None if pd.isna(v) else v for k, v in row_dict.items()}
+
+        #Encode the row dictionary to JSON
+        encode_row = {k: jsonable_encoder(v) for k, v in row_dict.items()}
+        serialized_data.append(encode_row)
+        
     serialized['_Series__data'] = serialized_data # Add it back to the response
     return serialized
 
