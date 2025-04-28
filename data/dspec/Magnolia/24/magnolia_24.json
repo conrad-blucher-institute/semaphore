@@ -89,7 +89,7 @@
             "series": "pWnDir",
             "unit": "degrees",
             "interval": 3600,
-            "range": [19, 1],
+            "range": [25, 1],
             "outKey": "PL_PWNDIR_F20",
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
@@ -107,7 +107,7 @@
             "series": "pWnSpd",
             "unit": "mps",
             "interval": 3600,
-            "range": [19, 1],
+            "range": [25, 1],
             "outKey": "PL_PWSPD_F20",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
