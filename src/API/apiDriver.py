@@ -76,13 +76,6 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     # Protect the API's JSON ENCODER from freaking out about floats sneaking from the ingestion class
     responseSeries.dataFrame['dataValue'] = responseSeries.dataFrame['dataValue'].astype(str)
 
-    # Set display options
-    pd.set_option('display.max_rows', 3)        # Show 3 rows
-    pd.set_option('display.max_columns', None)     # Show all columns
-    pd.set_option('display.width', None)           # Don't wrap columns
-    pd.set_option('display.max_colwidth', None)    # Show full content in columns
-    print(responseSeries.dataFrame)
-
     return serialize_series(responseSeries)
 
 
