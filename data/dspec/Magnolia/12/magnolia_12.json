@@ -89,7 +89,7 @@
             "series": "pWnDir",
             "unit": "degrees",
             "interval": 3600,
-            "range": [7, 1],
+            "range": [12, 1],
             "outKey": "PL_PWNDIR_F7",
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
@@ -107,7 +107,7 @@
             "series": "pWnSpd",
             "unit": "mps",
             "interval": 3600,
-            "range": [7, 1],
+            "range": [12, 1],
             "outKey": "PL_PWSPD_F7",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -195,11 +195,13 @@
         },
         {
             "key": "x_PL_PWNDCMP_F7",
-            "dType": "float"
+            "dType": "float",
+            "indexes": [0, 7]
         },
         {
             "key": "y_PL_PWNDCMP_F7",
-            "dType": "float"
+            "dType": "float",
+            "indexes": [0, 7]
         }
     ]
 }
