@@ -153,7 +153,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
     
 
     def select_latest_output(self, model_name: str) -> Series | None: 
-        ''' This selects outputs based just on a model name and a time range, all other information is inferred
+        ''' This selects *all* outputs based just on a model name and a time range, all other information is inferred
             :param model_name: str - The name of the model to query
 
             NOTE:: Things like model version and time will just be the latest in the DB
@@ -169,10 +169,25 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         if not tupleishResult: # If there are no results, no model information can't be inferred 
             return None    
 
-        outputResult = self.__splice_output([tupleishResult]) # Splice output expects a list of tuples
+        latest_time = tupleishResult[1]
+
+        # STEP 2: Get ALL outputs with the same timeGenerated
+        statement = (
+            select(outputTable)
+            .where(outputTable.c.modelName == model_name)
+            .where(outputTable.c.timeGenerated == latest_time)
+        )
+
+        result = self.__dbSelection(statement).fetchall()
+
+        if not result:
+            return None
+        
+        outputResult = self.__splice_output(result)  # Use all fetched outputs, not just the first one 
 
         # Parse out model information from first output result
-        description = SemaphoreSeriesDescription(tupleishResult[3], tupleishResult[4], tupleishResult[8], tupleishResult[7], tupleishResult[6])
+        first = result[0]
+        description = SemaphoreSeriesDescription(first[3], first[4], first[8], first[7], first[6])
         series = Series(description, False)
         series.dataFrame = outputResult
         return series
