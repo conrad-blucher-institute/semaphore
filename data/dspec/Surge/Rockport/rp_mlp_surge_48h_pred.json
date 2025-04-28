@@ -109,7 +109,7 @@
             "series": "pWnSpd",
             "unit": "mps",
             "interval": 3600,
-            "range": [48, 1],
+            "range": [54, 1],
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
@@ -127,7 +127,7 @@
             "series": "pWnDir",
             "unit": "degrees",
             "interval": 3600,
-            "range": [48, 1],
+            "range": [54, 1],
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
@@ -164,10 +164,10 @@
             "call": "ResolveVectorComponents",
             "args": {
                 "offset": 0,
-                "targetMagnitude_inKey":"WSPD_FUTR_48",
-                "targetDirection_inKey":"WDIR_FUTR_48",
-                "x_comp_outKey": "x_DWNDCMP_FUTR_48", 
-                "y_comp_outKey": "y_DWNDCMP_FUTR_48"      
+                "targetMagnitude_inKey":"WSPD_FUTR_54",
+                "targetDirection_inKey":"WDIR_FUTR_54",
+                "x_comp_outKey": "x_DWNDCMP_FUTR_54", 
+                "y_comp_outKey": "y_DWNDCMP_FUTR_54"      
             }
         },
         {
@@ -215,12 +215,20 @@
             "dType": "float"
         },
         {
-            "key": "x_DWNDCMP_FUTR_48",
-            "dType": "float"
+            "key": "x_DWNDCMP_FUTR_54",
+            "dType": "float",
+            "indexes": [
+                0,
+                48
+            ]
         },
         {
-            "key": "y_DWNDCMP_FUTR_48",
-            "dType": "float"
+            "key": "y_DWNDCMP_FUTR_54",
+            "dType": "float",
+            "indexes": [
+                0,
+                48
+            ]
         }
     ]
 }
