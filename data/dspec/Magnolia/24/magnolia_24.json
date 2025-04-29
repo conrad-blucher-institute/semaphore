@@ -195,11 +195,13 @@
         },
         {
             "key": "x_PL_PWNDCMP_F20",
-            "dType": "float"
+            "dType": "float",
+            "indexes": [0, 19]
         },
         {
             "key": "y_PL_PWNDCMP_F20",
-            "dType": "float"
+            "dType": "float",
+            "indexes": [0, 19]
         }
     ]
 }

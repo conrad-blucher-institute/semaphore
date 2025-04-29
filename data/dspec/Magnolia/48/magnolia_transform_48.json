@@ -35,7 +35,7 @@
             "series": "pWnDir",
             "unit": "degrees",
             "interval": 3600,
-            "range": [48, 1],
+            "range": [54, 1],
             "outKey": "PL_WNDIR_F48",
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
@@ -53,7 +53,7 @@
             "series": "pWnSpd",
             "unit": "mps",
             "interval": 3600,
-            "range": [48, 1],
+            "range": [54, 1],
             "outKey": "PL_WNDSPD_F48",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -117,11 +117,13 @@
         },
         {
             "key": "x_PL_WNDCMP_F48",
-            "dType": "float"
+            "dType": "float",
+            "indexes": [0, 48]
         },
         {
             "key": "y_PL_WNDCMP_F48",
-            "dType": "float"
+            "dType": "float",
+            "indexes": [0, 48]
         }
     ]
 }
