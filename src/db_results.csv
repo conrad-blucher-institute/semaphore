@@ -1,0 +1,1141 @@
+"id","timeGenerated","leadTime","modelName","modelVersion","dataValue","dataUnit","dataLocation","dataSeries","dataDatum","ensembleMemberID"
+1717194,"2025-05-07 22:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.058723","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1720741,"2025-05-09 01:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.285458","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1720842,"2025-05-09 01:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.503405","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1720843,"2025-05-09 01:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.253654","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1720946,"2025-05-09 01:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","24.109865","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1722923,"2025-05-09 02:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","25.703281","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1723024,"2025-05-09 02:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.71941","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1723025,"2025-05-09 02:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.600214","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1723128,"2025-05-09 02:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","24.216612","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1723330,"2025-05-09 02:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.021498","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1727285,"2025-05-09 04:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","25.224525","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1727386,"2025-05-09 04:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.987152","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1727387,"2025-05-09 04:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.969017","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1729467,"2025-05-09 05:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","24.733795","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1729568,"2025-05-09 05:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.693401","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1729569,"2025-05-09 05:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.014841","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1729672,"2025-05-09 05:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","25.057928","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1729874,"2025-05-09 05:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","24.536121","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1729978,"2025-05-09 05:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.731707","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1733829,"2025-05-09 07:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","24.891775","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1733930,"2025-05-09 07:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.009262","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1733931,"2025-05-09 07:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.714333","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1734032,"2025-05-09 07:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","25.46373","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1734236,"2025-05-09 07:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","24.289013","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1734337,"2025-05-09 07:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.525183","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1738192,"2025-05-09 09:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","25.532343","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1738293,"2025-05-09 09:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","25.515547","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1738294,"2025-05-09 09:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.968563","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1738395,"2025-05-09 09:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.696733","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1740371,"2025-05-09 10:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.145279","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1740472,"2025-05-09 10:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","25.162497","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1740473,"2025-05-09 10:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.00819","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1740574,"2025-05-09 10:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.849564","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1740776,"2025-05-09 10:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","24.716843","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1740877,"2025-05-09 10:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","24.931583","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1740878,"2025-05-09 10:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.348484","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1744715,"2025-05-09 12:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.729898","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1744816,"2025-05-09 12:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","25.289316","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1744817,"2025-05-09 12:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.446392","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1746896,"2025-05-09 13:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.059143","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1746997,"2025-05-09 13:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","25.296572","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1746998,"2025-05-09 13:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.505175","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1747099,"2025-05-09 13:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.34347","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1747301,"2025-05-09 13:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.828733","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1747402,"2025-05-09 13:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","24.319881","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1747403,"2025-05-09 13:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.8849","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1753998,"2025-05-09 17:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.061079","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1754099,"2025-05-09 17:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.117125","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1754100,"2025-05-09 17:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","25.4085","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1754201,"2025-05-09 17:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.749765","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1756176,"2025-05-09 18:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.962751","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1756277,"2025-05-09 18:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","25.75196","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1756278,"2025-05-09 18:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","25.171282","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1756379,"2025-05-09 18:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.44116","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1756581,"2025-05-09 18:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.68531","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1756682,"2025-05-09 18:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.501352","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1756684,"2025-05-09 18:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","24.777584","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1756886,"2025-05-09 18:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.99435","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1760541,"2025-05-09 20:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.12535","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1760642,"2025-05-09 20:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.938116","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1760643,"2025-05-09 20:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","25.344704","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1762722,"2025-05-09 21:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.865252","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1762823,"2025-05-09 21:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.339598","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1762824,"2025-05-09 21:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","25.410208","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1762925,"2025-05-09 21:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.187311","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1763129,"2025-05-09 21:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.05088","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1763230,"2025-05-09 21:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.501703","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1763231,"2025-05-09 21:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","24.688503","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1763432,"2025-05-09 21:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.692766","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1767085,"2025-05-09 23:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.359085","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1767186,"2025-05-09 23:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.738857","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1767187,"2025-05-09 23:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.021704","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1767288,"2025-05-09 23:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","25.187853","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1767492,"2025-05-09 23:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.663773","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1767593,"2025-05-09 23:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.214464","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1767594,"2025-05-09 23:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.19174","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1767795,"2025-05-09 23:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.082886","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1767797,"2025-05-09 23:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.300915","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1771447,"2025-05-10 01:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.867418","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1771548,"2025-05-10 01:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.836771","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1771549,"2025-05-10 01:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.676596","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1771650,"2025-05-10 01:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","25.032316","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1773629,"2025-05-10 02:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.911572","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1773730,"2025-05-10 02:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.154722","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1773731,"2025-05-10 02:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.12471","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1773832,"2025-05-10 02:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","25.116348","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1774034,"2025-05-10 02:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.048956","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1774135,"2025-05-10 02:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.260233","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1774137,"2025-05-10 02:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.916008","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1774339,"2025-05-10 02:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","24.956554","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1774341,"2025-05-10 02:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.514969","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1777991,"2025-05-10 04:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","25.704086","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1778092,"2025-05-10 04:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.906427","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1778093,"2025-05-10 04:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.97503","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1778194,"2025-05-10 04:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","25.493347","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1780173,"2025-05-10 05:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","25.854883","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1721151,"2025-05-09 01:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.479998","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1725104,"2025-05-09 03:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","25.55402","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1725205,"2025-05-09 03:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.641666","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1725206,"2025-05-09 03:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.710142","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1725309,"2025-05-09 03:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","24.581093","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1725514,"2025-05-09 03:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","24.761108","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1727490,"2025-05-09 04:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","24.580513","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1727692,"2025-05-09 04:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","24.727165","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1727794,"2025-05-09 04:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.81479","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1731648,"2025-05-09 06:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","24.97664","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1731749,"2025-05-09 06:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.375933","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1731750,"2025-05-09 06:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.86624","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1731853,"2025-05-09 06:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","24.966984","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1732056,"2025-05-09 06:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","23.951729","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1732159,"2025-05-09 06:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.858355","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1736011,"2025-05-09 08:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","25.126549","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1736112,"2025-05-09 08:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.043907","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1736113,"2025-05-09 08:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.820217","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1736214,"2025-05-09 08:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.78984","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1736416,"2025-05-09 08:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","24.517693","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1736519,"2025-05-09 08:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.150505","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1738599,"2025-05-09 09:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","24.444563","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1738700,"2025-05-09 09:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.13774","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1742543,"2025-05-09 11:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.37429","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1742644,"2025-05-09 11:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","24.983927","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1742645,"2025-05-09 11:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.575802","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1742746,"2025-05-09 11:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.204422","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1742948,"2025-05-09 11:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.388748","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1743049,"2025-05-09 11:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","24.642534","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1743050,"2025-05-09 11:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.25513","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1744918,"2025-05-09 12:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.735546","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1745120,"2025-05-09 12:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.719143","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1745221,"2025-05-09 12:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","24.190523","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1745223,"2025-05-09 12:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.036667","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1749078,"2025-05-09 14:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.256851","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1749179,"2025-05-09 14:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","24.919252","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1749180,"2025-05-09 14:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.451658","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1749281,"2025-05-09 14:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.0421","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1749483,"2025-05-09 14:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.2317","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1749584,"2025-05-09 14:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","24.143799","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1749585,"2025-05-09 14:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.778717","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1751259,"2025-05-09 15:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.384142","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1751360,"2025-05-09 15:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","25.036057","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1751361,"2025-05-09 15:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.08968","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1751462,"2025-05-09 15:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.234808","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1751816,"2025-05-09 16:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.702559","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1751917,"2025-05-09 16:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","25.541052","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1751918,"2025-05-09 16:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","25.66703","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1752019,"2025-05-09 16:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.126001","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1752223,"2025-05-09 16:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.074923","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1752324,"2025-05-09 16:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","24.904701","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1752325,"2025-05-09 16:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.47057","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1752526,"2025-05-09 16:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.005844","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1754403,"2025-05-09 17:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.32515","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1754505,"2025-05-09 17:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.008636","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1754507,"2025-05-09 17:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.248438","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1754708,"2025-05-09 17:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.997011","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1758357,"2025-05-09 19:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.652727","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1758458,"2025-05-09 19:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.547346","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1758459,"2025-05-09 19:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","25.20368","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1758560,"2025-05-09 19:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.18561","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1758764,"2025-05-09 19:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.45663","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1758865,"2025-05-09 19:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.57129","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1758866,"2025-05-09 19:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","24.693708","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1759067,"2025-05-09 19:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.75768","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1760744,"2025-05-09 20:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","25.9377","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1760946,"2025-05-09 20:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.030687","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1761047,"2025-05-09 20:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.303215","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1761049,"2025-05-09 20:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","24.211695","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1761251,"2025-05-09 20:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.931797","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1764903,"2025-05-09 22:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.5927","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1765004,"2025-05-09 22:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.727707","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1765005,"2025-05-09 22:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","25.710487","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1765106,"2025-05-09 22:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","25.994528","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1765308,"2025-05-09 22:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.055788","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1765409,"2025-05-09 22:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.798004","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1765410,"2025-05-09 22:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","24.896568","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1765613,"2025-05-09 22:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.339931","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1765615,"2025-05-09 22:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.226482","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1769266,"2025-05-10 00:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.380314","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1769367,"2025-05-10 00:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.591183","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1769368,"2025-05-10 00:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.25703","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1769469,"2025-05-10 00:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","24.35446","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1769671,"2025-05-10 00:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.491932","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1769774,"2025-05-10 00:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.231512","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1769775,"2025-05-10 00:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.195755","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1769976,"2025-05-10 00:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.114122","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1769978,"2025-05-10 00:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.373074","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1771852,"2025-05-10 01:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.365934","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1771953,"2025-05-10 01:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.108126","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1771954,"2025-05-10 01:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.48352","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1772157,"2025-05-10 01:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.167606","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1772159,"2025-05-10 01:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.875875","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1775810,"2025-05-10 03:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.284365","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1775911,"2025-05-10 03:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.15582","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1775912,"2025-05-10 03:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.774406","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1776013,"2025-05-10 03:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","25.305473","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1776215,"2025-05-10 03:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.544588","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1776316,"2025-05-10 03:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.251839","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1776317,"2025-05-10 03:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.22814","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1776520,"2025-05-10 03:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","24.989399","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1776522,"2025-05-10 03:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.236631","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1778398,"2025-05-10 04:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.433357","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1778499,"2025-05-10 04:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.081333","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1778500,"2025-05-10 04:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.692013","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1778701,"2025-05-10 04:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.021616","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1778703,"2025-05-10 04:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","24.878635","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1778804,"2025-05-10 04:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.473305","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1780274,"2025-05-10 05:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.497332","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1780275,"2025-05-10 05:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.925125","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1780376,"2025-05-10 05:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.026594","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1780578,"2025-05-10 05:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.243847","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1780679,"2025-05-10 05:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.897497","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1780680,"2025-05-10 05:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.463902","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1780883,"2025-05-10 05:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","24.901709","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1780885,"2025-05-10 05:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","24.428286","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1780986,"2025-05-10 05:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.251465","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1783064,"2025-05-10 06:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","24.726194","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1783066,"2025-05-10 06:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","24.45071","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1783167,"2025-05-10 06:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.103504","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1784535,"2025-05-10 07:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.537235","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1784636,"2025-05-10 07:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.163473","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1784637,"2025-05-10 07:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.50418","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1788898,"2025-05-10 09:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.71214","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1788999,"2025-05-10 09:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.036573","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1789000,"2025-05-10 09:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.486795","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1789101,"2025-05-10 09:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.27099","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1789303,"2025-05-10 09:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.339087","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1789404,"2025-05-10 09:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.926752","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1789405,"2025-05-10 09:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.783627","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1791178,"2025-05-10 10:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.718937","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1791179,"2025-05-10 10:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.318941","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1791280,"2025-05-10 10:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.438547","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1791482,"2025-05-10 10:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.395885","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1791585,"2025-05-10 10:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.51887","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1791586,"2025-05-10 10:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.957724","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1791787,"2025-05-10 10:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.678152","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1791789,"2025-05-10 10:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","24.88725","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1791890,"2025-05-10 10:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.12706","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1791991,"2025-05-10 10:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.79452","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1795438,"2025-05-10 12:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.834148","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1795539,"2025-05-10 12:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.613314","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1795540,"2025-05-10 12:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.715904","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1795641,"2025-05-10 12:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.84121","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1795843,"2025-05-10 12:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.31094","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1797616,"2025-05-10 13:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.886374","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1797717,"2025-05-10 13:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.456059","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1797718,"2025-05-10 13:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.78121","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1797819,"2025-05-10 13:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.431187","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1798022,"2025-05-10 13:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.586002","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1798124,"2025-05-10 13:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.041744","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1798125,"2025-05-10 13:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.951723","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1798326,"2025-05-10 13:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.401577","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1798328,"2025-05-10 13:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.30953","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1798429,"2025-05-10 13:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","24.554026","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1798530,"2025-05-10 13:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.3462","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1800712,"2025-05-10 14:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.996115","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1801977,"2025-05-10 15:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.300735","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1802078,"2025-05-10 15:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.046045","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1802079,"2025-05-10 15:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.55377","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1802180,"2025-05-10 15:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.642975","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1804158,"2025-05-10 16:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.49164","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1804259,"2025-05-10 16:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.518919","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1804260,"2025-05-10 16:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.379852","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1804361,"2025-05-10 16:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.707201","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1804565,"2025-05-10 16:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.526768","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1804666,"2025-05-10 16:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.56494","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1804667,"2025-05-10 16:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.992907","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1804868,"2025-05-10 16:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.824802","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1804870,"2025-05-10 16:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.889973","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1804971,"2025-05-10 16:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","24.533798","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1805072,"2025-05-10 16:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.737913","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1805173,"2025-05-10 16:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.214548","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1807144,"2025-05-10 17:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","24.621906","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1807245,"2025-05-10 17:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.09677","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1807346,"2025-05-10 17:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.019606","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1808512,"2025-05-10 18:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.533","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1808613,"2025-05-10 18:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.761972","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1808614,"2025-05-10 18:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.156513","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1811961,"2025-05-10 20:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.530794","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1811963,"2025-05-10 20:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.092585","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1812064,"2025-05-10 20:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.796274","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1812165,"2025-05-10 20:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","24.363255","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1812266,"2025-05-10 20:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.370417","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1813432,"2025-05-10 21:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.397491","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1813533,"2025-05-10 21:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.924246","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1813534,"2025-05-10 21:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.190523","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1813635,"2025-05-10 21:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.75285","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1813839,"2025-05-10 21:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.684372","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1813940,"2025-05-10 21:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.316923","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1813941,"2025-05-10 21:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.089552","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1814142,"2025-05-10 21:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.369871","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1814144,"2025-05-10 21:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.095387","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1814245,"2025-05-10 21:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.767958","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1814346,"2025-05-10 21:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","24.233898","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1814447,"2025-05-10 21:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","24.986568","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1818503,"2025-05-10 23:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.020689","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1818507,"2025-05-10 23:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.838535","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1818608,"2025-05-10 23:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.465376","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1818709,"2025-05-10 23:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","24.884708","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1818810,"2025-05-10 23:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","24.539392","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1818912,"2025-05-10 23:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.256123","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1822157,"2025-05-11 01:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.778194","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1782354,"2025-05-10 06:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.286354","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1782455,"2025-05-10 06:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.520998","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1782456,"2025-05-10 06:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.667627","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1782557,"2025-05-10 06:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.101015","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1782759,"2025-05-10 06:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","24.867805","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1782860,"2025-05-10 06:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.784683","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1782861,"2025-05-10 06:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.732136","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1784738,"2025-05-10 07:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.368828","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1784940,"2025-05-10 07:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.019688","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1785041,"2025-05-10 07:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.497297","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1785043,"2025-05-10 07:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.735659","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1785245,"2025-05-10 07:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.065617","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1785247,"2025-05-10 07:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","24.59899","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1785348,"2025-05-10 07:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.80828","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1786717,"2025-05-10 08:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.780464","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1786818,"2025-05-10 08:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.238522","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1786819,"2025-05-10 08:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.583935","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1786920,"2025-05-10 08:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.264524","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1787124,"2025-05-10 08:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.32928","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1787225,"2025-05-10 08:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.018234","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1787226,"2025-05-10 08:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.015568","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1787427,"2025-05-10 08:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.40272","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1787429,"2025-05-10 08:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","24.567507","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1787530,"2025-05-10 08:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.600754","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1789608,"2025-05-10 09:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.47368","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1789610,"2025-05-10 09:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","24.584532","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1789711,"2025-05-10 09:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.513456","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1791077,"2025-05-10 10:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.2404","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1793259,"2025-05-10 11:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.725605","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1793360,"2025-05-10 11:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.314934","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1793361,"2025-05-10 11:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.940016","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1793462,"2025-05-10 11:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.54755","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1793666,"2025-05-10 11:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.930407","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1793767,"2025-05-10 11:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.45808","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1793768,"2025-05-10 11:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.981327","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1793969,"2025-05-10 11:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.046492","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1793971,"2025-05-10 11:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","24.999046","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1794072,"2025-05-10 11:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","24.727474","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1794173,"2025-05-10 11:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.979","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1795944,"2025-05-10 12:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.20857","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1795945,"2025-05-10 12:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.998743","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1796148,"2025-05-10 12:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.351988","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1796150,"2025-05-10 12:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","24.92123","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1796251,"2025-05-10 12:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","24.535833","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1796352,"2025-05-10 12:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.699821","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1799798,"2025-05-10 14:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.254793","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1799899,"2025-05-10 14:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.046713","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1799900,"2025-05-10 14:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.819893","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1800001,"2025-05-10 14:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.377153","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1800203,"2025-05-10 14:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.165443","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1800304,"2025-05-10 14:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","24.83527","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1800305,"2025-05-10 14:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.695612","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1800508,"2025-05-10 14:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.675068","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1800510,"2025-05-10 14:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.59739","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1800611,"2025-05-10 14:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","24.700537","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1802384,"2025-05-10 15:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.579472","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1802485,"2025-05-10 15:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.420372","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1802486,"2025-05-10 15:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.477665","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1802687,"2025-05-10 15:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.699387","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1802689,"2025-05-10 15:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.67634","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1802790,"2025-05-10 15:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","24.579613","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1802891,"2025-05-10 15:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.919563","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1806331,"2025-05-10 17:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.584917","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1806432,"2025-05-10 17:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","26.951008","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1806433,"2025-05-10 17:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.226961","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1806534,"2025-05-10 17:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.349548","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1806737,"2025-05-10 17:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.74767","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1806839,"2025-05-10 17:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","25.727535","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1806840,"2025-05-10 17:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.98151","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1807041,"2025-05-10 17:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.87923","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1807043,"2025-05-10 17:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.254467","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1808715,"2025-05-10 18:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.25604","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1809069,"2025-05-10 19:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.459272","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1809170,"2025-05-10 19:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.318188","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1809171,"2025-05-10 19:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.174988","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1809272,"2025-05-10 19:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.964165","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1809474,"2025-05-10 19:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.906332","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1809575,"2025-05-10 19:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.471184","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1809577,"2025-05-10 19:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.149384","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1809779,"2025-05-10 19:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.654575","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1809781,"2025-05-10 19:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.74424","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1809882,"2025-05-10 19:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.446232","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1809983,"2025-05-10 19:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","24.439266","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1810084,"2025-05-10 19:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.796747","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1811251,"2025-05-10 20:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.801617","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1811352,"2025-05-10 20:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.639254","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1811353,"2025-05-10 20:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.137142","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1811454,"2025-05-10 20:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.524992","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1811657,"2025-05-10 20:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.635057","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1811759,"2025-05-10 20:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.833153","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1811760,"2025-05-10 20:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","24.940762","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1815613,"2025-05-10 22:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.22134","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1815714,"2025-05-10 22:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.17897","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1815715,"2025-05-10 22:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.387625","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1815816,"2025-05-10 22:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.825058","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1816018,"2025-05-10 22:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.884365","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1816120,"2025-05-10 22:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.658484","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1816122,"2025-05-10 22:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.206005","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1816323,"2025-05-10 22:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.166212","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1816325,"2025-05-10 22:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.965548","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1816426,"2025-05-10 22:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.001553","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1816527,"2025-05-10 22:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","24.667812","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1816628,"2025-05-10 22:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","24.529623","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1816730,"2025-05-10 22:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.38595","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1817795,"2025-05-10 23:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.562696","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1817896,"2025-05-10 23:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.360039","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1817897,"2025-05-10 23:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","26.889889","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1817998,"2025-05-10 23:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.2953","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1822258,"2025-05-11 01:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.54093","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1822259,"2025-05-11 01:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.689882","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1822360,"2025-05-11 01:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.40481","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1822562,"2025-05-11 01:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.139645","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1822663,"2025-05-11 01:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.571941","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1822665,"2025-05-11 01:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.252748","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1822867,"2025-05-11 01:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.863129","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1822869,"2025-05-11 01:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.383108","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1822970,"2025-05-11 01:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.797688","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1823071,"2025-05-11 01:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.921131","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1824845,"2025-05-11 02:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.951672","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1824847,"2025-05-11 02:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.615454","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1825049,"2025-05-11 02:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.6407","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1825051,"2025-05-11 02:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.106314","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1825152,"2025-05-11 02:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.9745","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1825253,"2025-05-11 02:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.569359","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1825354,"2025-05-11 02:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","24.13075","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1825456,"2025-05-11 02:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.853878","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1828701,"2025-05-11 04:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","26.910543","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1828802,"2025-05-11 04:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.51125","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1828803,"2025-05-11 04:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.450058","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1828904,"2025-05-11 04:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.420519","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1829108,"2025-05-11 04:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.423916","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1829209,"2025-05-11 04:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.71583","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1829210,"2025-05-11 04:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.203022","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1829411,"2025-05-11 04:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.522076","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1829413,"2025-05-11 04:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.749115","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1829514,"2025-05-11 04:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.939783","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1832000,"2025-05-11 05:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.341217","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1832202,"2025-05-11 05:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.638943","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1833774,"2025-05-11 06:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.458788","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1833776,"2025-05-11 06:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.474726","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1833877,"2025-05-11 06:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.508408","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1833978,"2025-05-11 06:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.575865","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1834079,"2025-05-11 06:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.30245","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1834181,"2025-05-11 06:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","24.755005","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1835245,"2025-05-11 07:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.49303","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1835346,"2025-05-11 07:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.286463","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1835347,"2025-05-11 07:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.128162","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1835448,"2025-05-11 07:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.380678","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1835652,"2025-05-11 07:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.990688","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1835753,"2025-05-11 07:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.76146","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1835754,"2025-05-11 07:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.334948","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1835955,"2025-05-11 07:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.78532","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1835957,"2025-05-11 07:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.634842","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1837427,"2025-05-11 08:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.935493","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1837528,"2025-05-11 08:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.012114","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1837529,"2025-05-11 08:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.154564","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1838442,"2025-05-11 08:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.299921","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1838544,"2025-05-11 08:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","24.644804","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1838746,"2025-05-11 08:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.257656","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1840013,"2025-05-11 09:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.364737","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1840114,"2025-05-11 09:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.891281","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1840115,"2025-05-11 09:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.541529","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1840318,"2025-05-11 09:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.29304","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1840320,"2025-05-11 09:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.575777","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1840421,"2025-05-11 09:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.976406","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1840522,"2025-05-11 09:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.349033","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1840623,"2025-05-11 09:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.728071","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1840725,"2025-05-11 09:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","24.608328","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1841789,"2025-05-11 10:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.10188","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1841890,"2025-05-11 10:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.625391","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1841891,"2025-05-11 10:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.038315","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1841992,"2025-05-11 10:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.018642","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1842196,"2025-05-11 10:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.3396","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1842297,"2025-05-11 10:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.650341","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1842298,"2025-05-11 10:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.63657","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1842499,"2025-05-11 10:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.541033","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1842501,"2025-05-11 10:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.7188","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1842602,"2025-05-11 10:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.559353","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1842703,"2025-05-11 10:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.372997","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1842804,"2025-05-11 10:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.115313","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1842906,"2025-05-11 10:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","24.594412","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1843108,"2025-05-11 10:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.145975","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1843109,"2025-05-11 10:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","26.447681","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1844885,"2025-05-11 11:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.490173","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1844986,"2025-05-11 11:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.049221","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1845088,"2025-05-11 11:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","24.849915","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1845290,"2025-05-11 11:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","24.968563","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1845291,"2025-05-11 11:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","26.465603","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1846152,"2025-05-11 12:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.560822","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1846253,"2025-05-11 12:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.586435","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1846254,"2025-05-11 12:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.605139","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1846355,"2025-05-11 12:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.579672","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1847269,"2025-05-11 12:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.101439","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1847471,"2025-05-11 12:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","24.840149","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1847472,"2025-05-11 12:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","26.686167","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1848839,"2025-05-11 13:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.177483","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1848841,"2025-05-11 13:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.709076","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1849043,"2025-05-11 13:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.23008","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1849045,"2025-05-11 13:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.230091","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1849146,"2025-05-11 13:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.326605","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1849247,"2025-05-11 13:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.019173","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1849348,"2025-05-11 13:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.247747","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1849450,"2025-05-11 13:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.22956","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1850512,"2025-05-11 14:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.002544","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1850613,"2025-05-11 14:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.067385","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1850614,"2025-05-11 14:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.695948","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1850715,"2025-05-11 14:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.278297","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1850917,"2025-05-11 14:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.920832","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1851018,"2025-05-11 14:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.000053","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1851019,"2025-05-11 14:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.173683","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1851221,"2025-05-11 14:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.387892","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1851224,"2025-05-11 14:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.56565","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1852887,"2025-05-11 15:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.520428","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1853090,"2025-05-11 15:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.393806","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1853192,"2025-05-11 15:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.219461","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1853193,"2025-05-11 15:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.221361","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1853394,"2025-05-11 15:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.502586","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1853396,"2025-05-11 15:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.876165","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1853497,"2025-05-11 15:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.473894","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1853598,"2025-05-11 15:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.67601","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1853699,"2025-05-11 15:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.310732","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1853801,"2025-05-11 15:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.00072","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1854003,"2025-05-11 15:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","24.840754","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1854004,"2025-05-11 15:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","25.42887","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1856174,"2025-05-11 16:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.046757","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1856175,"2025-05-11 16:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","25.416346","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1856276,"2025-05-11 16:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","26.703453","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1857737,"2025-05-11 17:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.600145","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1857739,"2025-05-11 17:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.09196","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1857840,"2025-05-11 17:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.624496","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1857941,"2025-05-11 17:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.725674","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1858042,"2025-05-11 17:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.514856","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1858144,"2025-05-11 17:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.459885","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1858346,"2025-05-11 17:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.313168","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1858347,"2025-05-11 17:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","25.062561","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1858448,"2025-05-11 17:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","26.302164","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1859208,"2025-05-11 18:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.109459","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1861389,"2025-05-11 19:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.825579","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1861490,"2025-05-11 19:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.837706","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1861491,"2025-05-11 19:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.231773","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1861592,"2025-05-11 19:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.782642","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1862506,"2025-05-11 19:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.73783","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1862708,"2025-05-11 19:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.602736","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1862709,"2025-05-11 19:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","24.764809","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1862810,"2025-05-11 19:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","25.983383","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1864079,"2025-05-11 20:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.662361","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1864080,"2025-05-11 20:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.716192","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1864281,"2025-05-11 20:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.22371","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1864283,"2025-05-11 20:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.925026","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1864384,"2025-05-11 20:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.66711","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1864485,"2025-05-11 20:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.243729","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1864586,"2025-05-11 20:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.245817","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1864688,"2025-05-11 20:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","27.133907","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1865752,"2025-05-11 21:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.700926","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1865853,"2025-05-11 21:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.599783","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1865854,"2025-05-11 21:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.329205","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1865955,"2025-05-11 21:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.527323","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1866159,"2025-05-11 21:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.431149","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1866260,"2025-05-11 21:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.84347","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1866261,"2025-05-11 21:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.956392","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1867933,"2025-05-11 22:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.447466","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1868034,"2025-05-11 22:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.733282","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1868035,"2025-05-11 22:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.447407","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1868847,"2025-05-11 22:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.469906","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1868948,"2025-05-11 22:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.699924","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1869050,"2025-05-11 22:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","27.26391","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1869252,"2025-05-11 22:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.34527","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1869253,"2025-05-11 22:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","24.511023","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1869354,"2025-05-11 22:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","25.218843","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1869556,"2025-05-11 22:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","26.957003","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1870520,"2025-05-11 23:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.251038","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1870621,"2025-05-11 23:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","28.151854","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1870622,"2025-05-11 23:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.212563","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1870825,"2025-05-11 23:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.668297","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1870827,"2025-05-11 23:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.72761","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1870928,"2025-05-11 23:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.305864","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1871029,"2025-05-11 23:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.67741","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1871130,"2025-05-11 23:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.7362","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1843971,"2025-05-11 11:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.635305","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1844072,"2025-05-11 11:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.41052","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1844073,"2025-05-11 11:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.65571","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1844174,"2025-05-11 11:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.247948","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1844376,"2025-05-11 11:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.888845","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1844478,"2025-05-11 11:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.63226","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1844480,"2025-05-11 11:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.671473","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1844681,"2025-05-11 11:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.844715","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1844683,"2025-05-11 11:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.858826","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1844784,"2025-05-11 11:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.248283","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1846557,"2025-05-11 12:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.182781","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1846658,"2025-05-11 12:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.122774","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1846659,"2025-05-11 12:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.723396","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1846862,"2025-05-11 12:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.092016","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1846864,"2025-05-11 12:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.931538","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1846965,"2025-05-11 12:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.215828","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1847066,"2025-05-11 12:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.317265","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1847167,"2025-05-11 12:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.7572","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1848333,"2025-05-11 13:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.514284","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1848434,"2025-05-11 13:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.524359","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1848435,"2025-05-11 13:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.694363","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1848536,"2025-05-11 13:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.341915","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1848738,"2025-05-11 13:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.443823","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1849652,"2025-05-11 13:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","24.848885","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1849653,"2025-05-11 13:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","26.276138","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1851325,"2025-05-11 14:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.489864","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1851426,"2025-05-11 14:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.78559","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1851527,"2025-05-11 14:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.622345","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1851629,"2025-05-11 14:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.795158","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1851831,"2025-05-11 14:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","24.636953","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1851832,"2025-05-11 14:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","25.888685","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1852684,"2025-05-11 15:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.84675","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1852785,"2025-05-11 15:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.126554","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1852786,"2025-05-11 15:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.411112","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1854855,"2025-05-11 16:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.12809","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1854956,"2025-05-11 16:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.458805","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1854957,"2025-05-11 16:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.345924","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1855058,"2025-05-11 16:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.642067","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1855262,"2025-05-11 16:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.277298","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1855363,"2025-05-11 16:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.764254","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1855364,"2025-05-11 16:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.669542","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1855565,"2025-05-11 16:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.545172","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1855567,"2025-05-11 16:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.97507","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1855668,"2025-05-11 16:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.487839","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1855769,"2025-05-11 16:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.330381","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1855870,"2025-05-11 16:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.737299","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1855972,"2025-05-11 16:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.458443","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1857027,"2025-05-11 17:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.389875","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1857128,"2025-05-11 17:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.680971","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1857129,"2025-05-11 17:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.247776","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1857230,"2025-05-11 17:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.103544","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1857432,"2025-05-11 17:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.50847","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1857533,"2025-05-11 17:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.862667","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1857534,"2025-05-11 17:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.598846","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1859309,"2025-05-11 18:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.558062","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1859310,"2025-05-11 18:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.225151","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1859411,"2025-05-11 18:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.910849","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1859613,"2025-05-11 18:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.612762","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1859714,"2025-05-11 18:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","26.974083","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1859715,"2025-05-11 18:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.137009","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1859918,"2025-05-11 18:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.544397","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1859920,"2025-05-11 18:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.229572","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1860021,"2025-05-11 18:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","25.79119","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1860122,"2025-05-11 18:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.307","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1860223,"2025-05-11 18:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.558542","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1860325,"2025-05-11 18:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.651731","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1860530,"2025-05-11 18:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.364088","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1860531,"2025-05-11 18:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","24.862328","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1860632,"2025-05-11 18:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","26.148323","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1861794,"2025-05-11 19:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.546196","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1861897,"2025-05-11 19:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.351583","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1861898,"2025-05-11 19:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.003963","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1862099,"2025-05-11 19:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.34476","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1862101,"2025-05-11 19:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.584652","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1862202,"2025-05-11 19:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.30474","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1862303,"2025-05-11 19:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.181446","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1862404,"2025-05-11 19:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.501574","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1863571,"2025-05-11 20:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.287802","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1863672,"2025-05-11 20:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.235512","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1863673,"2025-05-11 20:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.215427","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1863774,"2025-05-11 20:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.517189","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1863978,"2025-05-11 20:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.382988","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1864890,"2025-05-11 20:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.953264","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1864891,"2025-05-11 20:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","24.536293","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1864992,"2025-05-11 20:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","25.941422","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1866462,"2025-05-11 21:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.145525","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1866464,"2025-05-11 21:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.885084","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1866565,"2025-05-11 21:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.76437","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1866666,"2025-05-11 21:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.193937","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1866767,"2025-05-11 21:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.984388","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1866869,"2025-05-11 21:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","27.214718","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1867071,"2025-05-11 21:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.10411","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1867072,"2025-05-11 21:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","24.61128","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1867173,"2025-05-11 21:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","25.685465","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1868136,"2025-05-11 22:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.563213","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1868340,"2025-05-11 22:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.621439","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1868441,"2025-05-11 22:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","28.37227","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1868442,"2025-05-11 22:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.004961","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1868643,"2025-05-11 22:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.780943","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1868645,"2025-05-11 22:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.76364","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1868746,"2025-05-11 22:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.907963","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1870115,"2025-05-11 23:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.76403","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1870216,"2025-05-11 23:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.951181","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1870217,"2025-05-11 23:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.846468","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1870318,"2025-05-11 23:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.422058","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1871434,"2025-05-11 23:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.469164","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1871435,"2025-05-11 23:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","25.285511","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1871536,"2025-05-11 23:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","24.895527","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1871232,"2025-05-11 23:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","27.270653","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1872997,"2025-05-12 00:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.682821","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1872999,"2025-05-12 00:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.78856","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1873100,"2025-05-12 00:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.625263","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1873201,"2025-05-12 00:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.967554","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1873302,"2025-05-12 00:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.716116","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1873404,"2025-05-12 00:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","27.275013","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1873606,"2025-05-12 00:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.433691","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1873607,"2025-05-12 00:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","25.253025","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1874468,"2025-05-12 01:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.117817","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1874569,"2025-05-12 01:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","29.257832","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1874570,"2025-05-12 01:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.404934","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1874671,"2025-05-12 01:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.303736","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1874875,"2025-05-12 01:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.91794","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1874976,"2025-05-12 01:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","28.635592","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1874977,"2025-05-12 01:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.756325","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1875178,"2025-05-12 01:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.65859","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1875180,"2025-05-12 01:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.452068","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1876093,"2025-05-12 01:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","26.821508","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1876650,"2025-05-12 02:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.25497","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1876751,"2025-05-12 02:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","29.518122","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1876752,"2025-05-12 02:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.748013","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1876853,"2025-05-12 02:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.466833","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1877665,"2025-05-12 02:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","24.99222","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1877767,"2025-05-12 02:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.971102","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1877969,"2025-05-12 02:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.808323","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1877970,"2025-05-12 02:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","26.084997","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1878071,"2025-05-12 02:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","24.349644","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1878273,"2025-05-12 02:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","26.56779","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1879327,"2025-05-12 03:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","28.896854","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1879328,"2025-05-12 03:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.690216","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1879531,"2025-05-12 03:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.305586","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1879533,"2025-05-12 03:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.997131","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1879634,"2025-05-12 03:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.887953","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1879735,"2025-05-12 03:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.42717","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1879836,"2025-05-12 03:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.240717","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1879938,"2025-05-12 03:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.818361","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1880993,"2025-05-12 04:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.807798","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1881094,"2025-05-12 04:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","29.010633","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1881095,"2025-05-12 04:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","29.237173","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1881196,"2025-05-12 04:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.063543","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1881703,"2025-05-12 04:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.33668","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1881705,"2025-05-12 04:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.755413","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1881806,"2025-05-12 04:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.783062","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1881907,"2025-05-12 04:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.64523","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1882008,"2025-05-12 04:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.013796","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1883172,"2025-05-12 05:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.975906","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1883680,"2025-05-12 05:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","28.453728","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1883681,"2025-05-12 05:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.914392","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1883882,"2025-05-12 05:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.361311","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1883884,"2025-05-12 05:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.551935","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1883985,"2025-05-12 05:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.701641","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1884491,"2025-05-12 05:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.49761","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1884492,"2025-05-12 05:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","27.445047","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1884593,"2025-05-12 05:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","25.039461","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1884795,"2025-05-12 05:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","25.889513","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1885353,"2025-05-12 06:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.214054","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1885454,"2025-05-12 06:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.928114","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1885455,"2025-05-12 06:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","29.09221","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1885556,"2025-05-12 06:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.831318","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1886063,"2025-05-12 06:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.27593","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1886065,"2025-05-12 06:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.478745","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1886166,"2025-05-12 06:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.575325","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1886267,"2025-05-12 06:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","28.491764","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1886368,"2025-05-12 06:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.354916","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1886976,"2025-05-12 06:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","25.271528","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1887078,"2025-05-12 06:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","27.230606","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1887737,"2025-05-12 07:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.894512","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1887941,"2025-05-12 07:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.030907","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1888042,"2025-05-12 07:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","28.662445","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1888043,"2025-05-12 07:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","28.319454","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1888549,"2025-05-12 07:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.746525","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1888651,"2025-05-12 07:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.792944","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1888853,"2025-05-12 07:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.474516","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1889259,"2025-05-12 07:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","26.792128","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1890121,"2025-05-12 08:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.259226","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1890224,"2025-05-12 08:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","28.08702","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1890225,"2025-05-12 08:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","28.76115","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1890426,"2025-05-12 08:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.793676","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1890428,"2025-05-12 08:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.68856","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1891035,"2025-05-12 08:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.385246","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1891036,"2025-05-12 08:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","27.882355","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1891137,"2025-05-12 08:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","26.332825","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1891897,"2025-05-12 09:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.432827","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1891998,"2025-05-12 09:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.396406","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1891999,"2025-05-12 09:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.839878","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1892607,"2025-05-12 09:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.03574","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1892609,"2025-05-12 09:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.642496","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1892710,"2025-05-12 09:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.156221","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1892811,"2025-05-12 09:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","28.31852","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1894078,"2025-05-12 10:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.637117","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1894484,"2025-05-12 10:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.317461","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1894586,"2025-05-12 10:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.700396","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1894587,"2025-05-12 10:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","28.49842","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1894788,"2025-05-12 10:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.266132","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1894790,"2025-05-12 10:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.889656","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1895397,"2025-05-12 10:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.18665","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1895398,"2025-05-12 10:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","27.342527","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1895499,"2025-05-12 10:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","27.182554","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1896260,"2025-05-12 11:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.175722","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1896361,"2025-05-12 11:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.215128","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1896362,"2025-05-12 11:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.134838","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1896463,"2025-05-12 11:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.91398","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1896970,"2025-05-12 11:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.627504","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1896972,"2025-05-12 11:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.005548","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1897073,"2025-05-12 11:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.460007","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1897174,"2025-05-12 11:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","28.595968","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1897275,"2025-05-12 11:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.602118","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1897681,"2025-05-12 11:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","27.360525","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1897883,"2025-05-12 11:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","25.125051","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1897985,"2025-05-12 11:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","25.799553","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1897987,"2025-05-12 11:00:00","12:00:00","Bird-Island_Water-Temperature_12hr","1.0.0","27.70368","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1898540,"2025-05-12 12:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.191319","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1898541,"2025-05-12 12:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.968773","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1898642,"2025-05-12 12:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","29.264942","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1898844,"2025-05-12 12:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.866333","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1899353,"2025-05-12 12:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","28.285076","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1871738,"2025-05-11 23:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","27.085585","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1872287,"2025-05-12 00:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.615593","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1872388,"2025-05-12 00:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","29.098124","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1872389,"2025-05-12 00:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.01992","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1872490,"2025-05-12 00:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.583052","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1872694,"2025-05-12 00:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.007145","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1872795,"2025-05-12 00:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","28.261889","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1872796,"2025-05-12 00:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.424988","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1873708,"2025-05-12 00:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","24.702765","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1873910,"2025-05-12 00:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","26.899618","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1875281,"2025-05-12 01:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.502054","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1875382,"2025-05-12 01:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.550343","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1875483,"2025-05-12 01:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.37681","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1875585,"2025-05-12 01:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","27.314978","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1875787,"2025-05-12 01:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.43272","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1875788,"2025-05-12 01:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","26.039526","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1875889,"2025-05-12 01:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","24.61367","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1877057,"2025-05-12 02:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.807442","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1877158,"2025-05-12 02:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","29.004269","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1877159,"2025-05-12 02:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.210125","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1877360,"2025-05-12 02:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.409204","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1877362,"2025-05-12 02:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.13076","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1877463,"2025-05-12 02:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.704193","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1877564,"2025-05-12 02:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.230087","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1878821,"2025-05-12 03:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.971098","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1878922,"2025-05-12 03:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","29.493046","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1878923,"2025-05-12 03:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","29.085419","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1879024,"2025-05-12 03:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.316252","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1879226,"2025-05-12 03:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.341457","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1880140,"2025-05-12 03:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.63045","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1880141,"2025-05-12 03:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","26.717941","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1880242,"2025-05-12 03:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","24.202341","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1880444,"2025-05-12 03:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","26.518126","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1881398,"2025-05-12 04:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.31004","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1881499,"2025-05-12 04:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","28.684292","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1881500,"2025-05-12 04:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","28.004248","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1882110,"2025-05-12 04:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.484604","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1882312,"2025-05-12 04:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.506836","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1882313,"2025-05-12 04:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","27.094965","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1882414,"2025-05-12 04:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","24.558071","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1882616,"2025-05-12 04:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","26.214235","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1882718,"2025-05-12 04:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","27.310411","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1883273,"2025-05-12 05:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.772432","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1883274,"2025-05-12 05:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","29.233822","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1883375,"2025-05-12 05:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.511736","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1883579,"2025-05-12 05:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.371376","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1884086,"2025-05-12 05:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","28.290636","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1884187,"2025-05-12 05:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","26.132061","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1884289,"2025-05-12 05:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.391203","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1884897,"2025-05-12 05:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","27.114054","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1885758,"2025-05-12 06:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.017845","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1885859,"2025-05-12 06:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","28.574213","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1885861,"2025-05-12 06:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","28.273785","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1886470,"2025-05-12 06:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.877764","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1886672,"2025-05-12 06:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.742306","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1886673,"2025-05-12 06:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","27.568077","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1886774,"2025-05-12 06:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","25.217508","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1887534,"2025-05-12 07:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.402657","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1887635,"2025-05-12 07:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.738832","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1887636,"2025-05-12 07:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","29.023932","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1888244,"2025-05-12 07:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.588736","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1888246,"2025-05-12 07:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.698267","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1888347,"2025-05-12 07:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.426472","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1888448,"2025-05-12 07:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","28.476845","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1888854,"2025-05-12 07:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","27.89683","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1888955,"2025-05-12 07:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","25.700945","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1889157,"2025-05-12 07:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","25.141243","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1889716,"2025-05-12 08:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.688835","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1889817,"2025-05-12 08:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.612322","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1889818,"2025-05-12 08:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.968737","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1889919,"2025-05-12 08:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.461111","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1890529,"2025-05-12 08:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.313128","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1890630,"2025-05-12 08:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","28.300417","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1890731,"2025-05-12 08:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.321667","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1890833,"2025-05-12 08:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.789312","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1891339,"2025-05-12 08:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","25.10603","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1891441,"2025-05-12 08:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","26.802662","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1892100,"2025-05-12 09:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.600594","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1892302,"2025-05-12 09:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.30244","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1892403,"2025-05-12 09:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.82078","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1892404,"2025-05-12 09:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","28.497368","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1892912,"2025-05-12 09:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.510181","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1893014,"2025-05-12 09:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.582844","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1893216,"2025-05-12 09:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.308674","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1893217,"2025-05-12 09:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","27.44473","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1893318,"2025-05-12 09:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","26.890852","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1893520,"2025-05-12 09:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","25.314228","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1893622,"2025-05-12 09:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","26.382069","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1894179,"2025-05-12 10:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.343996","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1894180,"2025-05-12 10:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.589123","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1894281,"2025-05-12 10:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.907196","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1894891,"2025-05-12 10:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.839264","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1894992,"2025-05-12 10:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","28.528137","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1895093,"2025-05-12 10:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.743021","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1895195,"2025-05-12 10:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.496382","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1895701,"2025-05-12 10:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","25.14207","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1895803,"2025-05-12 10:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","26.195087","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1895805,"2025-05-12 10:00:00","12:00:00","Bird-Island_Water-Temperature_12hr","1.0.0","27.782034","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1896667,"2025-05-12 11:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.642048","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1896768,"2025-05-12 11:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.509974","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1896769,"2025-05-12 11:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","28.461544","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1897377,"2025-05-12 11:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.865896","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1897579,"2025-05-12 11:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.01977","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1897580,"2025-05-12 11:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","27.143383","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1898439,"2025-05-12 12:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.190561","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1898945,"2025-05-12 12:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.254658","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1898946,"2025-05-12 12:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","28.425991","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1899149,"2025-05-12 12:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","27.882973","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1899454,"2025-05-12 12:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.455412","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1899556,"2025-05-12 12:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.915215","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1901025,"2025-05-12 13:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.094494","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1901126,"2025-05-12 13:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.183004","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1901128,"2025-05-12 13:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","28.475904","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1901737,"2025-05-12 13:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.996326","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1901939,"2025-05-12 13:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.799522","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1901940,"2025-05-12 13:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","27.002916","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1902041,"2025-05-12 13:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","27.352095","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1902802,"2025-05-12 14:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.605778","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1902903,"2025-05-12 14:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.720877","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1902904,"2025-05-12 14:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.131874","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1903309,"2025-05-12 14:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.149815","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1903311,"2025-05-12 14:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","28.165798","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1903512,"2025-05-12 14:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","28.371035","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1903514,"2025-05-12 14:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.450779","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1903615,"2025-05-12 14:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.447237","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1904121,"2025-05-12 14:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.761988","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1904122,"2025-05-12 14:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","26.560877","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1904223,"2025-05-12 14:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","27.661592","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1904425,"2025-05-12 14:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","25.741713","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1905387,"2025-05-12 15:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.911064","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1905488,"2025-05-12 15:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.435755","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1905489,"2025-05-12 15:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","28.134527","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1905690,"2025-05-12 15:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","28.31099","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1905692,"2025-05-12 15:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.593622","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1906097,"2025-05-12 15:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.630991","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1906705,"2025-05-12 15:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","25.147556","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1906707,"2025-05-12 15:00:00","12:00:00","Bird-Island_Water-Temperature_12hr","1.0.0","26.60602","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1907161,"2025-05-12 16:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.40058","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1907262,"2025-05-12 16:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.23797","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1907263,"2025-05-12 16:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.884539","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1907871,"2025-05-12 16:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","28.367586","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1907873,"2025-05-12 16:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.685379","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1908176,"2025-05-12 16:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.711527","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1908278,"2025-05-12 16:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","27.136934","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1908582,"2025-05-12 16:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","27.35139","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1908886,"2025-05-12 16:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","24.911884","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1908888,"2025-05-12 16:00:00","12:00:00","Bird-Island_Water-Temperature_12hr","1.0.0","26.270786","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1909343,"2025-05-12 17:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.66369","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1909444,"2025-05-12 17:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.497898","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1909445,"2025-05-12 17:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.92361","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1910053,"2025-05-12 17:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","28.50325","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1910055,"2025-05-12 17:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.896116","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1910358,"2025-05-12 17:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.601534","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1910460,"2025-05-12 17:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","27.190895","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1910764,"2025-05-12 17:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","27.233252","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1911272,"2025-05-12 17:00:00","06:00:00","Bird-Island_Water-Temperature_6hr","1.0.0","27.455221","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1911522,"2025-05-12 18:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.209593","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1911623,"2025-05-12 18:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.423922","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1911624,"2025-05-12 18:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.787476","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1911929,"2025-05-12 18:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","29.06347","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1912030,"2025-05-12 18:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.909302","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1912031,"2025-05-12 18:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.18723","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1912335,"2025-05-12 18:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.054615","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1912436,"2025-05-12 18:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.275984","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1912844,"2025-05-12 18:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.118225","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1912845,"2025-05-12 18:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","25.962305","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1913148,"2025-05-12 18:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","26.971634","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1913250,"2025-05-12 18:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","25.183859","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1913252,"2025-05-12 18:00:00","12:00:00","Bird-Island_Water-Temperature_12hr","1.0.0","25.88543","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1913693,"2025-05-12 19:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.790016","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1914199,"2025-05-12 19:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.976696","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1914200,"2025-05-12 19:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.907822","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1914506,"2025-05-12 19:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.466543","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1914607,"2025-05-12 19:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.170088","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1915012,"2025-05-12 19:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.194479","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1915013,"2025-05-12 19:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","25.962824","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1915316,"2025-05-12 19:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","27.43711","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1915418,"2025-05-12 19:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","25.537674","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1915420,"2025-05-12 19:00:00","12:00:00","Bird-Island_Water-Temperature_12hr","1.0.0","25.585285","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1915723,"2025-05-12 19:00:00","03:00:00","Bird-Island_Water-Temperature_3hr","1.0.0","27.71891","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1915875,"2025-05-12 20:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.36473","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1899151,"2025-05-12 12:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.011477","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1899252,"2025-05-12 12:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.287933","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1899758,"2025-05-12 12:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.828238","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1899759,"2025-05-12 12:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","27.244831","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1899860,"2025-05-12 12:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","27.462234","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1900062,"2025-05-12 12:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","25.402426","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1900164,"2025-05-12 12:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","25.63683","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1900166,"2025-05-12 12:00:00","12:00:00","Bird-Island_Water-Temperature_12hr","1.0.0","27.578648","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1900620,"2025-05-12 13:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.096447","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1900721,"2025-05-12 13:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.988497","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1900722,"2025-05-12 13:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.071085","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1900823,"2025-05-12 13:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.984968","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1901330,"2025-05-12 13:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","28.076464","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1901332,"2025-05-12 13:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","27.240316","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1901433,"2025-05-12 13:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.396719","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1901534,"2025-05-12 13:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","28.029257","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1901635,"2025-05-12 13:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.969053","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1902243,"2025-05-12 13:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","25.563023","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1902345,"2025-05-12 13:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","25.401827","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1902347,"2025-05-12 13:00:00","12:00:00","Bird-Island_Water-Temperature_12hr","1.0.0","27.229164","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1903005,"2025-05-12 14:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.769316","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1903207,"2025-05-12 14:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.57313","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1903716,"2025-05-12 14:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.834074","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1903817,"2025-05-12 14:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","28.256912","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1903919,"2025-05-12 14:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.385035","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1904527,"2025-05-12 14:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","25.130682","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1904529,"2025-05-12 14:00:00","12:00:00","Bird-Island_Water-Temperature_12hr","1.0.0","27.004665","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1904980,"2025-05-12 15:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","29.35447","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1905081,"2025-05-12 15:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.77525","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1905082,"2025-05-12 15:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.952587","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1905183,"2025-05-12 15:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.846485","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1905793,"2025-05-12 15:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.497042","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1905894,"2025-05-12 15:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.735296","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1905995,"2025-05-12 15:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","28.186474","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1906299,"2025-05-12 15:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.917562","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1906300,"2025-05-12 15:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","26.250166","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1906401,"2025-05-12 15:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","27.561098","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1906603,"2025-05-12 15:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","25.97823","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1907364,"2025-05-12 16:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","29.043715","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1907566,"2025-05-12 16:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.814133","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1907667,"2025-05-12 16:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.529497","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1907669,"2025-05-12 16:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.741257","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1907974,"2025-05-12 16:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.576405","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1908075,"2025-05-12 16:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.314426","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1908480,"2025-05-12 16:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.052794","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1908481,"2025-05-12 16:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","26.178005","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1908784,"2025-05-12 16:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","26.157257","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1909090,"2025-05-12 16:00:00","06:00:00","Bird-Island_Water-Temperature_6hr","1.0.0","27.478151","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1909546,"2025-05-12 17:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.645117","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1909748,"2025-05-12 17:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.957008","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1909850,"2025-05-12 17:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.732052","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1909852,"2025-05-12 17:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.567318","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1910156,"2025-05-12 17:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.779623","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1910257,"2025-05-12 17:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.740316","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1910662,"2025-05-12 17:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","26.332218","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1910663,"2025-05-12 17:00:00","1 day 12:00:00","Bird-Island_Water-Temperature_36hr","1.0.0","26.04338","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1910966,"2025-05-12 17:00:00","1 day","Bird-Island_Water-Temperature_24hr","1.0.0","26.327267","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1911068,"2025-05-12 17:00:00","18:00:00","Bird-Island_Water-Temperature_18hr","1.0.0","25.150988","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1911070,"2025-05-12 17:00:00","12:00:00","Bird-Island_Water-Temperature_12hr","1.0.0","25.7652","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1911725,"2025-05-12 18:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.520624","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1912232,"2025-05-12 18:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","28.435257","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1912234,"2025-05-12 18:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","28.051193","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1912537,"2025-05-12 18:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.663464","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1912639,"2025-05-12 18:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","27.678635","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1912946,"2025-05-12 18:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","27.089417","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1913454,"2025-05-12 18:00:00","06:00:00","Bird-Island_Water-Temperature_6hr","1.0.0","27.210854","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1913794,"2025-05-12 19:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.709963","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1913795,"2025-05-12 19:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.815315","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1913896,"2025-05-12 19:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.423927","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1914098,"2025-05-12 19:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","28.978346","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1914403,"2025-05-12 19:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","28.308784","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1914405,"2025-05-12 19:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","28.320805","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1914708,"2025-05-12 19:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","27.50604","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1914810,"2025-05-12 19:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","27.90116","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1915114,"2025-05-12 19:00:00","1 day 06:00:00","Bird-Island_Water-Temperature_30hr","1.0.0","27.100569","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1915622,"2025-05-12 19:00:00","06:00:00","Bird-Island_Water-Temperature_6hr","1.0.0","27.106073","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1915976,"2025-05-12 20:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.940367","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1915977,"2025-05-12 20:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.745823","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1916078,"2025-05-12 20:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","28.088968","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1818200,"2025-05-10 23:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.30587","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1818301,"2025-05-10 23:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.45391","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1818302,"2025-05-10 23:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.542036","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1819976,"2025-05-11 00:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","28.387539","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1820077,"2025-05-11 00:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.372065","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1820078,"2025-05-11 00:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.230286","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1820179,"2025-05-11 00:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","25.563284","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1820381,"2025-05-11 00:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.184511","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1820482,"2025-05-11 00:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.54504","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1820483,"2025-05-11 00:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","25.747593","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1820686,"2025-05-11 00:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.017763","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1820688,"2025-05-11 00:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.762657","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1820789,"2025-05-11 00:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.82251","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1820890,"2025-05-11 00:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","25.200853","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1820991,"2025-05-11 00:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","24.856527","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1821093,"2025-05-11 00:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.115307","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1823172,"2025-05-11 01:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","24.408903","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1823274,"2025-05-11 01:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","26.245836","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1824339,"2025-05-11 02:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.882969","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1824440,"2025-05-11 02:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.8492","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1824441,"2025-05-11 02:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","27.97895","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1824542,"2025-05-11 02:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.455027","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1824744,"2025-05-11 02:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","27.037956","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1826520,"2025-05-11 03:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.302366","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1826621,"2025-05-11 03:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.756432","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1826622,"2025-05-11 03:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.233963","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1826723,"2025-05-11 03:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.341509","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1826925,"2025-05-11 03:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.527157","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1827028,"2025-05-11 03:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","28.030495","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1827029,"2025-05-11 03:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","26.813845","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1827230,"2025-05-11 03:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.498428","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1827232,"2025-05-11 03:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","26.004782","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1827333,"2025-05-11 03:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","27.036741","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1827434,"2025-05-11 03:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.701836","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1827535,"2025-05-11 03:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","24.404108","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1827637,"2025-05-11 03:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.677631","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1829615,"2025-05-11 04:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","26.882648","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1829716,"2025-05-11 04:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.13721","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1829818,"2025-05-11 04:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.599802","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1830020,"2025-05-11 04:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.856644","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1830883,"2025-05-11 05:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.316357","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1830984,"2025-05-11 05:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.23102","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1830985,"2025-05-11 05:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.403862","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1831086,"2025-05-11 05:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","26.997957","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1831288,"2025-05-11 05:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.283451","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1831389,"2025-05-11 05:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.5753","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1831390,"2025-05-11 05:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.087902","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1831593,"2025-05-11 05:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","25.548492","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1831595,"2025-05-11 05:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.384888","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1831696,"2025-05-11 05:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.837242","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1831797,"2025-05-11 05:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.487967","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1831898,"2025-05-11 05:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.187277","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1833064,"2025-05-11 06:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.529518","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1833165,"2025-05-11 06:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","28.360495","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1833166,"2025-05-11 06:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.239758","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1833267,"2025-05-11 06:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.240292","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1833469,"2025-05-11 06:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","25.871773","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1833572,"2025-05-11 06:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.787071","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1833573,"2025-05-11 06:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.344524","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1834383,"2025-05-11 06:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.794617","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1836058,"2025-05-11 07:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.24386","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1836159,"2025-05-11 07:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.61408","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1836260,"2025-05-11 07:00:00","2 days 06:00:00","Bird-Island_Water-Temperature_54hr","1.0.0","25.66218","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1836362,"2025-05-11 07:00:00","2 days","Bird-Island_Water-Temperature_48hr","1.0.0","25.073689","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1836564,"2025-05-11 07:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.440422","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1837630,"2025-05-11 08:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.714571","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1837834,"2025-05-11 08:00:00","4 days","Bird-Island_Water-Temperature_96hr","1.0.0","26.284243","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1837935,"2025-05-11 08:00:00","3 days 18:00:00","Bird-Island_Water-Temperature_90hr","1.0.0","27.216537","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1837936,"2025-05-11 08:00:00","3 days 12:00:00","Bird-Island_Water-Temperature_84hr","1.0.0","27.772522","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1838137,"2025-05-11 08:00:00","3 days 06:00:00","Bird-Island_Water-Temperature_78hr","1.0.0","26.018915","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1838139,"2025-05-11 08:00:00","3 days","Bird-Island_Water-Temperature_72hr","1.0.0","25.519972","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1838240,"2025-05-11 08:00:00","2 days 18:00:00","Bird-Island_Water-Temperature_66hr","1.0.0","26.093473","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1838341,"2025-05-11 08:00:00","2 days 12:00:00","Bird-Island_Water-Temperature_60hr","1.0.0","27.336775","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1839608,"2025-05-11 09:00:00","5 days","Bird-Island_Water-Temperature_120hr","1.0.0","27.886976","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1839709,"2025-05-11 09:00:00","4 days 18:00:00","Bird-Island_Water-Temperature_114hr","1.0.0","27.757095","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1839710,"2025-05-11 09:00:00","4 days 12:00:00","Bird-Island_Water-Temperature_108hr","1.0.0","28.166788","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1839811,"2025-05-11 09:00:00","4 days 06:00:00","Bird-Island_Water-Temperature_102hr","1.0.0","27.77463","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
+1840927,"2025-05-11 09:00:00","1 day 18:00:00","Bird-Island_Water-Temperature_42hr","1.0.0","25.282883","celsius","SouthBirdIsland","pWaterTmp",NULL,NULL
