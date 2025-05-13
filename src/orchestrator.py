@@ -64,10 +64,10 @@ class Orchestrator:
         if executionTime is None: 
                     executionTime = datetime.now()
 
-        try:
+        for dspecPath in checked_dspecs:
             try:
-                for dspecPath in checked_dspecs:
-                
+                try:
+                    
                     DSPEC = self.DSPEC_parser.parse_dspec(dspecPath)
                     model_name: str = DSPEC.modelName
                     reference_time = self.__calculate_referenceTime(executionTime, DSPEC)
@@ -81,18 +81,18 @@ class Orchestrator:
 
                     self.__handle_successful_prediction(model_name, reference_time, result, toss)
                 
-            except Exception:
-                    raise Semaphore_Exception('Error:: An unknown error ocurred!')
-            
-        except Semaphore_Exception as se:
-            log(f'Error:: Prediction failed due to Semaphore Exception\n{se}')
-            self.__handle_failed_prediction(se, reference_time, model_name, DSPEC, toss)
-        except Semaphore_Data_Exception as sde:
-            log(f'Warning:: Prediction failed due to lack of data.')
-            self.__handle_failed_prediction(sde, reference_time, model_name, DSPEC, toss)
-        except Semaphore_Ingestion_Exception as sie:
-            log(f'Error:: Prediction failed due to Semaphore Ingestion Exception\n{sie}')
-            self.__handle_failed_prediction(sie, reference_time, model_name, DSPEC, toss)
+                except Exception:
+                        raise Semaphore_Exception('Error:: An unknown error ocurred!')
+                
+            except Semaphore_Exception as se:
+                log(f'Error:: Prediction failed due to Semaphore Exception\n{se}')
+                self.__handle_failed_prediction(se, reference_time, model_name, DSPEC, toss)
+            except Semaphore_Data_Exception as sde:
+                log(f'Warning:: Prediction failed due to lack of data.')
+                self.__handle_failed_prediction(sde, reference_time, model_name, DSPEC, toss)
+            except Semaphore_Ingestion_Exception as sie:
+                log(f'Error:: Prediction failed due to Semaphore Ingestion Exception\n{sie}')
+                self.__handle_failed_prediction(sie, reference_time, model_name, DSPEC, toss)
 
     
     def __clean_and_check_dspec(self, dspec_path: str) -> str:
