@@ -1,7 +1,7 @@
 {
     "dspecVersion": "2.0",
     "modelName": "Bird-Island_Water-Temperature_12hr",
-    "modelVersion": "1.5.0",
+    "modelVersion": "1.0.0",
     "author": "Christian Duff",
     "modelFileName": "./ColdStunning/Bird-Island_Water-Temperature_12hr",
     "timingInfo": {
@@ -62,7 +62,7 @@
         {
             "_name": "Predicted Air Temp",
             "location": "SBirdIsland",
-            "source": "NDFD_API",
+            "source": "NDFD_EXP",
             "series": "pAirTemp",
             "unit": "celsius",
             "interval": 3600,
