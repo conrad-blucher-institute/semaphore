@@ -9,10 +9,7 @@
 Language (DWML) Generator. It will allow the ingestion of one series from NDFD. An object of this class must 
 be initialized with an ISeriesStorage interface, as fetched data is directly imported into the DB via that interface.
 
-The fundamental differnce between NDFD_EXP and NDFD_API is that NDFD_API removes a block of code from the NDFD ingestion method 
-that handles a situation where the requested toDateTime (end of the desired time range) is missing from the data returned by the NDFD
-API due to a change in the interval of available data that was causing flattened data becasue it would just find the closest average
-of the surrounding data points and flattening data.
+The fundamental differnce between NDFD_EXP and NDFD_API is that.........
 
 NOTE:: Helpful NDFD links:
         https://digital.mdl.nws.noaa.gov/xml/rest.php
@@ -60,7 +57,7 @@ Dataset = Tuple[SeriesName, LayoutKey, List[Data]]
 DataSeries = List[Dataset[Data]]
 ZippedDataset = List[Tuple[SeriesName, List[Tuple[Time, Data]]]]
 
-class NDFD_API(IDataIngestion):
+class NDFD_EXP(IDataIngestion):
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
 
@@ -84,7 +81,7 @@ class NDFD_API(IDataIngestion):
             case 'pWnSpd':
                 return self.fetch_predictions(seriesDescription, timeDescription, 'wspd')
             case _ : 
-                raise NotImplementedError(f'NDFD_API received request {seriesDescription} but could not map it to a series')
+                raise NotImplementedError(f'NDFD_EXP received request {seriesDescription} but could not map it to a series')
 
     def __init__(self):
         self.sourceCode = "NDFD"
@@ -185,12 +182,12 @@ class NDFD_API(IDataIngestion):
             response = self.__api_request(url)
 
             if response is None:
-                log(f'NDFD_API | fetch_predictions | For unknown reason fetch failed for {seriesRequest}{timeRequest}')
+                log(f'NDFD_EXP | fetch_predictions | For unknown reason fetch failed for {seriesRequest}{timeRequest}')
                 return None
             
             # We can trigger this error on the NDFD server if we make requests too quickly
             if(response.__contains__('<CurlError>'.encode())):
-                log(f'NDFD_API | fetch_predictions | 200 received but fetch failed due to server side <CurlError> Response content: {response}')
+                log(f'NDFD_EXP | fetch_predictions | 200 received but fetch failed due to server side <CurlError> Response content: {response}')
                 return None
 
             NDFD_Predictions: NDFDPredictions[str, str] = NDFDPredictions(url, response)
