@@ -75,7 +75,7 @@ class TWC(IDataIngestion):
 
         # the location the request is for retrieved by checking the locations table in the DB for the location keyword
         lat, lon = self.seriesStorage.find_lat_lon_coordinates(seriesDescription.dataLocation)
-        lat_lon = f'geocode=${lat},${lon}'
+        lat_lon = f'geocode={lat},{lon}'
 
         # We request the prototype feature. 100 members of them.
         num_proto = f'prototypes=temperature:100'
