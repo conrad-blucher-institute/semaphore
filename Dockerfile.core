@@ -26,3 +26,11 @@ RUN pip install -r requirements.txt
 # Copy the source code from ./src to the Docker image
 COPY . .
 
+# Create the service account user 
+RUN useradd -m -u ${SERVICE_ACCOUNT_UID} ${SERVICE_ACCOUNT_USERNAME}
+
+# Set the user to the service account user
+USER ${SERVICE_ACCOUNT_USERNAME}
+
+# Set permissions to the service account user
+RUN chown -R ${SERVICE_ACCOUNT_USERNAME} /app
