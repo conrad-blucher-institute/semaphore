@@ -26,11 +26,15 @@ RUN pip install -r requirements.txt
 # Copy the source code from ./src to the Docker image
 COPY . .
 
-# Create the service account user 
-RUN useradd -m -u ${SERVICE_ACCOUNT_UID} ${SERVICE_ACCOUNT_USERNAME}
+# Create the service account user, skip if it already exists
+RUN if ! id -u ${SERVICE_ACCOUNT_USERNAME} >/dev/null 2>&1; then \
+        useradd -m -u ${SERVICE_ACCOUNT_UID} ${SERVICE_ACCOUNT_USERNAME}; \
+    else \
+        echo "User ${SERVICE_ACCOUNT_USERNAME} already exists, skipping creation."; \
+    fi
+
+# Set permissions to the service account user first, before switching users
+RUN chown -R ${SERVICE_ACCOUNT_USERNAME} /app
 
 # Set the user to the service account user
 USER ${SERVICE_ACCOUNT_USERNAME}
-
-# Set permissions to the service account user
-RUN chown -R ${SERVICE_ACCOUNT_USERNAME} /app
