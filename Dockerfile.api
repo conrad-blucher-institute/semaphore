@@ -37,7 +37,8 @@ RUN if ! id -u ${SERVICE_ACCOUNT_USERNAME} >/dev/null 2>&1; then \
     fi
 
 # Set permissions to the service account user first, before switching users
-RUN chown -R ${SERVICE_ACCOUNT_USERNAME} /app
+# this sets ownership of the user and user group
+RUN chown -R ${SERVICE_ACCOUNT_USERNAME}:${SERVICE_ACCOUNT_USERNAME} /app
 
 # Set the user to the service account user
 USER ${SERVICE_ACCOUNT_USERNAME}
