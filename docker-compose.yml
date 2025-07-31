@@ -5,6 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.core
+      args:
+        SERVICE_ACCOUNT_USERNAME: ${SERVICE_ACCOUNT_USERNAME}
+        SERVICE_ACCOUNT_UID: ${SERVICE_ACCOUNT_UID}
     restart: always
     command: ["tail", "-f", "/dev/null"]
     env_file:
@@ -19,7 +22,6 @@ services:
       - DISCORD_NOTIFY=${DISCORD_NOTIFY}
       - DISCORD_WEBHOOK_PROD=${DISCORD_WEBHOOK_PROD}
       - DISCORD_WEBHOOK_DEV=${DISCORD_WEBHOOK_DEV}
-
     depends_on:
       db:
         condition: service_healthy
@@ -40,6 +42,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
+      args:
+        SERVICE_ACCOUNT_USERNAME: ${SERVICE_ACCOUNT_USERNAME}
+        SERVICE_ACCOUNT_UID: ${SERVICE_ACCOUNT_UID}
     restart: always
     env_file:
       - .env

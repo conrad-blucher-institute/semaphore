@@ -1,6 +1,9 @@
 # Start with the base image of tensorflow
 FROM tensorflow/tensorflow:2.14.0
 
+ARG SERVICE_ACCOUNT_USERNAME
+ARG SERVICE_ACCOUNT_UID
+
 # Install Python 3.10
 RUN apt-get update && apt-get install -y python3.10
 
@@ -25,6 +28,25 @@ RUN pip install -r requirements.txt
 
 # Copy the source code from ./src to the Docker image
 COPY . .
+
+# Create the service account user, skip if it already exists
+RUN if ! id -u ${SERVICE_ACCOUNT_USERNAME} >/dev/null 2>&1; then \
+        if getent passwd ${SERVICE_ACCOUNT_UID} >/dev/null 2>&1; then \
+            echo "Error: UID ${SERVICE_ACCOUNT_UID} is already in use. Exiting." >&2; \
+            exit 1; \
+        fi; \
+        if [ ${SERVICE_ACCOUNT_UID} -lt 1000 ] || [ ${SERVICE_ACCOUNT_UID} -gt 60000 ]; then \
+            echo "Error: UID ${SERVICE_ACCOUNT_UID} is outside the valid range (1000-60000). Exiting." >&2; \
+            exit 1; \
+        fi; \
+        useradd --uid ${SERVICE_ACCOUNT_UID} --create-home ${SERVICE_ACCOUNT_USERNAME}; \
+    fi
+# Set permissions to the service account user first, before switching users
+# this sets ownership of the user and user group
+RUN chown -R ${SERVICE_ACCOUNT_USERNAME}:${SERVICE_ACCOUNT_USERNAME} /app
+
+# Set the user to the service account user
+USER ${SERVICE_ACCOUNT_USERNAME}
 
 # Set the work directory to SRC such that imports work correctly
 WORKDIR /app/src
