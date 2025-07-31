@@ -31,10 +31,14 @@ COPY . .
 
 # Create the service account user, skip if it already exists
 RUN if ! id -u ${SERVICE_ACCOUNT_USERNAME} >/dev/null 2>&1; then \
-        useradd -m -u ${SERVICE_ACCOUNT_UID} ${SERVICE_ACCOUNT_USERNAME}; \
-    else \
-        echo "User ${SERVICE_ACCOUNT_USERNAME} already exists, skipping creation."; \
-    fi
+        if getent passwd ${SERVICE_ACCOUNT_UID} >/dev/null 2>&1; then \
+            echo "Error: UID ${SERVICE_ACCOUNT_UID} is already in use. Exiting." >&2; \
+            exit 1; \
+        fi; \
+        if [ ${SERVICE_ACCOUNT_UID} -lt 1000 ] || [ ${SERVICE_ACCOUNT_UID} -gt 60000 ]; then \
+            echo "Error: UID ${SERVICE_ACCOUNT_UID} is outside the valid range (1000-60000). Exiting." >&2; \
+            exit 1; \
+        fi; \
 
 # Set permissions to the service account user first, before switching users
 # this sets ownership of the user and user group
