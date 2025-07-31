@@ -39,7 +39,6 @@ RUN if ! id -u ${SERVICE_ACCOUNT_USERNAME} >/dev/null 2>&1; then \
             echo "Error: UID ${SERVICE_ACCOUNT_UID} is outside the valid range (1000-60000). Exiting." >&2; \
             exit 1; \
         fi; \
-
 # Set permissions to the service account user first, before switching users
 # this sets ownership of the user and user group
 RUN chown -R ${SERVICE_ACCOUNT_USERNAME}:${SERVICE_ACCOUNT_USERNAME} /app
