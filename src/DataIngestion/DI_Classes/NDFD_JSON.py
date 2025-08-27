@@ -50,7 +50,16 @@ Dataset = Tuple[SeriesName, LayoutKey, List[Data]]
 DataSeries = List[Dataset[Data]]
 ZippedDataset = List[Tuple[SeriesName, List[Tuple[Time, Data]]]]
 
-class NDFD_EXP(IDataIngestion):
+class NDFD_JSON(IDataIngestion):
+
+    # dictionary for the class
+    __series_code_mapping = {
+        'pXWnCmpD' : ['windSpeed', 'windDirection'],
+        'pYWnCmpD' : ['windSpeed', 'windDirection'],
+        'pAirTemp' : 'temperature',
+        'pWnDir' : 'windDirection',
+        'pWnSpd' : 'windSpeed'
+    }
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
 
@@ -70,13 +79,88 @@ class NDFD_EXP(IDataIngestion):
 
         # parse response to get the data for the given series description
         response_tree = json.loads(response)
-        
-        # columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude']
-        # timeGenerated - generatedAt or updatedTime
-        # lat, lon - we get grid coordinates from NDFD, not a single location. should we accomodate for that in semaphore?
-        # NOTE:: use lat lon extracted from database
-        # dataValue - 
 
+        '''
+        example response:
+
+        "properties": {
+        "units": "us",
+        "forecastGenerator": "HourlyForecastGenerator",
+        "generatedAt": "2025-08-27T16:34:24+00:00",
+        "updateTime": "2025-08-27T15:46:35+00:00",
+        "validTimes": "2025-08-27T09:00:00+00:00/P7DT16H",
+        "elevation": {
+            "unitCode": "wmoUnit:m",
+            "value": 0
+        },
+        "periods": [
+            {
+                "number": 1,
+                "name": "",
+                "startTime": "2025-08-27T11:00:00-05:00",
+                "endTime": "2025-08-27T12:00:00-05:00",
+                "isDaytime": true,
+                "temperature": 86,
+                "temperatureUnit": "F",
+                "temperatureTrend": "",
+                "probabilityOfPrecipitation": {
+                    "unitCode": "wmoUnit:percent",
+                    "value": 21
+                },
+                "dewpoint": {
+                    "unitCode": "wmoUnit:degC",
+                    "value": 25.555555555555557
+                },
+                "relativeHumidity": {
+                    "unitCode": "wmoUnit:percent",
+                    "value": 77
+                },
+                "windSpeed": "8 mph",
+                "windDirection": "SE",
+                "icon": "https://api.weather.gov/icons/land/day/tsra_hi,20?size=small",
+                "shortForecast": "Slight Chance Showers And Thunderstorms",
+                "detailedForecast": ""
+            },
+            {
+                "number": 2,
+                "name": "",
+                "startTime": "2025-08-27T12:00:00-05:00",
+                "endTime": "2025-08-27T13:00:00-05:00",
+                "isDaytime": true,
+                "temperature": 87,
+                "temperatureUnit": "F",
+                "temperatureTrend": "",
+                "probabilityOfPrecipitation": {
+                    "unitCode": "wmoUnit:percent",
+                    "value": 20
+                },
+                "dewpoint": {
+                    "unitCode": "wmoUnit:degC",
+                    "value": 25.555555555555557
+                },
+                "relativeHumidity": {
+                    "unitCode": "wmoUnit:percent",
+                    "value": 75
+                },
+                "windSpeed": "10 mph",
+                "windDirection": "SE",
+                "icon": "https://api.weather.gov/icons/land/day/tsra_hi,20?size=small",
+                "shortForecast": "Slight Chance Showers And Thunderstorms",
+                "detailedForecast": ""
+            }
+        '''
+        # columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude']
+        
+
+        # timeGenerated - generatedAt
+
+
+        # NOTE:: use lat lon extracted from database
+        # dataValue - depending on the series description, extract the value for that series. Logic is needed for some series'
+        # dataUnit - depends on the series description. Logic is needed for some series'
+        # timeVerified - the startTime for the given period
+        # timeGenerated - the generatedAt property from the response
+        # lat, lon - we get grid coordinates from NDFD, not a single location. should we accomodate for that in semaphore?
 
         # format as a series as expected by Semaphore
 
@@ -332,6 +416,8 @@ class NDFD_EXP(IDataIngestion):
         
         #Step three: Return it
         return xCompSeries if isXWindCmp else yCompSeries      
+    
+    
   
 class NDFDPredictions(Generic[Time, Data]):
 
