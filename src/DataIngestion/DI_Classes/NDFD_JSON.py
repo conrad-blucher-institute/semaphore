@@ -21,38 +21,38 @@ import json
 import requests
 from typing import List, Dict, TypeVar, NewType, Tuple, Generic, Callable
 from urllib.error import HTTPError
-import urllib.parse
-from lxml import etree # type: ignore
-                       # since lxml has no type hints
+# import urllib.parse
+# from lxml import etree # type: ignore
+#                        # since lxml has no type hints
 
 from DataIngestion.IDataIngestion import IDataIngestion
 from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from utility import log
 from exceptions import Semaphore_Ingestion_Exception
-import re
-import traceback
-import os
-import sys
+# import re
+# import traceback
+# import os
+# import sys
 
 from time import sleep
 
-Time = TypeVar('Time')
-NewTime = TypeVar('NewTime')
-Data = TypeVar('Data')
-NewData = TypeVar('NewData')
+# Time = TypeVar('Time')
+# NewTime = TypeVar('NewTime')
+# Data = TypeVar('Data')
+# NewData = TypeVar('NewData')
 
-LayoutKey = NewType('LayoutKey', str)
-TimeSeries = Dict[LayoutKey, List[Time]]
+# LayoutKey = NewType('LayoutKey', str)
+# TimeSeries = Dict[LayoutKey, List[Time]]
 
-SeriesName = NewType('SeriesName', str)
-Dataset = Tuple[SeriesName, LayoutKey, List[Data]]
-DataSeries = List[Dataset[Data]]
-ZippedDataset = List[Tuple[SeriesName, List[Tuple[Time, Data]]]]
+# SeriesName = NewType('SeriesName', str)
+# Dataset = Tuple[SeriesName, LayoutKey, List[Data]]
+# DataSeries = List[Dataset[Data]]
+# ZippedDataset = List[Tuple[SeriesName, List[Tuple[Time, Data]]]]
 
 class NDFD_JSON(IDataIngestion):
 
-    # dictionary for the class
+    # maps internal semaphore series codes to NDFD attribute names
     __series_code_mapping = {
         'pXWnCmpD' : ['windSpeed', 'windDirection'],
         'pYWnCmpD' : ['windSpeed', 'windDirection'],
@@ -63,10 +63,10 @@ class NDFD_JSON(IDataIngestion):
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
 
-        date_validation(timeDescription)
-        
+        self._validate_date(timeDescription)
+
         # get lat/lon from data location
-        lat, lon = self.__get_lat_lon_from_data_location(seriesDescription.dataLocation)
+        lat, lon = self.__get_lat_lon_from_location_code(seriesDescription.dataLocation)
 
         # get the hourly forecast url for the given series description
         hourly_forecast_url = self.__get_forecast_url(lat, lon)
@@ -77,78 +77,9 @@ class NDFD_JSON(IDataIngestion):
         except Exception as e:
             log(f'Error fetching data from NDFD API: {e}. URL: {hourly_forecast_url}')
 
-        # parse response to get the data for the given series description
-        response_tree = json.loads(response)
+        forecast_data = response.loads(response.text)
 
-        '''
-        example response:
 
-        "properties": {
-        "units": "us",
-        "forecastGenerator": "HourlyForecastGenerator",
-        "generatedAt": "2025-08-27T16:34:24+00:00",
-        "updateTime": "2025-08-27T15:46:35+00:00",
-        "validTimes": "2025-08-27T09:00:00+00:00/P7DT16H",
-        "elevation": {
-            "unitCode": "wmoUnit:m",
-            "value": 0
-        },
-        "periods": [
-            {
-                "number": 1,
-                "name": "",
-                "startTime": "2025-08-27T11:00:00-05:00",
-                "endTime": "2025-08-27T12:00:00-05:00",
-                "isDaytime": true,
-                "temperature": 86,
-                "temperatureUnit": "F",
-                "temperatureTrend": "",
-                "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
-                },
-                "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 25.555555555555557
-                },
-                "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 77
-                },
-                "windSpeed": "8 mph",
-                "windDirection": "SE",
-                "icon": "https://api.weather.gov/icons/land/day/tsra_hi,20?size=small",
-                "shortForecast": "Slight Chance Showers And Thunderstorms",
-                "detailedForecast": ""
-            },
-            {
-                "number": 2,
-                "name": "",
-                "startTime": "2025-08-27T12:00:00-05:00",
-                "endTime": "2025-08-27T13:00:00-05:00",
-                "isDaytime": true,
-                "temperature": 87,
-                "temperatureUnit": "F",
-                "temperatureTrend": "",
-                "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 20
-                },
-                "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 25.555555555555557
-                },
-                "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 75
-                },
-                "windSpeed": "10 mph",
-                "windDirection": "SE",
-                "icon": "https://api.weather.gov/icons/land/day/tsra_hi,20?size=small",
-                "shortForecast": "Slight Chance Showers And Thunderstorms",
-                "detailedForecast": ""
-            }
-        '''
         # columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude']
         
 
@@ -169,8 +100,6 @@ class NDFD_JSON(IDataIngestion):
 
 
             
-        
-
     def __init__(self):
         # ToDo: decide if we need a separate source code
         self.sourceCode = "NDFD"        
@@ -186,11 +115,27 @@ class NDFD_JSON(IDataIngestion):
         
         """
         This function creates the url that is used to get the data for the given series and time description.
-        The url will look similar to : https://api.weather.gov/gridpoints/CRP/113,20/forecast/hourly
+        The url will look similar to : https://api.weather.gov/gridpoints/CRP/113,20
 
-        First create the base url, then turn data location into lat/lon, form complete url with points/lat,lon, extract hourly forecast url,
-        then return hourly forecast url.
+        NDFD generates forecast as a grid. Each cell in the grid represents an area for which a given forecast is valid.  All of the lat, lon locations within that grid cell has the same forecast.  The API provides an endpoint for getting metadata from a given lat, lon that returns info such as the geometry of the cell that the location belongs to and the URLs that can be used to get varios forecasts for the location.
+
+        So it is a two step process to get the final url that will return forecast data.
+
         """
+        '''example of part of the response when getting metadata info for a lat,lon - this is for bird island (27.485,-97.3183)
+             "properties": {
+                    "@id": "https://api.weather.gov/points/27.485,-97.3182999",
+                    "@type": "wx:Point",
+                    "cwa": "CRP",
+                    "forecastOffice": "https://api.weather.gov/offices/CRP",
+                    "gridId": "CRP",
+                    "gridX": 113,
+                    "gridY": 20,
+                    "forecast": "https://api.weather.gov/gridpoints/CRP/113,20/forecast",
+                    "forecastHourly": "https://api.weather.gov/gridpoints/CRP/113,20/forecast/hourly",
+                    "forecastGridData": "https://api.weather.gov/gridpoints/CRP/113,20",
+                    "observationStations": "https://api.weather.gov/gridpoints/CRP/113,20/stations",
+        '''
 
         base_url = 'https://api.weather.gov/points/'
 
@@ -198,19 +143,19 @@ class NDFD_JSON(IDataIngestion):
         metadata_url = f'{base_url}{lat},{lon}'
 
         # make the request to get the metadata
-        metadata = self.__api_request(metadata_url)
+        response = self.__api_request(metadata_url)
 
         # extract the hourly forecast url from the metadata
         try:
-            metadata_tree = json.loads(metadata)
-            hourly_forecast_url = metadata_tree['properties']['forecastHourly']
+            metadata = response.loads(response.text)
+            forecast_data_url = metadata['properties']['forecastGridData']
         except (KeyError, TypeError, json.JSONDecodeError) as e:
-            raise ValueError(f'Error extracting hourly forecast URL from metadata: {e}. Metadata content: {metadata}')
+            raise ValueError(f'Error extracting forecast data URL from metadata: {e}. Metadata content: {response}')
 
-        return hourly_forecast_url
+        return forecast_data_url
 
     
-    def __get_lat_lon_from_data_location(dataLocation: str) -> Tuple[float, float]:
+    def __get_lat_lon_from_location_code(locationCode: str) -> Tuple[float, float]:
         """
         This function takes the data location string and returns the latitude and longitude as a tuple of floats.
         This works by querying the database for the location code and returning the lat/lon coordinates.
@@ -221,28 +166,40 @@ class NDFD_JSON(IDataIngestion):
 
         # call the series storage method to get the lat/lon coordinates
         try:
-            lat, lon = series_storage.find_lat_lon_coordinates(dataLocation)
+            lat, lon = series_storage.find_lat_lon_coordinates(locationCode)
         except Exception as e:
-            raise ValueError(f'Error retrieving lat-lon coordinates from the database: {e}. Location code: {dataLocation}')
+            raise ValueError(f'Error retrieving lat-lon coordinates from the database: {e}. Location code: {locationCode}')
         
         return lat, lon
 
 
-    def __api_request(self, url: str):
+    def __api_request(self, url: str) -> requests.Response:
         """
-        Makes a web request using the given url string and returns the response content.
+        Makes a web request using the given url string and returns the response.
         """
         try:
             response = requests.get(url)
-            return response.content
+            return response
         except HTTPError as err:
             log(f'Fetch failed, HTTPError of code: {err.status} for: {err.reason}')
             return None
         except Exception as ex:
             log(f'Fetch failed, unhandled exceptions: {ex}')
             return None
-        
 
+    def _validate_date(self, timeDescription: TimeDescription) -> bool:
+        """only allow dates in the future since we are getting predictions and NDFD does not provide past predictions"""
+
+        to_datetime = timeDescription.toDateTime
+        from_datetime = timeDescription.fromDateTime
+
+        #NDFD provides hourly predictions, so we need to make sure that the requested from time is greater than the top of the hour we are currently in
+        now = datetime.now().replace(minute=0, second=0, microsecond=0)
+
+        if from_datetime < now or to_datetime < now:
+            raise Semaphore_Ingestion_Exception(f'Invalid Date Time Provided. Ingestion request cannot execute')
+        
+'''
     def fetch_predictions(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, product: str) -> None | dict:
         """
         Fetches the predictions from the NDFD API for the given series and time description.
@@ -518,14 +475,6 @@ def iso8601_to_unixms(timestamp: str) -> int:
     except (ValueError, TypeError, AttributeError, OSError) as e:
         raise ValueError(f"Error converting timestamp to milliseconds: {e}")
     
-def date_validation(timeDescription : TimeDescription) -> bool:
-    """Checks if date time passed is valid"""
-    to_datetime = timeDescription.toDateTime
-    from_datetime = timeDescription.fromDateTime
+'''
 
-    now = datetime.now().replace(minute=0, second=0, microsecond=0)
-
-    if from_datetime < now or to_datetime < now:
-        raise Semaphore_Ingestion_Exception(f'Invalid Date Time Provided. Ingestion request cannot execute')
-    
     
