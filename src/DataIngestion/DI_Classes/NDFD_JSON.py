@@ -52,18 +52,20 @@ from time import sleep
 
 class NDFD_JSON(IDataIngestion):
 
-    # maps internal semaphore series codes to NDFD attribute names
-    __series_code_mapping = {
-        'pXWnCmpD' : ['windSpeed', 'windDirection'],
-        'pYWnCmpD' : ['windSpeed', 'windDirection'],
-        'pAirTemp' : 'temperature',
-        'pWnDir' : 'windDirection',
-        'pWnSpd' : 'windSpeed'
-    }
+    #region: interface implementation
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
 
-        self._validate_date(timeDescription)
+    # maps internal semaphore series codes to NDFD attribute names
+        series_code_mapping = {
+            'pXWnCmpD' : ['windSpeed', 'windDirection'],
+            'pYWnCmpD' : ['windSpeed', 'windDirection'],
+            'pAirTemp' : 'temperature',
+            'pWnDir' : 'windDirection',
+            'pWnSpd' : 'windSpeed'
+        }
+
+        self._validate_dates(timeDescription)
 
         # get lat/lon from data location
         lat, lon = self.__get_lat_lon_from_location_code(seriesDescription.dataLocation)
@@ -79,39 +81,32 @@ class NDFD_JSON(IDataIngestion):
 
         forecast_data = response.loads(response.text)
 
-
+        # the dataframe that we need to provide as part of the Series result object has the following columns
         # columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude']
-        
+        # we can find the corresponding values in the forecast_data as follows:
 
-        # timeGenerated - generatedAt
+        # timeGenerated from the properties.updateTime of the response
+        # dataUnit from the uom attribute under the requested series name (e.g, "properties": { "temperature" : { "uom": "wmoUnit:degC"} })
+        # longitude we got from our db call.  NDFD does not return one location, but a set of gridpoints that delimit the cell of the grid 
+        # same for latitude
+        # dataValue:  we can get the set of values with verification time from the values property under the requested series name
+        # e.g, "properties": { "temperature" : { { "uom": "wmoUnit:degC" , "values": [ {"validTime": "2025-08-27T11:00:00+00:00/PT3H", "value": 28.33333},  {"validTime": "2025-08-27T12:00:00+00:00/PT3H", "value": 29.33333}, ...] } }
 
-
-        # NOTE:: use lat lon extracted from database
-        # dataValue - depending on the series description, extract the value for that series. Logic is needed for some series'
-        # dataUnit - depends on the series description. Logic is needed for some series'
-        # timeVerified - the startTime for the given period
-        # timeGenerated - the generatedAt property from the response
-        # lat, lon - we get grid coordinates from NDFD, not a single location. should we accomodate for that in semaphore?
-
-        # format as a series as expected by Semaphore
+        # format as a Series object as expected by Semaphore
 
         # return the series
 
+    #endregion
 
-
+    #region privates
             
     def __init__(self):
-        # ToDo: decide if we need a separate source code
+        # ToDo: decide if we need a separate source code for the different NDFD api
         self.sourceCode = "NDFD"        
-        self.__seriesStorage = series_storage_factory()
-        self.__unitMappingDict = {
-            'degrees true' : 'degrees',
-            'meters/second' : 'mps',
-            'celsius' : 'celsius'
-        }
+
      
 
-    def __get_forecast_url(self, lat: float, lon: float) -> str:
+    def _get_forecast_url(self, lat: float, lon: float) -> str:
         
         """
         This function creates the url that is used to get the data for the given series and time description.
@@ -143,7 +138,7 @@ class NDFD_JSON(IDataIngestion):
         metadata_url = f'{base_url}{lat},{lon}'
 
         # make the request to get the metadata
-        response = self.__api_request(metadata_url)
+        response = self._make_api_request(metadata_url)
 
         # extract the hourly forecast url from the metadata
         try:
@@ -155,13 +150,13 @@ class NDFD_JSON(IDataIngestion):
         return forecast_data_url
 
     
-    def __get_lat_lon_from_location_code(locationCode: str) -> Tuple[float, float]:
+    def _get_lat_lon_from_location_code(self, locationCode: str) -> Tuple[float, float]:
         """
         This function takes the data location string and returns the latitude and longitude as a tuple of floats.
         This works by querying the database for the location code and returning the lat/lon coordinates.
         """
 
-        # create the series storage object
+        # create the series storage to load lat lon from the database from the intermal location code
         series_storage = series_storage_factory()
 
         # call the series storage method to get the lat/lon coordinates
@@ -173,7 +168,7 @@ class NDFD_JSON(IDataIngestion):
         return lat, lon
 
 
-    def __api_request(self, url: str) -> requests.Response:
+    def _make_api_request(self, url: str) -> requests.Response:
         """
         Makes a web request using the given url string and returns the response.
         """
@@ -182,12 +177,12 @@ class NDFD_JSON(IDataIngestion):
             return response
         except HTTPError as err:
             log(f'Fetch failed, HTTPError of code: {err.status} for: {err.reason}')
-            return None
+            raise
         except Exception as ex:
             log(f'Fetch failed, unhandled exceptions: {ex}')
-            return None
+            raise
 
-    def _validate_date(self, timeDescription: TimeDescription) -> bool:
+    def _validate_dates(self, timeDescription: TimeDescription) -> bool:
         """only allow dates in the future since we are getting predictions and NDFD does not provide past predictions"""
 
         to_datetime = timeDescription.toDateTime
@@ -197,8 +192,11 @@ class NDFD_JSON(IDataIngestion):
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
 
         if from_datetime < now or to_datetime < now:
-            raise Semaphore_Ingestion_Exception(f'Invalid Date Time Provided. Ingestion request cannot execute')
-        
+            raise Semaphore_Ingestion_Exception(f'Invalid from and to dates requested: {from_datetime} - {to_datetime}.  From date must be in the future and less than to date')
+
+    #endregion
+    
+    #region: old code to clean up once we are done
 '''
     def fetch_predictions(self, seriesRequest: SeriesDescription, timeRequest: TimeDescription, product: str) -> None | dict:
         """
@@ -476,5 +474,5 @@ def iso8601_to_unixms(timestamp: str) -> int:
         raise ValueError(f"Error converting timestamp to milliseconds: {e}")
     
 '''
-
+#endregion
     
