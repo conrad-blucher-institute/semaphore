@@ -21,14 +21,15 @@ import json
 import requests
 from typing import List, Dict, TypeVar, NewType, Tuple, Generic, Callable
 from urllib.error import HTTPError
-
+import re
+import pandas
 
 from DataIngestion.IDataIngestion import IDataIngestion
 from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from utility import log
 from exceptions import Semaphore_Ingestion_Exception
-import pandas
+
 
 from time import sleep
 
@@ -192,40 +193,92 @@ class NDFD_JSON(IDataIngestion):
         if from_datetime < now or to_datetime < now:
             raise Semaphore_Ingestion_Exception(f'Invalid from and to dates requested: {from_datetime} - {to_datetime}.  From date must be in the future and less than to date')
 
-    def _extract_prediction_values(self, ndfd_data: dict, series_code: str) -> pandas.DataFrame:
+    def _extract_prediction_values(self, ndfd_data: dict, series_code: str) -> list:
         """
         Extracts the prediction values from the forecast data and returns them as a DataFrame with the verification time as index and a prediction column.
+        :param ndfd_data: dict - the NDFD JSON data
+        :param series_code: str - the code of the series we are getting values for
+
+        :return: list - a list of dicts containing the valid times and prediction values
         """
 
-        match series_code:
-            case 'pXWnCmpD':
-                wind_speed_values = ndfd_data['properties']['windSpeed']['values']
-                wind_direction_values = ndfd_data['properties']['windDirection']['values']
-                prediction_values = self._calculate_windX_component(windSpeedValues=wind_speed_values, windDirectionValues=wind_direction_values)
-            case 'pYWnCmpD':
-                wind_speed_values = ndfd_data['properties']['windSpeed']['values']
-                wind_direction_values = ndfd_data['properties']['windDirection']['values']
-                prediction_values = self._calculate_windY_component(windSpeedValues=wind_speed_values, windDirectionValues=wind_direction_values)
-            case 'pAirTemp':
-                prediction_values = ndfd_data['properties']['temperature']['values']
-            case 'pWnDir':
-                prediction_values = ndfd_data['properties']['windDirection']['values']
-            case 'pWnSpd':
-                prediction_values = ndfd_data['properties']['windSpeed']['values']
+        # the prediction wind component series codes use the following naming conventions:
+        # p[x|Y]WnCmp{ijz}D wher {ijz} represent the degree to rotate the vector
+        wind_component_pattern = r"^p[XY]WnCmp.*D$"
+
+        # wind component series require calculations from wind speed and direction and need the degree specified in the name
+        if (re.match(wind_component_pattern, series_code)):
+            wind_speed_values = ndfd_data['properties']['windSpeed']['values']
+            wind_direction_values = ndfd_data['properties']['windDirection']['values']
+            is_x_axis = 'X' if series_code.startswith('pX') else 'Y'
+            degrees = int(series_code[7:9])
+            prediction_values = self._calculate_wind_component(windSpeedValues=wind_speed_values, windDirectionValues=wind_direction_values, calculateForXAxis=is_x_axis, offset=degrees)
+        else:
+            match(series_code):
+                case 'pAirTemp':
+                    prediction_values = ndfd_data['properties']['temperature']['values']
+                case 'pWnDir':
+                    prediction_values = ndfd_data['properties']['windDirection']['values']
+                case 'pWnSpd':
+                    prediction_values = ndfd_data['properties']['windSpeed']['values']
+                case _:
+                    raise ValueError(f'NDFD_JSON ingestion class: Unsupported series code: {series_code}')
+                
 
         return prediction_values
 
-    def _calculate_windX_component(self, windSpeedValues: list, windDirectionValues: list) -> pandas.DataFrame:
+    def _calculate_wind_component(self, windSpeedValues: list, windDirectionValues: list, calculateForXAxis: bool, offset: int) -> list:
         """
-        calculates the windX component predictions from the speed and direction values.
-        """
-        pass
+        calculates the wind component predictions from the speed and direction values.
+        :param windSpeedValues: list - list of dicts with wind speed values and verification times
+        :param windDirectionValues: list - list of dicts with wind direction values and verification times
+        :param calculateForXAxis: bool - whether to calculate the component for the X axis (True) or Y axis (False)
+        :param degrees: int - the degree to which the vector should be rotated so that the components are respectively parallel and perpendicular to shore
 
-    def _calculate_windY_component(self, windSpeedValues: list, windDirectionValues: list) -> pandas.DataFrame:
+        :return: list - a list of dicts containing the valid times and wind component values
         """
-        calculates the windY component predictions from the speed and direction values.
-        """
-        pass
+
+        # create one dataframe with both speed and direction values to make it easier to compute the wind component
+        # then add the wind component to the dataframe, and finally, create a lists of {validTime, value} objects for the component value
+        # and return that
+
+        # Create DataFrames for direction and speed values
+        dir_df = pandas.DataFrame({
+            'validTime': [item['validTime'] for item in windDirectionValues],
+            'windDirection': [item['value'] for item in windDirectionValues],
+        })
+        speed_df = pandas.DataFrame({
+            'validTime': [item['validTime'] for item in windSpeedValues],
+            'windSpeed': [item['value'] for item in windSpeedValues]
+        })
+
+        # Merge the DataFrames on validTime allowing for valid times not to align
+        temp_df = pandas.merge(dir_df, speed_df, on='validTime', how='outer')
+
+        # Calculate the wind component using the formula: windComponent = windSpeed * cos[or sin](radians(windDirection + degrees))
+        # Handle NaN values properly by only calculating where both values exist
+        
+        if calculateForXAxis:
+            temp_df['windComponent'] = temp_df.apply(
+                lambda row: row['windSpeed'] * cos(radians(row['windDirection'] + offset)) 
+                if pandas.notna(row['windSpeed']) and pandas.notna(row['windDirection']) 
+                else pandas.NA, axis=1
+            )
+        else:
+            temp_df['windComponent'] = temp_df.apply(
+                lambda row: row['windSpeed'] * sin(radians(row['windDirection'] + offset)) 
+                if pandas.notna(row['windSpeed']) and pandas.notna(row['windDirection']) 
+                else pandas.NA, axis=1
+            )
+
+        # extract the valid times and component values into a list of dicts - we keep the NaNs as it is not our place to decide what 
+        # to do with them
+        result = []
+        for index, row in temp_df.iterrows():
+            result.append({'validTime': row['validTime'], 'value': row['windComponent']})
+
+        return result
+
 
     #endregion
     
