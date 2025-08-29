@@ -17,14 +17,14 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 # Copy the requirements.txt file to the Docker image
-COPY requirements.txt .
+COPY api_requirements.txt .
 
 # Create a virtual environment and activate it
 RUN python3 -m venv ./venv/vsem
 RUN /bin/bash -c "source ./venv/vsem/bin/activate"
 
 # Install the requirements using pip
-RUN pip install -r requirements.txt
+RUN pip install -r api_requirements.txt
 
 # Copy the source code from ./src to the Docker image
 COPY . .
