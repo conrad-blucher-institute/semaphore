@@ -14,12 +14,12 @@ Run with: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_
 #----------------------------------
 
 import pytest
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 import json
-import requests
+import pandas
 from DataIngestion.DI_Classes.NDFD_JSON import NDFD_JSON
-from DataClasses import SeriesDescription, TimeDescription, Series
+from DataClasses import SeriesDescription, TimeDescription
 from exceptions import Semaphore_Ingestion_Exception
 
 
@@ -87,7 +87,7 @@ class TestNDFDJSON:
     
 #endregion
 
-#region: _api_request tests
+#region: _make_api_request tests
 
     @patch('DataIngestion.DI_Classes.NDFD_JSON.requests.get')
     def test_api_request_success(self, mock_get):
@@ -143,6 +143,7 @@ class TestNDFDJSON:
     def test_get_forecast_url_success(self, mock_api_request):
         """Test successful forecast URL retrieval"""
         mock_response = MagicMock()
+        mock_response.status_code = 200
         mock_response.text = json.dumps({
             "properties": {
                 "forecastGridData": "https://api.weather.gov/gridpoints/CRP/113,20"
@@ -180,7 +181,7 @@ class TestNDFDJSON:
 
 #region: _validate_dates tests
 
-    def test_date_validation_future_dates(self, mock_time_description):
+    def test_date_validation_valid_dates(self, mock_time_description):
         """Test date validation with future dates (should pass)"""
         try:
             ingest_class = NDFD_JSON()
@@ -188,15 +189,344 @@ class TestNDFDJSON:
         except Semaphore_Ingestion_Exception:
             pytest.fail("Date validation should not raise exception for valid future dates")
 
-    def test_date_validation_past_dates(self):
-        """Test date validation with past dates (should fail)"""
-        past_time = datetime.now() - timedelta(hours=4)
-        mock_td = MagicMock(spec=TimeDescription)
-        mock_td.fromDateTime = past_time
-        mock_td.toDateTime = past_time + timedelta(hours=1)
+    def test_date_validation_invalid_dates(self, mock_time_description):
+        """Test date validation with to-date older than from date (should fail)"""
+        invalid_mock_td = MagicMock(spec=TimeDescription)
+        invalid_mock_td.fromDateTime = mock_time_description.toDateTime 
+        invalid_mock_td.toDateTime = mock_time_description.fromDateTime
 
         ingest_class = NDFD_JSON()
         with pytest.raises(Semaphore_Ingestion_Exception):
-            ingest_class._validate_dates(mock_td)
+            ingest_class._validate_dates(invalid_mock_td)
+
+#endregion
+
+#region: _extract_prediction_values tests
+
+    def test_extract_prediction_values_air_temperature(self):
+        """Test extracting prediction values for air temperature series"""
+        mock_ndfd_data = {
+            'properties': {
+                'temperature': {
+                    'values': [
+                        {'validTime': '2025-08-27T11:00:00+00:00/PT3H', 'value': 28.33},
+                        {'validTime': '2025-08-27T14:00:00+00:00/PT1H', 'value': 29.33}
+                    ]
+                }
+            }
+        }
+        
+        ingest_class = NDFD_JSON()
+        data_unit, prediction_values = ingest_class._extract_prediction_values(mock_ndfd_data, 'pAirTemp')
+        
+        assert data_unit == 'celcius'
+        assert len(prediction_values) == 2
+        assert prediction_values[0]['validTime'] == '2025-08-27T11:00:00+00:00/PT3H'
+        assert prediction_values[0]['value'] == 28.33
+
+    def test_extract_prediction_values_wind_direction(self):
+        """Test extracting prediction values for wind direction series"""
+        mock_ndfd_data = {
+            'properties': {
+                'windDirection': {
+                    'values': [
+                        {'validTime': '2025-08-27T11:00:00+00:00/PT4H', 'value': 180},
+                        {'validTime': '2025-08-27T15:00:00+00:00/PT1H', 'value': 190}
+                    ]
+                }
+            }
+        }
+        
+        ingest_class = NDFD_JSON()
+        data_unit, prediction_values = ingest_class._extract_prediction_values(mock_ndfd_data, 'pWnDir')
+        
+        assert data_unit == 'degrees'
+        assert len(prediction_values) == 2
+        assert prediction_values[0]['validTime'] == '2025-08-27T11:00:00+00:00/PT4H'
+        assert prediction_values[0]['value'] == 180
+
+    def test_extract_prediction_values_wind_speed(self):
+        """Test extracting prediction values for wind speed series (with unit conversion)"""
+        mock_ndfd_data = {
+            'properties': {
+                'windSpeed': {
+                    'values': [
+                        {'validTime': '2025-08-27T11:00:00+00:00/PT4H', 'value': 18.0},  # 18 km/h
+                        {'validTime': '2025-08-27T15:00:00+00:00/PT1H', 'value': 21.6}   # 21.6 km/h
+                    ]
+                }
+            }
+        }
+        
+        ingest_class = NDFD_JSON()
+        data_unit, prediction_values = ingest_class._extract_prediction_values(mock_ndfd_data, 'pWnSpd')
+        
+        assert data_unit == 'mps'
+        assert len(prediction_values) == 2
+        # 18 km/h / 3.6 = 5.0 m/s
+        assert prediction_values[0]['value'] == 5.0
+        # 21.6 km/h / 3.6 = 6.0 m/s
+        assert prediction_values[1]['value'] == 6.0
+        assert prediction_values[1]['validTime'] == '2025-08-27T15:00:00+00:00/PT1H'
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._calculate_wind_component_values')
+    def test_extract_prediction_values_wind_component_x(self, mock_calculate_wind_component):
+        """Test extracting prediction values for X wind component series"""
+        mock_ndfd_data = {
+            'properties': {
+                'windSpeed': {
+                    'values': [
+                        {'validTime': '2025-08-27T11:00:00+00:00/PT3H', 'value': 18.0}
+                    ]
+                },
+                'windDirection': {
+                    'values': [
+                        {'validTime': '2025-08-27T11:00:00+00:00/PT3H', 'value': 180}
+                    ]
+                }
+            }
+        }
+        
+        mock_calculate_wind_component.return_value = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT3H', 'value': -5.0}
+        ]
+        
+        ingest_class = NDFD_JSON()
+        data_unit, prediction_values = ingest_class._extract_prediction_values(mock_ndfd_data, 'pXWnCmp090D')
+        
+        assert data_unit == 'mps'
+        assert len(prediction_values) == 1
+        assert prediction_values[0]['value'] == -5.0
+        
+        # Verify the wind component calculation was called with correct parameters
+        mock_calculate_wind_component.assert_called_once_with(
+            windSpeedValues=mock_ndfd_data['properties']['windSpeed']['values'],
+            windDirectionValues=mock_ndfd_data['properties']['windDirection']['values'],
+            calculateForXAxis='X',
+            offset=90
+        )
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._calculate_wind_component_values')
+    def test_extract_prediction_values_wind_component_y(self, mock_calculate_wind_component):
+        """Test extracting prediction values for Y wind component series"""
+        mock_ndfd_data = {
+            'properties': {
+                'windSpeed': {
+                    'values': [
+                        {'validTime': '2025-08-27T11:00:00+00:00/PT3H', 'value': 18.0}
+                    ]
+                },
+                'windDirection': {
+                    'values': [
+                        {'validTime': '2025-08-27T11:00:00+00:00/PT3H', 'value': 180}
+                    ]
+                }
+            }
+        }
+        
+        mock_calculate_wind_component.return_value = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT3H', 'value': 3.5}
+        ]
+        
+        ingest_class = NDFD_JSON()
+        data_unit, prediction_values = ingest_class._extract_prediction_values(mock_ndfd_data, 'pYWnCmp045D')
+        
+        assert data_unit == 'mps'
+        assert len(prediction_values) == 1
+        assert prediction_values[0]['value'] == 3.5
+        
+        # Verify the wind component calculation was called with correct parameters
+        mock_calculate_wind_component.assert_called_once_with(
+            windSpeedValues=mock_ndfd_data['properties']['windSpeed']['values'],
+            windDirectionValues=mock_ndfd_data['properties']['windDirection']['values'],
+            calculateForXAxis='Y',
+            offset=45
+        )
+
+    def test_extract_prediction_values_unsupported_series(self):
+        """Test extracting prediction values for unsupported series code"""
+        mock_ndfd_data = {'properties': {}}
+        
+        ingest_class = NDFD_JSON()
+        with pytest.raises(ValueError, match="NDFD_JSON ingestion class: Unsupported series code: pInvalidSeries"):
+            ingest_class._extract_prediction_values(mock_ndfd_data, 'pInvalidSeries')
+
+#endregion
+
+#region: _calculate_wind_component_values tests
+
+    def test_calculate_wind_component_values_x_axis(self):
+        """Test wind component calculation for X-axis (cosine)"""
+        wind_speed_values = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT1H', 'value': 10.0},
+            {'validTime': '2025-08-27T12:00:00+00:00/PT1H', 'value': 15.0}
+        ]
+        wind_direction_values = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT1H', 'value': 0},    # North
+            {'validTime': '2025-08-27T12:00:00+00:00/PT1H', 'value': 90}   # East
+        ]
+        
+        ingest_class = NDFD_JSON()
+        result = ingest_class._calculate_wind_component_values(
+            windSpeedValues=wind_speed_values,
+            windDirectionValues=wind_direction_values,
+            calculateForXAxis=True,
+            offset=0
+        )
+        
+        assert len(result) == 2
+        # For 0 degrees + 0 offset: cos(0) = 1.0, so component = 10.0 * 1.0 = 10.0
+        assert result[0]['validTime'] == '2025-08-27T11:00:00+00:00/PT1H'
+        assert abs(result[0]['value'] - 10.0) < 0.001
+        
+        # For 90 degrees + 0 offset: cos(90) = 0.0, so component = 15.0 * 0.0 = 0.0
+        assert result[1]['validTime'] == '2025-08-27T12:00:00+00:00/PT1H'
+        assert abs(result[1]['value'] - 0.0) < 0.001
+
+    def test_calculate_wind_component_values_y_axis(self):
+        """Test wind component calculation for Y-axis (sine)"""
+        wind_speed_values = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT1H', 'value': 10.0},
+            {'validTime': '2025-08-27T12:00:00+00:00/PT1H', 'value': 15.0}
+        ]
+        wind_direction_values = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT1H', 'value': 0},    # North
+            {'validTime': '2025-08-27T12:00:00+00:00/PT1H', 'value': 90}   # East
+        ]
+        
+        ingest_class = NDFD_JSON()
+        result = ingest_class._calculate_wind_component_values(
+            windSpeedValues=wind_speed_values,
+            windDirectionValues=wind_direction_values,
+            calculateForXAxis=False,
+            offset=0
+        )
+        
+        assert len(result) == 2
+        # For 0 degrees + 0 offset: sin(0) = 0.0, so component = 10.0 * 0.0 = 0.0
+        assert result[0]['validTime'] == '2025-08-27T11:00:00+00:00/PT1H'
+        assert abs(result[0]['value'] - 0.0) < 0.001
+        
+        # For 90 degrees + 0 offset: sin(90) = 1.0, so component = 15.0 * 1.0 = 15.0
+        assert result[1]['validTime'] == '2025-08-27T12:00:00+00:00/PT1H'
+        assert abs(result[1]['value'] - 15.0) < 0.001
+
+    def test_calculate_wind_component_values_with_offset(self):
+        """Test wind component calculation with angle offset"""
+        wind_speed_values = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT1H', 'value': 10.0}
+        ]
+        wind_direction_values = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT1H', 'value': 45}   # Northeast
+        ]
+        
+        ingest_class = NDFD_JSON()
+        
+        # Test X-axis with 45 degree offset: cos(45 + 45) = cos(90) = 0
+        result_x = ingest_class._calculate_wind_component_values(
+            windSpeedValues=wind_speed_values,
+            windDirectionValues=wind_direction_values,
+            calculateForXAxis=True,
+            offset=45
+        )
+        assert abs(result_x[0]['value'] - 0.0) < 0.001
+        
+        # Test Y-axis with 45 degree offset: sin(45 + 45) = sin(90) = 1
+        result_y = ingest_class._calculate_wind_component_values(
+            windSpeedValues=wind_speed_values,
+            windDirectionValues=wind_direction_values,
+            calculateForXAxis=False,
+            offset=45
+        )
+        assert abs(result_y[0]['value'] - 10.0) < 0.001
+
+    def test_calculate_wind_component_values_mismatched_times(self):
+        """Test wind component calculation with non-aligned time stamps"""
+        wind_speed_values = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT1H', 'value': 10.0},
+            {'validTime': '2025-08-27T13:00:00+00:00/PT1H', 'value': 12.0}
+        ]
+        wind_direction_values = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT1H', 'value': 0},
+            {'validTime': '2025-08-27T12:00:00+00:00/PT1H', 'value': 90}   # Different time
+        ]
+        
+        ingest_class = NDFD_JSON()
+        result = ingest_class._calculate_wind_component_values(
+            windSpeedValues=wind_speed_values,
+            windDirectionValues=wind_direction_values,
+            calculateForXAxis=True,
+            offset=0
+        )
+        
+        # Should have 3 entries: one matched, two with NaN values
+        assert len(result) == 3
+        
+        # Find the matched entry (should have a valid value)
+        matched_entries = [r for r in result if not pandas.isna(r['value'])]
+        nan_entries = [r for r in result if pandas.isna(r['value'])]
+        
+        assert len(matched_entries) == 1
+        assert len(nan_entries) == 2
+        
+        # The matched entry should be for 11:00 with value 10.0 * cos(0) = 10.0
+        matched_entry = matched_entries[0]
+        assert matched_entry['validTime'] == '2025-08-27T11:00:00+00:00/PT1H'
+        assert abs(matched_entry['value'] - 10.0) < 0.001
+
+    def test_calculate_wind_component_values_empty_input(self):
+        """Test wind component calculation with empty input lists"""
+        ingest_class = NDFD_JSON()
+        result = ingest_class._calculate_wind_component_values(
+            windSpeedValues=[],
+            windDirectionValues=[],
+            calculateForXAxis=True,
+            offset=0
+        )
+        
+        assert result == []
+
+    def test_calculate_wind_component_values_single_entry_with_nan(self):
+        """Test wind component calculation handling NaN values correctly"""
+        wind_speed_values = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT1H', 'value': 10.0}
+        ]
+        wind_direction_values = [
+            {'validTime': '2025-08-27T12:00:00+00:00/PT1H', 'value': 90}   # Different time, will create NaN
+        ]
+        
+        ingest_class = NDFD_JSON()
+        result = ingest_class._calculate_wind_component_values(
+            windSpeedValues=wind_speed_values,
+            windDirectionValues=wind_direction_values,
+            calculateForXAxis=True,
+            offset=0
+        )
+        
+        # Should have 2 entries, both with NaN values since times don't match
+        assert len(result) == 2
+        for entry in result:
+            assert pandas.isna(entry['value'])
+
+    def test_calculate_wind_component_values_negative_angles(self):
+        """Test wind component calculation with negative wind directions"""
+        wind_speed_values = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT1H', 'value': 10.0}
+        ]
+        wind_direction_values = [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT1H', 'value': -90}   # West
+        ]
+        
+        ingest_class = NDFD_JSON()
+        result = ingest_class._calculate_wind_component_values(
+            windSpeedValues=wind_speed_values,
+            windDirectionValues=wind_direction_values,
+            calculateForXAxis=True,
+            offset=0
+        )
+        
+        # cos(-90) = 0
+        assert len(result) == 1
+        assert abs(result[0]['value'] - 0.0) < 0.001
 
 #endregion

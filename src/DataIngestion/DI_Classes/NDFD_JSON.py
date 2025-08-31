@@ -52,15 +52,6 @@ class NDFD_JSON(IDataIngestion):
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
 
-    # maps internal semaphore series codes to NDFD attribute names
-        series_code_mapping = {
-            'pXWnCmpD' : ['windSpeed', 'windDirection'],
-            'pYWnCmpD' : ['windSpeed', 'windDirection'],
-            'pAirTemp' : 'temperature',
-            'pWnDir' : 'windDirection',
-            'pWnSpd' : 'windSpeed'
-        }
-
         self._validate_dates(timeDescription)
 
         # get lat/lon from data location
@@ -77,25 +68,41 @@ class NDFD_JSON(IDataIngestion):
 
         ndfd_data = response.loads(response.text)
 
-        # the dataframe that we need to provide as part of the Series result object has the following columns
-        # columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude']
-        # we can find the corresponding values in the response as follows:
-
-        # * timeGenerated from the properties.updateTime of the response
-        # * dataUnit from the uom attribute under the requested series name (e.g, "properties": { "temperature" : { "uom": "wmoUnit:degC"} })
+        # extract the relevant data from the response 
+        # * timeGenerated is the same for all data in the response and is in the properties.updateTime of the response
+        # * dataUnit we can get from the uom attribute under the requested series name (e.g, "properties": { "temperature" : { "uom": "wmoUnit:degC"} })
         # * longitude we got from our db call.  NDFD does not return one location, but a set of gridpoints that delimit the cell of the grid 
-        # * same for latitude
+        # * latitude: same as longitude
         # * dataValue:  we can get the set of values with verification time from the values property under the requested series name
         # e.g, "properties": { "temperature" : { { "uom": "wmoUnit:degC" , "values": [ {"validTime": "2025-08-27T11:00:00+00:00/PT3H", "value": 28.33333},  {"validTime": "2025-08-27T12:00:00+00:00/PT3H", "value": 29.33333}, ...] } }
 
         time_generated = ndfd_data['properties']['updateTime']
         latitude = lat
         longitude = lon
-
-        prediction_values = self._extract_prediction_values(ndfd_data, seriesDescription.dataSeries)
+    
+        data_unit, prediction_values = self._extract_prediction_values(ndfd_data, seriesDescription.dataSeries)
 
         # format as a Series object as expected by Semaphore
         # create a df with all the correct columns and within the time frame requested -- at this point should we really worry about the interval if the data source doesn't support specifying an interval?  seems like semaphore should be worrying about dropping or adding records, interpolation and all that?  Something to consider when we introduce identifying a prediction using both the verification time and the lead time
+        df = get_input_dataFrame()
+        for item in prediction_values:
+            # the validTime comes with a duration appended to it (e.g, PT4H: P means this is a duration, T means in time (not date) 3H means 3 hours)
+            # TODO: we need to use the duration to add potentially missing data. For example, if the duration is PT4H, we need to ensure we have data for the next 4 hours, as the next entry in the values dictionary will be for 4 hours from the current prediction. It gets a little complicated for wind components as we could theoritically have non-aligned start time and durations, however, it looks like the wind dir and speed are always aligned in the response.
+            # valid_time, duration = self._get_time_and_duration(item['validTime'])
+            valid_time_str = item['validTime'].split('/')[0]
+            valid_time = datetime.fromisoformat(valid_time_str.replace('Z', '+00:00'))
+
+            if valid_time < timeDescription.fromDateTime or valid_time > timeDescription.toDateTime:
+                continue
+
+            df.loc[len(df)] = [
+                str(item['value']),                       # dataValue
+                data_unit,                                # dataUnit
+                valid_time,                               # timeVerified
+                time_generated,                           # timeGenerated
+                longitude,                                # longitude
+                latitude                                  # latitude
+            ]
 
         # return the series
 
@@ -104,7 +111,8 @@ class NDFD_JSON(IDataIngestion):
     #region privates
             
     def __init__(self):
-        # ToDo: decide if we need a separate source code for the different NDFD api
+        # TODO: decide if we need a separate source code for the different NDFD api
+        # TODO: we should add the property to our interface and have all ingestion classes return a source code and description
         self.sourceCode = "NDFD"        
    
     def _get_forecast_url(self, lat: float, lon: float) -> str:
@@ -181,53 +189,65 @@ class NDFD_JSON(IDataIngestion):
             log(f'Fetch failed, unhandled exceptions: {ex}')
             raise
 
-    def _validate_dates(self, timeDescription: TimeDescription) -> bool:
-        """only allow dates in the future since we are getting predictions and NDFD does not provide past predictions"""
+    def _validate_dates(self, timeDescription: TimeDescription):
+        """We don't get to request dates from NDFD so we only check that from time is before to time. We'll end up 
+        returning a bunch of NaN if the dates passed to use are both in the past. If the to date is in the future, we'll return as much as we can"""
 
         to_datetime = timeDescription.toDateTime
         from_datetime = timeDescription.fromDateTime
 
-        #NDFD provides hourly predictions, so we need to make sure that the requested from time is greater than the top of the hour we are currently in
-        now = datetime.now().replace(minute=0, second=0, microsecond=0)
+        if from_datetime > to_datetime:
+            raise Semaphore_Ingestion_Exception(f'Invalid from and to dates requested: {from_datetime} - {to_datetime}.  From date must be older than to date')
 
-        if from_datetime < now or to_datetime < now:
-            raise Semaphore_Ingestion_Exception(f'Invalid from and to dates requested: {from_datetime} - {to_datetime}.  From date must be in the future and less than to date')
-
-    def _extract_prediction_values(self, ndfd_data: dict, series_code: str) -> list:
+    def _extract_prediction_values(self, ndfd_data: dict, series_code: str) -> tuple[str, list]:
         """
-        Extracts the prediction values from the forecast data and returns them as a DataFrame with the verification time as index and a prediction column.
+        Extracts the prediction values and the unit for these values from the forecast data 
         :param ndfd_data: dict - the NDFD JSON data
         :param series_code: str - the code of the series we are getting values for
 
-        :return: list - a list of dicts containing the valid times and prediction values
+        :return: str - the data unit for the prediction values, and a list of dicts containing the valid times and prediction values
         """
 
-        # the prediction wind component series codes use the following naming conventions:
-        # p[x|Y]WnCmp{ijz}D wher {ijz} represent the degree to rotate the vector
+        # the semaphore prediction wind component series codes use the following naming conventions:
+        #         p[x|Y]WnCmp{ijz}D where {ijz} represent the degree to rotate the vector
         wind_component_pattern = r"^p[XY]WnCmp.*D$"
+
+        #we hardcode the data unit based on the requested series since the API does not give us a choice of what units or system of units 
+        #we can get
+        data_unit = None
 
         # wind component series require calculations from wind speed and direction and need the degree specified in the name
         if (re.match(wind_component_pattern, series_code)):
             wind_speed_values = ndfd_data['properties']['windSpeed']['values']
             wind_direction_values = ndfd_data['properties']['windDirection']['values']
             is_x_axis = 'X' if series_code.startswith('pX') else 'Y'
-            degrees = int(series_code[7:9])
-            prediction_values = self._calculate_wind_component(windSpeedValues=wind_speed_values, windDirectionValues=wind_direction_values, calculateForXAxis=is_x_axis, offset=degrees)
+            degrees = int(series_code[7:10])
+            prediction_values = self._calculate_wind_component_values(windSpeedValues=wind_speed_values, windDirectionValues=wind_direction_values, calculateForXAxis=is_x_axis, offset=degrees)
+            data_unit = 'mps' 
         else:
             match(series_code):
                 case 'pAirTemp':
                     prediction_values = ndfd_data['properties']['temperature']['values']
+                    #for now we hardcode the units since 
+                    data_unit = 'celcius'
                 case 'pWnDir':
                     prediction_values = ndfd_data['properties']['windDirection']['values']
-                case 'pWnSpd':
-                    prediction_values = ndfd_data['properties']['windSpeed']['values']
+                    data_unit = 'degrees'
+                case 'pWnSpd': 
+                    # we get values in kmh so we need to convert to mps - round to 4 decimal places to have plenty of precision
+                    wind_speed_values = ndfd_data['properties']['windSpeed']['values']
+                    prediction_values = [
+                        {'validTime': v['validTime'], 'value': round(v['value'] / 3.6, 4)}
+                        for v in wind_speed_values
+                    ]
+                    data_unit = 'mps'
                 case _:
                     raise ValueError(f'NDFD_JSON ingestion class: Unsupported series code: {series_code}')
                 
 
-        return prediction_values
+        return data_unit, prediction_values
 
-    def _calculate_wind_component(self, windSpeedValues: list, windDirectionValues: list, calculateForXAxis: bool, offset: int) -> list:
+    def _calculate_wind_component_values(self, windSpeedValues: list, windDirectionValues: list, calculateForXAxis: bool, offset: int) -> list:
         """
         calculates the wind component predictions from the speed and direction values.
         :param windSpeedValues: list - list of dicts with wind speed values and verification times
@@ -238,10 +258,9 @@ class NDFD_JSON(IDataIngestion):
         :return: list - a list of dicts containing the valid times and wind component values
         """
 
-        # create one dataframe with both speed and direction values to make it easier to compute the wind component
-        # then add the wind component to the dataframe, and finally, create a lists of {validTime, value} objects for the component value
-        # and return that
-
+        if (windSpeedValues is None or windDirectionValues is None) or windSpeedValues == [] or windDirectionValues == []:
+            return []
+        
         # Create DataFrames for direction and speed values
         dir_df = pandas.DataFrame({
             'validTime': [item['validTime'] for item in windDirectionValues],
@@ -255,7 +274,7 @@ class NDFD_JSON(IDataIngestion):
         # Merge the DataFrames on validTime allowing for valid times not to align
         temp_df = pandas.merge(dir_df, speed_df, on='validTime', how='outer')
 
-        # Calculate the wind component using the formula: windComponent = windSpeed * cos[or sin](radians(windDirection + degrees))
+        # Calculate the wind component using the formula: windComponent = windSpeed * cos[or sin](radians(windDirection + offset))
         # Handle NaN values properly by only calculating where both values exist
         
         if calculateForXAxis:
@@ -278,6 +297,7 @@ class NDFD_JSON(IDataIngestion):
             result.append({'validTime': row['validTime'], 'value': row['windComponent']})
 
         return result
+
 
 
     #endregion
