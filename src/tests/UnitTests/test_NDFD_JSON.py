@@ -685,6 +685,237 @@ class TestNDFDJSON:
         assert result.timeDescription == mock_time_description
         pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
 
+
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    def test_ingest_series_success_wind_speed(self, mock_extract_values,
+                                                  mock_api_request, mock_get_url, mock_get_lat_lon,
+                                                  mock_series_description, mock_time_description):
+        """Test successful ingest_series for wind speed data"""
+        # Setup
+        mock_get_lat_lon.return_value = (27.83444444, -97.06777778)
+        mock_get_url.return_value = "https://api.weather.gov/gridpoints/CRP/123,36"
+        
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({
+            'properties': {
+                'updateTime': '2025-08-27T10:00:00+00:00'
+            }
+        })
+        mock_response.loads = json.loads
+        mock_api_request.return_value = mock_response
+
+        speed1 = str(round(9.26 / 3.6, 4))
+        speed2 = str(round(11.112 / 3.6, 4))
+        speed3 = str(round(16.668 / 3.6, 4))
+        mock_extract_values.return_value = ('mps', [
+            {"validTime": "2025-08-27T11:00:00+00:00/PT4H", "value": speed1},
+            {"validTime": "2025-08-27T15:00:00+00:00/PT1H", "value": speed2},
+            {"validTime": "2025-08-27T16:00:00+00:00/PT2H", "value": speed3}
+        ])
+
+        # Mock series description for wind speed
+        mock_series_description.dataSeries = 'pWnSpd'
+        
+        # test range is the same as mocked extracted values (accounting for the validity duration of each prediction)
+        test_start = datetime.fromisoformat("2025-08-27T11:00:00+00:00")
+        test_end = datetime.fromisoformat("2025-08-27T16:00:00+00:00")
+        mock_time_description.fromDateTime = test_start
+        mock_time_description.toDateTime = test_end
+        
+        # execute
+        ingest_class = NDFD_JSON()
+        result = ingest_class.ingest_series(mock_series_description, mock_time_description)
+        
+        # Verify 
+        expected_results = [
+            {'dataValue': speed1, 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T11:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.06777778, 'latitude': 27.83444444},
+            {'dataValue': speed1, 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T12:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.06777778, 'latitude': 27.83444444},
+            {'dataValue': speed1, 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T13:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.06777778, 'latitude': 27.83444444},
+            {'dataValue': speed1, 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T14:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.06777778, 'latitude': 27.83444444},
+            {'dataValue': speed2, 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T15:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.06777778, 'latitude': 27.83444444},
+            {'dataValue': speed3, 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T16:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.06777778, 'latitude': 27.83444444},
+            {'dataValue': speed3, 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T17:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.06777778, 'latitude': 27.83444444}
+        ]
+
+        assert result is not None
+        assert result.description == mock_series_description
+        assert result.timeDescription == mock_time_description
+        pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
+
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    def test_ingest_series_success_wind_direction(self, mock_extract_values,
+                                                  mock_api_request, mock_get_url, mock_get_lat_lon,
+                                                  mock_series_description, mock_time_description):
+        """Test successful ingest_series for wind direction data"""
+        # Setup
+        mock_get_lat_lon.return_value = (27.485, -97.3183)
+        mock_get_url.return_value = "https://api.weather.gov/gridpoints/CRP/113,20"
+        
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({
+            'properties': {
+                'updateTime': '2025-08-27T10:00:00+00:00'
+            }
+        })
+        mock_response.loads = json.loads
+        mock_api_request.return_value = mock_response
+
+        mock_extract_values.return_value = ('degrees', [
+            {"validTime": "2025-08-27T11:00:00+00:00/PT2H", "value": 180},
+            {"validTime": "2025-08-27T13:00:00+00:00/PT2H", "value": 225},
+            {"validTime": "2025-08-27T15:00:00+00:00/PT2H", "value": 270}
+        ])
+
+        # Mock series description for wind direction
+        mock_series_description.dataSeries = 'pWnDir'
+        
+        # test range is the same as mocked extracted values (accounting for the validity duration of each prediction)
+        test_start = datetime.fromisoformat("2025-08-27T11:00:00+00:00")
+        test_end = datetime.fromisoformat("2025-08-27T17:00:00+00:00")
+        mock_time_description.fromDateTime = test_start
+        mock_time_description.toDateTime = test_end
+        
+        # execute
+        ingest_class = NDFD_JSON()
+        result = ingest_class.ingest_series(mock_series_description, mock_time_description)
+        
+        # Verify 
+        expected_results = [
+            {'dataValue': '180', 'dataUnit': 'degrees', 'timeVerified': datetime.fromisoformat("2025-08-27T11:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '180', 'dataUnit': 'degrees', 'timeVerified': datetime.fromisoformat("2025-08-27T12:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '225', 'dataUnit': 'degrees', 'timeVerified': datetime.fromisoformat("2025-08-27T13:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '225', 'dataUnit': 'degrees', 'timeVerified': datetime.fromisoformat("2025-08-27T14:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '270', 'dataUnit': 'degrees', 'timeVerified': datetime.fromisoformat("2025-08-27T15:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '270', 'dataUnit': 'degrees', 'timeVerified': datetime.fromisoformat("2025-08-27T16:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485}
+        ]
+
+        assert result is not None
+        assert result.description == mock_series_description
+        assert result.timeDescription == mock_time_description
+        pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
+
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    def test_ingest_series_success_wind_component_x(self, mock_extract_values,
+                                                   mock_api_request, mock_get_url, mock_get_lat_lon,
+                                                   mock_series_description, mock_time_description):
+        """Test successful ingest_series for X wind component data"""
+        # Setup
+        mock_get_lat_lon.return_value = (27.485, -97.3183)
+        mock_get_url.return_value = "https://api.weather.gov/gridpoints/CRP/113,20"
+        
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({
+            'properties': {
+                'updateTime': '2025-08-27T10:00:00+00:00'
+            }
+        })
+        mock_response.loads = json.loads
+        mock_api_request.return_value = mock_response
+
+        mock_extract_values.return_value = ('mps', [
+            {"validTime": "2025-08-27T11:00:00+00:00/PT3H", "value": -2.5},
+            {"validTime": "2025-08-27T14:00:00+00:00/PT2H", "value": 1.8},
+            {"validTime": "2025-08-27T16:00:00+00:00/PT1H", "value": -3.1}
+        ])
+
+        # Mock series description for X wind component
+        mock_series_description.dataSeries = 'pXWnCmp090D'
+        
+        # test range is the same as mocked extracted values (accounting for the validity duration of each prediction)
+        test_start = datetime.fromisoformat("2025-08-27T11:00:00+00:00")
+        test_end = datetime.fromisoformat("2025-08-27T17:00:00+00:00")
+        mock_time_description.fromDateTime = test_start
+        mock_time_description.toDateTime = test_end
+        
+        # execute
+        ingest_class = NDFD_JSON()
+        result = ingest_class.ingest_series(mock_series_description, mock_time_description)
+        
+        # Verify 
+        expected_results = [
+            {'dataValue': '-2.5', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T11:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '-2.5', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T12:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '-2.5', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T13:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '1.8', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T14:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '1.8', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T15:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '-3.1', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T16:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485}
+        ]
+
+        assert result is not None
+        assert result.description == mock_series_description
+        assert result.timeDescription == mock_time_description
+        pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
+
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    def test_ingest_series_success_wind_component_y(self, mock_extract_values,
+                                                   mock_api_request, mock_get_url, mock_get_lat_lon,
+                                                   mock_series_description, mock_time_description):
+        """Test successful ingest_series for Y wind component data"""
+        # Setup
+        mock_get_lat_lon.return_value = (27.485, -97.3183)
+        mock_get_url.return_value = "https://api.weather.gov/gridpoints/CRP/113,20"
+        
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({
+            'properties': {
+                'updateTime': '2025-08-27T10:00:00+00:00'
+            }
+        })
+        mock_response.loads = json.loads
+        mock_api_request.return_value = mock_response
+
+        mock_extract_values.return_value = ('mps', [
+            {"validTime": "2025-08-27T11:00:00+00:00/PT3H", "value": 4.2},
+            {"validTime": "2025-08-27T14:00:00+00:00/PT2H", "value": -1.5},
+            {"validTime": "2025-08-27T16:00:00+00:00/PT1H", "value": 2.8}
+        ])
+
+        # Mock series description for Y wind component
+        mock_series_description.dataSeries = 'pYWnCmp045D'
+        
+        # test range is the same as mocked extracted values (accounting for the validity duration of each prediction)
+        test_start = datetime.fromisoformat("2025-08-27T11:00:00+00:00")
+        test_end = datetime.fromisoformat("2025-08-27T17:00:00+00:00")
+        mock_time_description.fromDateTime = test_start
+        mock_time_description.toDateTime = test_end
+        
+        # execute
+        ingest_class = NDFD_JSON()
+        result = ingest_class.ingest_series(mock_series_description, mock_time_description)
+        
+        # Verify 
+        expected_results = [
+            {'dataValue': '4.2', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T11:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '4.2', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T12:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '4.2', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T13:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '-1.5', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T14:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '-1.5', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T15:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '2.8', 'dataUnit': 'mps', 'timeVerified': datetime.fromisoformat("2025-08-27T16:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485}
+        ]
+
+        assert result is not None
+        assert result.description == mock_series_description
+        assert result.timeDescription == mock_time_description
+        pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
+
+
+
     ''' commenting out all of these Claude generated tests as they need to be code reviewed and improved/changed
 
     @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
