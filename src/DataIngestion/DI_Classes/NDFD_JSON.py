@@ -55,20 +55,20 @@ class NDFD_JSON(IDataIngestion):
         self._validate_dates(timeDescription)
 
         # get lat/lon from data location
-        lat, lon = self.__get_lat_lon_from_location_code(seriesDescription.dataLocation)
+        lat, lon = self._get_lat_lon_from_location_code(seriesDescription.dataLocation)
 
         # get the hourly forecast url for the given series description
-        hourly_forecast_url = self.__get_forecast_url(lat, lon)
+        forecast_url = self._get_forecast_url(lat, lon)
         
         # call url to get hourly forecast response
         try:
-            response = self.__api_request(hourly_forecast_url)
+            response = self._make_api_request(forecast_url)
         except Exception as e:
-            log(f'Error fetching data from NDFD API: {e}. URL: {hourly_forecast_url}')
+            log(f'Error fetching data from NDFD API: {e}. URL: {forecast_url}')
 
         ndfd_data = response.loads(response.text)
 
-        # extract the relevant data from the response 
+        # extract the relevant data from the response - columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude'])
         # * timeGenerated is the same for all data in the response and is in the properties.updateTime of the response
         # * dataUnit we can get from the uom attribute under the requested series name (e.g, "properties": { "temperature" : { "uom": "wmoUnit:degC"} })
         # * longitude we got from our db call.  NDFD does not return one location, but a set of gridpoints that delimit the cell of the grid 
@@ -83,28 +83,42 @@ class NDFD_JSON(IDataIngestion):
         data_unit, prediction_values = self._extract_prediction_values(ndfd_data, seriesDescription.dataSeries)
 
         # format as a Series object as expected by Semaphore
-        # create a df with all the correct columns and within the time frame requested -- at this point should we really worry about the interval if the data source doesn't support specifying an interval?  seems like semaphore should be worrying about dropping or adding records, interpolation and all that?  Something to consider when we introduce identifying a prediction using both the verification time and the lead time
-        df = get_input_dataFrame()
-        for item in prediction_values:
-            # the validTime comes with a duration appended to it (e.g, PT4H: P means this is a duration, T means in time (not date) 3H means 3 hours)
-            # TODO: we need to use the duration to add potentially missing data. For example, if the duration is PT4H, we need to ensure we have data for the next 4 hours, as the next entry in the values dictionary will be for 4 hours from the current prediction. It gets a little complicated for wind components as we could theoritically have non-aligned start time and durations, however, it looks like the wind dir and speed are always aligned in the response.
-            # valid_time, duration = self._get_time_and_duration(item['validTime'])
-            valid_time_str = item['validTime'].split('/')[0]
-            valid_time = datetime.fromisoformat(valid_time_str.replace('Z', '+00:00'))
 
-            if valid_time < timeDescription.fromDateTime or valid_time > timeDescription.toDateTime:
+        result_df = get_input_dataFrame()
+        for item in prediction_values:
+            # the validTime comes with a duration appended to it (e.g, PT4H: P means this is a duration, T means it's a time (not a date) and 3H means 3 hours including the start time)
+            # we need to use the duration to add potentially missing data. For example, if the duration is PT4H, we need to ensure we have data for the next 4 hours, as the next entry in the values dictionary will be for 4 hours from the current prediction. It gets a little complicated for wind components as we could theoritically have non-aligned start time and durations, however, it looks like the wind dir and speed are always aligned in the response.
+            
+            verification_time, duration = self._get_start_time_and_duration(item['validTime'])
+
+            # filter out data that is outside the requested time range
+            if verification_time < timeDescription.fromDateTime or verification_time > timeDescription.toDateTime:
                 continue
 
-            df.loc[len(df)] = [
-                str(item['value']),                       # dataValue
-                data_unit,                                # dataUnit
-                valid_time,                               # timeVerified
+            # add as many rows to the data frame as number of hours in the duration, increasing each item's verification time by 1 hour
+            for i in range(duration):
+                result_df.loc[len(result_df)] = [
+                    str(item['value']),                       # dataValue
+                    data_unit,                                # dataUnit
+                    verification_time + timedelta(hours=i),  # timeVerified
                 time_generated,                           # timeGenerated
                 longitude,                                # longitude
                 latitude                                  # latitude
             ]
 
-        # return the series
+
+        # TODO: add or remove rows to/from the DataFrame based on the interval requested
+        # requested_interval = timeDescription.interval.total_seconds() 
+
+        # if requested_interval < 3600:
+        #     # add rows with the proper data but with NaN as values in between our current rows
+        #     # loop through the dataframe, adding 
+        #    pass
+
+        series = Series(description=seriesDescription, timeDescription=timeDescription, isComplete=True) # should the ingestion class really be deciding if this is complete?
+        series.dataFrame = result_df
+
+        return series
 
     #endregion
 
@@ -298,7 +312,30 @@ class NDFD_JSON(IDataIngestion):
 
         return result
 
+    def _get_start_time_and_duration(self, iso8601_time: str) -> tuple[datetime, int]:
+        """
+        Parses an ISO 8601 time string with duration and returns the start time and duration as a tuple.
+        :param iso8601_time: str - The ISO 8601 time string with duration (e.g., "2025-08-27T11:00:00+00:00/PT3H")
+        :return: tuple - A tuple containing the start time as a datetime object and the duration as a timedelta object.
+        """
+        try:
+            # Split the string into start time and duration parts
+            start_time_str, duration_str = iso8601_time.split('/')
 
+            # Parse the start time
+            start_time = datetime.fromisoformat(start_time_str.replace('Z', '+00:00'))
+
+            # Parse the duration using regex to extract hours only
+            duration_pattern = r'PT(\d+)H'
+            match = re.match(duration_pattern, duration_str)
+            if not match:
+                raise ValueError(f"Invalid duration format: {duration_str}")
+
+            duration = int(match.group(1))
+
+            return start_time, duration
+        except Exception as e:
+            raise ValueError(f"Error parsing ISO 8601 time: {iso8601_time}, {e}")
 
     #endregion
     

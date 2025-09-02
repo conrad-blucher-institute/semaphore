@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 import json
 import pandas
 from DataIngestion.DI_Classes.NDFD_JSON import NDFD_JSON
-from DataClasses import SeriesDescription, TimeDescription
+from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from exceptions import Semaphore_Ingestion_Exception
 
 
@@ -529,4 +529,402 @@ class TestNDFDJSON:
         assert len(result) == 1
         assert abs(result[0]['value'] - 0.0) < 0.001
 
+#endregion
+
+#region: _get_start_time_and_duration tests
+
+    def test_get_start_time_and_duration_basic(self):
+        """Test basic ISO 8601 time string parsing with duration"""
+        ingest_class = NDFD_JSON()
+        iso_string = "2025-08-27T11:00:00+00:00/PT3H"
+        
+        start_time, duration = ingest_class._get_start_time_and_duration(iso_string)
+        
+        expected_start = datetime(2025, 8, 27, 11, 0, 0, tzinfo=datetime.fromisoformat("2025-08-27T11:00:00+00:00").tzinfo)
+        assert start_time == expected_start
+        assert duration == 3
+
+    def test_get_start_time_and_duration_single_hour(self):
+        """Test ISO 8601 time string parsing with 1 hour duration"""
+        ingest_class = NDFD_JSON()
+        iso_string = "2025-08-27T14:00:00+00:00/PT1H"
+        
+        start_time, duration = ingest_class._get_start_time_and_duration(iso_string)
+        
+        expected_start = datetime(2025, 8, 27, 14, 0, 0, tzinfo=datetime.fromisoformat("2025-08-27T14:00:00+00:00").tzinfo)
+        assert start_time == expected_start
+        assert duration == 1
+
+    def test_get_start_time_and_duration_large_duration(self):
+        """Test ISO 8601 time string parsing with large duration"""
+        ingest_class = NDFD_JSON()
+        iso_string = "2025-10-12T06:00:00+00:00/PT24H"
+        
+        start_time, duration = ingest_class._get_start_time_and_duration(iso_string)
+
+        expected_start = datetime(2025, 10, 12, 6, 0, 0, tzinfo=datetime.fromisoformat("2025-10-12T06:00:00+00:00").tzinfo)
+        assert start_time == expected_start
+        assert duration == 24
+
+    def test_get_start_time_and_duration_z_timezone(self):
+        """Test ISO 8601 time string parsing with Z timezone notation"""
+        ingest_class = NDFD_JSON()
+        iso_string = "2025-08-27T11:00:00Z/PT6H"
+        
+        start_time, duration = ingest_class._get_start_time_and_duration(iso_string)
+        
+        expected_start = datetime(2025, 8, 27, 11, 0, 0, tzinfo=datetime.fromisoformat("2025-08-27T11:00:00+00:00").tzinfo)
+        assert start_time == expected_start
+        assert duration == 6
+
+    def test_get_start_time_and_duration_different_timezone(self):
+        """Test ISO 8601 time string parsing with different timezone"""
+        ingest_class = NDFD_JSON()
+        iso_string = "2025-08-27T11:00:00-05:00/PT2H"
+        
+        start_time, duration = ingest_class._get_start_time_and_duration(iso_string)
+        
+        expected_start = datetime.fromisoformat("2025-08-27T11:00:00-05:00")
+        assert start_time == expected_start
+        assert duration == 2
+
+    def test_get_start_time_and_duration_invalid_format_no_slash(self):
+        """Test ISO 8601 time string parsing with invalid format (no slash)"""
+        ingest_class = NDFD_JSON()
+        iso_string = "2025-08-27T11:00:00+00:00PT3H"
+        
+        with pytest.raises(ValueError, match="Error parsing ISO 8601 time"):
+            ingest_class._get_start_time_and_duration(iso_string)
+
+    def test_get_start_time_and_duration_invalid_duration_format(self):
+        """Test ISO 8601 time string parsing with invalid duration format"""
+        ingest_class = NDFD_JSON()
+        iso_string = "2025-08-27T11:00:00+00:00/P3H"  # Missing T after P
+        
+        with pytest.raises(ValueError, match="Error parsing ISO 8601 time"):
+            ingest_class._get_start_time_and_duration(iso_string)
+
+    def test_get_start_time_and_duration_invalid_duration_no_hours(self):
+        """Test ISO 8601 time string parsing with invalid duration (no hours)"""
+        ingest_class = NDFD_JSON()
+        iso_string = "2025-08-27T11:00:00+00:00/PT3M"  # Minutes instead of hours
+        
+        with pytest.raises(ValueError, match="Error parsing ISO 8601 time"):
+            ingest_class._get_start_time_and_duration(iso_string)
+
+    def test_get_start_time_and_duration_invalid_time_format(self):
+        """Test ISO 8601 time string parsing with invalid time format"""
+        ingest_class = NDFD_JSON()
+        iso_string = "2025-13-27T11:00:00+00:00/PT3H"  # Invalid month
+        
+        with pytest.raises(ValueError, match="Error parsing ISO 8601 time"):
+            ingest_class._get_start_time_and_duration(iso_string)
+
+    def test_get_start_time_and_duration_empty_string(self):
+        """Test ISO 8601 time string parsing with empty string"""
+        ingest_class = NDFD_JSON()
+        iso_string = ""
+        
+        with pytest.raises(ValueError, match="Error parsing ISO 8601 time"):
+            ingest_class._get_start_time_and_duration(iso_string)
+
+
+#endregion
+
+#region: ingest_series tests
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    def test_ingest_series_success_air_temperature(self, mock_extract_values,
+                                                  mock_api_request, mock_get_url, mock_get_lat_lon,
+                                                  mock_series_description, mock_time_description):
+        """Test successful ingest_series for air temperature data"""
+        # Setup
+        mock_get_lat_lon.return_value = (27.485, -97.3183)
+        mock_get_url.return_value = "https://api.weather.gov/gridpoints/CRP/113,20"
+        
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({
+            'properties': {
+                'updateTime': '2025-08-27T10:00:00+00:00'
+            }
+        })
+        mock_response.loads = json.loads
+        mock_api_request.return_value = mock_response
+        
+        mock_extract_values.return_value = ('celcius', [
+            {'validTime': '2025-08-27T11:00:00+00:00/PT3H', 'value': 25.5},
+            {'validTime': '2025-08-27T14:00:00+00:00/PT2H', 'value': 26.0}
+        ])
+           
+        # Mock series description for air temperature
+        mock_series_description.dataSeries = 'pAirTemp'
+        
+        # test range is the same as mocked extracted values (accounting for the validity duration of each prediction)
+        test_start = datetime.fromisoformat("2025-08-27T11:00:00+00:00")
+        test_end = datetime.fromisoformat("2025-08-27T17:00:00+00:00")
+        mock_time_description.fromDateTime = test_start
+        mock_time_description.toDateTime = test_end
+        
+        # execute
+        ingest_class = NDFD_JSON()
+        result = ingest_class.ingest_series(mock_series_description, mock_time_description)
+        
+        # Verify 
+        expected_results = [
+            {'dataValue': '25.5', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T11:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '25.5', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T12:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '25.5', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T13:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '26.0', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T14:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485},
+            {'dataValue': '26.0', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T15:00:00+00:00"), 'timeGenerated': '2025-08-27T10:00:00+00:00', 'longitude': -97.3183, 'latitude': 27.485}
+        ]
+        assert result is not None
+        assert result.description == mock_series_description
+        assert result.timeDescription == mock_time_description
+        pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
+
+    ''' commenting out all of these Claude generated tests as they need to be code reviewed and improved/changed
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.get_input_dataFrame')
+    def test_ingest_series_with_duration_expansion(self, mock_get_df, mock_extract_values, 
+                                                  mock_api_request, mock_get_url, mock_get_lat_lon,
+                                                  mock_series_description, mock_time_description):
+        """Test ingest_series properly expands duration values into multiple DataFrame rows"""
+        # Setup mocks
+        mock_get_lat_lon.return_value = (27.485, -97.3183)
+        mock_get_url.return_value = "https://api.weather.gov/gridpoints/CRP/113,20"
+        
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({
+            'properties': {
+                'updateTime': '2025-08-27T10:00:00+00:00'
+            }
+        })
+        mock_response.loads = json.loads
+        mock_api_request.return_value = mock_response
+        
+        # Prediction with 3-hour duration
+        mock_extract_values.return_value = ('celcius', [
+            {'validTime': '2025-08-27T12:00:00+00:00/PT3H', 'value': 25.5}
+        ])
+        
+        # Setup DataFrame mock to track calls
+        mock_df = MagicMock()
+        call_count = [0]  # Use list to allow modification in nested function
+        
+        def mock_len():
+            return call_count[0]
+        
+        def mock_setitem(key, value):
+            call_count[0] += 1
+            
+        mock_df.__len__ = mock_len
+        mock_df.__setitem__ = mock_setitem
+        mock_df.loc = MagicMock()
+        mock_df.loc.__setitem__ = mock_setitem
+        mock_get_df.return_value = mock_df
+        
+        mock_series_description.dataSeries = 'pAirTemp'
+        
+        test_start = datetime(2025, 8, 27, 11, 0, 0, tzinfo=datetime.now().astimezone().tzinfo)
+        test_end = datetime(2025, 8, 27, 15, 0, 0, tzinfo=datetime.now().astimezone().tzinfo)
+        mock_time_description.fromDateTime = test_start
+        mock_time_description.toDateTime = test_end
+        
+        ingest_class = NDFD_JSON()
+        result = ingest_class.ingest_series(mock_series_description, mock_time_description)
+        
+        # Should add 3 rows to DataFrame (PT3H duration)
+        assert call_count[0] == 3
+        assert result is not None
+
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.get_input_dataFrame')
+    def test_ingest_series_time_filtering(self, mock_get_df, mock_extract_values, 
+                                         mock_api_request, mock_get_url, mock_get_lat_lon,
+                                         mock_series_description, mock_time_description):
+        """Test ingest_series properly filters data based on time range"""
+        # Setup mocks
+        mock_get_lat_lon.return_value = (27.485, -97.3183)
+        mock_get_url.return_value = "https://api.weather.gov/gridpoints/CRP/113,20"
+        
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({
+            'properties': {
+                'updateTime': '2025-08-27T10:00:00+00:00'
+            }
+        })
+        mock_response.loads = json.loads
+        mock_api_request.return_value = mock_response
+        
+        # Return data both inside and outside the requested range
+        mock_extract_values.return_value = ('celcius', [
+            {'validTime': '2025-08-27T10:00:00+00:00/PT1H', 'value': 24.0},  # Before range
+            {'validTime': '2025-08-27T12:00:00+00:00/PT1H', 'value': 25.5},  # In range  
+            {'validTime': '2025-08-27T16:00:00+00:00/PT1H', 'value': 27.0}   # After range
+        ])
+        
+        # Setup DataFrame mock to track calls
+        mock_df = MagicMock()
+        call_count = [0]
+        
+        def mock_len():
+            return call_count[0]
+        
+        def mock_setitem(key, value):
+            call_count[0] += 1
+            
+        mock_df.__len__ = mock_len
+        mock_df.loc = MagicMock()
+        mock_df.loc.__setitem__ = mock_setitem
+        mock_get_df.return_value = mock_df
+        
+        mock_series_description.dataSeries = 'pAirTemp'
+        
+        # Set time range from 11:00 to 15:00
+        test_start = datetime(2025, 8, 27, 11, 0, 0, tzinfo=datetime.now().astimezone().tzinfo)
+        test_end = datetime(2025, 8, 27, 15, 0, 0, tzinfo=datetime.now().astimezone().tzinfo)
+        mock_time_description.fromDateTime = test_start
+        mock_time_description.toDateTime = test_end
+        
+        ingest_class = NDFD_JSON()
+        result = ingest_class.ingest_series(mock_series_description, mock_time_description)
+        
+        # Should only add 1 row (only the 12:00 data is in range)
+        assert call_count[0] == 1
+        assert result is not None
+
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._validate_dates')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    def test_ingest_series_validation_error(self, mock_get_lat_lon, mock_validate_dates,
+                                           mock_series_description, mock_time_description):
+        """Test ingest_series handles date validation errors"""
+        mock_validate_dates.side_effect = Semaphore_Ingestion_Exception("Invalid dates")
+        
+        ingest_class = NDFD_JSON()
+        with pytest.raises(Semaphore_Ingestion_Exception, match="Invalid dates"):
+            ingest_class.ingest_series(mock_series_description, mock_time_description)
+        
+        # Should not call other methods if validation fails
+        mock_get_lat_lon.assert_not_called()
+
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._validate_dates')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    def test_ingest_series_location_error(self, mock_get_lat_lon, mock_validate_dates,
+                                         mock_series_description, mock_time_description):
+        """Test ingest_series handles location lookup errors"""
+        mock_validate_dates.return_value = None
+        mock_get_lat_lon.side_effect = ValueError("Location not found")
+        
+        ingest_class = NDFD_JSON()
+        with pytest.raises(ValueError, match="Location not found"):
+            ingest_class.ingest_series(mock_series_description, mock_time_description)
+
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._validate_dates')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
+    def test_ingest_series_forecast_url_error(self, mock_get_url, mock_get_lat_lon, mock_validate_dates,
+                                             mock_series_description, mock_time_description):
+        """Test ingest_series handles forecast URL errors"""
+        mock_validate_dates.return_value = None
+        mock_get_lat_lon.return_value = (27.485, -97.3183)
+        mock_get_url.side_effect = ValueError("Invalid forecast URL")
+        
+        ingest_class = NDFD_JSON()
+        with pytest.raises(ValueError, match="Invalid forecast URL"):
+            ingest_class.ingest_series(mock_series_description, mock_time_description)
+
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._validate_dates')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.log')
+    def test_ingest_series_api_request_error(self, mock_log, mock_api_request, mock_get_url, 
+                                            mock_get_lat_lon, mock_validate_dates,
+                                            mock_series_description, mock_time_description):
+        """Test ingest_series handles API request errors and logs them"""
+        mock_validate_dates.return_value = None
+        mock_get_lat_lon.return_value = (27.485, -97.3183)
+        mock_get_url.return_value = "https://api.weather.gov/gridpoints/CRP/113,20"
+        mock_api_request.side_effect = Exception("API connection failed")
+        
+        ingest_class = NDFD_JSON()
+        # The method catches the exception but doesn't re-raise it, just logs
+        # This should cause an error when trying to access response.loads
+        with pytest.raises(AttributeError):  # response will be None, so response.loads will fail
+            ingest_class.ingest_series(mock_series_description, mock_time_description)
+        
+        # Verify the error was logged
+        mock_log.assert_called_once()
+        log_message = mock_log.call_args[0][0]
+        assert "Error fetching data from NDFD API: API connection failed" in log_message
+
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    def test_ingest_series_extract_values_error(self, mock_extract_values, mock_api_request, 
+                                               mock_get_url, mock_get_lat_lon,
+                                               mock_series_description, mock_time_description):
+        """Test ingest_series handles prediction value extraction errors"""
+        mock_get_lat_lon.return_value = (27.485, -97.3183)
+        mock_get_url.return_value = "https://api.weather.gov/gridpoints/CRP/113,20"
+        
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({'properties': {'updateTime': '2025-08-27T10:00:00+00:00'}})
+        mock_response.loads = json.loads
+        mock_api_request.return_value = mock_response
+        
+        mock_extract_values.side_effect = ValueError("Unsupported series code")
+        
+        ingest_class = NDFD_JSON()
+        with pytest.raises(ValueError, match="Unsupported series code"):
+            ingest_class.ingest_series(mock_series_description, mock_time_description)
+
+
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    @patch('DataIngestion.DI_Classes.NDFD_JSON.get_input_dataFrame')
+    def test_ingest_series_empty_prediction_values(self, mock_get_df, mock_extract_values, 
+                                                  mock_api_request, mock_get_url, mock_get_lat_lon,
+                                                  mock_series_description, mock_time_description):
+        """Test ingest_series handles empty prediction values list"""
+        mock_get_lat_lon.return_value = (27.485, -97.3183)
+        mock_get_url.return_value = "https://api.weather.gov/gridpoints/CRP/113,20"
+        
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({'properties': {'updateTime': '2025-08-27T10:00:00+00:00'}})
+        mock_response.loads = json.loads
+        mock_api_request.return_value = mock_response
+        
+        mock_extract_values.return_value = ('celcius', [])  # Empty prediction values
+        
+        mock_df = MagicMock()
+        mock_df.__len__.return_value = 0
+        mock_get_df.return_value = mock_df
+        
+        ingest_class = NDFD_JSON()
+        result = ingest_class.ingest_series(mock_series_description, mock_time_description)
+        
+        # Should still return a Series object, just with empty DataFrame
+        assert result is not None
+        assert hasattr(result, 'dataFrame')
+'''
 #endregion
