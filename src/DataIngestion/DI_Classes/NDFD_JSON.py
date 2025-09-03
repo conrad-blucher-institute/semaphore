@@ -16,7 +16,7 @@ NOTE:: Helpful NDFD links:
 # 
 #
 from math import sin, cos, radians
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import requests
 from typing import List, Dict, TypeVar, NewType, Tuple, Generic, Callable
@@ -66,7 +66,7 @@ class NDFD_JSON(IDataIngestion):
         except Exception as e:
             log(f'Error fetching data from NDFD API: {e}. URL: {forecast_url}')
 
-        ndfd_data = response.loads(response.text)
+        ndfd_data = response.json()
 
         # extract the relevant data from the response - columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude'])
         # * timeGenerated is the same for all data in the response and is in the properties.updateTime of the response
@@ -76,9 +76,13 @@ class NDFD_JSON(IDataIngestion):
         # * dataValue:  we can get the set of values with verification time from the values property under the requested series name
         # e.g, "properties": { "temperature" : { { "uom": "wmoUnit:degC" , "values": [ {"validTime": "2025-08-27T11:00:00+00:00/PT3H", "value": 28.33333},  {"validTime": "2025-08-27T12:00:00+00:00/PT3H", "value": 29.33333}, ...] } }
 
-        time_generated = ndfd_data['properties']['updateTime']
-        latitude = lat
-        longitude = lon
+        time_generated = datetime.fromisoformat(ndfd_data['properties']['updateTime'])
+        latitude = str(lat)
+        longitude = str(lon)
+
+        # Ensure timezone consistency for comparisons
+        to_datetime_aware = self._make_timezone_aware(timeDescription.toDateTime)
+        from_datetime_aware = self._make_timezone_aware(timeDescription.fromDateTime)
     
         data_unit, prediction_values = self._extract_prediction_values(ndfd_data, seriesDescription.dataSeries)
 
@@ -92,15 +96,20 @@ class NDFD_JSON(IDataIngestion):
             verification_time, duration = self._get_start_time_and_duration(item['validTime'])
 
             # filter out data that is outside the requested time range
-            if verification_time < timeDescription.fromDateTime or verification_time > timeDescription.toDateTime:
-                continue
+            if verification_time > to_datetime_aware:
+                break  #this assumes that NDFD will always give us the values in ascending order of verification time.  Continue would be safer but we would keep looping unnecessarily if indeed they are in ascending order 
 
-            # add as many rows to the data frame as number of hours in the duration, increasing each item's verification time by 1 hour
+            # add as many rows to the data frame as number of hours in the duration, increasing each item's verification time by 1 hour - stop if we get outside of the requested time range
             for i in range(duration):
+                range_time = verification_time + timedelta(hours=i)
+                if range_time < from_datetime_aware:
+                    continue
+                if range_time > to_datetime_aware:
+                    break # same thing here, continue would be safer but less effective
                 result_df.loc[len(result_df)] = [
-                    str(item['value']),                       # dataValue
+                    str(item['value']),                   # dataValue
                     data_unit,                                # dataUnit
-                    verification_time + timedelta(hours=i),  # timeVerified
+                    range_time,                           # timeVerified
                 time_generated,                           # timeGenerated
                 longitude,                                # longitude
                 latitude                                  # latitude
@@ -165,7 +174,7 @@ class NDFD_JSON(IDataIngestion):
 
         # extract the hourly forecast url from the metadata
         try:
-            metadata = response.loads(response.text)
+            metadata = response.json()
             forecast_data_url = metadata['properties']['forecastGridData']
         except (KeyError, TypeError, json.JSONDecodeError) as e:
             raise ValueError(f'Error extracting forecast data URL from metadata: {e}. Metadata content: {response}')
@@ -311,6 +320,16 @@ class NDFD_JSON(IDataIngestion):
             result.append({'validTime': row['validTime'], 'value': row['windComponent']})
 
         return result
+
+    def _make_timezone_aware(self, dt: datetime) -> datetime:
+        """
+        Ensures a datetime object is timezone-aware. If it's naive, assumes UTC.
+        :param dt: datetime - The datetime object to check
+        :return: datetime - A timezone-aware datetime object
+        """
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
 
     def _get_start_time_and_duration(self, iso8601_time: str) -> tuple[datetime, int]:
         """
