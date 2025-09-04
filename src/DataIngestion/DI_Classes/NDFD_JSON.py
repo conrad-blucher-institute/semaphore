@@ -108,7 +108,7 @@ class NDFD_JSON(IDataIngestion):
                     break # same thing here, continue would be safer but less effective
                 result_df.loc[len(result_df)] = [
                     str(item['value']),                   # dataValue
-                    data_unit,                                # dataUnit
+                    data_unit,                            # dataUnit
                     range_time,                           # timeVerified
                 time_generated,                           # timeGenerated
                 longitude,                                # longitude
