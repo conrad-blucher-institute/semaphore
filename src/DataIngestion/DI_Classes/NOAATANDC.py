@@ -67,7 +67,7 @@ class NOAATANDC(IDataIngestion):
         """
 
         # Remove digits 
-        processed_series = re.sub('\d', '', seriesDescription.dataSeries)
+        processed_series = re.sub(r'\d', '', seriesDescription.dataSeries)
         match processed_series:
             case 'dXWnCmpD':
                 return self.__fetch_WnCmp(seriesDescription, timeDescription, True)
