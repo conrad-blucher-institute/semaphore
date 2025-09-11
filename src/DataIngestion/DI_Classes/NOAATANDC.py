@@ -9,7 +9,11 @@
 This file is a communicator with the NOAA tides and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
 An object of this class must be initialized with a DBInterface, as fetched data is directly imported into the DB via that interface.
 
-https://api.tidesandcurrents.noaa.gov/api/prod/
+NOAA predictions are "calculated 'on-the-fly'" and Predictions are a (relatively) mathematical calculation. There is no "pre-generation" stored copies of 
+predictions, no stored database table of these values. So because no relevant generatedTime can be calculated we're going to have both generatedTime and 
+verifiedTime be the given verifiedTime that NOAA's API provides.
+
+Documentation: https://api.tidesandcurrents.noaa.gov/api/prod/
 """ 
 #----------------------------------
 # 
