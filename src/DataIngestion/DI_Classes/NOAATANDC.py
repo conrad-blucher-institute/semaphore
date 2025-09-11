@@ -39,7 +39,6 @@ class NOAATANDC(IDataIngestion):
         """
         self.sourceCode = "NOAATANDC"
         self.__seriesStorage = series_storage_factory()
-        self.__acquisitionTime = None
 
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
@@ -136,9 +135,6 @@ class NOAATANDC(IDataIngestion):
             tuple[DataFrame, tuple[float, float]] | None: Tuple of (data DataFrame, (latitude, longitude))
                 or None if station mapping fails or API request fails
         """
-        # Record when we're acquiring the data
-        self.__acquisitionTime = datetime.datetime.now(timezone.utc)
-
         stationID = self.__get_station_number(seriesDescription.dataLocation)
         if stationID == None: return None
 
@@ -251,7 +247,7 @@ class NOAATANDC(IDataIngestion):
                 value,                  # dataValue
                 'meter',                # dataUnit
                 dt,                     # timeVerified
-                self.__acquisitionTime, # timeGenerated
+                dt,                     # timeGenerated = timeVerified due to data source limitations detailed in header
                 lat_lon[1],             # longitude
                 lat_lon[0]              # Latitude
             ]
@@ -305,7 +301,7 @@ class NOAATANDC(IDataIngestion):
                 surge,                  # dataValue
                 'meter',                # dataUnit
                 dt,                     # timeVerified
-                self.__acquisitionTime, # timeGenerated
+                dt,                     # timeGenerated = timeVerified due to data source limitations detailed in header
                 lat_lon[1],             # longitude
                 lat_lon[0]              # latitude
             ]
