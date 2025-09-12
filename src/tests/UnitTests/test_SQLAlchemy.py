@@ -16,8 +16,6 @@ import pytest
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from sqlalchemy import create_engine, Boolean, MetaData, Table, Column, Integer, String, DateTime, insert
 
-
-from SeriesStorage.SS_Classes import SQLAlchemyORM_Postgres  # your real class
 from DataClasses import SeriesDescription, TimeDescription
 
 
@@ -148,13 +146,48 @@ def test_select_input_with_mock_db(engine, inputs_table):
         fromDateTime=from_dt,
         toDateTime=to_dt,
     )
-    storage = series_storage_factory()
+    storage = series_storage_factory() #May need to use custom select inpuit as this is accessing our db
 
     # Call the real function
     series = storage.select_input(series_desc, time_desc)
     df = pd.DataFrame(series.dataFrame)  # ensure DataFrame
     print(f'DF:{df.to_string()}')
-    # Assert ordering: verifiedTime asc, generatedTime desc per group
-    assert df["timeVerified"].is_monotonic_increasing
-    for vt, sub in df.groupby("timeVerified"):
-        assert sub["timeGenerated"].is_monotonic_decreasing
+    # Ensure datetime dtype (in case __splice_input returns strings)
+    for col in ("timeVerified", "timeGenerated"):
+        if col in df and not pd.api.types.is_datetime64_any_dtype(df[col]):
+            df[col] = pd.to_datetime(df[col])
+
+    # Expected order (verifiedTime ASC, generatedTime DESC within each verified)
+    expected = [
+        (datetime(2025, 9, 12, 0, 0), datetime(2025, 9, 12, 0, 10), "12"),
+        (datetime(2025, 9, 12, 0, 0), datetime(2025, 9, 12, 0, 5),  "11"),
+        (datetime(2025, 9, 12, 1, 0), datetime(2025, 9, 12, 1, 7),  "21"),
+        (datetime(2025, 9, 12, 1, 0), datetime(2025, 9, 12, 1, 1),  "20"),
+        (datetime(2025, 9, 12, 2, 0), datetime(2025, 9, 12, 1, 59), "30"),
+    ]
+
+    # Extract actual as a list of tuples in the current order returned by select_input
+    actual = list(
+        df[["timeVerified", "timeGenerated", "dataValue"]]
+        .itertuples(index=False, name=None)
+    )
+
+    # First, lengths must match
+    assert len(actual) == len(expected), (
+        f"Row count mismatch. Got {len(actual)} rows, expected {len(expected)}.\n"
+        f"Actual (top): {actual[:5]}"
+    )
+
+    # Then, exact ordered equality
+    assert actual == expected, (
+        "Rows not in expected order.\n"
+        f"Actual:\n{pd.DataFrame(actual, columns=['timeVerified','timeGenerated','dataValue']).to_string(index=False)}\n\n"
+        f"Expected:\n{pd.DataFrame(expected, columns=['timeVerified','timeGenerated','dataValue']).to_string(index=False)}"
+    )
+
+    assert df["timeVerified"].is_monotonic_increasing, "timeVerified not ascending"
+    for vt, sub in df.groupby("timeVerified", sort=False):
+        assert sub["timeGenerated"].is_monotonic_decreasing, (
+            f"timeGenerated not descending for timeVerified={vt}:\n"
+            f"{sub[['timeVerified','timeGenerated']].to_string(index=False)}"
+    )
