@@ -46,6 +46,8 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param timeDescription: TimeDescription - A hydrated time description object
         """
         inputTable = self.__metadata.tables['inputs']
+        # Create a query that ensures the timeGenerated is shown with in a descending order(Earliest first). Currently timeGenerated is not taken into consideration. 
+        # Look into partiton by, composite query
         statement = (select(inputTable)
             .where(inputTable.c.dataSource == seriesDescription.dataSource)
             .where(inputTable.c.dataLocation == seriesDescription.dataLocation)
@@ -53,6 +55,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             .where(inputTable.c.dataDatum == seriesDescription.dataDatum)
             .where(inputTable.c.verifiedTime >= timeDescription.fromDateTime)
             .where(inputTable.c.verifiedTime <= timeDescription.toDateTime)
+            .order_by(inputTable.c.verifiedTime.asc(), inputTable.c.generatedTime.desc())
             )
         tupleishResult = self.__dbSelection(statement).fetchall()
         df_inputResult = self.__splice_input(tupleishResult)
