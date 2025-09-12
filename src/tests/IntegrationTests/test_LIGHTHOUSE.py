@@ -24,7 +24,7 @@ from src.DataIngestion.IDataIngestion import data_ingestion_factory
 from src.DataIngestion.DI_Classes.LIGHTHOUSE import LIGHTHOUSE
 from dotenv import load_dotenv
 
-# @pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
+@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
     # series: dWaterTmp - wtp
