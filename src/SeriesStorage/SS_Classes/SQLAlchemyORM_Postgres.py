@@ -48,6 +48,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         inputTable = self.__metadata.tables['inputs']
         # Create a query that ensures the timeGenerated is shown with in a descending order(Earliest first). Currently timeGenerated is not taken into consideration. 
         # Look into partiton by, composite query
+        #Only return the first rank of results. The first rank will be the latest verified time. 
         statement = (select(inputTable)
             .where(inputTable.c.dataSource == seriesDescription.dataSource)
             .where(inputTable.c.dataLocation == seriesDescription.dataLocation)
@@ -55,13 +56,18 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             .where(inputTable.c.dataDatum == seriesDescription.dataDatum)
             .where(inputTable.c.verifiedTime >= timeDescription.fromDateTime)
             .where(inputTable.c.verifiedTime <= timeDescription.toDateTime)
-            .order_by(inputTable.c.verifiedTime.asc(), inputTable.c.generatedTime.desc())
+            .order_by(
+                inputTable.c.verifiedTime.asc(),
+                inputTable.c.generatedTime.desc(),)
             )
+        print(f'STATEMENT:{statement}')
         tupleishResult = self.__dbSelection(statement).fetchall()
+        print(f'TUPLE:{tupleishResult}')
         df_inputResult = self.__splice_input(tupleishResult)
-        
+        print(f'DF input:{df_inputResult}')
         # Prune the results removing any data that does not align with the interval that was requested
         df_prunedInputs = df_inputResult.copy(deep=True)
+        print(f'DF PRUNES:{df_prunedInputs}')
         if timeDescription.interval != None and timeDescription.interval.total_seconds() != 0:
             for i in range(len(df_inputResult)):
                 if not (df_inputResult.iloc[i]['timeVerified'].timestamp() % timeDescription.interval.total_seconds() == 0):
@@ -454,6 +460,45 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             ]
 
         return df_out
+
+    
+    # def __splice_input(self, results: list[tuple]) -> DataFrame:
+    #     """
+    #     Row-preserving splice:
+    #     - Keep every DB row as its own output row.
+    #     - Preserve DB order exactly.
+    #     - Just normalize columns and rename times to (timeGenerated, timeVerified).
+    #     """
+    #     cols = [
+    #         "id", "generatedTime", "acquiredTime", "verifiedTime", "dataValue",
+    #         "isActual", "dataUnit", "dataSource", "dataLocation", "dataSeries",
+    #         "dataDatum", "latitude", "longitude", "ensembleMemberID",
+    #     ]
+    #     expected = len(cols)
+
+    #     if not results:
+    #         return get_input_dataFrame()
+
+    #     first = results[0]
+    #     if hasattr(first, "_mapping"):  # SQLAlchemy Row
+    #         df_results = pd.DataFrame([{c: r._mapping.get(c) for c in cols} for r in results])
+    #     else:  # tuples
+    #         df_results = pd.DataFrame.from_records([tuple(r)[:expected] for r in results], columns=cols)
+
+    #     # Ensure proper dtypes for time fields (does not change order)
+    #     for c in ("generatedTime", "acquiredTime", "verifiedTime"):
+    #         if not pd.api.types.is_datetime64_any_dtype(df_results[c]):
+    #             df_results[c] = pd.to_datetime(df_results[c])
+
+    #     # Thin, row-for-row output (keep order as given by DB)
+    #     df_out = (
+    #         df_results.loc[:, ["dataValue", "dataUnit", "verifiedTime", "generatedTime", "longitude", "latitude"]]
+    #         .rename(columns={"verifiedTime": "timeVerified", "generatedTime": "timeGenerated"})
+    #         .reset_index(drop=True)
+    #     )
+
+    #     return df_out
+
 
 
     def __splice_output(self, results: list[tuple]) -> DataFrame:
