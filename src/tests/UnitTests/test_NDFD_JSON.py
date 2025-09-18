@@ -54,8 +54,8 @@ class TestNDFDJSON:
     """Test class for NDFD_JSON ingestion class"""
 
     def test_init(self):
-        ingest_class = NDFD_JSON()
         """Test NDFD_JSON initialization"""
+        ingest_class = NDFD_JSON()
         assert ingest_class.sourceCode == "NDFD"
 
 #region: -get_lat_lon_from_location_code tests

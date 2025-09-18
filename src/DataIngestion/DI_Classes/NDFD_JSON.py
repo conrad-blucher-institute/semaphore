@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
  #NDFD_JSON.py
 #----------------------------------
-# Created By: Christian Quintero
-# Last Updated: 08/22/2025
+# Created By: Christian Quintero & Florence Tissot
+# Last Updated: 09/18/2025
 # Version 1.0
 #----------------------------------
 """ 
@@ -29,22 +29,6 @@ from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDesc
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from utility import log
 from exceptions import Semaphore_Ingestion_Exception
-
-
-from time import sleep
-
-# Time = TypeVar('Time')
-# NewTime = TypeVar('NewTime')
-# Data = TypeVar('Data')
-# NewData = TypeVar('NewData')
-
-# LayoutKey = NewType('LayoutKey', str)
-# TimeSeries = Dict[LayoutKey, List[Time]]
-
-# SeriesName = NewType('SeriesName', str)
-# Dataset = Tuple[SeriesName, LayoutKey, List[Data]]
-# DataSeries = List[Dataset[Data]]
-# ZippedDataset = List[Tuple[SeriesName, List[Tuple[Time, Data]]]]
 
 class NDFD_JSON(IDataIngestion):
 
