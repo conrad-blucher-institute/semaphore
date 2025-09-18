@@ -115,8 +115,7 @@ class LIGHTHOUSE(IDataIngestion):
         dataTimestampIndex = 0
         df = get_input_dataFrame()
         for dataPoint in data:
-            
-            # Lighthouse returns epoch time in milliseconds
+         # Lighthouse returns epoch time in milliseconds
             epochTimeStamp = dataPoint[dataTimestampIndex]/1000            # Lighthouse over returns data, so we just clip any data that is before or after our requested date range
             if epochTimeStamp > timeDescription.toDateTime.timestamp() or epochTimeStamp < timeDescription.fromDateTime.timestamp():
                 continue
