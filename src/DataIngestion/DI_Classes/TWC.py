@@ -154,8 +154,7 @@ class TWC(IDataIngestion):
         # TWC does not provide a dedicated generated time, so we use the initTime from metadata.
         # TWC also only provides 1 initTime per request, so we set all rows to the same value.
         initTime_epoch = response_metadata['initTime']
-        timeGenerated =  datetime.utcfromtimestamp(initTime_epoch)
-
+        timeGenerated = datetime.utcfromtimestamp(initTime_epoch)
 
         # Get ensemble members shaped (ensemble_member_index, time_index), indexing first value b/c we only requested one prototype (temperature)
         data_buckets: list[list[float]] = response_data['prototypes'][0]['forecast']
