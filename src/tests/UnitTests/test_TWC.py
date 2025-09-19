@@ -50,7 +50,8 @@ def test_ingest_series_success(mock_urlopen, mock_series_storage_factory, mock_s
     {
         "metadata": {
             "latitude": 40.7128,
-            "longitude": -74.0060
+            "longitude": -74.0060,
+            "initTime": 1735689600
         },
         "forecasts1Hour": {
             "fcstValid": [1697040000, 1697043600],
