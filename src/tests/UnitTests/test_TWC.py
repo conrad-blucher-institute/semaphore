@@ -79,6 +79,11 @@ def test_ingest_series_success(mock_urlopen, mock_series_storage_factory, mock_s
     assert result.dataFrame is not None
     assert len(result.dataFrame) == 2  # Two timestamps in the mocked response
 
+    # check that each row has the same timeGenerated value
+    expected_timeGenerated = datetime.utcfromtimestamp(1735689600)
+    for i in range(len(result.dataFrame)):
+        assert result.dataFrame.iloc[i]['timeGenerated'] == expected_timeGenerated
+
     # Verify the mocked methods were called
     mock_series_storage.find_lat_lon_coordinates.assert_called_once_with("TestLocation")
     mock_urlopen.assert_called_once()
