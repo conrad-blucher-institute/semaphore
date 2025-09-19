@@ -150,6 +150,12 @@ class TWC(IDataIngestion):
         unix_validation_timestamps: list[int] = response_data['fcstValid']
         validation_timestamps = [datetime.utcfromtimestamp(ts) for ts in unix_validation_timestamps]
 
+        # Get the generated time (init time)
+        # TWC does not provide a dedicated generated time, so we use the initTime from metadata.
+        # TWC also only provides 1 initTime per request, so we set all rows to the same value.
+        initTime_epoch = response_metadata['initTime']
+        timeGenerated = datetime.utcfromtimestamp(initTime_epoch)
+
         # Get ensemble members shaped (ensemble_member_index, time_index), indexing first value b/c we only requested one prototype (temperature)
         data_buckets: list[list[float]] = response_data['prototypes'][0]['forecast']
         data_buckets: ndarray[float] = np.array(data_buckets).T     # Transpose to (time_index, ensemble_member_index), easier to work with
@@ -162,7 +168,7 @@ class TWC(IDataIngestion):
                 ensemble_data,                      # dataValue (list of values for each ensemble member)
                 'celsius',                          # dataUnit
                 validation_time,                    # timeVerified
-                None,                               # timeGenerated
+                timeGenerated,                      # timeGenerated
                 response_metadata['longitude'],     # longitude
                 response_metadata['latitude']       # latitude
             ]
