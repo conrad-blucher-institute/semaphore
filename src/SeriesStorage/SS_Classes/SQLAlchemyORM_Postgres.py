@@ -45,29 +45,47 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param seriesDescription: SeriesDescription - A series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
-        inputTable = self.__metadata.tables['inputs']
-        # Create a query that ensures the timeGenerated is shown with in a descending order(Earliest first). Currently timeGenerated is not taken into consideration. 
-        # Look into partiton by, composite query
-        #Only return the first rank of results. The first rank will be the latest verified time. 
-        statement = (select(inputTable)
-            .where(inputTable.c.dataSource == seriesDescription.dataSource)
-            .where(inputTable.c.dataLocation == seriesDescription.dataLocation)
-            .where(inputTable.c.dataSeries == seriesDescription.dataSeries)
-            .where(inputTable.c.dataDatum == seriesDescription.dataDatum)
-            .where(inputTable.c.verifiedTime >= timeDescription.fromDateTime)
-            .where(inputTable.c.verifiedTime <= timeDescription.toDateTime)
-            .order_by(
-                inputTable.c.verifiedTime.asc(),
-                inputTable.c.generatedTime.desc(),)
-            )
-        print(f'STATEMENT:{statement}')
-        tupleishResult = self.__dbSelection(statement).fetchall()
-        print(f'TUPLE:{tupleishResult}')
+        inputs_select_latest_stmt = text("""
+        SELECT
+            i.id,
+            i."generatedTime",
+            i."acquiredTime",
+            i."verifiedTime",
+            i."dataValue",
+            i."isActual",
+            i."dataUnit",
+            i."dataSource",
+            i."dataLocation",
+            i."dataSeries",
+            i."dataDatum",
+            i.latitude,
+            i.longitude,
+            i."ensembleMemberID"
+        FROM inputs AS i
+        WHERE i."dataSource"   = :dataSource
+        AND i."dataLocation" = :dataLocation
+        AND i."dataSeries"   = :dataSeries
+        AND i."dataDatum"    = :dataDatum
+        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        ORDER BY
+            i."verifiedTime" DESC,
+            i."generatedTime" ASC,
+            i."ensembleMemberID" DESC;
+    """).bindparams(
+        dataSource=seriesDescription.dataSource,
+        dataLocation=seriesDescription.dataLocation,
+        dataSeries=seriesDescription.dataSeries,
+        dataDatum=seriesDescription.dataDatum,
+        from_dt=timeDescription.fromDateTime,
+        to_dt=timeDescription.toDateTime,
+    )
+        tupleishResult = self.__dbSelection(inputs_select_latest_stmt).fetchall()
+        
         df_inputResult = self.__splice_input(tupleishResult)
-        print(f'DF input:{df_inputResult}')
+        
         # Prune the results removing any data that does not align with the interval that was requested
         df_prunedInputs = df_inputResult.copy(deep=True)
-        print(f'DF PRUNES:{df_prunedInputs}')
+    
         if timeDescription.interval != None and timeDescription.interval.total_seconds() != 0:
             for i in range(len(df_inputResult)):
                 if not (df_inputResult.iloc[i]['timeVerified'].timestamp() % timeDescription.interval.total_seconds() == 0):
@@ -429,75 +447,70 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 "dataDatum", "latitude", "longitude", "ensembleMemberID"
             ]
         )
+        
+        if df_results.empty:
+            return get_input_dataFrame()
+        
+        # --- minimal: normalize dtypes so checks / sorting work correctly ---
+        df_results["generatedTime"]    = pd.to_datetime(df_results["generatedTime"], errors="coerce")
+        df_results["verifiedTime"]     = pd.to_datetime(df_results["verifiedTime"],  errors="coerce")
+        df_results["ensembleMemberID"] = pd.to_numeric(df_results["ensembleMemberID"], errors="coerce")  # NaN if not ensemble
+
 
         # A formatted dataframe to place the spliced data 
         df_out = get_input_dataFrame()
+        for vt, group in df_results.groupby("verifiedTime", sort=True):
+            has_ensemble = group["ensembleMemberID"].notna().any()
 
-        # We have to post process the results as this could be ensemble data or not
-        # grouping by verifiedTime groups the data by time point
-        for _, group in df_results.groupby("verifiedTime"):
-
-            # ensembleMemberID is None if not an ensemble, so we check the first row of the group
-            firstRow = group.iloc[0]
-            isEnsemble = firstRow["ensembleMemberID"] is not None
-            
-            # If its an ensemble the dataValue is all the values sorted by there ID (to ensure correct order)
-            # If not an ensemble we just take the solitary dataValue
-            if isEnsemble:
-                group = group.sort_values(by=("ensembleMemberID"))
-                dataValues = group["dataValue"].to_list()
+            if has_ensemble:
+                #Handles ensembles
+                ens = group[group["ensembleMemberID"].notna()].sort_values(
+                ["generatedTime", "ensembleMemberID"], ascending=[False, True]
+                )
+                for row in ens.itertuples(index=False):
+                    df_out.loc[len(df_out)] = [
+                        row.dataValue,         
+                        row.dataUnit,
+                        row.verifiedTime,
+                        row.generatedTime,
+                        row.longitude,
+                        row.latitude,
+                    ]
             else:
-                dataValues = group["dataValue"].iloc[0]
-            
-            # Pack the data into the out dataframe
-            df_out.loc[len(df_out)] = [
-                dataValues,                   # dataValue
-                firstRow["dataUnit"],         # dataUnit
-                firstRow["verifiedTime"],     # timeVerified
-                firstRow["generatedTime"],    # timeGenerated
-                firstRow["longitude"],        # longitude
-                firstRow["latitude"]          # latitude
-            ]
+                # No ensemble: return the single latest row for every verified time
+                idx = group["generatedTime"].idxmax()
+                row = group.loc[idx]
+
+                df_out.loc[len(df_out)] = [
+                    row["dataValue"],            # dataValue 
+                    row["dataUnit"],             # dataUnit
+                    vt,                          # timeVerified
+                    row["generatedTime"],        # timeGenerated
+                    row["longitude"],            # longitude
+                    row["latitude"],             # latitude
+                ]
+        df_out = df_out.rename(
+            columns={
+                "verifiedTime": "timeVerified",
+                "generatedTime": "timeGenerated"
+            }
+        )
+
+        df_out = df_out.sort_values(
+             ["timeVerified", "timeGenerated"],
+            ascending=[True, False],
+            kind="mergesort"
+        ).reset_index(drop=True)
+        
 
         return df_out
 
     
-    # def __splice_input(self, results: list[tuple]) -> DataFrame:
-    #     """
-    #     Row-preserving splice:
-    #     - Keep every DB row as its own output row.
-    #     - Preserve DB order exactly.
-    #     - Just normalize columns and rename times to (timeGenerated, timeVerified).
-    #     """
-    #     cols = [
-    #         "id", "generatedTime", "acquiredTime", "verifiedTime", "dataValue",
-    #         "isActual", "dataUnit", "dataSource", "dataLocation", "dataSeries",
-    #         "dataDatum", "latitude", "longitude", "ensembleMemberID",
-    #     ]
-    #     expected = len(cols)
 
-    #     if not results:
-    #         return get_input_dataFrame()
 
-    #     first = results[0]
-    #     if hasattr(first, "_mapping"):  # SQLAlchemy Row
-    #         df_results = pd.DataFrame([{c: r._mapping.get(c) for c in cols} for r in results])
-    #     else:  # tuples
-    #         df_results = pd.DataFrame.from_records([tuple(r)[:expected] for r in results], columns=cols)
 
-    #     # Ensure proper dtypes for time fields (does not change order)
-    #     for c in ("generatedTime", "acquiredTime", "verifiedTime"):
-    #         if not pd.api.types.is_datetime64_any_dtype(df_results[c]):
-    #             df_results[c] = pd.to_datetime(df_results[c])
-
-    #     # Thin, row-for-row output (keep order as given by DB)
-    #     df_out = (
-    #         df_results.loc[:, ["dataValue", "dataUnit", "verifiedTime", "generatedTime", "longitude", "latitude"]]
-    #         .rename(columns={"verifiedTime": "timeVerified", "generatedTime": "timeGenerated"})
-    #         .reset_index(drop=True)
-    #     )
-
-    #     return df_out
+    
+   
 
 
 
