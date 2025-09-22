@@ -50,7 +50,8 @@ def test_ingest_series_success(mock_urlopen, mock_series_storage_factory, mock_s
     {
         "metadata": {
             "latitude": 40.7128,
-            "longitude": -74.0060
+            "longitude": -74.0060,
+            "initTime": 1735689600
         },
         "forecasts1Hour": {
             "fcstValid": [1697040000, 1697043600],
@@ -77,6 +78,11 @@ def test_ingest_series_success(mock_urlopen, mock_series_storage_factory, mock_s
     assert result.timeDescription == mock_time_description
     assert result.dataFrame is not None
     assert len(result.dataFrame) == 2  # Two timestamps in the mocked response
+
+    # check that each row has the same timeGenerated value
+    expected_timeGenerated = datetime.utcfromtimestamp(1735689600)
+    for i in range(len(result.dataFrame)):
+        assert result.dataFrame.iloc[i]['timeGenerated'] == expected_timeGenerated
 
     # Verify the mocked methods were called
     mock_series_storage.find_lat_lon_coordinates.assert_called_once_with("TestLocation")
