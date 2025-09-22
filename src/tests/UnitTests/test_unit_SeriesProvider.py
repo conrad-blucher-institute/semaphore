@@ -117,9 +117,6 @@ def test__validate_series(seriesDescription: SeriesDescription, timeDescription:
     seriesProvider = SeriesProvider()
     result: Series = seriesProvider._SeriesProvider__validate_series(seriesDescription, timeDescription, df_DB, df_DI)
 
-    # Test that the method is correctly validating if the series is correct or not
-    assert result.isComplete == correctness
-
     # Test that the method has preformed replacements correctly (All data should be one by design of the test)
     for value in result.dataFrame['dataValue'].to_list():
         assert value == '1', 'Incorrect data found in dataFrame, a replacement is not working!'

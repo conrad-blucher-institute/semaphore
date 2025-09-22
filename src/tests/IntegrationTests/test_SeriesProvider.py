@@ -47,6 +47,6 @@ def test_request_output():
 
     semaphoreSeriesDescription = SemaphoreSeriesDescription('pineapple', 'strawberry', 'apple', 'pear')
     timeDescription = TimeDescription(datetime(2001, 12, 28), datetime(2001, 12, 28) + timedelta(hours=24))
-    series = Series(semaphoreSeriesDescription, True, timeDescription)
+    series = Series(semaphoreSeriesDescription, timeDescription)
     seriesProvider.request_output('SPECIFIC', semaphoreSeriesDescription=semaphoreSeriesDescription, timeDescription=timeDescription)
     assert True

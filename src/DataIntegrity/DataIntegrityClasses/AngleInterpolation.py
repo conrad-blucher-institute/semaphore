@@ -87,7 +87,6 @@ class AngleInterpolation(IDataIntegrity):
                 {timeDescription} \n 
             '''
             log(error_message)
-            inSeries.nonCompleteReason = '' if inSeries.nonCompleteReason is None else inSeries.nonCompleteReason  + f'\n{error_message}'
             return inSeries  
             
         # Cast dataValue string to float for interpolation
@@ -125,7 +124,7 @@ class AngleInterpolation(IDataIntegrity):
         # Reset the index on the DF
         filled_input_df.reset_index(inplace=True)
 
-        outSeries = Series(seriesDescription, True, timeDescription)
+        outSeries = Series(seriesDescription, timeDescription)
         outSeries.dataFrame = filled_input_df
 
         return outSeries
