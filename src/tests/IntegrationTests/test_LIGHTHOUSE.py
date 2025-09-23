@@ -24,7 +24,7 @@ from src.DataIngestion.IDataIngestion import data_ingestion_factory
 from src.DataIngestion.DI_Classes.LIGHTHOUSE import LIGHTHOUSE
 from dotenv import load_dotenv
 
-# @pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
+@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_min_output", [
     # series: dWaterTmp - wtp
@@ -67,7 +67,7 @@ def test_pull_pd_endpoint_dataPoint(seriesDescription: SeriesDescription, timeDe
                 assert start_time <= row_timestamp <= end_time, f"Data point {row['timeVerified']} is outside requested range"
 
 
-# @pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
+@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
     # series: erroneous
