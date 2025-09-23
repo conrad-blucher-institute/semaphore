@@ -15,11 +15,11 @@ from datetime import datetime
 import requests
 import re
 
-
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
+
 
 class NDBC(IDataIngestion):
 
@@ -127,6 +127,7 @@ class NDBC(IDataIngestion):
 
         df, units = self.__download_NDBC_data(NDBC_location_code)
 
+        # Filter data to requested time range - return all valid data points within range
         df_inTimeRange = df.loc[timeDescription.toDateTime:timeDescription.fromDateTime]
 
         df_result = get_input_dataFrame()
@@ -134,6 +135,7 @@ class NDBC(IDataIngestion):
             dataValue = row[seriesDescription.dataSeries]
             dataUnit = self.unitConversionDict[units[df.columns.get_loc(seriesDescription.dataSeries)]]
             dateTime = dt_idx
+            # Skip missing values (MM in NDBC data)
             if dataValue != 'MM':
                 df_result.loc[len(df_result)] = [
                     dataValue,  # dataValue
