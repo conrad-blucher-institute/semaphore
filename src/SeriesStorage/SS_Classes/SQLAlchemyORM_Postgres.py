@@ -504,15 +504,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         return df_out
 
-    
-
-
-
-    
-   
-
-
-
     def __splice_output(self, results: list[tuple]) -> DataFrame:
         """Converts DB row results into a proper output dataframe to be packed into a series.
         param: list[tupleish] - a list of selections from the table formatted in tupleish
