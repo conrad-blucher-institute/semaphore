@@ -41,7 +41,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
     #############################################################################################
 
     def select_input(self, seriesDescription: SeriesDescription, timeDescription : TimeDescription) -> Series:
-        """Selects a given series given a SeriesDescription and TimeDescription
+        """Selects a given series given a SeriesDescription and TimeDescription using splice_input to give the latest generated time per verified time.
            :param seriesDescription: SeriesDescription - A series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
@@ -463,7 +463,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             has_ensemble = group["ensembleMemberID"].notna().any()
 
             if has_ensemble:
-                #Handles ensembles
+                # Ensemble: Retrieve all ensemble members within the selected verified time
                 ens = group[group["ensembleMemberID"].notna()].sort_values(
                 ["generatedTime", "ensembleMemberID"], ascending=[False, True]
                 )
@@ -502,7 +502,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             kind="mergesort"
         ).reset_index(drop=True)
         
-
         return df_out
 
     
