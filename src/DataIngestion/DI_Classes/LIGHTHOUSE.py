@@ -3,7 +3,7 @@
 #----------------------------------
 # Created By: Matthew Kastl
 # Created Date: 11/3/2023
-# version 1.0
+# Version: 1.0
 #----------------------------------
 """ This file ingests data from CBI maintained Lighthouse
  """ 
@@ -16,11 +16,10 @@ from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDesc
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
 
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.error import HTTPError
 from urllib.request import urlopen
 import json
-from pandas import DataFrame
 
 
 class LIGHTHOUSE(IDataIngestion):
@@ -72,7 +71,7 @@ class LIGHTHOUSE(IDataIngestion):
         :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull 
         :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull 
         :param Series | None: A series containing the imported data or none if something went wrong
-"""
+        """
         
         # Reformat and sterilize datetimes
         fromString = timeDescription.fromDateTime.strftime('%m/%d/%y').replace('/', '%2F')
@@ -119,18 +118,14 @@ class LIGHTHOUSE(IDataIngestion):
             if(dataPoint[dataValueIndex] == None): # If lighthouse does not have a requested value, it will return None
                 continue
             
-            #Filter data via interval if one was provided
             # Lighthouse returns epoch time in milliseconds
-            epochTimeStamp = dataPoint[dataTimestampIndex]/1000
-            if timeDescription.interval != None:
-                if epochTimeStamp % timeDescription.interval.total_seconds() != 0:
-                    continue    
+            epochTimeStamp = dataPoint[dataTimestampIndex]/1000 
 
             # Lighthouse over returns data, so we just clip any data that is before or after our requested date range.
             if epochTimeStamp > timeDescription.toDateTime.timestamp() or epochTimeStamp < timeDescription.fromDateTime.timestamp():
                 continue
 
-            dt = datetime.utcfromtimestamp(epochTimeStamp)
+            dt = datetime.fromtimestamp(epochTimeStamp, timezone.utc)
 
             df.loc[len(df)] = [
                 dataPoint[dataValueIndex],          # dataValue
