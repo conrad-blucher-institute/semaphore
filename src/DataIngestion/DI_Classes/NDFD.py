@@ -196,9 +196,6 @@ class NDFD(IDataIngestion):
             df = get_input_dataFrame()
             for row in data_dictionary:
                 timeVerified = datetime.fromtimestamp(row[0])
-                if timeRequest.interval is not None:
-                    if(timeVerified.timestamp() % timeRequest.interval.total_seconds() != 0):
-                        continue
 
                 # NDFD over returns data, so we just clip any data that is before or after our requested date range.
                 if timeVerified > timeRequest.toDateTime or timeVerified < timeRequest.fromDateTime:
