@@ -59,7 +59,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         # Sending all rows found downstream the input gatherer will handle interval alignment
         series = Series(seriesDescription, True, timeDescription)
-        series.dataFrame = df_prunedInputs
+        series.dataFrame = df_inputResult
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
