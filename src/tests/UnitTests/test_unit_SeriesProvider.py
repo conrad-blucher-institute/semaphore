@@ -102,16 +102,16 @@ df_correct_three_hour_series_middle_changed.loc[1] = ['2', 'test', datetime(2000
 df_correct_three_hour_series_middle_changed.loc[2] = ['1', 'test', datetime(2000, 1, 1, hour=3), datetime(2000, 1, 1, hour=0), None, None]
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, df_DB, df_DI, correctness", [
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series.copy(deep=True), None, True), # Fully correct Series from DB, no DI series, 
-    (test_series_desc, three_hour_time_desc, get_input_dataFrame(), df_correct_three_hour_series.copy(deep=True), True), # Fully correct Series from DI, empty DB, 
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), None, False), # Missing one from DB, no DI series
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), df_correct_three_hour_series_missing_one.copy(deep=True), False), # Missing one from DB, Missing one from DI series
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), df_correct_three_hour_series.copy(deep=True), True), # Missing one from DB, correct DI series
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_with_duplicate.copy(deep=True), None, True), # Correct DB series w/ duplicate
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), df_correct_three_hour_series_with_duplicate.copy(deep=True), True), # Missing one from DB, correct DI series w/ Duplicate
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_middle_changed.copy(deep=True), df_correct_three_hour_series.copy(deep=True), True), # Both Series, DI has updated data
+    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series.copy(deep=True), None), # Fully correct Series from DB, no DI series, 
+    (test_series_desc, three_hour_time_desc, get_input_dataFrame(), df_correct_three_hour_series.copy(deep=True)), # Fully correct Series from DI, empty DB, 
+    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), None), # Missing one from DB, no DI series
+    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), df_correct_three_hour_series_missing_one.copy(deep=True)), # Missing one from DB, Missing one from DI series
+    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), df_correct_three_hour_series.copy(deep=True)), # Missing one from DB, correct DI series
+    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_with_duplicate.copy(deep=True), None), # Correct DB series w/ duplicate
+    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), df_correct_three_hour_series_with_duplicate.copy(deep=True)), # Missing one from DB, correct DI series w/ Duplicate
+    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_middle_changed.copy(deep=True), df_correct_three_hour_series.copy(deep=True)), # Both Series, DI has updated data
 ])
-def test__validate_series(seriesDescription: SeriesDescription, timeDescription: TimeDescription, df_DB: DataFrame, df_DI: DataFrame, correctness: bool):
+def test__validate_series(seriesDescription: SeriesDescription, timeDescription: TimeDescription, df_DB: DataFrame, df_DI: DataFrame):
 
     # Call the generate resulting series method
     seriesProvider = SeriesProvider()

@@ -123,7 +123,6 @@ class SemaphoreSeriesDescription():
 class Series():
     """A series is a pairing of an object describing a series of data, and an array of the data itself. It also includes some meta data about how well the data provided matches the description.
         :param description: SeriesDescription | SemaphoreSeriesDescription - An object that will describe to you what unique data set this is
-        :param isComplete: bool - Whether the description object completely describes the bound data
         :param timeDescription: TimeDescription = None - An object that contains the datetime properties of the data
         :param nonCompleteReason: Exception = None - The exception that cased the problem
     """
