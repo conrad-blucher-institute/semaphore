@@ -22,7 +22,7 @@ from pandas import DataFrame
 
 from SeriesStorage.ISeriesStorage import ISeriesStorage
 
-from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, TimeDescription, get_input_dataFrame, get_output_dataFrame
+from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, TimeDescription,  get_output_dataFrame
 from utility import log
 
 
@@ -448,17 +448,16 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             ]
         )
         
-        if df_results.empty:
-            return get_input_dataFrame()
         
         # --- minimal: normalize dtypes so checks / sorting work correctly ---
         df_results["generatedTime"]    = pd.to_datetime(df_results["generatedTime"], errors="coerce")
         df_results["verifiedTime"]     = pd.to_datetime(df_results["verifiedTime"],  errors="coerce")
+        df_results["acquiredTime"]     = pd.to_datetime(df_results["acquiredTime"],  errors="coerce")
         df_results["ensembleMemberID"] = pd.to_numeric(df_results["ensembleMemberID"], errors="coerce")  # NaN if not ensemble
 
 
-        # A formatted dataframe to place the spliced data 
-        df_out = get_input_dataFrame()
+        # A formatted dataframe to place the spliced data. Added acquired time as this is when acquired time is needed.
+        df_out = DataFrame(columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'acquiredTime', 'longitude', 'latitude'])
         for vt, group in df_results.groupby("verifiedTime", sort=True):
             has_ensemble = group["ensembleMemberID"].notna().any()
 
@@ -473,12 +472,14 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                         row.dataUnit,
                         row.verifiedTime,
                         row.generatedTime,
+                        row.acquiredTime,
                         row.longitude,
                         row.latitude,
+                        
                     ]
             else:
                 # No ensemble: return the single latest row for every verified time
-                idx = group["generatedTime"].idxmax()
+                idx = group["generatedTime"] .idxmax() if group["generatedTime"] .notna().any() else group["verifiedTime"] .idxmax()
                 row = group.loc[idx]
 
                 df_out.loc[len(df_out)] = [
@@ -486,8 +487,10 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                     row["dataUnit"],             # dataUnit
                     vt,                          # timeVerified
                     row["generatedTime"],        # timeGenerated
+                    row["acquiredTime"],
                     row["longitude"],            # longitude
                     row["latitude"],             # latitude
+                    
                 ]
         df_out = df_out.rename(
             columns={

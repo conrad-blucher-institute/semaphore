@@ -32,7 +32,9 @@ def test_request_input(seriesDescription: SeriesDescription, timeDescription: Ti
     load_dotenv()
     seriesProvider = SeriesProvider()
     try:
-        seriesProvider.request_input(seriesDescription, timeDescription)
+        results = seriesProvider.request_input(seriesDescription, timeDescription)
+        
+        print(f"[RESULTS]\n{results.dataFrame.to_string(index=False)}")
     except ModuleNotFoundError: #Catches when the DI factory is called, which is far out of this unit test
         assert True 
 
