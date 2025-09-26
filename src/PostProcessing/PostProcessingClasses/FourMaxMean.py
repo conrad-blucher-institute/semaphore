@@ -75,7 +75,7 @@ class FourMaxMean(IPostProcessing):
         timeDescription = deepcopy(IN_SERIES.timeDescription)
         seriesDescription = deepcopy(IN_SERIES.description)
         seriesDescription.dataSeries = OUT_KEY
-        out_series = Series(seriesDescription, True, timeDescription)
+        out_series = Series(seriesDescription, timeDescription)
         out_series.dataFrame = df_fmm
 
         preprocessedData[OUT_KEY] = out_series

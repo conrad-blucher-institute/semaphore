@@ -91,7 +91,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 if not (df_inputResult.iloc[i]['timeVerified'].timestamp() % timeDescription.interval.total_seconds() == 0):
                     df_prunedInputs.drop(i, inplace=True)
 
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = df_prunedInputs
         return series
     
@@ -101,7 +101,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param timeDescription: TimeDescription - A hydrated time description object
         """
 
-        series = Series(semaphoreSeriesDescription, True, timeDescription)
+        series = Series(semaphoreSeriesDescription, timeDescription)
         
 
         outputTable = self.__metadata.tables['outputs']
@@ -174,7 +174,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         # Parse out model information from first output result
         description = SemaphoreSeriesDescription(tupleishResult[0][3], tupleishResult[0][4], tupleishResult[0][8], tupleishResult[0][7], tupleishResult[0][6])
-        series = Series(description, False)
+        series = Series(description)
         series.dataFrame = outputResult
         return series
     
@@ -215,7 +215,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # Parse out model information from first output result
         first = result[0]
         description = SemaphoreSeriesDescription(first[3], first[4], first[8], first[7], first[6])
-        series = Series(description, False)
+        series = Series(description)
         series.dataFrame = outputResult
         return series
     
@@ -295,7 +295,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             conn.commit()
         
         # Create a series object to return with the inserted data
-        resultSeries = Series(series.description, True, series.timeDescription)
+        resultSeries = Series(series.description, series.timeDescription)
         resultSeries.dataFrame = self.__splice_input(result) #Turn tuple objects into actual objects
         return resultSeries
     
@@ -385,7 +385,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             conn.commit()
 
         # Create a series object to return with the inserted data
-        resultSeries = Series(series.description, True, series.timeDescription)
+        resultSeries = Series(series.description, series.timeDescription)
         resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
         ids = [row[0] for row in result]
         return resultSeries, ids
