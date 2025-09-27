@@ -70,6 +70,7 @@ class SeriesProvider():
         #Determine if stale
         db_validated_is_fresh = self.__determine_staleness(validated_DB_results, reference_time,stalenessOffset)
         db_raw_is_fresh = self.__determine_staleness(raw_DB_results, reference_time, stalenessOffset)
+        print()
         
         db_is_complete= self.__is_complete(timeDescription, validated_DB_results.dataFrame)
         
@@ -165,7 +166,7 @@ class SeriesProvider():
 
         return actual_len >= expected_len
               
-    def __determine_staleness(self, validated_db_results: Series, reference_time: timedelta, stalenessOffset: timedelta | None) -> bool:
+    def __determine_staleness(self, validated_db_results: Series, reference_time: timedelta, stalenessOffset: timedelta) -> bool:
         """
         Returns True (fresh) if the OLDEST acquiredTime in the series is within the allowed
         freshness window of the reference time; otherwise returns False (stale).
@@ -174,8 +175,6 @@ class SeriesProvider():
         - validated_db_results.timeDescription.referenceTime: datetime-like
         - validated_db_results.dataFrame: pandas DataFrame with column 'acquiredTime'
         """
-        if stalenessOffset is None:
-            stalenessOffset = timedelta(hours=1)
 
         df = validated_db_results.dataFrame
         if df is None or len(df) == 0:
