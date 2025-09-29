@@ -70,8 +70,7 @@ class SeriesProvider():
         #Determine if stale
         db_validated_is_fresh = self.__determine_staleness(validated_DB_results, reference_time,stalenessOffset)
         db_raw_is_fresh = self.__determine_staleness(raw_DB_results, reference_time, stalenessOffset)
-        print()
-        
+      
         db_is_complete= self.__is_complete(timeDescription, validated_DB_results.dataFrame)
         
         #If fresh + results complete, and NO verification override

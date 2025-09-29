@@ -22,8 +22,7 @@ _mp = MonkeyPatch()
 
 @pytest.fixture(autouse=True)
 def force_factory_engine(monkeypatch, engine):
-    # Adjust path to the module/class that implements __create_engine / __get_engine
-    import SeriesStorage.SS_Classes.SQLAlchemyORM_Postgres as sa  # example
+    import SeriesStorage.SS_Classes.SQLAlchemyORM_Postgres as sa  
 
     # Patch the PRIVATE methods the factory calls in __init__
     cls = sa.SQLAlchemyORM_Postgres 
