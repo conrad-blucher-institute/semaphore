@@ -2,13 +2,14 @@
 #dataGatherer.py
 #----------------------------------
 # Created By: Matthew Kastl
-# Version: 3.0
+# Version: 4.0
+# Last Updated: 09/30/2025 by Christian Quintero
 #----------------------------------
 """ 
 This file is responsible for gathering the data needed to construct input vectors for the model.
 It handles requesting the data from series provider, checking the data is complete enough to proceed
 and post processing and data as specified.
- """ 
+""" 
 #----------------------------------
 # 
 #
@@ -29,11 +30,18 @@ class DataGatherer:
 
 
     def get_data_repository(self, dspec: Dspec, referenceTime: datetime) -> dict[str, Series]:
-        """ This is the main public function for data gatherer. It handles the whole process of reading from a dspec object
-        all the data needed to build the models input vectors. It will:
-            - Request the data from the series provider
-            - Post process the data if it is specified
-            - Return a dictionary of the data
+        """
+        This is the main public function for data gatherer. It handles the process of 
+        - building the request objects
+        - requesting inputs for each request
+        - interpolating the series if allowed 
+        - reindexing based on the interval
+        - validating the data 
+        - collecting the series into a repository
+        At this point, if the series is invalid, the method will fail and go back to the orchestrator.
+        If valid:
+        - perform each post processing call in the dspec
+        - return the data repository
 
         :param dspec: Dspec - The dspec object to read from
         :param referenceTime: datetime - The reference time to build the time description from.
@@ -41,18 +49,18 @@ class DataGatherer:
         """
 
         # Pull out the objects we need from the DSPEC
-        dependantSeries: list[DependentSeries] = dspec.dependentSeries
+        dependentSeries: list[DependentSeries] = dspec.dependentSeries
         postProcessCalls: list[PostProcessCall] = dspec.postProcessCall
 
         # Get Dependent Data
-        dependent_data_repository = self.__request_dependent_data(dependantSeries, referenceTime)
+        dependent_data_repository = self.__request_dependent_data(dependentSeries, referenceTime)
 
         # Call post processing 
         post_processed_series_repository = self.__post_process_data(dependent_data_repository, postProcessCalls)
 
         return post_processed_series_repository
     
-    
+
     def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime) -> dict[str, Series]:
         """This method handles the process of requesting the dependant series from the DSPEC. Its requests will be temporally
         referenced from the passed reference time. It will:
