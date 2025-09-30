@@ -67,23 +67,30 @@ class DataGatherer:
             - Build the series description
             - Build the time description
             - Request the data from the series provider
-            - Check the data for completeness
+            - Interpolate the data if allowed
+            - Reindex the data based on the interval
+            - Validate the data
             - Store the data with its specified outKey
             - Return the data repository
 
         :param dependentSeriesList: list[DependentSeries] - The list of dependent series from the DSEPC
         :param referenceTime: datetime - The reference time to build the time description from.
+
         :returns: dict[str, Series] - The dictionary of the data it collected 
+
         :raises: Semaphore_Ingestion_Exception - If a series provider returns none for a series description
         :raises: Semaphore_Data_Exception - If a series is incomplete
         """
         
         series_repository: dict[str, Series] = {}
+
         for dependentSeries in dependentSeriesList:
             
-            # Build or description objects
+            # Build the description objects
             seriesDescription = self.__build_seriesDescription(dependentSeries)
             timeDescription = self.__build_timeDescription(dependentSeries, referenceTime)
+
+            # Get the out key for the series
             key = dependentSeries.outKey
 
             # Request the data from Series provider from its description 
