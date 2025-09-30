@@ -19,6 +19,8 @@ from DataClasses import SeriesDescription, TimeDescription, DataIntegrityDescrip
 from .dspecParser import Dspec, DependentSeries, PostProcessCall
 from utility import log
 from PostProcessing.IPostProcessing import post_processing_factory
+from DataIntegrity.IDataIntegrity import data_integrity_factory
+from DataValidation.IDataValidation import data_validation_factory
 from exceptions import Semaphore_Data_Exception, Semaphore_Ingestion_Exception
 from datetime import datetime, timedelta
 
@@ -96,23 +98,39 @@ class DataGatherer:
             # Request the data from Series provider from its description 
             series = self.__seriesProvider.request_input(seriesDescription, timeDescription)
 
-            # Verify the series is ok
-            if series is None:
-                raise Semaphore_Ingestion_Exception(f'Series provider returned none for {seriesDescription}')
-            elif not series.isComplete:
-                raise Semaphore_Data_Exception(f'Incomplete data found for {seriesDescription}')
+            # Interpolate the data if allowed
+            if dependentSeries.dataIntegrityCall is not None:
+                # Create an instance of the data integrity class and execute it
+                series = data_integrity_factory(dependentSeries.dataIntegrityCall.call).exec(series)
+
+            # Reindex the data based on the interval
+            series.reindex(timeDescription.interval)
+
+            # Validate the data
+            if seriesDescription.verificationOverride.call is None:
+                raise Semaphore_Data_Exception(f'Series {seriesDescription} does not have a verification override specified.')
             
+            is_valid = data_validation_factory(seriesDescription.verificationOverride.call).validate(series)
+            
+            if not is_valid:
+                raise Semaphore_Ingestion_Exception(f'Series provider returned invalid data for {seriesDescription}')
+
             # Store the series in the repository
             series_repository[key] = series
         return series_repository
 
 
-    def __post_process_data(self, series_repository: dict[str, Series], postProcessCalls: list[PostProcessCall]) -> None:
+    def __post_process_data(self, series_repository: dict[str, Series], postProcessCalls: list[PostProcessCall]) -> dict[str, Series]:
         """
         This function calls the post processing methods for any inputs that need post processing
         the post_process_data function is passed the input dictionary and the process call
         so that the function can easily find the series needed for the computation and return 
         a dictionary with the new outkeys and series. 
+
+        :param series_repository: dict[str, Series] - The dictionary of the data it collected
+        :param postProcessCalls: list[PostProcessCall] - The list of post processing calls to execute
+
+        :returns: dict[str, Series] - The updated dictionary of the data with post processed series
         """
         for postProcessCall in postProcessCalls:
             # Instantiate Factory Method
@@ -144,21 +162,34 @@ class DataGatherer:
         """This function builds a time description from the dependentSeries object and reference time.
         :param dependentSeries: DependentSeries - The dependent series object to build the time description from.
         :param referenceTime: datetime - The reference time to build the time description from.
+
+        :returns: TimeDescription - The built time description
+
+        NOTE:: If no staleness offset is provided, it will default to 1 hour.
         """    
 
+        # Build the to and from offsets by unpacking the range
         toOffset, fromOffset = dependentSeries.range
+
         # Calculate the to and from time from the interval and range
         toDateTime = referenceTime + timedelta(seconds= toOffset * dependentSeries.interval)
         fromDateTime = referenceTime + timedelta(seconds= fromOffset * dependentSeries.interval)
+
+        # build the staleness offset if needed
+        if dependentSeries.stalenessOffset is None:
+            dependentSeries.stalenessOffset = timedelta(seconds=3600)      # Default to 1 hour
+
         
         # Check if it's only one point
         if (toOffset == fromOffset): 
             fromDateTime = fromDateTime.replace(minute=0, second=0, microsecond=0)
 
+        
         return TimeDescription(
             fromDateTime, 
             toDateTime,
-            timedelta(seconds=dependentSeries.interval)
+            timedelta(seconds=dependentSeries.interval),
+            dependentSeries.stalenessOffset
         )
     
 
