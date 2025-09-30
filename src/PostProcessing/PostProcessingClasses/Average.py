@@ -70,7 +70,7 @@ class Average(IPostProcessing):
         desc = first_series.description
         average_outKey = args['avg_outkey']
         desc.dataSeries = average_outKey
-        a_series = Series(desc, True, first_series.timeDescription)
+        a_series = Series(desc, first_series.timeDescription)
         a_series.dataFrame = df_result
         preprocessedData[average_outKey] = a_series
 

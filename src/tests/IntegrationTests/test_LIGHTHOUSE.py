@@ -28,11 +28,11 @@ from dotenv import load_dotenv
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
     # series: dWaterTmp - wtp
-    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), 24), # 1hr interval
+    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), 241), # 1hr interval
     (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), timedelta(seconds=360)), 11), # 6min interval
     (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), None), 11), # no interval
     # series: dAirTmp - atp
-    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), 24), # 1hr interval
+    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), 241), # 1hr interval
     (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), timedelta(seconds=360)), 11),  # 6min interval
     (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), None), 11), # no interval
     # series: erroneous

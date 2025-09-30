@@ -17,6 +17,7 @@ for any version of despec. The dspec gets converted into objects found in this f
 
 from os.path import exists
 from json import load
+from datetime import timedelta
 
 
 class DSPEC_Parser:
@@ -214,6 +215,7 @@ class dspec_sub_Parser_2_0:
                 dSeries.datum = dSeries_dict.get("datum")
                 dSeries.unit = dSeries_dict.get("unit")
                 dSeries.outKey = dSeries_dict.get("outKey")
+                dSeries.stalenessOffset = dSeries_dict.get("stalenessOffset", timedelta(hours=7)) # Staleness offset defaults to 7 hours if not provided
                 dSeries.verificationOverride = dSeries_dict.get("verificationOverride")
 
                 # If there is a data Integrity Call we parse it, else its set to None.
@@ -336,14 +338,15 @@ class DependentSeries:
         self.dataIntegrityCall = None
         self.outKey = None
         self.verificationOverride = None
+        self.stalenessOffset = None
         
         
     def __str__(self) -> str:
-        return f'\n[DependentSeries] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, datum: {self.datum}, range: {self.range}, outkey: {self.outKey}, dataIntegrityCall: {self.dataIntegrityCall}, verificationOverride: {self.verificationOverride}'
-    
+        return f'\n[DependentSeries] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, datum: {self.datum}, range: {self.range}, outkey: {self.outKey}, dataIntegrityCall: {self.dataIntegrityCall}, verificationOverride: {self.verificationOverride}, stalenessOffset: {self.stalenessOffset}'
+
     def __repr__(self):
-        return f'\nDependentSeries({self.name}, {self.location}, {self.source}, {self.series}, {self.unit}, {self.datum}, {self.range}, {self.outKey},{self.dataIntegrityCall}, {self.verificationOverride})'
-    
+        return f'\nDependentSeries({self.name}, {self.location}, {self.source}, {self.series}, {self.unit}, {self.datum}, {self.range}, {self.outKey},{self.dataIntegrityCall}, {self.verificationOverride}, {self.stalenessOffset})'
+
 class PostProcessCall:
     '''All information pertaining to a required call to a post processing function'''
     def __init__(self) -> None:
