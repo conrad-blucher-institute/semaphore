@@ -107,16 +107,22 @@ class DataGatherer:
             series.reindex(timeDescription.interval)
 
             # Validate the data
-            if seriesDescription.verificationOverride.call is None:
-                raise Semaphore_Data_Exception(f'Series {seriesDescription} does not have a verification override specified.')
-            
-            is_valid = data_validation_factory(seriesDescription.verificationOverride.call).validate(series)
-            
-            if not is_valid:
-                raise Semaphore_Ingestion_Exception(f'Series provider returned invalid data for {seriesDescription}')
+            if seriesDescription.verificationOverride is not None:
+                # if there is a verification override block, use it
+                is_valid = data_validation_factory('OverrideValidation').validate(series)
 
+                if not is_valid:
+                    raise Semaphore_Ingestion_Exception(f'Series provider returned invalid data for {seriesDescription}')
+            else:
+                # if no verification override, default to valide the date range
+                is_valid = data_validation_factory('DateRangeValidation').validate(series)
+
+                if not is_valid:
+                    raise Semaphore_Ingestion_Exception(f'Series provider returned invalid data for {seriesDescription}')
+            
             # Store the series in the repository
             series_repository[key] = series
+
         return series_repository
 
 
