@@ -45,8 +45,22 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param seriesDescription: SeriesDescription - A series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
-        inputs_select_latest_stmt = text("""
-        SELECT *
+        inputs_select_latest_stmt = text(""" 
+        SELECT  
+        i."id",
+        i."generatedTime",
+        i."acquiredTime",
+        i."verifiedTime",
+        i."dataValue",
+        i."isActual",
+        i."dataUnit",
+        i."dataSource",
+        i."dataLocation",
+        i."dataSeries",
+        i."dataDatum",
+        i."latitude",
+        i."longitude",
+        i."ensembleMemberID"
         FROM inputs AS i
         WHERE i."dataSource"   = :dataSource
         AND i."dataLocation" = :dataLocation
@@ -384,7 +398,21 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
         stalenessOffset = timeDescription.stalenessOffset
         query_stmt = text("""
-        SELECT *
+        SELECT  
+        i."id",
+        i."generatedTime",
+        i."acquiredTime",
+        i."verifiedTime",
+        i."dataValue",
+        i."isActual",
+        i."dataUnit",
+        i."dataSource",
+        i."dataLocation",
+        i."dataSeries",
+        i."dataDatum",
+        i."latitude",
+        i."longitude",
+        i."ensembleMemberID"
         FROM inputs AS i
         WHERE i."dataSource"   = :dataSource
         AND i."dataLocation" = :dataLocation
@@ -403,8 +431,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         )
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
+        
+        if not tupleishResult:
+            return False
             
-        acquiredTime = tupleishResult[0][3]
+        acquiredTime = tupleishResult[0][2]
         
          # Coerce to pandas Timestamp (handles string or datetime)
         acq = pd.to_datetime(acquiredTime, errors="coerce")

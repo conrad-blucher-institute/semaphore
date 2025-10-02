@@ -7,7 +7,7 @@
 # -------------------------------
 """Tests for the SQLAlchemy storage layer."""
 # -------------------------------
-# test_select_input_mockdb.py
+# test_select_input.py
 import sys
 sys.path.append('/app/src')
 from datetime import datetime
@@ -180,7 +180,7 @@ def seed_inputs_once(engine, inputs_table):
             ]
  
         ),
-        #Tests same generatd time and same verified time, but no ensemble
+        #Tests same generated time and same verified time, but no ensemble
         (
             dict(dataSource="LIGHTHOUSE", dataSeries="dWnDir",
                  dataLocation="PortLavaca", dataDatum="NA"),
@@ -197,12 +197,13 @@ def seed_inputs_once(engine, inputs_table):
             ]
  
         )
+        
     ],
     ids=[
         "NOAATANDC",
         "NDFD_EXP",
         "TWC",
-        "LIGHTHOUSE",
+        "LIGHTHOUSE"
     ],
 )
 def test_select_input_with_mock_db(engine, inputs_table, series_kwargs, from_str, to_str, expected_values):
@@ -246,6 +247,7 @@ def test_select_input_with_mock_db(engine, inputs_table, series_kwargs, from_str
             return out
 
     actual_df   = _normalize(df)
+    print(f'FINAL:{actual_df}')
     expected_df = _normalize(expected_values)
 
     assert_frame_equal(actual_df, expected_df, check_dtype=False)
