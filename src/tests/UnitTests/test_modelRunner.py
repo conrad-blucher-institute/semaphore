@@ -56,8 +56,6 @@ def mock_dspec():
 def equate_series(left: Series, right: Series):
     """Compares two series objects against one another"""
 
-    assert left.isComplete == right.isComplete, "isComplete doesn't match"
-
     assert left.dataFrame == right.dataFrame, "Series data does not match"
     
     leftD = left.description
@@ -80,7 +78,7 @@ TEST_DESCRIPTION = SemaphoreSeriesDescription(
     'testLocation',
     'testDatum'
 )
-TEST_SERIES = Series(TEST_DESCRIPTION, True)
+TEST_SERIES = Series(TEST_DESCRIPTION)
 RESULT_DATA = 0
 TEST_SERIES.dataFrame = RESULT_DATA
 

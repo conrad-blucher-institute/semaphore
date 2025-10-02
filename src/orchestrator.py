@@ -177,7 +177,7 @@ class Orchestrator:
             
                 # Reconstruct the expected predictions information with a nulled result
                 predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, dspec.outputInfo.series, dspec.outputInfo.location, dspec.outputInfo.datum)
-                result_series = Series(predictionDesc, True)
+                result_series = Series(predictionDesc)
 
                 # Generate null output
                 df_output = get_output_dataFrame() 

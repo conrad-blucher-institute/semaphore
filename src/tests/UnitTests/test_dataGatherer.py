@@ -82,7 +82,6 @@ def test_get_data_repository(data_gatherer, mock_dspec):
 
     # Force the mock series provider to return a mock series, it will be complete
     mock_series = MagicMock(spec=Series)
-    mock_series.configure_mock(isComplete = True)
     data_gatherer._DataGatherer__seriesProvider.request_input.return_value = mock_series
 
     # Request the data in the mock dspec

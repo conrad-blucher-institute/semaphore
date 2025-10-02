@@ -58,17 +58,19 @@ class TimeDescription():
         :param fromDateTime: datetime - The datetime the data starts at
         :param toDateTime: datetime - The datetime the data stops at
         :param interval: timedelta = None - The time step separating the data points in order
+        :param stalenessOffset: timedelta = None - The amount of time after reference time that the data is  considered stale
     """
-    def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: timedelta = None) -> None:
+    def __init__(self, fromDateTime: datetime, toDateTime: datetime, interval: timedelta = None, stalenessOffset: timedelta = None) -> None:
         self.fromDateTime = fromDateTime
         self.toDateTime = toDateTime
         self.interval = interval
+        self.stalenessOffset = stalenessOffset
 
     def __str__(self) -> str:
-        return f'\n[TimeDescription] -> fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}. interval: {self.interval}'
-    
+        return f'\n[TimeDescription] -> fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}. interval: {self.interval}, stalenessOffset: {self.stalenessOffset}'
+
     def __repr__(self) -> str:
-        return f'\nTimeDescription({self.fromDateTime}, {self.toDateTime}, {self.interval})'
+        return f'\nTimeDescription({self.fromDateTime}, {self.toDateTime}, {self.interval}, {self.stalenessOffset})'
 
 
 class SeriesDescription():
@@ -121,15 +123,12 @@ class SemaphoreSeriesDescription():
 class Series():
     """A series is a pairing of an object describing a series of data, and an array of the data itself. It also includes some meta data about how well the data provided matches the description.
         :param description: SeriesDescription | SemaphoreSeriesDescription - An object that will describe to you what unique data set this is
-        :param isComplete: bool - Whether the description object completely describes the bound data
         :param timeDescription: TimeDescription = None - An object that contains the datetime properties of the data
         :param nonCompleteReason: Exception = None - The exception that cased the problem
     """
-    def __init__(self, description: SeriesDescription | SemaphoreSeriesDescription, isComplete: bool, timeDescription: TimeDescription = None, nonCompleteReason: Exception = None) -> None:
+    def __init__(self, description: SeriesDescription | SemaphoreSeriesDescription, timeDescription: TimeDescription = None) -> None:
         self.description = description
-        self.isComplete = isComplete
         self.timeDescription = timeDescription
-        self.nonCompleteReason = nonCompleteReason
         self.__dataFrame = None
 
     @property
@@ -141,5 +140,5 @@ class Series():
         self.__dataFrame = dataFrame
 
     def __str__(self) -> str:
-        return f'\n[Series] -> description: {self.description}, wasSuccessful: {self.isComplete}, timeDescription: {self.timeDescription}, errorReason: {self.nonCompleteReason}'
+        return f'\n[Series] -> description: {self.description}, timeDescription: {self.timeDescription}'
     

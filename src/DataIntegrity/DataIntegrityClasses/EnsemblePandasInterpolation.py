@@ -96,7 +96,7 @@ class EnsemblePandasInterpolation(IDataIntegrity):
         out_df.fillna(method='ffill', inplace=True)
         out_df.reset_index(inplace=True, names='timeVerified')
 
-        outSeries = Series(seriesDescription, True, timeDescription)
+        outSeries = Series(seriesDescription, timeDescription)
         outSeries.dataFrame = out_df
 
         return outSeries

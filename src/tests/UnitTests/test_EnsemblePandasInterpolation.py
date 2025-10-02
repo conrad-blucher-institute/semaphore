@@ -84,7 +84,7 @@ def test_interpolate_series(dependent_series: list, timeDescription: TimeDescrip
     )
 
     
-    inSeries = Series(description = seriesDescription, isComplete = False, timeDescription = timeDescription)
+    inSeries = Series(description = seriesDescription, timeDescription = timeDescription)
 
     inSeries.dataFrame = inputs
 
