@@ -98,7 +98,7 @@ class DataGatherer:
             # Request the data from Series provider from its description 
             series = self.__seriesProvider.request_input(seriesDescription, timeDescription)
 
-            # Interpolate the data if allowed
+            # Perform data integrity processing if specified
             if dependentSeries.dataIntegrityCall is not None:
                 # Create an instance of the data integrity class and execute it
                 series = data_integrity_factory(dependentSeries.dataIntegrityCall.call).exec(series)
@@ -114,7 +114,7 @@ class DataGatherer:
                 if not is_valid:
                     raise Semaphore_Data_Exception(f'Series provider returned invalid data for {seriesDescription}')
             else:
-                # if no verification override, default to valide the date range
+                # if no verification override, default to validate the date range
                 is_valid = data_validation_factory('DateRangeValidation').validate(series)
 
                 if not is_valid:
@@ -181,9 +181,12 @@ class DataGatherer:
         toDateTime = referenceTime + timedelta(seconds= toOffset * dependentSeries.interval)
         fromDateTime = referenceTime + timedelta(seconds= fromOffset * dependentSeries.interval)
 
+        # Build staleness offset
+        stalenessOffset = dependentSeries.stalenessOffset
+
         # build the staleness offset if needed
-        if dependentSeries.stalenessOffset is None:
-            dependentSeries.stalenessOffset = timedelta(seconds=3600)      # Default to 1 hour
+        if stalenessOffset is None:
+            stalenessOffset = timedelta(seconds=3600)      # Default to 1 hour
 
         
         # Check if it's only one point
@@ -195,7 +198,7 @@ class DataGatherer:
             fromDateTime, 
             toDateTime,
             timedelta(seconds=dependentSeries.interval),
-            dependentSeries.stalenessOffset
+            stalenessOffset
         )
     
 
