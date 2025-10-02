@@ -107,18 +107,10 @@ class DataGatherer:
             series.reindex(timeDescription.interval)
 
             # Validate the data
-            if seriesDescription.verificationOverride is not None:
-                # if there is a verification override block, use it
-                is_valid = data_validation_factory('OverrideValidation').validate(series)
-
-                if not is_valid:
-                    raise Semaphore_Data_Exception(f'Series provider returned invalid data for {seriesDescription}')
-            else:
-                # if no verification override, default to validate the date range
-                is_valid = data_validation_factory('DateRangeValidation').validate(series)
-
-                if not is_valid:
-                    raise Semaphore_Data_Exception(f'Series provider returned invalid data for {seriesDescription}')
+            is_valid = self.__validate_series(series)
+            
+            if not is_valid:
+                raise Semaphore_Data_Exception(f'Series provider returned invalid data for {seriesDescription}')
             
             # Store the series in the repository
             series_repository[key] = series
@@ -212,3 +204,20 @@ class DataGatherer:
                             dependentSeries.dataIntegrityCall.call,
                             dependentSeries.dataIntegrityCall.args
                     )
+    
+    def __validate_series(self, series: Series) -> bool:
+        """ This method checks if the series description has a verification override.
+            If it does, it uses the override to validate the series.
+            If it doesn't, it uses the date range validation to validate the series.
+
+            :param series: Series - The series to validate
+
+            :return: bool - True if the series passes validation, False otherwise
+        """
+
+        if series.seriesDescription.verificationOverride is not None:
+            # if there is a verification override block, use it
+            return data_validation_factory('OverrideValidation').validate(series)
+        else:
+            # if no verification override, default to validate the date range
+            return data_validation_factory('DateRangeValidation').validate(series)
