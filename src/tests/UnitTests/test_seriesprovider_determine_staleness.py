@@ -18,7 +18,6 @@ from sqlalchemy import create_engine, Boolean, MetaData, Table, Column, Integer,
 from sqlalchemy.pool import StaticPool
 from DataClasses import SeriesDescription, TimeDescription
 from pathlib import Path
-from SeriesProvider import SeriesProvider
 _mp = MonkeyPatch()
 
 @pytest.fixture(autouse=True)
@@ -153,18 +152,9 @@ def test_determine_staleness_with_mock_db(engine, inputs_table, series_kwargs, f
     time_desc = TimeDescription(fromDateTime=from_dt, toDateTime=to_dt)
     time_desc.interval = timedelta(hours=1)
     reference_time = datetime(2025, 9, 12, 4, 0, 0)
+    time_desc.stalenessOffset = timedelta(hours=1)
 
     storage = series_storage_factory()
-    provider = SeriesProvider()
-    
-    stalenessWindow = timedelta(hours=1)
-    
-    time_desc.interval = timedelta(hours=1)
-
-    # Call private methods via name-mangling
-    db_query = getattr(provider, "_SeriesProvider__data_base_query")
-    validated_DB_results, _raw_DB_results = db_query(series_desc, time_desc)
-    is_fresh_fn = getattr(provider, "_SeriesProvider__determine_staleness")
-    actual_result = is_fresh_fn(validated_DB_results, reference_time,stalenessWindow)
+    actual_result = storage.is_fresh_by_acquired_time(series_desc, time_desc, reference_time)
 
     assert actual_result is expected_result

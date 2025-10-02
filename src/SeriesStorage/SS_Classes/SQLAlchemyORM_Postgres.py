@@ -46,21 +46,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param timeDescription: TimeDescription - A hydrated time description object
         """
         inputs_select_latest_stmt = text("""
-        SELECT
-            i.id,
-            i."generatedTime",
-            i."acquiredTime",
-            i."verifiedTime",
-            i."dataValue",
-            i."isActual",
-            i."dataUnit",
-            i."dataSource",
-            i."dataLocation",
-            i."dataSeries",
-            i."dataDatum",
-            i.latitude,
-            i.longitude,
-            i."ensembleMemberID"
+        SELECT *
         FROM inputs AS i
         WHERE i."dataSource"   = :dataSource
         AND i."dataLocation" = :dataLocation
@@ -384,6 +370,69 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
         ids = [row[0] for row in result]
         return resultSeries, ids
+    
+    def is_fresh_by_acquired_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: timedelta):
+        """
+        Returns True (fresh) if the OLDEST acquiredTime in the series is within the allowed
+        freshness window of the reference time; otherwise returns False (stale).
+
+        Expected attributes:
+        :param seriesDescription: SeriesDescription - A series description object
+        :param timeDescription: TimeDescription - A hydrated time description object
+        :param referenceTime: timedelta - The time data is being requested. Usually, it is now.
+
+        """
+        stalenessOffset = timeDescription.stalenessOffset
+        query_stmt = text("""
+        SELECT *
+        FROM inputs AS i
+        WHERE i."dataSource"   = :dataSource
+        AND i."dataLocation" = :dataLocation
+        AND i."dataSeries"   = :dataSeries
+        AND i."dataDatum"    = :dataDatum
+        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        ORDER BY i."acquiredTime" ASC
+        LIMIT 1;
+        """).bindparams(
+            dataSource=seriesDescription.dataSource,
+            dataLocation=seriesDescription.dataLocation,
+            dataSeries=seriesDescription.dataSeries,
+            dataDatum=seriesDescription.dataDatum,
+            from_dt=timeDescription.fromDateTime,
+            to_dt=timeDescription.toDateTime,
+        )
+        
+        tupleishResult = self.__dbSelection(query_stmt).fetchall()
+            
+        acquiredTime = tupleishResult[0][3]
+        
+         # Coerce to pandas Timestamp (handles string or datetime)
+        acq = pd.to_datetime(acquiredTime, errors="coerce")
+        
+        if pd.isna(acq):
+            return False
+
+        # Normalize reference_time
+        ref = pd.to_datetime(referenceTime, errors="coerce")
+        if pd.isna(ref):
+            return False
+
+        # Make both tz-naive for comparison
+        if isinstance(ref, pd.Timestamp) and ref.tz is not None:
+            ref = ref.tz_localize(None)
+        if isinstance(acq, pd.Timestamp) and acq.tz is not None:
+            acq = acq.tz_localize(None)
+
+        # Compute age; clamp negatives (in case acq > ref due to clock skew)
+        age = ref - acq
+        if age < pd.Timedelta(0):
+            age = pd.Timedelta(0)
+
+        return age <= pd.to_timedelta(stalenessOffset)
+        
+        
+        
+        
 
     #############################################################################################
     ################################################################################## DB Managment Methods
@@ -443,16 +492,17 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             ]
         )
         
+        if df_results.empty:
+            return get_input_dataFrame()
         
         # --- minimal: normalize dtypes so checks / sorting work correctly ---
         df_results["generatedTime"]    = pd.to_datetime(df_results["generatedTime"], errors="coerce")
         df_results["verifiedTime"]     = pd.to_datetime(df_results["verifiedTime"],  errors="coerce")
-        df_results["acquiredTime"]     = pd.to_datetime(df_results["acquiredTime"],  errors="coerce")
         df_results["ensembleMemberID"] = pd.to_numeric(df_results["ensembleMemberID"], errors="coerce")  # NaN if not ensemble
 
 
-        # A formatted dataframe to place the spliced data. Added acquired time as this is when acquired time is needed.
-        df_out = DataFrame(columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'acquiredTime', 'longitude', 'latitude'])
+        # A formatted dataframe to place the spliced data 
+        df_out = get_input_dataFrame()
         for vt, group in df_results.groupby("verifiedTime", sort=True):
             has_ensemble = group["ensembleMemberID"].notna().any()
 
@@ -467,14 +517,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                         row.dataUnit,
                         row.verifiedTime,
                         row.generatedTime,
-                        row.acquiredTime,
                         row.longitude,
                         row.latitude,
-                        
                     ]
             else:
                 # No ensemble: return the single latest row for every verified time
-                idx = group["generatedTime"] .idxmax() if group["generatedTime"] .notna().any() else group["verifiedTime"] .idxmax()
+                idx = group["generatedTime"].idxmax()
                 row = group.loc[idx]
 
                 df_out.loc[len(df_out)] = [
@@ -482,10 +530,8 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                     row["dataUnit"],             # dataUnit
                     vt,                          # timeVerified
                     row["generatedTime"],        # timeGenerated
-                    row["acquiredTime"],
                     row["longitude"],            # longitude
                     row["latitude"],             # latitude
-                    
                 ]
         df_out = df_out.rename(
             columns={
@@ -501,6 +547,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         ).reset_index(drop=True)
         
         return df_out
+
 
     def __splice_output(self, results: list[tuple]) -> DataFrame:
         """Converts DB row results into a proper output dataframe to be packed into a series.

@@ -46,69 +46,44 @@ class SeriesProvider():
           
     
     def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, saveIngestion: bool = True) -> Series:
-        """This method attempts to return a series matching a series description and a time description.
-            It will attempt first to get the series from series storage, kicking off data ingestion if series storage
-            doesn't have all the data.
-            NOTE: If an interval is not provided in the time description, the interval will be assumed to be 1 hour
-            :param seriesDescription - A description of the wanted series.
-            :param timeDescription - A description of the temporal information of the wanted series. 
-            :returns series - The series containing as much data as could be found.
-        """
-        log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
+            """This method attempts to return a series matching a series description and a time description.
+                It will attempt first to get the series from series storage, kicking off data ingestion if series storage
+                doesn't have all the data.
+                NOTE: If an interval is not provided in the time description, the interval will be assumed to be 1 hour
+                :param seriesDescription - A description of the wanted series.
+                :param timeDescription - A description of the temporal information of the wanted series. 
+                :returns series - The series containing as much data as could be found.
+            """
+            log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
 
-        # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 1 hour
-        timeDescription.interval = timedelta(hours=1) if timeDescription.interval == None else timeDescription.interval
-        
-        # First we check the database to see if it has the data we need
-        validated_DB_results, raw_DB_results = self.__data_base_query(seriesDescription, timeDescription)
-        
-        # Get reference time 
-        reference_time = datetime.now()
-        
-        stalenessOffset = timeDescription.stalenessOffset
+            # If an interval was not provided we have to make an assumption to be able to validate it. Here we assume the interval to be 1 hour
+            timeDescription.interval = timedelta(hours=1) if timeDescription.interval == None else timeDescription.interval
+            
+            # First we check the database to see if it has the data we need
+            validated_DB_results, raw_DB_results = self.__data_base_query(seriesDescription, timeDescription)
 
-        #Determine if stale
-        db_validated_is_fresh = self.__determine_staleness(validated_DB_results, reference_time,stalenessOffset)
-        db_raw_is_fresh = self.__determine_staleness(raw_DB_results, reference_time, stalenessOffset)
-      
-        db_is_complete= self.__is_complete(timeDescription, validated_DB_results.dataFrame)
-        
-        #If fresh + results complete, and NO verification override
-        # Note: If there is a verification override, we have to always request new data, so we can return here
-        if db_validated_is_fresh and seriesDescription.verificationOverride is None and db_is_complete:
-            return validated_DB_results
-         
-        # Next we start Data Ingestion, to go and get the data we need
-        validated_DI_results, raw_DI_results = self.__data_ingestion_query(seriesDescription, timeDescription, saveIngestion)
-        di_is_complete = self.__is_complete(timeDescription, validated_DI_results.dataFrame)
-        if validated_DI_results is not None and di_is_complete: 
-            return validated_DI_results
-        
-        # If raw DB results is stale, do NOT merge
-        if not db_raw_is_fresh:
-            if validated_DI_results is not None:
-                if seriesDescription.dataIntegrityDescription is None:
-                    log('INFO:: DB stale; DI incomplete; interpolation not permitted. Returning incomplete DI.')
-                    return validated_DI_results
-                return self.__data_interpolation(seriesDescription, timeDescription, validated_DI_results)
-            log('INFO:: DB stale and may be None')
-            return validated_DI_results
-        
-        # If neither of those in isolation work we try merging them together
-        validated_merged_results = self.__validate_series(seriesDescription, timeDescription, raw_DB_results.dataFrame, None if raw_DI_results is None else raw_DI_results.dataFrame)
-        merged_is_complete= self.__is_complete(timeDescription, validated_merged_results.dataFrame)
-        
-        if merged_is_complete: 
-            return validated_merged_results
-        elif seriesDescription.dataIntegrityDescription is None:
-            log(f'INFO:: Series is not complete and interpolation was not granted!')
-            return validated_merged_results
-        
-        # If we are allowed to interpolate, we interpolate the data and return that
-        # This does not guarantee all the data is there, but there is nothing more we can do.
-        return self.__data_interpolation(seriesDescription, timeDescription, validated_merged_results)
-   
+            # If there is a verification override, we have to always request new data, so we can return here
+            if validated_DB_results.isComplete and seriesDescription.verificationOverride is None: 
+                return validated_DB_results
+
+            # Next we start Data Ingestion, to go and get the data we need
+            validated_DI_results, raw_DI_results = self.__data_ingestion_query(seriesDescription, timeDescription, saveIngestion)
+            if validated_DI_results is not None and validated_DI_results.isComplete: 
+                return validated_DI_results
+            
+            # If neither of those in isolation work we try merging them together
+            validated_merged_results = self.__validate_series(seriesDescription, timeDescription, raw_DB_results.dataFrame, None if raw_DI_results is None else raw_DI_results.dataFrame)
+            if validated_merged_results.isComplete: 
+                return validated_merged_results
+            elif seriesDescription.dataIntegrityDescription is None:
+                log(f'INFO:: Series is not complete and interpolation was not granted!')
+                return validated_merged_results
+            print(validated_merged_results.dataFrame.to_string())
+            # If we are allowed to interpolate, we interpolate the data and return that
+            # This does not guarantee all the data is there, but there is nothing more we can do.
+            return self.__data_interpolation(seriesDescription, timeDescription, validated_merged_results)
     
+        
     def request_output(self, method: str, **kwargs) -> Series | None: 
         ''' Selects the correct method from the ORM, calling it, and passing it the correct args
             :param method: str - This is a string value to select which style of request you are trying to make
@@ -147,60 +122,6 @@ class SeriesProvider():
                     raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("SPECIFIC", semaphoreSeriesDescription= DESCRIPTION, timeDescription= DESCRIPTION)')
             case _:
                 raise NotImplementedError(f'Method {method} has not been implemented in SeriesProvider.request_output')
-            
-    def __is_complete(self, timeDescription: TimeDescription, df: DataFrame | None) -> bool:
-        """
-        Returns True if the number of rows in df matches the expected
-        number of timestamps for the given timeDescription.
-        """
-        if df is None or len(df) == 0:
-            return False
-
-        # Expected length = number of timestamps we should see in the window
-        expected_times = self.__generate_expected_timestamp_list(timeDescription)
-        expected_len = len(expected_times)
-
-        # Actual length = number of non-null rows for dataValue (safer than raw len)
-        actual_len = df["dataValue"].notna().sum() if "dataValue" in df.columns else len(df)
-
-        return actual_len >= expected_len
-              
-    def __determine_staleness(self, validated_db_results: Series, reference_time: timedelta, stalenessOffset: timedelta) -> bool:
-        """
-        Returns True (fresh) if the OLDEST acquiredTime in the series is within the allowed
-        freshness window of the reference time; otherwise returns False (stale).
-
-        Expected attributes:
-        - validated_db_results.timeDescription.referenceTime: datetime-like
-        - validated_db_results.dataFrame: pandas DataFrame with column 'acquiredTime'
-        """
-
-        df = validated_db_results.dataFrame
-        if df is None or len(df) == 0:
-            return False
-        
-
-        # Coerce acquiredTime to datetimes and get the OLDEST (minimum) timestamp
-        acq = pd.to_datetime(df["acquiredTime"], errors="coerce")
-        oldest_acq = acq.min(skipna=True)
-
-        if pd.isna(oldest_acq):
-            return False
-        
-
-        # Normalize tz-awareness (use timezone-naive comparison)
-        reference_time = pd.to_datetime(reference_time)
-        if isinstance(reference_time, pd.Timestamp) and reference_time.tz is not None:
-            reference_time = reference_time.tz_localize(None)
-        if isinstance(oldest_acq, pd.Timestamp) and oldest_acq.tz is not None:
-            oldest_acq = oldest_acq.tz_localize(None)
-            
-        # Age = how far the OLDEST acquired sample is from the reference
-        age = reference_time - oldest_acq
-
-        # If the oldest sample is no older than the freshness window, we're good
-        return age <= stalenessOffset
-    
 
 
     def __data_base_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> tuple[Series, Series]:
