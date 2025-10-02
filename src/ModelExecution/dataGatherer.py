@@ -3,7 +3,7 @@
 #----------------------------------
 # Created By: Matthew Kastl
 # Version: 4.0
-# Last Updated: 09/30/2025 by Christian Quintero
+# Last Updated: 10/02/2025 by Christian Quintero
 #----------------------------------
 """ 
 This file is responsible for gathering the data needed to construct input vectors for the model.
@@ -112,13 +112,13 @@ class DataGatherer:
                 is_valid = data_validation_factory('OverrideValidation').validate(series)
 
                 if not is_valid:
-                    raise Semaphore_Ingestion_Exception(f'Series provider returned invalid data for {seriesDescription}')
+                    raise Semaphore_Data_Exception(f'Series provider returned invalid data for {seriesDescription}')
             else:
                 # if no verification override, default to valide the date range
                 is_valid = data_validation_factory('DateRangeValidation').validate(series)
 
                 if not is_valid:
-                    raise Semaphore_Ingestion_Exception(f'Series provider returned invalid data for {seriesDescription}')
+                    raise Semaphore_Data_Exception(f'Series provider returned invalid data for {seriesDescription}')
             
             # Store the series in the repository
             series_repository[key] = series
@@ -128,8 +128,8 @@ class DataGatherer:
 
     def __post_process_data(self, series_repository: dict[str, Series], postProcessCalls: list[PostProcessCall]) -> dict[str, Series]:
         """
-        This function calls the post processing methods for any inputs that need post processing
-        the post_process_data function is passed the input dictionary and the process call
+        This function calls the post processing methods for any inputs that need post processing.
+        The post_process_data function is passed the input dictionary and the process call
         so that the function can easily find the series needed for the computation and return 
         a dictionary with the new outkeys and series. 
 
