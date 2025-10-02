@@ -1,126 +1,244 @@
 # -*- coding: utf-8 -*-
-# test_unit_SeriesProvider.py
-#-------------------------------
-# Created By : Matthew Kastl
-# Created Date: 2/21/2024
-# version 1.0
-#-------------------------------
-""" This file contains unit tests the series provider class
-
-run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_SeriesProvider.py
- """ 
-#-------------------------------
-# 
-#
-#Imports
+# test_unit_SeriesProvider.py (updated for SeriesProvider v2.0)
+# ---------------------------------------------------------------------
+# Created By : Anointiyae Beasley
+# Based on original by: Matthew Kastl
+# ---------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+# test_unit_SeriesProvider.py (updated for SeriesProvider v2.0)
 import sys
 sys.path.append('/app/src')
-import os
-    
+
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
 from src.SeriesProvider.SeriesProvider import SeriesProvider
-from src.DataClasses import TimeDescription, SeriesDescription, get_input_dataFrame, DataIntegrityDescription, Series
-from unittest import mock
-from pandas import DataFrame
+from src.DataClasses import (
+    Series,
+    SeriesDescription,
+    SemaphoreSeriesDescription,
+    TimeDescription,
+    get_input_dataFrame,
+)
 
-ONE_POINT = TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1),  timedelta(hours=1))
-FIVE_POINTS = TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1, 4),  timedelta(hours=1))
+# ---------- helpers ----------
 
-TWO_HOUR_LIMIT_INTERPOLATION = DataIntegrityDescription('PandasInterpolation', {'method' : 'linear', 'limit': '7200', 'limit_area': 'inside' })
-TWO_HOUR_LIMIT_EX_AND_IN_TERP = DataIntegrityDescription('PandasInterpolation', {'method' : 'linear', 'limit': '7200', 'limit_area': 'None' })
+def _input_df(rows=3, start=None):
+    """
+    Build an INPUT dataframe using the exact schema from get_input_dataFrame():
+    ['dataValue','dataUnit','timeVerified','timeGenerated','longitude','latitude']
+    """
+    if start is None:
+        # Keep tests deterministic & tz-aware where we fabricate times
+        start = datetime(2000, 1, 1, tzinfo=timezone.utc)
 
-TEST_DI_DESC = SeriesDescription('TEST_DI', 'COMPLETE', 'TEST', None) #
-TEST_DB_DESC = SeriesDescription('TEST_SS', 'COMPLETE', 'TEST', None) #
-TEST_DI_DESC_MISS_1 = SeriesDescription('TEST_DI', 'MISS_1', 'TEST', None)
-TEST_DI_DESC_W_OVERRIDE_5 = SeriesDescription('TEST_DI', 'COMPLETE', 'TEST', None, None, {"label": "equals", "value": "5"})
-TEST_DI_DESC_W_OVERRIDE_5_MISS_1 = SeriesDescription('TEST_DI', 'MISS_1', 'TEST', None, None, {"label": "equals", "value": "5"})
-TEST_DI_DESC_W_INTERP_MISS_LAST = SeriesDescription('TEST_DI', 'MISS_LAST', 'TEST', None, TWO_HOUR_LIMIT_INTERPOLATION)
-TEST_DI_DESC_W_INTERP_MISS_FIRST_EX = SeriesDescription('TEST_DI', 'MISS_LAST', 'TEST', None, TWO_HOUR_LIMIT_EX_AND_IN_TERP)
-TEST_DI_DESC_W_INTERP_MISS_1 = SeriesDescription('TEST_DI', 'MISS_1', 'TEST', None, TWO_HOUR_LIMIT_EX_AND_IN_TERP)
-
-
-# @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
-
-#     # Testing correctly detecting good series
-#     (TEST_DI_DESC, FIVE_POINTS, True), # Tests a normal 5 hour series where the data should be returned by ingestion
-#     (TEST_DB_DESC, FIVE_POINTS, True), # Tests a normal 5 hour series where the data should be returned by DB
-#     (TEST_DI_DESC, ONE_POINT, True), # Tests a normal 1 hour series where the data should be returned by ingestion
-#     (TEST_DB_DESC, ONE_POINT, True), # Tests a normal 1 hour series where the data should be returned by DB
-
-#     # Testing correctly detecting missing data
-#     (TEST_DI_DESC_MISS_1, FIVE_POINTS, False), # Tests a normal 5 hour series where the data should have one missing from ingestion
-#     (TEST_DI_DESC_MISS_1, ONE_POINT, False), # Tests a normal 1 hour series where the data should have one missing from ingestion
-
-#     # Testing verification override
-#     (TEST_DI_DESC_W_OVERRIDE_5, FIVE_POINTS, True), # Tests a normal 5 hour series where the data is validated with an override
-#     (TEST_DI_DESC_W_OVERRIDE_5_MISS_1, FIVE_POINTS, False), # Tests a normal 5 hour series where the data is validated with an override but a value is missing
-
-#     # Testing Interpolation
-#     (TEST_DI_DESC_W_INTERP_MISS_LAST, FIVE_POINTS, False), # Testing first and last value when extrapolation is NOT allowed
-#     (TEST_DI_DESC_W_INTERP_MISS_FIRST_EX, FIVE_POINTS, True), # Testing first and last value when extrapolation is allowed
-#     (TEST_DI_DESC_W_INTERP_MISS_1, FIVE_POINTS, True), # Testing interpolating a random missing value from di
-   
-# ])
-# def test_request_input(seriesDescription: SeriesDescription, timeDescription: TimeDescription, expected_output):
-
-#     seriesProvider = SeriesProvider()
-#     series = seriesProvider.request_input(seriesDescription, timeDescription)
-#     assert series.isComplete == expected_output
+    df = get_input_dataFrame()
+    for i in range(rows):
+        df.loc[len(df)] = [
+            "1",                                 # dataValue (string)
+            "test",                              # dataUnit
+            start + timedelta(hours=i),          # timeVerified
+            start,                               # timeGenerated
+            None,                                # longitude
+            None,                                # latitude
+        ]
+    return df
 
 
-@pytest.mark.parametrize("timeDescription, expected_output", [
-    (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1),  timedelta(hours=1)), [datetime(2000, 1, 1)]), # I single data point
-    (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1, hour=11),  timedelta(hours=1)), [datetime(2000, 1, 1) + timedelta(hours=idx) for idx in range(12)]), # A 12 hour long data series
-])
-def test__generate_datetime_list(timeDescription, expected_output):
-    seriesProvider = SeriesProvider()
-    result = seriesProvider._SeriesProvider__generate_expected_timestamp_list(timeDescription)
-    assert result == expected_output
+class _FakeStorage:
+    """
+    Fake Series Storage returned by series_storage_factory().
+    We simulate 'freshness' via is_fresh_by_acquired_time and hold the
+    series that select_input will return.
+    """
+    def __init__(self):
+        self.fresh = True
+        self.selected_series = Series(SeriesDescription("TEST_SRC", "TEST_SERI", "TEST_LOC"))
+        self.selected_series.dataFrame = _input_df(3)
+
+        self.inserted = None
+        self.insert_output_called_with = None
+
+        # For request_output routes
+        self.latest_series = Series(SemaphoreSeriesDescription("M", "v1", "target", "loc"))
+        self.time_span_series = Series(SemaphoreSeriesDescription("M", "v1", "target", "loc"))
+        self.specific_series = Series(SemaphoreSeriesDescription("M", "v1", "target", "loc"))
+
+    # ----- input path -----
+    def is_fresh_by_acquired_time(self, series_desc, time_desc, reference_time):
+        return self.fresh
+
+    def select_input(self, series_desc, time_desc):
+        return self.selected_series
+
+    def insert_input(self, di_series):
+        # simulate an upsert echo from DB
+        self.inserted = di_series
+        return di_series
+
+    # ----- output path -----
+    def insert_output(self, series):
+        self.insert_output_called_with = series
+        return series
+
+    def select_latest_output(self, **kwargs):
+        return self.latest_series
+
+    def select_output(self, **kwargs):
+        return self.time_span_series
+
+    def select_specific_output(self, **kwargs):
+        return self.specific_series
 
 
-test_series_desc = SeriesDescription('Test', 'Test', 'Test')
-three_hour_time_desc = TimeDescription(datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=3),  timedelta(hours=1))
-df_correct_three_hour_series = get_input_dataFrame()
-df_correct_three_hour_series.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series.loc[1] = ['1', 'test', datetime(2000, 1, 1, hour=2), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series.loc[2] = ['1', 'test', datetime(2000, 1, 1, hour=3), datetime(2000, 1, 1, hour=0), None, None]
+class _FakeDI:
+    """Fake Data Ingestion returned by data_ingestion_factory()."""
+    def __init__(self, df=None):
+        self.called_with = []
+        self.series = Series(SeriesDescription("TEST_SRC", "TEST_SERI", "TEST_LOC"))
+        self.series.dataFrame = df if df is not None else _input_df(3)
 
-df_correct_three_hour_series_with_duplicate = get_input_dataFrame()
-df_correct_three_hour_series_with_duplicate.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_with_duplicate.loc[1] = ['1', 'test', datetime(2000, 1, 1, hour=2), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_with_duplicate.loc[2] = ['1', 'test', datetime(2000, 1, 1, hour=2), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_with_duplicate.loc[3] = ['1', 'test', datetime(2000, 1, 1, hour=3), datetime(2000, 1, 1, hour=0), None, None]
-
-df_correct_three_hour_series_missing_one = get_input_dataFrame()
-df_correct_three_hour_series_missing_one.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_missing_one.loc[1] = ['1', 'test', datetime(2000, 1, 1, hour=3), datetime(2000, 1, 1, hour=0), None, None]
-
-df_correct_three_hour_series_middle_changed = get_input_dataFrame()
-df_correct_three_hour_series_middle_changed.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_middle_changed.loc[1] = ['2', 'test', datetime(2000, 1, 1, hour=2), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_middle_changed.loc[2] = ['1', 'test', datetime(2000, 1, 1, hour=3), datetime(2000, 1, 1, hour=0), None, None]
-
-@pytest.mark.parametrize("seriesDescription, timeDescription, df_DB, df_DI", [
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series.copy(deep=True), None), # Fully correct Series from DB, no DI series, 
-    (test_series_desc, three_hour_time_desc, get_input_dataFrame(), df_correct_three_hour_series.copy(deep=True)), # Fully correct Series from DI, empty DB, 
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), None), # Missing one from DB, no DI series
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), df_correct_three_hour_series_missing_one.copy(deep=True)), # Missing one from DB, Missing one from DI series
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), df_correct_three_hour_series.copy(deep=True)), # Missing one from DB, correct DI series
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_with_duplicate.copy(deep=True), None), # Correct DB series w/ duplicate
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_missing_one.copy(deep=True), df_correct_three_hour_series_with_duplicate.copy(deep=True)), # Missing one from DB, correct DI series w/ Duplicate
-    (test_series_desc, three_hour_time_desc, df_correct_three_hour_series_middle_changed.copy(deep=True), df_correct_three_hour_series.copy(deep=True)), # Both Series, DI has updated data
-])
-def test__validate_series(seriesDescription: SeriesDescription, timeDescription: TimeDescription, df_DB: DataFrame, df_DI: DataFrame):
-
-    # Call the generate resulting series method
-    seriesProvider = SeriesProvider()
-    result: Series = seriesProvider._SeriesProvider__validate_series(seriesDescription, timeDescription, df_DB, df_DI)
-
-    # Test that the method has preformed replacements correctly (All data should be one by design of the test)
-    for value in result.dataFrame['dataValue'].to_list():
-        assert value == '1', 'Incorrect data found in dataFrame, a replacement is not working!'
+    def ingest_series(self, series_desc, time_desc):
+        self.called_with.append((series_desc, time_desc))
+        return self.series
 
 
+# ---------- fixtures to patch factories inside SeriesProvider module ----------
+
+@pytest.fixture
+def storage(monkeypatch):
+    fake = _FakeStorage()
+    # Patch the *symbol* imported in SeriesProvider.py
+    monkeypatch.setattr(
+        "src.SeriesProvider.SeriesProvider.series_storage_factory",
+        lambda: fake,
+        raising=False,
+    )
+    return fake
+
+@pytest.fixture
+def make_di(monkeypatch):
+    """Installer to inject a fake DI (optionally with a custom df)."""
+    def _install(di_df=None):
+        di = _FakeDI(di_df)
+        monkeypatch.setattr(
+            "src.SeriesProvider.SeriesProvider.data_ingestion_factory",
+            lambda series_desc: di,
+            raising=False,
+        )
+        return di
+    return _install
 
 
+# ---------- common inputs ----------
+
+SERIES_DESC = SeriesDescription("TEST_SRC", "TEST_SERI", "TEST_LOC")
+TIME_ONE_POINT = TimeDescription(
+    datetime(2000, 1, 1, tzinfo=timezone.utc),
+    datetime(2000, 1, 1, tzinfo=timezone.utc),
+    timedelta(hours=1),
+)
+TIME_FIVE_POINTS = TimeDescription(
+    datetime(2000, 1, 1, tzinfo=timezone.utc),
+    datetime(2000, 1, 1, 4, tzinfo=timezone.utc),
+    timedelta(hours=1),
+)
+
+# =====================================================================
+#                           INPUT REQUESTS
+# =====================================================================
+
+def test_request_input_returns_db_when_fresh(storage, make_di):
+    """If DB is fresh by acquiredTime, return DB and do NOT call DI."""
+    storage.fresh = True
+    di = make_di()  # installed but should not be used
+
+    sp = SeriesProvider()
+    result = sp.request_input(SERIES_DESC, TIME_FIVE_POINTS)
+
+    assert isinstance(result, Series)
+    assert result is storage.selected_series
+    assert getattr(di, "called_with", []) == []  # DI not invoked
+
+
+def test_request_input_ingests_when_stale_then_reads_db(storage, make_di):
+    """If DB is stale: call DI, upsert, then re-query DB and return it."""
+    storage.fresh = False
+
+    fresh_df = _input_df(5)
+    di = make_di(di_df=fresh_df)
+
+    storage.selected_series = Series(SERIES_DESC)
+    storage.selected_series.dataFrame = fresh_df  # what DB returns after upsert
+
+    sp = SeriesProvider()
+    result = sp.request_input(SERIES_DESC, TIME_FIVE_POINTS)
+
+    # DI invoked
+    assert len(di.called_with) == 1
+    # Upsert happened
+    assert storage.inserted is not None
+    assert storage.inserted.dataFrame.equals(fresh_df)
+    # Returned the DB results
+    assert result is storage.selected_series
+    assert result.dataFrame.equals(fresh_df)
+
+# =====================================================================
+#                           OUTPUT REQUESTS
+# =====================================================================
+
+def test_save_output_series_rejects_non_semaphore_desc(storage):
+    """Non-SemaphoreSeriesDescription should not call insert_output."""
+    s = Series(SeriesDescription("X", "Y", "Z"))
+    s.dataFrame = _input_df(1)
+
+    sp = SeriesProvider()
+    returned = sp.save_output_series(s)
+
+    assert storage.insert_output_called_with is None
+    assert isinstance(returned, Series)
+    assert returned.description is s.description  # unchanged, just returned
+
+
+def test_save_output_series_accepts_semaphore_desc(storage):
+    """SemaphoreSeriesDescription should be inserted via storage."""
+    desc = SemaphoreSeriesDescription("ModelA", "v1", "target", "loc")
+    s = Series(desc)
+    s.dataFrame = _input_df(2)
+
+    sp = SeriesProvider()
+    returned = sp.save_output_series(s)
+
+    assert storage.insert_output_called_with is s
+    assert returned is s
+
+def test_request_output_latest_routes_to_storage(storage):
+    sp = SeriesProvider()
+    out = sp.request_output("LATEST", model_name="M")
+    assert out is storage.latest_series
+
+def test_request_output_time_span_routes_to_storage(storage):
+    sp = SeriesProvider()
+    out = sp.request_output(
+        "TIME_SPAN",
+        model_name="M",
+        from_time=datetime(2024, 1, 1, tzinfo=timezone.utc),
+        to_time=datetime(2024, 1, 2, tzinfo=timezone.utc),
+    )
+    assert out is storage.time_span_series
+
+def test_request_output_specific_routes_to_storage(storage):
+    sp = SeriesProvider()
+    desc = SemaphoreSeriesDescription("M", "v1", "target", "loc")
+    td = TimeDescription(
+        datetime(2024, 1, 1, tzinfo=timezone.utc),
+        datetime(2024, 1, 1, 3, tzinfo=timezone.utc),
+        timedelta(hours=1),
+    )
+    out = sp.request_output("SPECIFIC", semaphoreSeriesDescription=desc, timeDescription=td)
+    assert out is storage.specific_series
+
+def test_request_output_unsupported_method_raises():
+    sp = SeriesProvider()
+    with pytest.raises(NotImplementedError):
+        sp.request_output("NOT_A_METHOD")
