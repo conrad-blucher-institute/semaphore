@@ -23,6 +23,8 @@ from DataIntegrity.IDataIntegrity import data_integrity_factory
 from DataValidation.IDataValidation import data_validation_factory
 from exceptions import Semaphore_Data_Exception, Semaphore_Ingestion_Exception
 from datetime import datetime, timedelta
+from pandas import date_range
+
 
 
 class DataGatherer:
@@ -104,7 +106,7 @@ class DataGatherer:
                 series = data_integrity_factory(dependentSeries.dataIntegrityCall.call).exec(series)
 
             # Reindex the data based on the interval
-            series.reindex(timeDescription.interval)
+            series = series.reindex(timeDescription.interval)
 
             # Validate the data
             is_valid = self.__validate_series(series)
