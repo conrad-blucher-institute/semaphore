@@ -18,9 +18,10 @@ from datetime import datetime, timedelta
 import sys
 import pytest
 from unittest.mock import MagicMock, patch
+from pandas import DataFrame, date_range
 from src.ModelExecution.dataGatherer import DataGatherer
 from src.ModelExecution.dspecParser import Dspec, DependentSeries, PostProcessCall
-from src.DataClasses import Series
+from src.DataClasses import Series, SeriesDescription, TimeDescription
 
 ## Mocks
 @pytest.fixture
@@ -77,19 +78,58 @@ def mock_dspec():
 ## Tests
 def test_get_data_repository(data_gatherer, mock_dspec):
     """ This test checks that the data gatherer can get a data repository from the series provider
+
+        NOTE::The mock object requires that the series description, time desctiption, and dataframe be set on the mock series
+        otherwise this test will throw attribute errors. What happens here is that the mock_series to be returned by 
+        _DataGatherer__seriesProvider.request_input.return_value is a completed series with the expected attributes.
     """
     reference_time = datetime.now()
 
-    # Force the mock series provider to return a mock series, it will be complete
+    # Force the mock series provider to return a mock series
     mock_series = MagicMock(spec=Series)
+
+    # Build the to and from offsets by unpacking the range
+    toOffset, fromOffset = mock_dspec.dependentSeries[0].range
+
+    # Calculate the to and from time from the interval and range
+    toDateTime = reference_time + timedelta(seconds= toOffset * mock_dspec.dependentSeries[0].interval)
+    fromDateTime = reference_time + timedelta(seconds= fromOffset * mock_dspec.dependentSeries[0].interval)
+
+    # Bulid a TimeDescription 
+    timeDescription = TimeDescription(
+        fromDateTime,
+        toDateTime,
+        timedelta(seconds=mock_dspec.dependentSeries[0].interval),
+        None
+    )
+
+    # Build a SeriesDescription
+    series_description = SeriesDescription(
+    mock_dspec.dependentSeries[0].source,
+    mock_dspec.dependentSeries[0].series,
+    mock_dspec.dependentSeries[0].location,
+    mock_dspec.dependentSeries[0].datum,
+    None,
+    None
+    )
+
+    df = DataFrame(
+        data= {'dataValue': [1, 2], 'timeVerified': [reference_time, reference_time]},
+        index = date_range(fromDateTime, periods=2, freq='3600s'))
+
+
+    # Add the objects to the mock series
+    mock_series.timeDescription = timeDescription
+    mock_series.seriesDescription = series_description
+    mock_series.dataFrame = df
+
+    # Set the expected return value to be the expected mock_series
     data_gatherer._DataGatherer__seriesProvider.request_input.return_value = mock_series
 
-    # Request the data in the mock dspec
     result = data_gatherer.get_data_repository(mock_dspec, reference_time)
 
-    # Assert expected == result
     assert 'key1' in result
-    assert mock_series == result['key1'] 
+    assert mock_series == result['key1']
 
 
 def test_post_process_data(data_gatherer, mock_dspec):
