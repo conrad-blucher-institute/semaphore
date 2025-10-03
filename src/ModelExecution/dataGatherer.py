@@ -112,10 +112,7 @@ class DataGatherer:
                 freq=timedelta(seconds=series.timeDescription.interval.total_seconds())))
 
             # Validate the data
-            is_valid = self.__validate_series(series)
-            
-            if not is_valid:
-                raise Semaphore_Data_Exception(f'Series provider returned invalid data for {seriesDescription}')
+            self.__validate_series(series)
             
             # Store the series in the repository
             series_repository[key] = series
@@ -210,19 +207,23 @@ class DataGatherer:
                             dependentSeries.dataIntegrityCall["args"]
                     )
     
-    def __validate_series(self, series: Series) -> bool:
+    def __validate_series(self, series: Series):
         """ This method checks if the series description has a verification override.
             If it does, it uses the override to validate the series.
             If it doesn't, it uses the date range validation to validate the series.
 
             :param series: Series - The series to validate
-
-            :return: bool - True if the series passes validation, False otherwise
         """
 
         if series.description.verificationOverride is not None:
             # if there is a verification override block, use it
-            return data_validation_factory('OverrideValidation').validate(series)
+            is_valid = data_validation_factory('OverrideValidation').validate(series)
+
+            if not is_valid:
+                raise Semaphore_Data_Exception(f'OverrideValidation Failed! Series provider returned invalid data for {series.description}')
         else:
             # if no verification override, default to validate the date range
-            return data_validation_factory('DateRangeValidation').validate(series)
+            is_valid = data_validation_factory('DateRangeValidation').validate(series)
+
+            if not is_valid:
+                raise Semaphore_Data_Exception(f'DateRangeValidation Failed! Series provider returned incomplete data for {series.description}')
