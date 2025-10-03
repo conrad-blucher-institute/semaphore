@@ -106,7 +106,10 @@ class DataGatherer:
                 series = data_integrity_factory(dependentSeries.dataIntegrityCall.call).exec(series)
 
             # Reindex the data based on the interval
-            series = series.reindex(timeDescription.interval)
+            series = series.dataFrame.reindex(date_range(
+                start=series.timeDescription.fromDateTime,
+                end=series.timeDescription.toDateTime,
+                freq=timedelta(seconds=series.timeDescription.interval.total_seconds())))
 
             # Validate the data
             is_valid = self.__validate_series(series)
