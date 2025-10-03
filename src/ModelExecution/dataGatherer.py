@@ -103,7 +103,7 @@ class DataGatherer:
             # Perform data integrity processing if specified
             if dependentSeries.dataIntegrityCall is not None:
                 # Create an instance of the data integrity class and execute it
-                series = data_integrity_factory(dependentSeries.dataIntegrityCall.call).exec(series)
+                series = data_integrity_factory(dependentSeries.dataIntegrityCall["call"]).exec(series)
 
             # Reindex the data based on the interval
             series.dataFrame.reindex(date_range(
@@ -206,8 +206,8 @@ class DataGatherer:
         if dependentSeries.dataIntegrityCall is None: 
             return None
         return DataIntegrityDescription(
-                            dependentSeries.dataIntegrityCall.call,
-                            dependentSeries.dataIntegrityCall.args
+                            dependentSeries.dataIntegrityCall["call"],
+                            dependentSeries.dataIntegrityCall["args"]
                     )
     
     def __validate_series(self, series: Series) -> bool:
