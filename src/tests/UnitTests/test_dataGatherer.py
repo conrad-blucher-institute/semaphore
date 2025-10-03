@@ -19,6 +19,7 @@ import sys
 import pytest
 from unittest.mock import MagicMock, patch
 from pandas import DataFrame, date_range
+from numpy import nan
 from src.ModelExecution.dataGatherer import DataGatherer
 from src.ModelExecution.dspecParser import Dspec, DependentSeries, PostProcessCall
 from src.DataClasses import Series, SeriesDescription, TimeDescription
@@ -120,7 +121,7 @@ def test_get_data_repository(data_gatherer, mock_dspec):
 
     # Add the objects to the mock series
     mock_series.timeDescription = timeDescription
-    mock_series.seriesDescription = series_description
+    mock_series.description = series_description
     mock_series.dataFrame = df
 
     # Set the expected return value to be the expected mock_series
@@ -186,3 +187,64 @@ def test_build_timeDescription_multi_point(data_gatherer, mock_dspec):
     # Assert expected == result
     assert result.fromDateTime == expected_from_time
     assert result.toDateTime == expected_to_time
+
+
+def test_data_integrity(data_gatherer, mock_dspec):
+    """ This test checks that the data gatherer can perform data integrity checks
+    """
+
+    reference_time = datetime.now()
+    toOffset = 0
+    fromOffset = 2
+
+    toDateTime = reference_time + timedelta(seconds=toOffset * mock_dspec.dependentSeries[0].interval)
+    fromDateTime = reference_time + timedelta(seconds=fromOffset * mock_dspec.dependentSeries[0].interval)
+
+    # build a test time description
+    timeDescription = TimeDescription(
+        fromDateTime,
+        toDateTime,
+        timedelta(seconds=mock_dspec.dependentSeries[0].interval),
+        None
+    )
+
+    # set the dependent series to have a data integrity call
+    mock_dspec.dependentSeries[0].dataIntegrityCall = {
+        "call": "PandasInterpolation",
+        "args": {"limit": "3600", "method'": "linear", "limit_area": "inside"}
+    }
+
+    # build a test series description with a data integrity call
+    series_description = SeriesDescription(
+        mock_dspec.dependentSeries[0].source,
+        mock_dspec.dependentSeries[0].series,
+        mock_dspec.dependentSeries[0].location,
+        mock_dspec.dependentSeries[0].datum,
+        mock_dspec.dependentSeries[0].dataIntegrityCall,
+        None
+    )
+
+    # Build a DataFrame with a missing value to be interpolated
+    df = DataFrame(
+        data={'dataValue': [1, nan, 3], 'timeVerified': [reference_time, reference_time, reference_time]},
+        index=date_range(fromDateTime, periods=3, freq='3600s')
+    )
+
+    # make the test series
+    test_series = Series(series_description, timeDescription)
+    test_series.dataFrame = df
+
+    # Make series provider return a copy of the test series
+    data_gatherer._DataGatherer__seriesProvider.request_input.return_value = test_series
+
+    result = data_gatherer.get_data_repository(mock_dspec, reference_time)
+
+
+    expected_df = DataFrame(
+        data={'dataValue': [1, 2.0, 3],
+              'timeVerified': [reference_time, reference_time, reference_time]},
+        index=date_range(fromDateTime, periods=3, freq='3600s')
+    )
+
+    assert 'key1' in result
+    assert result['key1'].dataFrame.equals(expected_df)
