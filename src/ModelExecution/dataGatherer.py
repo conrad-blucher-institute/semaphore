@@ -220,7 +220,7 @@ class DataGatherer:
             :return: bool - True if the series passes validation, False otherwise
         """
 
-        if series.seriesDescription.verificationOverride is not None:
+        if series.description.verificationOverride is not None:
             # if there is a verification override block, use it
             return data_validation_factory('OverrideValidation').validate(series)
         else:
