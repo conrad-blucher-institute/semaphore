@@ -103,7 +103,7 @@ class DataGatherer:
             # Perform data integrity processing if specified
             if dependentSeries.dataIntegrityCall is not None:
                 # Create an instance of the data integrity class and execute it
-                series = data_integrity_factory(dependentSeries.dataIntegrityCall["call"]).exec(series)
+                series = data_integrity_factory(dependentSeries.dataIntegrityCall.call).exec(series)
 
             # Reindex the data based on the interval
             series.dataFrame.reindex(date_range(
@@ -220,10 +220,10 @@ class DataGatherer:
             is_valid = data_validation_factory('OverrideValidation').validate(series)
 
             if not is_valid:
-                raise Semaphore_Data_Exception(f'OverrideValidation Failed! Series provider returned invalid data for {series.description}')
+                raise Semaphore_Data_Exception(f'OverrideValidation Failed in Data Gatherer! \n[Series] -> {series}')
         else:
             # if no verification override, default to validate the date range
             is_valid = data_validation_factory('DateRangeValidation').validate(series)
 
             if not is_valid:
-                raise Semaphore_Data_Exception(f'DateRangeValidation Failed! Series provider returned incomplete data for {series.description}')
+                raise Semaphore_Data_Exception(f'DateRangeValidation Failed in Data Gatherer! \n[Series] -> {series}')

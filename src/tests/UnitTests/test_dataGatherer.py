@@ -20,7 +20,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from src.ModelExecution.dataGatherer import DataGatherer
 from src.ModelExecution.dspecParser import Dspec, DependentSeries, PostProcessCall
-from src.DataClasses import Series
+from src.DataClasses import Series, SeriesDescription, TimeDescription
 
 ## Mocks
 @pytest.fixture
@@ -80,9 +80,22 @@ def test_get_data_repository(data_gatherer, mock_dspec):
     """
     reference_time = datetime.now()
 
-    # Force the mock series provider to return a mock series, it will be complete
+    # Create the mock time description, and set the required attributes for this test
+    mock_timeDescription = MagicMock(spec=TimeDescription)
+    mock_timeDescription.fromDateTime = reference_time
+    mock_timeDescription.toDateTime = reference_time + timedelta(seconds=mock_dspec.dependentSeries[0].interval)
+    mock_timeDescription.interval = timedelta(mock_dspec.dependentSeries[0].interval)
+
+    # Create the mock series description, and set the required attributes for this test
+    mock_description = MagicMock(spec=SeriesDescription)
+    mock_description.verificationOverride = mock_dspec.dependentSeries[0].verificationOverride
+
+    # Create the mock series with the mock time description and description
     mock_series = MagicMock(spec=Series)
-    mock_series.configure_mock(isComplete = True)
+    mock_series.configure_mock(description=mock_description)
+    mock_series.configure_mock(timeDescription=mock_timeDescription)
+
+    # Force the series provider to return the mock series
     data_gatherer._DataGatherer__seriesProvider.request_input.return_value = mock_series
 
     # Request the data in the mock dspec
