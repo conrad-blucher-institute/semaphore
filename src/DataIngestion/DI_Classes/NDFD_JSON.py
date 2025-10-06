@@ -99,7 +99,7 @@ class NDFD_JSON(IDataIngestion):
                 latitude                                  # latitude
             ]
 
-        series = Series(description=seriesDescription, timeDescription=timeDescription, isComplete=True) # should the ingestion class really be deciding if this is complete?
+        series = Series(description=seriesDescription, timeDescription=timeDescription) 
         # series.dataFrame = result_df
         series.dataFrame = ndfd_df
 

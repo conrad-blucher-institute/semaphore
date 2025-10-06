@@ -62,12 +62,12 @@ class SeriesProvider():
         validated_DB_results, raw_DB_results = self.__data_base_query(seriesDescription, timeDescription)
 
         # If there is a verification override, we have to always request new data, so we can return here
-        if validated_DB_results.isComplete and seriesDescription.verificationOverride is None: 
+        if  seriesDescription.verificationOverride is None: 
             return validated_DB_results
 
         # Next we start Data Ingestion, to go and get the data we need
         validated_DI_results, raw_DI_results = self.__data_ingestion_query(seriesDescription, timeDescription, saveIngestion)
-        if validated_DI_results is not None and validated_DI_results.isComplete: 
+        if validated_DI_results is not None: 
             return validated_DI_results
         
         # If neither of those in isolation work we try merging them together
