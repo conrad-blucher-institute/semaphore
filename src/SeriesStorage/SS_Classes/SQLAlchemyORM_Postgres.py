@@ -285,11 +285,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 insertionRows.append(new_row)         
         
         # Insert the rows into the inputs table returning what is inserted as a sanity check
+        # On conflict we update the acquired time to now
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.__metadata.tables['inputs'])
-                                    .on_conflict_do_nothing('inputs_AK00')
-                                    .returning(self.__metadata.tables['inputs'])
                                     .values(insertionRows)
+                                    .on_conflict_do_update(constraint='inputs_AK00', set_={"acquiredTime": now})
+                                    .returning(self.__metadata.tables['inputs'])
                                 )
             result = cursor.fetchall()
             conn.commit()
