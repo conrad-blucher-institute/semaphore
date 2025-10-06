@@ -228,7 +228,7 @@ class NDFD_JSON(IDataIngestion):
                 case 'pAirTemp':
                     prediction_values = ndfd_data['properties']['temperature']['values']
                     #for now we hardcode the units since 
-                    data_unit = 'celcius'
+                    data_unit = 'celsius'
                 case 'pWnDir':
                     prediction_values = ndfd_data['properties']['windDirection']['values']
                     data_unit = 'degrees'
