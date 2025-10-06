@@ -14,13 +14,18 @@ docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_dataGather
 import sys
 sys.path.append('/app/src')
 
+from utility import log
+
 from datetime import datetime, timedelta
 import sys
 import pytest
+from pandas import DataFrame
+import copy
+from numpy import nan
 from unittest.mock import MagicMock, patch
 from src.ModelExecution.dataGatherer import DataGatherer
 from src.ModelExecution.dspecParser import Dspec, DependentSeries, PostProcessCall
-from src.DataClasses import Series, SeriesDescription, TimeDescription
+from src.DataClasses import Series, SeriesDescription, TimeDescription, DataIntegrityDescription
 
 ## Mocks
 @pytest.fixture
@@ -76,7 +81,8 @@ def mock_dspec():
 
 ## Tests
 def test_get_data_repository(data_gatherer, mock_dspec):
-    """ This test checks that the data gatherer can get a data repository from the series provider
+    """ This test checks that the data gatherer can get a data repository from the series provider.
+    The mock series must define the expected attributes and methods used by the data gatherer.
     """
     reference_time = datetime.now()
 
@@ -94,6 +100,12 @@ def test_get_data_repository(data_gatherer, mock_dspec):
     mock_series = MagicMock(spec=Series)
     mock_series.configure_mock(description=mock_description)
     mock_series.configure_mock(timeDescription=mock_timeDescription)
+
+    # Set the data for the mock series
+    mock_series.dataFrame = DataFrame({
+        'timeVerified': [mock_timeDescription.fromDateTime, mock_timeDescription.toDateTime],
+        'dataValue': [1.0, 2.0]
+    })
 
     # Force the series provider to return the mock series
     data_gatherer._DataGatherer__seriesProvider.request_input.return_value = mock_series
@@ -160,3 +172,79 @@ def test_build_timeDescription_multi_point(data_gatherer, mock_dspec):
     # Assert expected == result
     assert result.fromDateTime == expected_from_time
     assert result.toDateTime == expected_to_time
+
+
+def test_data_integrity_call(data_gatherer, mock_dspec):
+    """ This test checks that the data integrity call works
+    """
+    reference_time = datetime.now()
+
+    # Change the mock dspec to include the needed data for this test
+    dspec_copy = copy.deepcopy(mock_dspec)
+
+    # Make a data integrity call
+    dspec_copy.dependentSeries[0].dataIntegrityCall = DataIntegrityDescription(
+        'PandasInterpolation',
+        {'limit': 3600, 'method': 'linear', 'limit_area': 'inside'})
+
+    # Change the range to have 3 points
+    dspec_copy.dependentSeries[0].range = [0, 2]
+
+    # Create the mock time description, and set the required attributes for this test
+    mock_timeDescription = MagicMock(spec=TimeDescription)
+    
+    mock_timeDescription.fromDateTime = reference_time
+    mock_timeDescription.toDateTime = reference_time + timedelta(seconds=dspec_copy.dependentSeries[0].interval * 2) # because range is [0, 2]
+    mock_timeDescription.interval = timedelta(dspec_copy.dependentSeries[0].interval)
+
+    # Create a mock integrity call
+    mock_integrity_call = MagicMock(spec=DataIntegrityDescription)
+    mock_integrity_call.call = dspec_copy.dependentSeries[0].dataIntegrityCall.call
+    mock_integrity_call.args = dspec_copy.dependentSeries[0].dataIntegrityCall.args
+
+    # Create the mock series description, and set the required attributes for this test
+    mock_description = MagicMock(spec=SeriesDescription)
+    mock_description.verificationOverride = dspec_copy.dependentSeries[0].verificationOverride
+    mock_description.dataIntegrityDescription = mock_integrity_call
+
+    # Create the mock series with the mock time description and description
+    mock_series = MagicMock(spec=Series)
+    mock_series.configure_mock(description=mock_description)
+    mock_series.configure_mock(timeDescription=mock_timeDescription)
+
+    # Set the middle datetime for the missing value
+    middle_datetime = mock_timeDescription.fromDateTime + timedelta(seconds=dspec_copy.dependentSeries[0].interval)
+
+    # Set the data for the mock series
+    mock_series.dataFrame = DataFrame({
+        'timeVerified': [mock_timeDescription.fromDateTime,         # Now
+                        middle_datetime,                            # Now + 1 hour
+                        mock_timeDescription.toDateTime],           # Now + 2 hours
+        'timeGenerated': [mock_timeDescription.fromDateTime,
+                          middle_datetime,
+                          mock_timeDescription.toDateTime],
+        'dataValue': [1.0, nan, 3.0]
+    })
+
+    # Force the series provider to return the mock series
+    data_gatherer._DataGatherer__seriesProvider.request_input.return_value = mock_series
+
+    # Request the data in the mock dspec
+    result = data_gatherer.get_data_repository(dspec_copy, reference_time)
+
+    # Update the mock series to have the expected interpolated value
+    mock_series.dataFrame = DataFrame({
+        'timeVerified': [mock_timeDescription.fromDateTime,       
+                        middle_datetime,                           
+                        mock_timeDescription.toDateTime],         
+        'timeGenerated': [mock_timeDescription.fromDateTime,
+                          middle_datetime,
+                          mock_timeDescription.toDateTime],
+        'dataValue': [1.0, 2.0, 3.0]
+    })
+
+    # Assert expected == result
+    assert 'key1' in result
+    log(f'Interpolated DataFrame:\n{result["key1"].dataFrame}')
+    log(f'Expected DataFrame:\n{mock_series.dataFrame}')
+    assert mock_series == result['key1']

@@ -203,8 +203,8 @@ class DataGatherer:
         if dependentSeries.dataIntegrityCall is None: 
             return None
         return DataIntegrityDescription(
-                            dependentSeries.dataIntegrityCall["call"],
-                            dependentSeries.dataIntegrityCall["args"]
+                            dependentSeries.dataIntegrityCall.call,
+                            dependentSeries.dataIntegrityCall.args
                     )
     
     def __validate_series(self, series: Series):
