@@ -18,7 +18,7 @@ sys.path.append('/app/src')
 from datetime import datetime, timedelta
 import sys
 import pytest
-from pandas import DataFrame
+from pandas import DataFrame, date_range
 import copy
 from numpy import nan
 from unittest.mock import MagicMock, patch
@@ -95,24 +95,34 @@ def test_get_data_repository(data_gatherer, mock_dspec):
 
     # Create the mock time description, and set the required attributes for this test
     mock_timeDescription = MagicMock(spec=TimeDescription)
-    mock_timeDescription.fromDateTime = reference_time
-    mock_timeDescription.toDateTime = reference_time + timedelta(seconds=mock_dspec.dependentSeries[0].interval)
-    mock_timeDescription.interval = timedelta(mock_dspec.dependentSeries[0].interval)
+    mock_timeDescription.configure_mock(
+        fromDateTime = reference_time,
+        toDateTime = reference_time + timedelta(seconds=mock_dspec.dependentSeries[0].interval),
+        interval= timedelta(seconds=mock_dspec.dependentSeries[0].interval)
+    )
 
     # Create the mock series description, and set the required attributes for this test
     mock_description = MagicMock(spec=SeriesDescription)
-    mock_description.verificationOverride = mock_dspec.dependentSeries[0].verificationOverride
+    mock_description.configure_mock(
+        verificationOverride = mock_dspec.dependentSeries[0].verificationOverride
+    )
 
     # Create the mock series with the mock time description and description
     mock_series = MagicMock(spec=Series)
-    mock_series.configure_mock(description=mock_description)
-    mock_series.configure_mock(timeDescription=mock_timeDescription)
+    mock_series.configure_mock(description=mock_description, timeDescription=mock_timeDescription)
 
     # Set the data for the mock series
-    mock_series.dataFrame = DataFrame({
-        'timeVerified': [mock_timeDescription.fromDateTime, mock_timeDescription.toDateTime],
-        'dataValue': [1.0, 2.0]
-    })
+    mock_series.configure_mock(dataFrame=DataFrame(
+        {
+            'dataValue': [1.0, 2.0],
+            'timeVerified': [mock_timeDescription.fromDateTime, mock_timeDescription.toDateTime]
+        },
+        index=date_range(
+            start=mock_timeDescription.fromDateTime,
+            end=mock_timeDescription.toDateTime,
+            freq=timedelta(seconds=mock_timeDescription.interval.total_seconds())
+        )
+    ))
 
     # Force the series provider to return the mock series
     data_gatherer._DataGatherer__seriesProvider.request_input.return_value = mock_series
@@ -199,31 +209,43 @@ def test_data_integrity_call(data_gatherer, mock_dspec, mock_integrity_factory):
     )
 
     # Create the mock time description, and set the required attributes for this test
-    mock_timeDescription = MagicMock()
-    mock_timeDescription.fromDateTime = reference_time
-    mock_timeDescription.toDateTime = reference_time + timedelta(seconds=3600)
-    mock_timeDescription.interval = timedelta(seconds=3600)
+    mock_timeDescription = MagicMock(spec=TimeDescription)
+    mock_timeDescription.configure_mock(
+        fromDateTime = reference_time,
+        toDateTime = reference_time + timedelta(seconds=3600),
+        interval= timedelta(seconds=3600)
+    )
 
     # Create the mock integrity call
-    mock_intergityCall = MagicMock(spec=DataIntegrityDescription)
-    mock_intergityCall.call = dspec_copy.dependentSeries[0].dataIntegrityCall.call
-    mock_intergityCall.args = dspec_copy.dependentSeries[0].dataIntegrityCall.args
+    mock_integrityCall = MagicMock(spec=DataIntegrityDescription)
+    mock_integrityCall.configure_mock(
+        call= dspec_copy.dependentSeries[0].dataIntegrityCall.call,
+        args= dspec_copy.dependentSeries[0].dataIntegrityCall.args
+    )
 
     # Create the mock series description, and set the required attributes for this test
     mock_description = MagicMock(spec=SeriesDescription)
-    mock_description.verificationOverride = dspec_copy.dependentSeries[0].verificationOverride
-    mock_description.dataIntegrityCall = mock_intergityCall
+    mock_description.configure_mock(
+        verificationOverride = dspec_copy.dependentSeries[0].verificationOverride,
+        dataIntegrityCall = mock_integrityCall
+    )
 
     # Create the mock series with the mock time description and description
     mock_series = MagicMock(spec=Series)
-    mock_series.configure_mock(description=mock_description)
-    mock_series.configure_mock(timeDescription=mock_timeDescription)
+    mock_series.configure_mock(description=mock_description, timeDescription=mock_timeDescription)
 
     # Set the data for the mock series
-    mock_series.dataFrame = DataFrame({
-        'timeVerified': [mock_timeDescription.fromDateTime, mock_timeDescription.toDateTime],
-        'dataValue': [1.0, 2.0]
-    })
+    mock_series.configure_mock(dataFrame=DataFrame(
+        {
+            'dataValue': [1.0, 2.0],
+            'timeVerified': [mock_timeDescription.fromDateTime, mock_timeDescription.toDateTime]
+        },
+        index=date_range(
+            start=mock_timeDescription.fromDateTime,
+            end=mock_timeDescription.toDateTime,
+            freq=timedelta(seconds=mock_timeDescription.interval.total_seconds())
+        )
+    ))
 
     # Force the series provider to return the mock series
     data_gatherer._DataGatherer__seriesProvider.request_input.return_value = mock_series
