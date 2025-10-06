@@ -45,7 +45,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param seriesDescription: SeriesDescription - A series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
-        inputs_select_latest_stmt = text(""" 
+        # Handle NULL datum case
+        if seriesDescription.dataDatum is None:
+            datum_clause = 'i."dataDatum" IS NULL'
+        else:
+            datum_clause = 'i."dataDatum" = :dataDatum'
+            
+        inputs_select_latest_stmt = text(f""" 
         SELECT  
         i."id",
         i."generatedTime",
@@ -65,20 +71,27 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         WHERE i."dataSource"   = :dataSource
         AND i."dataLocation" = :dataLocation
         AND i."dataSeries"   = :dataSeries
-        AND i."dataDatum"    = :dataDatum
+        AND {datum_clause}
         AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
         ORDER BY
             i."verifiedTime" DESC,
             i."generatedTime" ASC,
             i."ensembleMemberID" DESC;
-    """).bindparams(
-        dataSource=seriesDescription.dataSource,
-        dataLocation=seriesDescription.dataLocation,
-        dataSeries=seriesDescription.dataSeries,
-        dataDatum=seriesDescription.dataDatum,
-        from_dt=timeDescription.fromDateTime,
-        to_dt=timeDescription.toDateTime,
-    )
+    """)
+        
+        # Only bind dataDatum if it's not None
+        bind_params = {
+            'dataSource': seriesDescription.dataSource,
+            'dataLocation': seriesDescription.dataLocation,
+            'dataSeries': seriesDescription.dataSeries,
+            'from_dt': timeDescription.fromDateTime,
+            'to_dt': timeDescription.toDateTime
+        }
+        if seriesDescription.dataDatum is not None:
+            bind_params['dataDatum'] = seriesDescription.dataDatum
+        
+        inputs_select_latest_stmt = inputs_select_latest_stmt.bindparams(**bind_params)
+        
         tupleishResult = self.__dbSelection(inputs_select_latest_stmt).fetchall()
         
         df_inputResult = self.__splice_input(tupleishResult)
@@ -512,7 +525,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         :param list[tupleish] -a list of selections from the table formatted in tupleish
         :return: DataFrame - a dataframe with the data formatted for use in a series
         """
-
+        print(f"DEBUG __splice_input: Received {len(results)} rows")
         # Convert returned DB rows into a dataframe to make manipulation easier 
         df_results = pd.DataFrame(
             data=results, 
