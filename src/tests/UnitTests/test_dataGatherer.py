@@ -2,7 +2,8 @@
 #test_dataGatherer.py
 #-------------------------------
 # Created By: Matthew Kastl
-# version 1.0
+# version 2.0
+# Last Updated: 10/05/2025 by Christian Quintero
 #----------------------------------
 """ This provides unit tests for the dataGatherer class
 
@@ -13,8 +14,6 @@ docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_dataGather
 #
 import sys
 sys.path.append('/app/src')
-
-from utility import log
 
 from datetime import datetime, timedelta
 import sys
@@ -40,6 +39,14 @@ def mock_postProcessFactory():
         mock_post_process_class = MagicMock()
         mock_factory.return_value = mock_post_process_class
         yield mock_postProcessFactory
+
+@pytest.fixture
+def mock_integrity_factory():
+    with patch('src.ModelExecution.dataGatherer.data_integrity_factory') as mock_integrity_factory:
+        # The mock factory should return a mock class
+        mock_integrity_class = MagicMock()
+        mock_integrity_factory.return_value = mock_integrity_class
+        yield mock_integrity_factory
 
 @pytest.fixture
 def data_gatherer(mock_series_provider, mock_postProcessFactory):
@@ -174,77 +181,110 @@ def test_build_timeDescription_multi_point(data_gatherer, mock_dspec):
     assert result.toDateTime == expected_to_time
 
 
-def test_data_integrity_call(data_gatherer, mock_dspec):
-    """ This test checks that the data integrity call works
+def test_data_integrity_call(data_gatherer, mock_dspec, mock_integrity_factory):
+    """ This test checks that the data integrity call is made to the factory
     """
     reference_time = datetime.now()
 
-    # Change the mock dspec to include the needed data for this test
     dspec_copy = copy.deepcopy(mock_dspec)
 
-    # Make a data integrity call
+    # Add a data integrity call to the dependent series
     dspec_copy.dependentSeries[0].dataIntegrityCall = DataIntegrityDescription(
-        'PandasInterpolation',
-        {'limit': 3600, 'method': 'linear', 'limit_area': 'inside'})
-
-    # Change the range to have 3 points
-    dspec_copy.dependentSeries[0].range = [0, 2]
+        call= 'PandasInterpolation',
+        args= {
+            'limit': 3600,
+            'method': 'linear',
+            'limit_area': 'inside'
+        }
+    )
 
     # Create the mock time description, and set the required attributes for this test
-    mock_timeDescription = MagicMock(spec=TimeDescription)
-    
+    mock_timeDescription = MagicMock()
     mock_timeDescription.fromDateTime = reference_time
-    mock_timeDescription.toDateTime = reference_time + timedelta(seconds=dspec_copy.dependentSeries[0].interval * 2) # because range is [0, 2]
-    mock_timeDescription.interval = timedelta(dspec_copy.dependentSeries[0].interval)
+    mock_timeDescription.toDateTime = reference_time + timedelta(seconds=3600)
+    mock_timeDescription.interval = timedelta(seconds=3600)
 
-    # Create a mock integrity call
-    mock_integrity_call = MagicMock(spec=DataIntegrityDescription)
-    mock_integrity_call.call = dspec_copy.dependentSeries[0].dataIntegrityCall.call
-    mock_integrity_call.args = dspec_copy.dependentSeries[0].dataIntegrityCall.args
+    # Create the mock integrity call
+    mock_intergityCall = MagicMock(spec=DataIntegrityDescription)
+    mock_intergityCall.call = dspec_copy.dependentSeries[0].dataIntegrityCall.call
+    mock_intergityCall.args = dspec_copy.dependentSeries[0].dataIntegrityCall.args
 
     # Create the mock series description, and set the required attributes for this test
     mock_description = MagicMock(spec=SeriesDescription)
     mock_description.verificationOverride = dspec_copy.dependentSeries[0].verificationOverride
-    mock_description.dataIntegrityDescription = mock_integrity_call
+    mock_description.dataIntegrityCall = mock_intergityCall
 
     # Create the mock series with the mock time description and description
     mock_series = MagicMock(spec=Series)
     mock_series.configure_mock(description=mock_description)
     mock_series.configure_mock(timeDescription=mock_timeDescription)
 
-    # Set the middle datetime for the missing value
-    middle_datetime = mock_timeDescription.fromDateTime + timedelta(seconds=dspec_copy.dependentSeries[0].interval)
-
     # Set the data for the mock series
     mock_series.dataFrame = DataFrame({
-        'timeVerified': [mock_timeDescription.fromDateTime,         # Now
-                        middle_datetime,                            # Now + 1 hour
-                        mock_timeDescription.toDateTime],           # Now + 2 hours
-        'timeGenerated': [mock_timeDescription.fromDateTime,
-                          middle_datetime,
-                          mock_timeDescription.toDateTime],
-        'dataValue': [1.0, nan, 3.0]
+        'timeVerified': [mock_timeDescription.fromDateTime, mock_timeDescription.toDateTime],
+        'dataValue': [1.0, 2.0]
     })
 
     # Force the series provider to return the mock series
     data_gatherer._DataGatherer__seriesProvider.request_input.return_value = mock_series
 
+    # Force the integrity factory to return the same mock series
+    mock_integrity_class = MagicMock()
+    mock_integrity_class.exec.return_value = mock_series
+    mock_integrity_factory.return_value = mock_integrity_class
+
     # Request the data in the mock dspec
     result = data_gatherer.get_data_repository(dspec_copy, reference_time)
 
-    # Update the mock series to have the expected interpolated value
+    # Assert the factory was called with the correct call 
+    # and that the exec method was called on the returned class
+    expected_call = dspec_copy.dependentSeries[0].dataIntegrityCall.call
+    mock_integrity_factory.assert_called_with(expected_call)
+    mock_integrity_class.exec.assert_called_with(mock_series)
+
+    # Assert the same mock series made it all the way through
+    assert 'key1' in result
+    assert result['key1'] == mock_series
+
+
+def test_data_validation_call(data_gatherer):
+    """This test checks that the data validation factory is called when there is a verification override
+    """
+    reference_time = datetime.now()
+
+    # Create mock objects for series and its description
+    mock_description = MagicMock(spec=SeriesDescription)
+    mock_description.verificationOverride = {
+        "label": "greaterThanOrEqual",
+        "value": 4
+    }  
+
+    # Create the mock time description, and set the required attributes for this test
+    mock_time = MagicMock(spec=TimeDescription)
+    mock_time.fromDateTime = reference_time
+    mock_time.toDateTime = reference_time + timedelta(seconds= 3600)
+    mock_time.interval = timedelta(seconds= 3600)
+
+    # Create the mock series with the mock time description and description
+    mock_series = MagicMock(spec=Series)
+    mock_series.configure_mock(description=mock_description, timeDescription=mock_time)
     mock_series.dataFrame = DataFrame({
-        'timeVerified': [mock_timeDescription.fromDateTime,       
-                        middle_datetime,                           
-                        mock_timeDescription.toDateTime],         
-        'timeGenerated': [mock_timeDescription.fromDateTime,
-                          middle_datetime,
-                          mock_timeDescription.toDateTime],
-        'dataValue': [1.0, 2.0, 3.0]
+        "timeVerified": [mock_time.fromDateTime, mock_time.toDateTime],
+        "dataValue": [1.0, 2.0]
     })
 
-    # Assert expected == result
-    assert 'key1' in result
-    log(f'Interpolated DataFrame:\n{result["key1"].dataFrame}')
-    log(f'Expected DataFrame:\n{mock_series.dataFrame}')
-    assert mock_series == result['key1']
+    # Patch the validation factory
+    with patch("src.ModelExecution.dataGatherer.data_validation_factory") as mock_factory:
+        # Set up a mock validator object
+        mock_validator = MagicMock()
+        mock_validator.validate.return_value = True
+        mock_factory.return_value = mock_validator
+
+        # Call the private method directly
+        data_gatherer._DataGatherer__validate_series(mock_series)
+
+        # Assert the factory was called with OverrideValidation
+        mock_factory.assert_called_once_with("OverrideValidation")
+
+        # Assert that the returned object's .validate method was called
+        mock_validator.validate.assert_called_once_with(mock_series)

@@ -3,7 +3,7 @@
 #----------------------------------
 # Created By: Matthew Kastl
 # Version: 4.0
-# Last Updated: 10/02/2025 by Christian Quintero
+# Last Updated: 10/05/2025 by Christian Quintero
 #----------------------------------
 """ 
 This file is responsible for gathering the data needed to construct input vectors for the model.
