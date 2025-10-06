@@ -180,7 +180,7 @@ class DataGatherer:
 
         # build the staleness offset if needed
         if stalenessOffset is None:
-            stalenessOffset = timedelta(seconds=3600)      # Default to 1 hour
+            stalenessOffset = timedelta(seconds=3600 * 7)      # Default to 7 hour
 
         
         # Check if it's only one point
