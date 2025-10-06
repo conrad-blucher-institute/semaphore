@@ -200,6 +200,7 @@ def serialize_input_series(series: Series) -> dict[any]:
     param: series - Series The input series to serialize.
     return: A dictionary representation of the input series.
 
+    NOTE:: Ensures `isComplete` always exists and is set to True for backward compatibility.
     NOTE:: Expected input series serialization
     {
         "description": {
@@ -236,6 +237,9 @@ def serialize_input_series(series: Series) -> dict[any]:
     # Remove the automatically serialized dataFrame
     del serialized['_Series__dataFrame']
 
+    # Always include isComplete for backward compatibility
+    serialized['isComplete'] = True
+
     # Serialize the dataFrame by our own rules
     serialized_data = []
     for _, row in series.dataFrame.iterrows():
@@ -264,6 +268,7 @@ def serialize_output_series(series: Series) -> dict[any]:
     param: series - Series The output series to serialize.
     return: A dictionary representation of the output series.
 
+    NOTE:: Ensures `isComplete` always exists and is set to True for backward compatibility.
     NOTE:: Expected out series serialization
     {
         "description": {
@@ -293,6 +298,9 @@ def serialize_output_series(series: Series) -> dict[any]:
     # Remove the automatically serialized dataFrame
     del serialized['_Series__dataFrame']
 
+    # Always include isComplete for backward compatibility
+    serialized['isComplete'] = True
+
     # Serialize the dataFrame by our own rules
     serialized_data = []
     for _, row in series.dataFrame.iterrows():
@@ -302,5 +310,11 @@ def serialize_output_series(series: Series) -> dict[any]:
             "timeGenerated":  jsonable_encoder(row['timeGenerated']),
             "leadTime":       jsonable_encoder(row['leadTime'])
         })
+
+        # Replace NaNs with None and ensure JSON safe types
+        row_dict = {k: None if pd.isna(v) else v for k, v in row_dict.items()}
+        encoded_row = {k: jsonable_encoder(v) for k, v in row_dict.items()}
+        serialized_data.append(encoded_row)
+
     serialized['_Series__data'] = serialized_data # Add it back to the response
     return serialized
