@@ -71,7 +71,7 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     )
 
     provider = SeriesProvider()
-    responseSeries = provider.request_input(requestDescription, timeDescription)
+    responseSeries = provider.request_input(requestDescription, timeDescription, saveIngestion=False)
 
     # Protect the API's JSON ENCODER from freaking out about floats sneaking from the ingestion class
     responseSeries.dataFrame['dataValue'] = responseSeries.dataFrame['dataValue'].astype(str)
@@ -210,6 +210,7 @@ def serialize_input_series(series: Series) -> dict[any]:
             "dataIntegrityDescription": null,
             "verificationOverride": null
         },
+        "isComplete": series.isComplete,
         "timeDescription": {
             "fromDateTime": "2025-03-26T00:00:00",
             "toDateTime": "2025-03-26T03:00:00",
@@ -272,6 +273,7 @@ def serialize_output_series(series: Series) -> dict[any]:
             "dataLocation": "SouthBirdIsland",
             "dataDatum": "celsius"
         },
+        "isComplete": series.isComplete,
         "timeDescription": null,
         "nonCompleteReason": null,
         "_Series__data": [

@@ -84,8 +84,8 @@ class DataGatherer:
             # Verify the series is ok
             if series is None:
                 raise Semaphore_Ingestion_Exception(f'Series provider returned none for {seriesDescription}')
-            # elif not series.isComplete:
-            #     raise Semaphore_Data_Exception(f'Incomplete data found for {seriesDescription}')
+            elif not series.isComplete:
+                raise Semaphore_Data_Exception(f'Incomplete data found for {seriesDescription}')
             
             # Store the series in the repository
             series_repository[key] = series
