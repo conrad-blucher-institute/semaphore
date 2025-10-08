@@ -199,10 +199,6 @@ class NOAATANDC(IDataIngestion):
             dt = idx.to_pydatetime()
             value = data['v'][idx]
 
-            # If value is not on interval we ignore it
-            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
-                continue
-
             df.loc[len(df)] = [
                 value,          # dataValue
                 'meter',        # dataUnit
@@ -242,10 +238,6 @@ class NOAATANDC(IDataIngestion):
             # parse
             dt = idx.to_pydatetime()
             value = data['v'][idx]
-
-            # If value is not on interval we ignore it
-            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
-                continue
 
             df.loc[len(df)] = [
                 value,                  # dataValue
@@ -297,10 +289,6 @@ class NOAATANDC(IDataIngestion):
             predictive_water_level = pData['v'][idx]
             surge = str(float(water_level) - float(predictive_water_level))
 
-            # If value is not on interval we ignore it
-            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
-                continue
-
             df.loc[len(df)] = [
                 surge,                  # dataValue
                 'meter',                # dataUnit
@@ -344,10 +332,6 @@ class NOAATANDC(IDataIngestion):
             dt = idx.to_pydatetime()
             wind_dir = data['d'][idx]
 
-            # If value is not on interval we ignore it
-            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
-                continue
-
             df.loc[len(df)] = [
                 wind_dir,          # dataValue
                 'degrees',        # dataUnit
@@ -387,10 +371,6 @@ class NOAATANDC(IDataIngestion):
             # parse
             dt = idx.to_pydatetime()
             wind_spd = data['s'][idx]
-
-            # If value is not on interval we ignore it
-            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
-                continue
 
             df.loc[len(df)] = [
                 wind_spd,          # dataValue
@@ -445,10 +425,6 @@ class NOAATANDC(IDataIngestion):
             wind_dir = float(data['d'][idx])
             x_comp = wind_speed * cos(wind_dir - offset)
             y_comp = wind_speed * sin(wind_dir - offset)
-
-            # If value is not on interval we ignore it
-            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
-                continue
 
             x_df.loc[len(x_df)] = [
                 x_comp,          # dataValue
@@ -550,10 +526,6 @@ class NOAATANDC(IDataIngestion):
             dt = idx.to_pydatetime()
             value = data['v'][idx]
 
-            # If value is not on interval we ignore it
-            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
-                continue
-
             df.loc[len(df)] = [
                 value,                  # dataValue
                 'celsius',              # dataUnit
@@ -592,10 +564,6 @@ class NOAATANDC(IDataIngestion):
             # parse
             dt = idx.to_pydatetime()
             value = data['v'][idx]
-
-            # If value is not on interval we ignore it
-            if dt.timestamp() % timeDescription.interval.total_seconds() != 0:
-                continue
 
             df.loc[len(df)] = [
                 value,                  # dataValue
