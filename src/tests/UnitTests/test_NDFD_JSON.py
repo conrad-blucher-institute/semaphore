@@ -211,7 +211,7 @@ class TestNDFDJSON:
         ingest_class = NDFD_JSON()
         data_unit, prediction_values = ingest_class._extract_prediction_values(mock_ndfd_data, 'pAirTemp')
         
-        assert data_unit == 'celcius'
+        assert data_unit == 'celsius'
         assert len(prediction_values) == 2
         assert prediction_values[0]['validTime'] == '2025-08-27T11:00:00+00:00/PT3H'
         assert prediction_values[0]['value'] == 28.33
@@ -646,7 +646,7 @@ class TestNDFDJSON:
         }
         mock_api_request.return_value = mock_response
         
-        mock_extract_values.return_value = ('celcius', [
+        mock_extract_values.return_value = ('celsius', [
             {'validTime': '2025-08-27T11:00:00+00:00/PT3H', 'value': 25.5},
             {'validTime': '2025-08-27T14:00:00+00:00/PT2H', 'value': 26.0}
         ])
@@ -667,11 +667,11 @@ class TestNDFDJSON:
         
         # Verify 
         expected_results = [
-            {'dataValue': '25.5', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T11:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
-            {'dataValue': '25.5', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T12:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
-            {'dataValue': '25.5', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T13:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
-            {'dataValue': '26.0', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T14:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
-            {'dataValue': '26.0', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T15:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"}
+            {'dataValue': '25.5', 'dataUnit': 'celsius', 'timeVerified': datetime.fromisoformat("2025-08-27T11:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
+            {'dataValue': '25.5', 'dataUnit': 'celsius', 'timeVerified': datetime.fromisoformat("2025-08-27T12:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
+            {'dataValue': '25.5', 'dataUnit': 'celsius', 'timeVerified': datetime.fromisoformat("2025-08-27T13:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
+            {'dataValue': '26.0', 'dataUnit': 'celsius', 'timeVerified': datetime.fromisoformat("2025-08-27T14:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
+            {'dataValue': '26.0', 'dataUnit': 'celsius', 'timeVerified': datetime.fromisoformat("2025-08-27T15:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"}
         ]
         assert result is not None
         assert result.description == mock_series_description
@@ -931,7 +931,7 @@ class TestNDFDJSON:
         }
         mock_api_request.return_value = mock_response
         
-        mock_extract_values.return_value = ('celcius', [
+        mock_extract_values.return_value = ('celsius', [
             {'validTime': '2025-08-27T11:00:00+00:00/PT3H', 'value': 25.5},
             {'validTime': '2025-08-27T14:00:00+00:00/PT4H', 'value': 26.0}
         ])
@@ -951,9 +951,9 @@ class TestNDFDJSON:
         
         # Verify 
         expected_results = [
-            {'dataValue': '25.5', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T13:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
-            {'dataValue': '26.0', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T14:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
-            {'dataValue': '26.0', 'dataUnit': 'celcius', 'timeVerified': datetime.fromisoformat("2025-08-27T15:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"}
+            {'dataValue': '25.5', 'dataUnit': 'celsius', 'timeVerified': datetime.fromisoformat("2025-08-27T13:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
+            {'dataValue': '26.0', 'dataUnit': 'celsius', 'timeVerified': datetime.fromisoformat("2025-08-27T14:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"},
+            {'dataValue': '26.0', 'dataUnit': 'celsius', 'timeVerified': datetime.fromisoformat("2025-08-27T15:00:00+00:00"), 'timeGenerated': time_generated, 'longitude': "-97.3183", 'latitude': "27.485"}
         ]
         assert result is not None
         assert result.description == mock_series_description
@@ -983,7 +983,7 @@ class TestNDFDJSON:
 
         mock_api_request.return_value = mock_response
         
-        mock_extract_values.return_value = ('celcius', [
+        mock_extract_values.return_value = ('celsius', [
             {'validTime': '2025-08-27T11:00:00+00:00/PT3H', 'value': 25.5},
             {'validTime': '2025-08-27T14:00:00+00:00/PT4H', 'value': 26.0}
         ])

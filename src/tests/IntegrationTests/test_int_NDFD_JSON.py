@@ -72,7 +72,7 @@ def test_ingest_series_integration(data_series: str):
             assert result.dataFrame['dataValue'].dtype == 'object'
             # Check that dataUnit is appropriate for the series type
             if data_series == "pAirTemp":
-                assert all(unit == 'celcius' for unit in result.dataFrame['dataUnit'])
+                assert all(unit == 'celsius' for unit in result.dataFrame['dataUnit'])
             elif data_series in ["pWnSpd", "pXWnCmp090D", "pYWnCmp045D"]:
                 assert all(unit == 'mps' for unit in result.dataFrame['dataUnit'])
             elif data_series == "pWnDir":
