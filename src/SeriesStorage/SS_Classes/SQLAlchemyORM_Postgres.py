@@ -91,7 +91,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         df_inputResult = self.__splice_input(tupleishResult)
         
         # Sending all rows found downstream the input gatherer will handle interval alignment
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = df_inputResult
         return series
     
@@ -518,7 +518,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         :param list[tupleish] -a list of selections from the table formatted in tupleish
         :return: DataFrame - a dataframe with the data formatted for use in a series
         """
-        print(f"DEBUG __splice_input: Received {len(results)} rows")
         # Convert returned DB rows into a dataframe to make manipulation easier 
         df_results = pd.DataFrame(
             data=results, 
