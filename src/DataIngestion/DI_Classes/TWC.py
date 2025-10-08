@@ -176,7 +176,6 @@ class TWC(IDataIngestion):
         # Pack data into Series object and return
         out_series = Series(
             description=seriesDescription,
-            isComplete=True,
             timeDescription=timeDescription,
         )
         out_series.dataFrame = out_df

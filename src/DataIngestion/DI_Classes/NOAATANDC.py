@@ -210,7 +210,7 @@ class NOAATANDC(IDataIngestion):
 
         df['dataValue'] = df['dataValue'].astype(str)
 
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
 
         return series
@@ -250,7 +250,7 @@ class NOAATANDC(IDataIngestion):
 
         df['dataValue'] = df['dataValue'].astype(str)
 
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
 
         return series
@@ -303,7 +303,7 @@ class NOAATANDC(IDataIngestion):
         # Surge is datum-less. A datum is required for ingesting water level but we remove it here
         seriesDescription.dataDatum = 'NA'
 
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
         return series
     
@@ -343,7 +343,7 @@ class NOAATANDC(IDataIngestion):
 
         df['dataValue'] = df['dataValue'].astype(str)
 
-        wnDir_series = Series(seriesDescription, True, timeDescription)
+        wnDir_series = Series(seriesDescription, timeDescription)
         wnDir_series.dataFrame = df
 
         return wnDir_series
@@ -383,7 +383,7 @@ class NOAATANDC(IDataIngestion):
 
         df['dataValue'] = df['dataValue'].astype(str)
 
-        wnSpd_series = Series(seriesDescription, True, timeDescription)
+        wnSpd_series = Series(seriesDescription, timeDescription)
         wnSpd_series.dataFrame = df
 
         return wnSpd_series
@@ -452,10 +452,10 @@ class NOAATANDC(IDataIngestion):
         x_df['dataValue'] = x_df['dataValue'].astype(str)
         y_df['dataValue'] = y_df['dataValue'].astype(str)
 
-        x_series = Series(xCompDesc, True, timeDescription)
+        x_series = Series(xCompDesc, timeDescription)
         x_series.dataFrame = x_df
 
-        y_series = Series(yCompDesc, True, timeDescription)
+        y_series = Series(yCompDesc, timeDescription)
         y_series.dataFrame = y_df
 
 
@@ -498,7 +498,7 @@ class NOAATANDC(IDataIngestion):
         ]
 
         df['dataValue'] = df['dataValue'].astype(str)
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
 
         return series
@@ -536,7 +536,7 @@ class NOAATANDC(IDataIngestion):
             ]
 
         df['dataValue'] = df['dataValue'].astype(str)
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
 
         return series
@@ -576,6 +576,6 @@ class NOAATANDC(IDataIngestion):
 
         df['dataValue'] = df['dataValue'].astype(str)
 
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
         return series

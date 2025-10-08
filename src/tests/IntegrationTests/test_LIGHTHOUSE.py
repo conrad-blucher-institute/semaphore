@@ -28,15 +28,13 @@ from dotenv import load_dotenv
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_min_output", [
     # series: dWaterTmp - wtp
-    # Note: After refactor, all valid data points are returned (no interval filtering)
-    # so we expect more data points than before, using minimum expected counts
-    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), 24), # 1hr interval
-    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), timedelta(seconds=360)), 10), # 1 hour range - expect at least 10 points
-    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), None), 10), # 1 hour range - no interval specified
+    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), 241), # 1hr interval
+    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), timedelta(seconds=360)), 11), # 6min interval
+    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), None), 11), # no interval
     # series: dAirTmp - atp
-    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), 24), # 1 day range
-    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), timedelta(seconds=360)), 10),  # 1 hour range
-    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), None), 10), # 1 hour range - no interval
+    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), 241), # 1hr interval
+    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), timedelta(seconds=360)), 11),  # 6min interval
+    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), None), 11), # no interval
     # series: erroneous
     (SeriesDescription('LIGHTHOUSE', 'apple', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), None),
 ])

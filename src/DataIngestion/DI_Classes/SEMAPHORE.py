@@ -54,7 +54,7 @@ class SEMAPHORE(IDataIngestion):
         result = self.series_storage.select_specific_output(ssd, timeDescription)
 
         # Repack the data with the original series description and return
-        return_series = Series(seriesDescription, True, timeDescription)
+        return_series = Series(seriesDescription, timeDescription)
         return_series.dataFrame = self.__convert_output_to_input(result.dataFrame) # Cast output frame to input frame
         return return_series
     

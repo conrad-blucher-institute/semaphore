@@ -231,7 +231,7 @@ class NDFD_EXP(IDataIngestion):
 
             df['dataValue'] = df['dataValue'].astype(str)
 
-            resultSeries = Series(seriesRequest, True)
+            resultSeries = Series(seriesRequest, timeRequest)
             resultSeries.dataFrame = df
 
             return resultSeries
@@ -329,10 +329,10 @@ class NDFD_EXP(IDataIngestion):
         yCompDesc = SeriesDescription(seriesDescription.dataSource, f'pYWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
 
         #Creating series objects with correct description information and inputs
-        xCompSeries = Series(xCompDesc, True, timeDescription)
+        xCompSeries = Series(xCompDesc, timeDescription)
         xCompSeries.dataFrame = xCompDF
-        yCompSeries = Series(yCompDesc, True, timeDescription)
-        yCompSeries.data = yCompDF
+        yCompSeries = Series(yCompDesc, timeDescription)
+        yCompSeries.dataFrame = yCompDF
         
         #Step three: Return it
         return xCompSeries if isXWindCmp else yCompSeries      

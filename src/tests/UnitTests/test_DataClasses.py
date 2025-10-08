@@ -182,35 +182,28 @@ class TestSeries(unittest.TestCase):
         """Test creating a Series with SeriesDescription"""
         series = Series(
             description=self.series_desc,
-            isComplete=True,
             timeDescription=self.time_desc
         )
         
         self.assertEqual(series.description, self.series_desc)
-        self.assertTrue(series.isComplete)
         self.assertEqual(series.timeDescription, self.time_desc)
-        self.assertIsNone(series.nonCompleteReason)
         self.assertEqual(series.dataFrame, None)
         
     def test_creation_with_semaphore_description(self):
         """Test creating a Series with SemaphoreSeriesDescription"""
         series = Series(
             description=self.semaphore_desc,
-            isComplete=True,
             timeDescription=self.time_desc
         )
         
         self.assertEqual(series.description, self.semaphore_desc)
-        self.assertTrue(series.isComplete)
         self.assertEqual(series.timeDescription, self.time_desc)
-        self.assertIsNone(series.nonCompleteReason)
         self.assertEqual(series.dataFrame, None)
         
     def test_setting_data(self):
         """Test setting the data property of a Series"""
         series = Series(
             description=self.series_desc,
-            isComplete=True,
             timeDescription=self.time_desc
         )
         

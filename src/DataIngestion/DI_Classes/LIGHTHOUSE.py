@@ -59,17 +59,17 @@ class LIGHTHOUSE(IDataIngestion):
                 data = json.loads(''.join([line.decode() for line in response.readlines()])) #Download and parse
 
         except HTTPError as err:
-            log(f'Fetch failed, HTTPError of code: {err.status} for: {err.reason}')
+            log(f'Fetch failed, HTTPError of code: {err.status} for: {err.reason}\n URL:[{url}]')
             return None
         except Exception as ex:
-            log(f'Fetch failed, unhandled exceptions: {ex}')
+            log(f'Fetch failed, unhandled exceptions: {ex}\n URL:[{url}]')
             return None
         return data
 
     def __pull_pd_endpoint_dataPoint(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
-        """This function pulls data from LIGHTHOUSE's pd endpoint
+        """This function pulls raw data from LIGHTHOUSE's pd endpoint
         :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull 
-        :param timeREquest: TimeDescription - A data TimeDescription object with the information to pull 
+        :param timeRequest: TimeDescription - A data TimeDescription object with the information to pull 
         :param Series | None: A series containing the imported data or none if something went wrong
         """
         
@@ -102,7 +102,7 @@ class LIGHTHOUSE(IDataIngestion):
         url = f'https://lighthouse.tamucc.edu/pd?stnlist={lighthouseLocationCode}&serlist={seriesInfoMap[SIMSeriesCodeIndex]}&when={fromString}%2C{toString}&whentz=UTC0&-action=app_json&unit=metric&elev={datum}'
         apiReturn = self.__api_request(url)
         if apiReturn == None:
-            log(f'LIGHTHOUSE | __pull_pd_endpoint_dataPoint | For unknown reason fetch failed for {seriesDescription}{timeDescription}')
+            log(f'LIGHTHOUSE | __pull_pd_endpoint_dataPoint | For unknown reason fetch failed for {seriesDescription}{timeDescription}\n URL:[{url}]')
             return None
 
         # Parse Meta Data
@@ -115,13 +115,8 @@ class LIGHTHOUSE(IDataIngestion):
         dataTimestampIndex = 0
         df = get_input_dataFrame()
         for dataPoint in data:
-            if(dataPoint[dataValueIndex] == None): # If lighthouse does not have a requested value, it will return None
-                continue
-            
-            # Lighthouse returns epoch time in milliseconds
-            epochTimeStamp = dataPoint[dataTimestampIndex]/1000 
-
-            # Lighthouse over returns data, so we just clip any data that is before or after our requested date range.
+         # Lighthouse returns epoch time in milliseconds
+            epochTimeStamp = dataPoint[dataTimestampIndex]/1000            # Lighthouse over returns data, so we just clip any data that is before or after our requested date range
             if epochTimeStamp > timeDescription.toDateTime.timestamp() or epochTimeStamp < timeDescription.fromDateTime.timestamp():
                 continue
 
