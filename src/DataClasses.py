@@ -17,12 +17,12 @@ from pandas import DataFrame
 def get_input_dataFrame() -> DataFrame:
     """ Constructs a dataframe with the columns Semaphore would expect from a dataframe of inputs.
     The columns are: 
-    - dataValue: The value of the data point AS A STRING!
-    - dataUnit: The unit of the data point
-    - timeVerified: The time the data was verified
-    - timeGenerated: The time the data was generated
-    - longitude: The longitude where the data was collected
-    - latitude: The latitude where the data was collected
+    - dataValue: The value of the data point - string
+    - dataUnit: The unit of the data point - string
+    - timeVerified: The time the data was verified - datetime (non timezone aware but understood to be UTC)
+    - timeGenerated: The time the data was generated - datetime (non timezone aware but understood to be UTC)
+    - longitude: The longitude where the data was collected - string
+    - latitude: The latitude where the data was collected - string
     """
     return DataFrame(columns=['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude'])
 

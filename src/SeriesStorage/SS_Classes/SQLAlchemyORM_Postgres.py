@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#SQLAlchemyORM.py
+#SQLAlchemyORM_Postgres.py
 #-------------------------------
 # Created By : Matthew Kastl
 # Created Date: 3/26/2023
@@ -30,7 +30,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
  
     def __init__(self) -> None:
         """Constructor generates an a db schema. Automatically creates the 
-        metadata object holding the defined schema.
+            metadata object holding the defined schema.
         """
         self.__create_engine(getenv('DB_LOCATION_STRING'), False)
         self.__metadata = MetaData()
@@ -83,11 +83,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         df_inputResult = self.__splice_input(tupleishResult)
         
-        # Prune the results removing any data that does not align with the interval that was requested
-        df_prunedInputs = df_inputResult.copy(deep=True)
-
-        series = Series(seriesDescription, timeDescription)
-        series.dataFrame = df_prunedInputs
+        # Sending all rows found downstream the input gatherer will handle interval alignment
+        series = Series(seriesDescription, True, timeDescription)
+        series.dataFrame = df_inputResult
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
@@ -280,11 +278,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 insertionRows.append(new_row)         
         
         # Insert the rows into the inputs table returning what is inserted as a sanity check
+        # On conflict we update the acquired time to now
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.__metadata.tables['inputs'])
-                                    .on_conflict_do_nothing('inputs_AK00')
-                                    .returning(self.__metadata.tables['inputs'])
                                     .values(insertionRows)
+                                    .on_conflict_do_update(constraint='inputs_AK00', set_={"acquiredTime": now})
+                                    .returning(self.__metadata.tables['inputs'])
                                 )
             result = cursor.fetchall()
             conn.commit()
