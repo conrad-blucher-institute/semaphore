@@ -3,7 +3,7 @@
 #----------------------------------
 # Created By: Matthew Kastl
 # Created Date: 11/3/2023
-# version 1.0
+# Version: 1.0
 #----------------------------------
 """ This file ingests data from CBI maintained Lighthouse
  """ 
@@ -71,7 +71,7 @@ class LIGHTHOUSE(IDataIngestion):
         :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull 
         :param timeRequest: TimeDescription - A data TimeDescription object with the information to pull 
         :param Series | None: A series containing the imported data or none if something went wrong
-"""
+        """
         
         # Reformat and sterilize datetimes
         fromString = timeDescription.fromDateTime.strftime('%m/%d/%y').replace('/', '%2F')

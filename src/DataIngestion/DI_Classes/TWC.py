@@ -21,6 +21,7 @@ from numpy import ndarray
 import numpy as np
 
 from datetime import datetime, timezone
+from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 from os import getenv
@@ -84,6 +85,7 @@ class TWC(IDataIngestion):
         api_permission = f'apiKey={self.api_key}'
 
         # Ensure the requested time range is not in the past
+        now = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
         now = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
         if timeDescription.fromDateTime < now:
             raise Semaphore_Ingestion_Exception("ERROR: Requested time range starts in the past. Please provide a valid time range.")

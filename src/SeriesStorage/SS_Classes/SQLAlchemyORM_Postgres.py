@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#SQLAlchemyORM.py
+#SQLAlchemyORM_Postgres.py
 #-------------------------------
 # Created By : Matthew Kastl
 # Created Date: 3/26/2023
@@ -30,7 +30,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
  
     def __init__(self) -> None:
         """Constructor generates an a db schema. Automatically creates the 
-        metadata object holding the defined schema.
+            metadata object holding the defined schema.
         """
         self.__create_engine(getenv('DB_LOCATION_STRING'), False)
         self.__metadata = MetaData()
@@ -45,22 +45,22 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param seriesDescription: SeriesDescription - A series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
-        inputs_select_latest_stmt = text("""
-        SELECT
-            i.id,
-            i."generatedTime",
-            i."acquiredTime",
-            i."verifiedTime",
-            i."dataValue",
-            i."isActual",
-            i."dataUnit",
-            i."dataSource",
-            i."dataLocation",
-            i."dataSeries",
-            i."dataDatum",
-            i.latitude,
-            i.longitude,
-            i."ensembleMemberID"
+        inputs_select_latest_stmt = text(""" 
+        SELECT  
+        i."id",
+        i."generatedTime",
+        i."acquiredTime",
+        i."verifiedTime",
+        i."dataValue",
+        i."isActual",
+        i."dataUnit",
+        i."dataSource",
+        i."dataLocation",
+        i."dataSeries",
+        i."dataDatum",
+        i."latitude",
+        i."longitude",
+        i."ensembleMemberID"
         FROM inputs AS i
         WHERE i."dataSource"   = :dataSource
         AND i."dataLocation" = :dataLocation
@@ -83,16 +83,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         df_inputResult = self.__splice_input(tupleishResult)
         
-        # Prune the results removing any data that does not align with the interval that was requested
-        df_prunedInputs = df_inputResult.copy(deep=True)
-    
-        if timeDescription.interval != None and timeDescription.interval.total_seconds() != 0:
-            for i in range(len(df_inputResult)):
-                if not (df_inputResult.iloc[i]['timeVerified'].timestamp() % timeDescription.interval.total_seconds() == 0):
-                    df_prunedInputs.drop(i, inplace=True)
-
-        series = Series(seriesDescription, timeDescription)
-        series.dataFrame = df_prunedInputs
+        # Sending all rows found downstream the input gatherer will handle interval alignment
+        series = Series(seriesDescription, True, timeDescription)
+        series.dataFrame = df_inputResult
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
@@ -285,11 +278,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 insertionRows.append(new_row)         
         
         # Insert the rows into the inputs table returning what is inserted as a sanity check
+        # On conflict we update the acquired time to now
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(self.__metadata.tables['inputs'])
-                                    .on_conflict_do_nothing('inputs_AK00')
-                                    .returning(self.__metadata.tables['inputs'])
                                     .values(insertionRows)
+                                    .on_conflict_do_update(constraint='inputs_AK00', set_={"acquiredTime": now})
+                                    .returning(self.__metadata.tables['inputs'])
                                 )
             result = cursor.fetchall()
             conn.commit()
@@ -389,6 +383,86 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
         ids = [row[0] for row in result]
         return resultSeries, ids
+    
+    def is_fresh_by_acquired_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: timedelta):
+        """
+        Returns True (fresh) if the OLDEST acquiredTime in the series is within the allowed
+        freshness window of the reference time; otherwise returns False (stale).
+
+        Expected attributes:
+        :param seriesDescription: SeriesDescription - A series description object
+        :param timeDescription: TimeDescription - A hydrated time description object
+        :param referenceTime: timedelta - The time data is being requested. Usually, it is now.
+
+        """
+        stalenessOffset = timeDescription.stalenessOffset
+        query_stmt = text("""
+        SELECT  
+        i."id",
+        i."generatedTime",
+        i."acquiredTime",
+        i."verifiedTime",
+        i."dataValue",
+        i."isActual",
+        i."dataUnit",
+        i."dataSource",
+        i."dataLocation",
+        i."dataSeries",
+        i."dataDatum",
+        i."latitude",
+        i."longitude",
+        i."ensembleMemberID"
+        FROM inputs AS i
+        WHERE i."dataSource"   = :dataSource
+        AND i."dataLocation" = :dataLocation
+        AND i."dataSeries"   = :dataSeries
+        AND i."dataDatum"    = :dataDatum
+        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        ORDER BY i."acquiredTime" ASC
+        LIMIT 1;
+        """).bindparams(
+            dataSource=seriesDescription.dataSource,
+            dataLocation=seriesDescription.dataLocation,
+            dataSeries=seriesDescription.dataSeries,
+            dataDatum=seriesDescription.dataDatum,
+            from_dt=timeDescription.fromDateTime,
+            to_dt=timeDescription.toDateTime,
+        )
+        
+        tupleishResult = self.__dbSelection(query_stmt).fetchall()
+        
+        if not tupleishResult:
+            return False
+            
+        acquiredTime = tupleishResult[0][2]
+        
+         # Coerce to pandas Timestamp (handles string or datetime)
+        acq = pd.to_datetime(acquiredTime, errors="coerce")
+        
+        if pd.isna(acq):
+            return False
+
+        # Normalize reference_time
+        ref = pd.to_datetime(referenceTime, errors="coerce")
+        if pd.isna(ref):
+            return False
+
+        # Make both tz-naive for comparison
+        if isinstance(ref, pd.Timestamp) and ref.tz is not None:
+            ref = ref.tz_localize(None)
+        if isinstance(acq, pd.Timestamp) and acq.tz is not None:
+            acq = acq.tz_localize(None)
+
+        # Compute age; clamp negatives (in case acq > ref due to clock skew)
+        age = ref - acq
+        if age < pd.Timedelta(0):
+            age = pd.Timedelta(0)
+
+        return age <= pd.to_timedelta(stalenessOffset)
+        
+        
+        
+        
 
     #############################################################################################
     ################################################################################## DB Managment Methods
@@ -504,6 +578,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         ).reset_index(drop=True)
         
         return df_out
+
 
     def __splice_output(self, results: list[tuple]) -> DataFrame:
         """Converts DB row results into a proper output dataframe to be packed into a series.
