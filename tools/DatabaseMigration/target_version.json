@@ -1,4 +1,4 @@
 {
-    "Target Version" : "3.2",
-    "Description" : "Add null constraint to timeGenerated and delete any null rows"
+    "Target Version" : "3.3",
+    "Description" : "Add NDFD_JSON as a new data source"
 }

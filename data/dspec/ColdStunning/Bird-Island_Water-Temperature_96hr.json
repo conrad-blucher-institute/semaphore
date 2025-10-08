@@ -62,7 +62,7 @@
         {
             "_name": "Predicted Air Temp",
             "location": "SBirdIsland",
-            "source": "NDFD_EXP",
+            "source": "NDFD_JSON",
             "series": "pAirTemp",
             "unit": "celsius",
             "interval": 3600,
