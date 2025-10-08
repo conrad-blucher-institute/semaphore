@@ -15,7 +15,7 @@ docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_dataGather
 import sys
 sys.path.append('/app/src')
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import sys
 import pytest
 from pandas import DataFrame, date_range
@@ -91,7 +91,7 @@ def test_get_data_repository(data_gatherer, mock_dspec):
     """ This test checks that the data gatherer can get a data repository from the series provider.
     The mock series must define the expected attributes and methods used by the data gatherer.
     """
-    reference_time = datetime.now()
+    reference_time = datetime.now(timezone.utc)
 
     # Create the mock time description, and set the required attributes for this test
     mock_timeDescription = MagicMock(spec=TimeDescription)
@@ -154,7 +154,7 @@ def test_post_process_data(data_gatherer, mock_dspec):
 def test_build_timeDescription_single_point(data_gatherer, mock_dspec):
     """ This test checks that the data gatherer can build a time description for a single point
     """
-    reference_time = datetime(2000, 1, 1, 0, 0, 0)
+    reference_time = datetime(2000, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 
     # Calculate expected values
     expected_from_time = reference_time
@@ -174,7 +174,7 @@ def test_build_timeDescription_single_point(data_gatherer, mock_dspec):
 def test_build_timeDescription_multi_point(data_gatherer, mock_dspec):
     """ This test checks that the data gatherer can build a time description for a multi point
     """
-    reference_time = datetime(2000, 1, 1, 0, 0, 0)
+    reference_time = datetime(2000, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 
     # Calculate expected values
     expected_from_time = reference_time

@@ -120,7 +120,7 @@ class LIGHTHOUSE(IDataIngestion):
             if epochTimeStamp > timeDescription.toDateTime.timestamp() or epochTimeStamp < timeDescription.fromDateTime.timestamp():
                 continue
 
-            dt = datetime.fromtimestamp(epochTimeStamp, timezone.utc)
+            dt = datetime.fromtimestamp(epochTimeStamp, tz=timezone.utc)
 
             df.loc[len(df)] = [
                 dataPoint[dataValueIndex],          # dataValue

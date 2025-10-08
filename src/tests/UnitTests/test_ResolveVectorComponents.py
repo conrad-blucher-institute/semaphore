@@ -15,7 +15,7 @@ run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_Resol
 import sys
 sys.path.append('/app/src')
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from src.PostProcessing.IPostProcessing import post_processing_factory
 from src.ModelExecution.dspecParser import PostProcessCall
@@ -24,7 +24,7 @@ from math import isclose
 
 def build_series_obj(data: list[float]) -> Series:
     """Build  series with a filled Dataframe"""
-    test_series = Series(SeriesDescription('Test', 'Test', 'Test'), TimeDescription(datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=3),  timedelta(hours=1)))
+    test_series = Series(SeriesDescription('Test', 'Test', 'Test'), TimeDescription(datetime(2000, 1, 1, hour=1, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=3, tzinfo=timezone.utc),  timedelta(hours=1)))
     df = get_input_dataFrame()
     for index in range(len(data)):
         df.loc[index] = [data[index], 'degrees', 'Test', 'Test', 'Test', 'Test']

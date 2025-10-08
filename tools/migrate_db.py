@@ -14,7 +14,7 @@ from os import listdir, getcwd, getenv
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, Engine, inspect, Table, MetaData, select, update
 from importlib import import_module
-from datetime import datetime
+from datetime import datetime, timezone
 from json import load
 
 load_dotenv()
@@ -98,7 +98,7 @@ def set_current_database_version(engine: Engine, version: float, description='')
         stmt = (update(version_table)
                        .values({
                            version_table.c.versionNumber: str(version.major) + '.' + str(version.minor), 
-                           version_table.c.migrationTime: datetime.utcnow(), 
+                           version_table.c.migrationTime: datetime.now(timezone.utc), 
                            version_table.c.versionNotes: description
                        }))
         connection.execute(stmt)

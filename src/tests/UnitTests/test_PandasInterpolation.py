@@ -16,7 +16,7 @@ import sys
 sys.path.append('/app/src')
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from src.DataClasses import get_input_dataFrame, Series, SeriesDescription, TimeDescription, DataIntegrityDescription
 from src.DataIntegrity.IDataIntegrity import data_integrity_factory
@@ -44,28 +44,28 @@ dependent_series = {
             "verificationOverride": None
         }
 
-testTimeDescription = TimeDescription(datetime(2024, 1, 1, hour=0), datetime(2024, 1, 1, hour=6),  timedelta(seconds = 3600))
+testTimeDescription = TimeDescription(datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=6, tzinfo=timezone.utc),  timedelta(seconds = 3600))
 
 
 df_seven_hour_series_missing_one = get_input_dataFrame()
-df_seven_hour_series_missing_one.loc[0] = ['0.60', 'test', datetime(2024, 1, 1, hour=0), datetime(2024, 1, 1, hour=0), None, None]
-df_seven_hour_series_missing_one.loc[1] = ['0.66', 'test', datetime(2024, 1, 1, hour=1), datetime(2024, 1, 1, hour=0), None, None]
-df_seven_hour_series_missing_one.loc[2] = ['0.69', 'test', datetime(2024, 1, 1, hour=2), datetime(2024, 1, 1, hour=0), None, None]
-df_seven_hour_series_missing_one.loc[3] = ['0.72', 'test', datetime(2024, 1, 1, hour=4), datetime(2024, 1, 1, hour=0), None, None]
-df_seven_hour_series_missing_one.loc[4] = ['0.76', 'test', datetime(2024, 1, 1, hour=5), datetime(2024, 1, 1, hour=0), None, None]
-df_seven_hour_series_missing_one.loc[5] = ['0.79', 'test', datetime(2024, 1, 1, hour=6), datetime(2024, 1, 1, hour=0), None, None]
+df_seven_hour_series_missing_one.loc[0] = ['0.60', 'test', datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_seven_hour_series_missing_one.loc[1] = ['0.66', 'test', datetime(2024, 1, 1, hour=1, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_seven_hour_series_missing_one.loc[2] = ['0.69', 'test', datetime(2024, 1, 1, hour=2, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_seven_hour_series_missing_one.loc[3] = ['0.72', 'test', datetime(2024, 1, 1, hour=4, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_seven_hour_series_missing_one.loc[4] = ['0.76', 'test', datetime(2024, 1, 1, hour=5, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_seven_hour_series_missing_one.loc[5] = ['0.79', 'test', datetime(2024, 1, 1, hour=6, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 
 df_seven_hour_series_missing_three_consecutive = get_input_dataFrame()
-df_seven_hour_series_missing_three_consecutive.loc[0] = ['0.60', 'test', datetime(2024, 1, 1, hour=0), datetime(2024, 1, 1, hour=0), None, None]
-df_seven_hour_series_missing_three_consecutive.loc[1] = ['0.66', 'test', datetime(2024, 1, 1, hour=1), datetime(2024, 1, 1, hour=0), None, None]
-df_seven_hour_series_missing_three_consecutive.loc[2] = ['0.69', 'test', datetime(2024, 1, 1, hour=2), datetime(2024, 1, 1, hour=0), None, None]
-df_seven_hour_series_missing_three_consecutive.loc[3] = ['0.79', 'test', datetime(2024, 1, 1, hour=6), datetime(2024, 1, 1, hour=0), None, None]
+df_seven_hour_series_missing_three_consecutive.loc[0] = ['0.60', 'test', datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_seven_hour_series_missing_three_consecutive.loc[1] = ['0.66', 'test', datetime(2024, 1, 1, hour=1, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_seven_hour_series_missing_three_consecutive.loc[2] = ['0.69', 'test', datetime(2024, 1, 1, hour=2, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_seven_hour_series_missing_three_consecutive.loc[3] = ['0.79', 'test', datetime(2024, 1, 1, hour=6, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 
 df_seven_hour_series_missing_one_tails_missing = get_input_dataFrame()
-df_seven_hour_series_missing_one_tails_missing.loc[1] = ['0.66', 'test', datetime(2024, 1, 1, hour=1), datetime(2024, 1, 1, hour=0), None, None]
-df_seven_hour_series_missing_one_tails_missing.loc[2] = ['0.69', 'test', datetime(2024, 1, 1, hour=2), datetime(2024, 1, 1, hour=0), None, None]
-df_seven_hour_series_missing_one_tails_missing.loc[3] = ['0.72', 'test', datetime(2024, 1, 1, hour=4), datetime(2024, 1, 1, hour=0), None, None]
-df_seven_hour_series_missing_one_tails_missing.loc[4] = ['0.76', 'test', datetime(2024, 1, 1, hour=5), datetime(2024, 1, 1, hour=0), None, None]
+df_seven_hour_series_missing_one_tails_missing.loc[1] = ['0.66', 'test', datetime(2024, 1, 1, hour=1, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_seven_hour_series_missing_one_tails_missing.loc[2] = ['0.69', 'test', datetime(2024, 1, 1, hour=2, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_seven_hour_series_missing_one_tails_missing.loc[3] = ['0.72', 'test', datetime(2024, 1, 1, hour=4, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_seven_hour_series_missing_one_tails_missing.loc[4] = ['0.76', 'test', datetime(2024, 1, 1, hour=5, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 
 
 @pytest.mark.parametrize("dependent_series, timeDescription, inputs, expected_length_of_data", [

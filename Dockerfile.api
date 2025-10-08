@@ -1,11 +1,8 @@
 # Start with the base image of tensorflow
-FROM tensorflow/tensorflow:2.14.0
+FROM python:3.12
 
 ARG SERVICE_ACCOUNT_USERNAME
 ARG SERVICE_ACCOUNT_UID
-
-# Install Python 3.10
-RUN apt-get update && apt-get install -y python3.10
 
 # No .pyc files created
 ENV PYTHONDONTWRITEBYTECODE 1
