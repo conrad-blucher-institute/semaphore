@@ -34,11 +34,10 @@ class SeriesProvider():
             :param series - The series to store.
             :returns series - A series containing only the stored values.
         """
-        returningSeries = Series(series.description, True)
+        returningSeries = Series(series.description)
 
         if not (type(series.description) == SemaphoreSeriesDescription): #Check and make sure this is actually something with the proper description to be inserted
-            returningSeries.isComplete = False
-            returningSeries.nonCompleteReason = f'An output save request must be provided a series with a SemaphoreSeriesDescription not a Series Description'
+            log('WARNING:: Attempting to insert a series without a SemaphoreSeriesDescription, this is not allowed!')
         else:
             returningSeries = self.seriesStorage.insert_output(series)
 
@@ -247,9 +246,7 @@ class SeriesProvider():
         if missing_value_count <= 0:
             result = Series(
                 description=  seriesDescription, 
-                isComplete=         True, 
                 timeDescription=    timeDescription, 
-                nonCompleteReason=  ''
             )
             result.dataFrame = df_expected
 
@@ -257,9 +254,7 @@ class SeriesProvider():
             # No log here, as this method will be used to also detect if Data Ingestion should be kicked off
             result = Series(
                 description=  seriesDescription, 
-                isComplete=         False, 
                 timeDescription=    timeDescription, 
-                nonCompleteReason=  f'There were {missing_value_count} missing results!'
             )
             result.dataFrame = df_expected
 
@@ -300,7 +295,6 @@ class SeriesProvider():
         if df_valid is not None:
             result = Series(
                 description= seriesDescription, 
-                isComplete= True,
                 timeDescription= timeDescription,
             )
             result.dataFrame = df_valid
@@ -308,9 +302,7 @@ class SeriesProvider():
         else:
             result = Series(
                 description= seriesDescription, 
-                isComplete= False,
                 timeDescription= timeDescription,
-                nonCompleteReason= 'Failed the verification override check.'
             )
             return result
                 

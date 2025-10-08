@@ -147,7 +147,7 @@ class NDBC(IDataIngestion):
                 ]
         df_result['dataValue'] = df_result['dataValue'].astype(str)
         
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = df_result
         return series
     
@@ -198,7 +198,7 @@ class NDBC(IDataIngestion):
         # Cast back to string
         one_row_df['dataValue'].astype(str)
 
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = one_row_df
         return series
 

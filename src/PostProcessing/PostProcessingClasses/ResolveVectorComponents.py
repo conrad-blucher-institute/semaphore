@@ -90,13 +90,13 @@ class ResolveVectorComponents(IPostProcessing):
 
         x_comp_outKey = args['x_comp_outKey']
         desc.dataSeries = x_comp_outKey
-        x_series = Series(desc, True, magnitude_series.timeDescription)
+        x_series = Series(desc, magnitude_series.timeDescription)
         x_series.dataFrame = df_x_result
         preprocessedData[x_comp_outKey] = x_series
 
         y_comp_outKey = args['y_comp_outKey']
         desc.dataSeries = y_comp_outKey
-        y_series = Series(desc, True, magnitude_series.timeDescription)
+        y_series = Series(desc, magnitude_series.timeDescription)
         y_series.dataFrame = df_y_result
         preprocessedData[y_comp_outKey] = y_series
 
