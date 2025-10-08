@@ -17,8 +17,8 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta, time, date
 import pandas as pd
 import numpy as np
-from src.DataClasses import Series, TimeDescription, SeriesDescription
-from src.DataIngestion.NOAATANDC import NOAATANDC
+from DataClasses import Series, TimeDescription, SeriesDescription
+from src.DataIngestion.DI_Classes.NOAATANDC import NOAATANDC
 
 
 class TestNOAATANDCUnit:
@@ -39,7 +39,7 @@ class TestNOAATANDCUnit:
             'd': [45, 50, 40, 55, 35, 60, 30, 65, 70, 25, 20]  # wind direction
         }, index=timestamps)
     
-    @patch('src.DataIngestion.NOAATANDC.series_storage_factory')
+    @patch('src.DataIngestion.DI_Classes.NOAATANDC.series_storage_factory')
     def test_init(self, mock_factory):
         """Test NOAATANDC initialization."""
         mock_storage = Mock()
@@ -66,14 +66,14 @@ class TestNOAATANDCUnit:
         with patch.object(self.noaa_ingester, '_NOAATANDC__seriesStorage') as mock_storage:
             mock_storage.find_external_location_code.return_value = None
             
-            with patch('src.DataIngestion.NOAATANDC.log') as mock_log:
+            with patch('src.DataIngestion.DI_Classes.NOAATANDC.log') as mock_log:
                 result = self.noaa_ingester._NOAATANDC__get_station_number('invalidLocation')
                 
                 assert result is None
                 mock_log.assert_called_once()
                 assert 'Empty dataSource Location mapping received' in mock_log.call_args[0][0]
     
-    @patch('src.DataIngestion.NOAATANDC.Station')
+    @patch('src.DataIngestion.DI_Classes.NOAATANDC.Station')
     def test_fetch_NOAA_data_success(self, mock_station_class):
         """Test successful NOAA API data fetch."""
         # Setup mocks
@@ -97,7 +97,7 @@ class TestNOAATANDCUnit:
             mock_station_class.assert_called_once_with(id='8775792')
             mock_station.get_data.assert_called_once()
     
-    @patch('src.DataIngestion.NOAATANDC.Station')
+    @patch('src.DataIngestion.DI_Classes.NOAATANDC.Station')
     def test_fetch_NOAA_data_single_point(self, mock_station_class):
         """Test NOAA API data fetch for single point in time."""
         # Setup for single point request
@@ -122,7 +122,7 @@ class TestNOAATANDCUnit:
             assert result_data is not None
             assert len(result_data) == 1
     
-    @patch('src.DataIngestion.NOAATANDC.Station')
+    @patch('src.DataIngestion.DI_Classes.NOAATANDC.Station')
     def test_fetch_NOAA_data_api_error(self, mock_station_class):
         """Test NOAA API data fetch with API error."""
         mock_station_class.side_effect = ValueError("Invalid station ID")
@@ -130,7 +130,7 @@ class TestNOAATANDCUnit:
         with patch.object(self.noaa_ingester, '_NOAATANDC__get_station_number') as mock_get_station:
             mock_get_station.return_value = '8775792'
             
-            with patch('src.DataIngestion.NOAATANDC.log') as mock_log:
+            with patch('src.DataIngestion.DI_Classes.NOAATANDC.log') as mock_log:
                 series_desc = SeriesDescription("NOAATANDC", "dWl", "packChan", "MHHW")
                 time_desc = TimeDescription(self.from_date, self.to_date, timedelta(hours=1))
                 
@@ -174,7 +174,7 @@ class TestNOAATANDCUnit:
     
     def test_ingest_series_unsupported(self):
         """Test ingest_series with unsupported series type."""
-        with patch('src.DataIngestion.NOAATANDC.log') as mock_log:
+        with patch('src.DataIngestion.DI_Classes.NOAATANDC.log') as mock_log:
             series_desc = SeriesDescription("NOAATANDC", "unsupportedSeries", "packChan", "MHHW")
             time_desc = TimeDescription(self.from_date, self.to_date, timedelta(hours=1))
             
@@ -236,7 +236,7 @@ class TestNOAATANDCUnit:
             
             assert result is not None
             assert isinstance(result, Series)
-            assert result.seriesDescription.dataDatum == 'NA'
+            assert result.description.dataDatum == 'NA'
             assert all(result.dataFrame['dataUnit'] == 'meter')
             assert mock_fetch.call_count == 2
     
