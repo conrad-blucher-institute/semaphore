@@ -45,7 +45,7 @@ class DateRangeValidation(IDataValidation):
         
 
         if missing_value_count > 0:
-            log(f'DateRangeValidation: Series {series.seriesDescription} is missing {missing_value_count} values.')
+            log(f'DateRangeValidation: Series {series.description} is missing {missing_value_count} values.')
             return False
         return True
 
