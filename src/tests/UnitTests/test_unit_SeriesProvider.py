@@ -18,14 +18,14 @@ sys.path.append('/app/src')
 import os
     
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from src.SeriesProvider.SeriesProvider import SeriesProvider
 from src.DataClasses import TimeDescription, SeriesDescription, get_input_dataFrame, DataIntegrityDescription, Series
 from unittest import mock
 from pandas import DataFrame
 
-ONE_POINT = TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1),  timedelta(hours=1))
-FIVE_POINTS = TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1, 4),  timedelta(hours=1))
+ONE_POINT = TimeDescription(datetime(2000, 1, 1, tzinfo=timezone.utc), datetime(2000, 1, 1, tzinfo=timezone.utc),  timedelta(hours=1))
+FIVE_POINTS = TimeDescription(datetime(2000, 1, 1, tzinfo=timezone.utc), datetime(2000, 1, 1, 4, tzinfo=timezone.utc),  timedelta(hours=1))
 
 TWO_HOUR_LIMIT_INTERPOLATION = DataIntegrityDescription('PandasInterpolation', {'method' : 'linear', 'limit': '7200', 'limit_area': 'inside' })
 TWO_HOUR_LIMIT_EX_AND_IN_TERP = DataIntegrityDescription('PandasInterpolation', {'method' : 'linear', 'limit': '7200', 'limit_area': 'None' })
@@ -70,8 +70,8 @@ TEST_DI_DESC_W_INTERP_MISS_1 = SeriesDescription('TEST_DI', 'MISS_1', 'TEST', No
 
 
 @pytest.mark.parametrize("timeDescription, expected_output", [
-    (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1),  timedelta(hours=1)), [datetime(2000, 1, 1)]), # I single data point
-    (TimeDescription(datetime(2000, 1, 1), datetime(2000, 1, 1, hour=11),  timedelta(hours=1)), [datetime(2000, 1, 1) + timedelta(hours=idx) for idx in range(12)]), # A 12 hour long data series
+    (TimeDescription(datetime(2000, 1, 1, tzinfo=timezone.utc), datetime(2000, 1, 1, tzinfo=timezone.utc),  timedelta(hours=1)), [datetime(2000, 1, 1, tzinfo=timezone.utc)]), # I single data point
+    (TimeDescription(datetime(2000, 1, 1, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=11, tzinfo=timezone.utc),  timedelta(hours=1)), [datetime(2000, 1, 1, tzinfo=timezone.utc) + timedelta(hours=idx) for idx in range(12)]), # A 12 hour long data series
 ])
 def test__generate_datetime_list(timeDescription, expected_output):
     seriesProvider = SeriesProvider()
@@ -80,26 +80,26 @@ def test__generate_datetime_list(timeDescription, expected_output):
 
 
 test_series_desc = SeriesDescription('Test', 'Test', 'Test')
-three_hour_time_desc = TimeDescription(datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=3),  timedelta(hours=1))
+three_hour_time_desc = TimeDescription(datetime(2000, 1, 1, hour=1, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=3, tzinfo=timezone.utc),  timedelta(hours=1))
 df_correct_three_hour_series = get_input_dataFrame()
-df_correct_three_hour_series.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series.loc[1] = ['1', 'test', datetime(2000, 1, 1, hour=2), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series.loc[2] = ['1', 'test', datetime(2000, 1, 1, hour=3), datetime(2000, 1, 1, hour=0), None, None]
+df_correct_three_hour_series.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_correct_three_hour_series.loc[1] = ['1', 'test', datetime(2000, 1, 1, hour=2, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_correct_three_hour_series.loc[2] = ['1', 'test', datetime(2000, 1, 1, hour=3, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 
 df_correct_three_hour_series_with_duplicate = get_input_dataFrame()
-df_correct_three_hour_series_with_duplicate.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_with_duplicate.loc[1] = ['1', 'test', datetime(2000, 1, 1, hour=2), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_with_duplicate.loc[2] = ['1', 'test', datetime(2000, 1, 1, hour=2), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_with_duplicate.loc[3] = ['1', 'test', datetime(2000, 1, 1, hour=3), datetime(2000, 1, 1, hour=0), None, None]
+df_correct_three_hour_series_with_duplicate.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_correct_three_hour_series_with_duplicate.loc[1] = ['1', 'test', datetime(2000, 1, 1, hour=2, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_correct_three_hour_series_with_duplicate.loc[2] = ['1', 'test', datetime(2000, 1, 1, hour=2, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_correct_three_hour_series_with_duplicate.loc[3] = ['1', 'test', datetime(2000, 1, 1, hour=3, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 
 df_correct_three_hour_series_missing_one = get_input_dataFrame()
-df_correct_three_hour_series_missing_one.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_missing_one.loc[1] = ['1', 'test', datetime(2000, 1, 1, hour=3), datetime(2000, 1, 1, hour=0), None, None]
+df_correct_three_hour_series_missing_one.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_correct_three_hour_series_missing_one.loc[1] = ['1', 'test', datetime(2000, 1, 1, hour=3, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 
 df_correct_three_hour_series_middle_changed = get_input_dataFrame()
-df_correct_three_hour_series_middle_changed.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_middle_changed.loc[1] = ['2', 'test', datetime(2000, 1, 1, hour=2), datetime(2000, 1, 1, hour=0), None, None]
-df_correct_three_hour_series_middle_changed.loc[2] = ['1', 'test', datetime(2000, 1, 1, hour=3), datetime(2000, 1, 1, hour=0), None, None]
+df_correct_three_hour_series_middle_changed.loc[0] = ['1', 'test', datetime(2000, 1, 1, hour=1, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_correct_three_hour_series_middle_changed.loc[1] = ['2', 'test', datetime(2000, 1, 1, hour=2, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+df_correct_three_hour_series_middle_changed.loc[2] = ['1', 'test', datetime(2000, 1, 1, hour=3, tzinfo=timezone.utc), datetime(2000, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, df_DB, df_DI, correctness", [
     (test_series_desc, three_hour_time_desc, df_correct_three_hour_series.copy(deep=True), None), # Fully correct Series from DB, no DI series, 

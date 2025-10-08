@@ -17,7 +17,7 @@
 from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
 from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, Engine
 from sqlalchemy.dialects.postgresql import insert
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Migrator(IDatabaseMigration):
@@ -32,7 +32,7 @@ class Migrator(IDatabaseMigration):
         self.__create_schema()
 
         #build dictionary with first row information
-        first_row_dict = [{'versionNumber':'2.0', 'migrationTime':datetime.utcnow(), 'versionNotes': " "}]
+        first_row_dict = [{'versionNumber':'2.0', 'migrationTime':datetime.now(timezone.utc), 'versionNotes': " "}]
         
         #starting a transaction
         with databaseEngine.begin() as connection:

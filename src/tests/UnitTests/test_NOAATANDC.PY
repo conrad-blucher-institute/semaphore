@@ -14,7 +14,7 @@ import sys
 sys.path.append('/app/src')
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timedelta, time, date
+from datetime import datetime, timedelta, time, date, timezone
 import pandas as pd
 import numpy as np
 from src.DataClasses import Series, TimeDescription, SeriesDescription
@@ -27,8 +27,8 @@ class TestNOAATANDCUnit:
     def setup_method(self):
         """Setup for each test method."""
         self.noaa_ingester = NOAATANDC()
-        self.from_date = datetime.combine(date(2024, 12, 28), time(10, 0))
-        self.to_date = datetime.combine(date(2024, 12, 28), time(20, 0))
+        self.from_date = datetime.combine(date(2024, 12, 28), time(10, 0), tzinfo=timezone.utc)
+        self.to_date = datetime.combine(date(2024, 12, 28), time(20, 0), tzinfo=timezone.utc)
         self.sample_lat_lon = (29.3108, -94.7933)  # Sample coordinates
         
         # Create sample NOAA API response DataFrame
@@ -101,7 +101,7 @@ class TestNOAATANDCUnit:
     def test_fetch_NOAA_data_single_point(self, mock_station_class):
         """Test NOAA API data fetch for single point in time."""
         # Setup for single point request
-        single_time = datetime.combine(date(2024, 12, 28), time(12, 0))
+        single_time = datetime.combine(date(2024, 12, 28), time(12, 0), tzinfo=timezone.utc)
         single_data = pd.DataFrame({'v': [1.5]}, index=[single_time])
         
         mock_station = Mock()

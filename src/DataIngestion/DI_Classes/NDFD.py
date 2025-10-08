@@ -22,7 +22,7 @@ NOTE:: Original code was taken from:
 # 
 #
 from math import cos, sin, radians
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import requests
 from typing import List, Dict, TypeVar, NewType, Tuple, Generic, Callable
@@ -195,7 +195,7 @@ class NDFD(IDataIngestion):
 
             df = get_input_dataFrame()
             for row in data_dictionary:
-                timeVerified = datetime.fromtimestamp(row[0])
+                timeVerified = datetime.fromtimestamp(row[0], tz=timezone.utc)
                 if timeRequest.interval is not None:
                     if(timeVerified.timestamp() % timeRequest.interval.total_seconds() != 0):
                         continue

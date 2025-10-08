@@ -12,7 +12,7 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription, Series
 from SeriesProvider.SeriesProvider import SeriesProvider
 from fastapi.encoders import jsonable_encoder
@@ -49,8 +49,8 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
         HTTPException: If the series is not found.
     """
     try:
-        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
-        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
     except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
     
@@ -110,8 +110,8 @@ async def get_outputs_time_span(fromDateTime: str, toDateTime: str, modelNames: 
         The results for each model index by the model name. If no data can be found for that model for the provided time range the value will be null.
     """ 
     try:
-        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
-        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
     except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
 
@@ -146,8 +146,8 @@ async def get_output(modelName: str, modelVersion: str, series: str, location: s
         HTTPException: If the series is not found.
     """ 
     try:
-        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
-        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
     except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
     

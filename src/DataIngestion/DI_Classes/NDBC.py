@@ -11,7 +11,7 @@
 #
 import pandas as pd
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 import requests
 import re
 
@@ -103,7 +103,8 @@ class NDBC(IDataIngestion):
                 month= int(date_info[1]),
                 day= int(date_info[2]),
                 hour= int(date_info[3]),
-                minute= int(date_info[4])
+                minute= int(date_info[4]), 
+                tzinfo=timezone.utc
             )
             data.insert(0, dt)
             parsed_data.append(data)

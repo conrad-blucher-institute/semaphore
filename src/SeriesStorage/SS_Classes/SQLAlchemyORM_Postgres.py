@@ -16,7 +16,7 @@ from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, Uniqu
 from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
 from os import getenv
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 import pandas as pd
 from pandas import DataFrame
 
@@ -258,7 +258,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         # If dataValue is a list its an ensemble
         isEnsemble = isinstance(series.dataFrame['dataValue'].iloc[0], list) 
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         insertionRows = []
 
         for df_index, row in series.dataFrame.iterrows():
@@ -451,10 +451,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         if df_results.empty:
             return get_input_dataFrame()
         
-        # --- minimal: normalize dtypes so checks / sorting work correctly ---
-        df_results["generatedTime"]    = pd.to_datetime(df_results["generatedTime"], errors="coerce")
-        df_results["verifiedTime"]     = pd.to_datetime(df_results["verifiedTime"],  errors="coerce")
-        df_results["ensembleMemberID"] = pd.to_numeric(df_results["ensembleMemberID"], errors="coerce")  # NaN if not ensemble
+        # --- Normalize dtypes and ADD TIMEZONE INFO ---
+        df_results["generatedTime"] = pd.to_datetime(df_results["generatedTime"], errors="coerce").dt.tz_localize(timezone.utc)
+        df_results["verifiedTime"] = pd.to_datetime(df_results["verifiedTime"], errors="coerce").dt.tz_localize(timezone.utc)
+        df_results["acquiredTime"] = pd.to_datetime(df_results["acquiredTime"], errors="coerce").dt.tz_localize(timezone.utc)  # Added this too for completeness
+        df_results["ensembleMemberID"] = pd.to_numeric(df_results["ensembleMemberID"], errors="coerce")  # NaN if not ensembleembleMemberID"] = pd.to_numeric(df_results["ensembleMemberID"], errors="coerce")  # NaN if not ensemble
 
 
         # A formatted dataframe to place the spliced data 
@@ -518,7 +519,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 "dataUnit", "dataLocation", "dataSeries", "dataDatum", "ensembleMemberID"
             ]
         )
+
+        if df_results.empty:
+            return get_output_dataFrame()
         
+        # --- ADD TIMEZONE INFO to timeGenerated ---
+        df_results["timeGenerated"] = pd.to_datetime(df_results["timeGenerated"], errors="coerce").dt.tz_localize(timezone.utc)
+
         # A formatted dataframe to place the spliced data 
         df_out = get_output_dataFrame()
 

@@ -18,9 +18,8 @@ from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, T
 from exceptions import Semaphore_Ingestion_Exception, Semaphore_Exception
 
 from utility import log
-from datetime import timedelta
-from datetime import datetime
 from pandas import DataFrame
+from datetime import datetime, timedelta
 
 
 

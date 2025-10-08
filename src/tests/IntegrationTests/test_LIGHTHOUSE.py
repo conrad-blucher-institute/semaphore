@@ -18,7 +18,7 @@ sys.path.append('/app/src')
 
 import pytest
 
-from datetime import datetime, timedelta, time, date
+from datetime import datetime, timedelta, time, date, timezone
 from src.DataClasses import TimeDescription, SeriesDescription, Series
 from src.DataIngestion.IDataIngestion import data_ingestion_factory
 from src.DataIngestion.DI_Classes.LIGHTHOUSE import LIGHTHOUSE
@@ -28,15 +28,15 @@ from dotenv import load_dotenv
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
     # series: dWaterTmp - wtp
-    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), 241), # 1hr interval
-    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), timedelta(seconds=360)), 11), # 6min interval
-    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), None), 11), # no interval
+    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 7), time(11, 0), tzinfo=timezone.utc), timedelta(seconds=3600)), 241), # 1hr interval
+    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 6), time(12, 0), tzinfo=timezone.utc), timedelta(seconds=360)), 11), # 6min interval
+    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 6), time(12, 0), tzinfo=timezone.utc), None), 11), # no interval
     # series: dAirTmp - atp
-    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), 241), # 1hr interval
-    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), timedelta(seconds=360)), 11),  # 6min interval
-    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(12, 0)), None), 11), # no interval
+    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 7), time(11, 0), tzinfo=timezone.utc), timedelta(seconds=3600)), 241), # 1hr interval
+    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 6), time(12, 0), tzinfo=timezone.utc), timedelta(seconds=360)), 11),  # 6min interval
+    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 6), time(12, 0), tzinfo=timezone.utc), None), 11), # no interval
     # series: erroneous
-    (SeriesDescription('LIGHTHOUSE', 'apple', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 7), time(11, 0)), timedelta(seconds=3600)), None),
+    (SeriesDescription('LIGHTHOUSE', 'apple', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 7), time(11, 0), tzinfo=timezone.utc), timedelta(seconds=3600)), None),
 ])
 def test_pull_pd_endpoint_dataPoint(seriesDescription: SeriesDescription, timeDescription: TimeDescription, expected_output: int | None):
     """This function tests the pull_pd_endpoint_dataPoint which is datapoints from LIGHTHOUSE's pd endpoint
@@ -57,7 +57,7 @@ def test_pull_pd_endpoint_dataPoint(seriesDescription: SeriesDescription, timeDe
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
     # series: erroneous
-    (SeriesDescription('LIGHTHOUSE', 'apple', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0)), datetime.combine(date(2023, 9, 6), time(11, 0)), timedelta(seconds=3600)), None),
+    (SeriesDescription('LIGHTHOUSE', 'apple', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), timedelta(seconds=3600)), None),
 ])
 def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: TimeDescription, expected_output: None):
     """This function tests the test ingest series method. This test makes sure that the LIGHTHOUSE ingestion class is being properly mapped

@@ -16,7 +16,7 @@ docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_DataClasse
 import sys
 sys.path.append('/app/src')
 import unittest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from DataClasses import (DataIntegrityDescription, 
                         TimeDescription, SeriesDescription, 
                         SemaphoreSeriesDescription, Series)
@@ -42,8 +42,8 @@ class TestTimeDescription(unittest.TestCase):
     """Test cases for the TimeDescription class"""
     
     def setUp(self):
-        self.from_datetime = datetime(2025, 2, 1)
-        self.to_datetime = datetime(2025, 2, 28)
+        self.from_datetime = datetime(2025, 2, 1, tzinfo=timezone.utc)
+        self.to_datetime = datetime(2025, 2, 28, tzinfo=timezone.utc)
         self.interval = timedelta(hours=1)
         
     def test_creation_with_interval(self):
@@ -170,8 +170,8 @@ class TestSeries(unittest.TestCase):
         
         # Create TimeDescription for testing
         self.time_desc = TimeDescription(
-            fromDateTime=datetime(2025, 2, 1),
-            toDateTime=datetime(2025, 2, 28),
+            fromDateTime=datetime(2025, 2, 1, tzinfo=timezone.utc),
+            toDateTime=datetime(2025, 2, 28, tzinfo=timezone.utc),
             interval=timedelta(hours=1)
         )
         

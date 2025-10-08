@@ -17,7 +17,6 @@
 from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
 from DatabaseMigration.databaseMigrationUtility import DatabaseDeletionHelper
 from sqlalchemy import MetaData, Engine, update
-from datetime import datetime
 
 
 class Migrator(IDatabaseMigration):

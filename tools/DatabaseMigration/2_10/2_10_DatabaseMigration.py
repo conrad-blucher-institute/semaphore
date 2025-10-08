@@ -15,7 +15,6 @@
 #Imports
 from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
 from sqlalchemy import MetaData, Engine, update
-from datetime import datetime
 
 
 class Migrator(IDatabaseMigration):

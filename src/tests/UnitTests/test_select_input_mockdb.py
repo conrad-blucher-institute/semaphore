@@ -10,7 +10,7 @@
 # test_select_input_mockdb.py
 import sys
 sys.path.append('/app/src')
-from datetime import datetime
+from datetime import datetime, timezone
 import pandas as pd
 import pytest 
 from _pytest.monkeypatch import MonkeyPatch
@@ -212,8 +212,8 @@ def test_select_input_with_mock_db(engine, inputs_table, series_kwargs, from_str
 
     
     series_desc = SeriesDescription(**series_kwargs)
-    from_dt = datetime.strptime(from_str, "%Y%m%d%H")
-    to_dt   = datetime.strptime(to_str,   "%Y%m%d%H")
+    from_dt = datetime.strptime(from_str, "%Y%m%d%H").replace(tzinfo=timezone.utc)
+    to_dt   = datetime.strptime(to_str,   "%Y%m%d%H").replace(tzinfo=timezone.utc)
     time_desc = TimeDescription(fromDateTime=from_dt, toDateTime=to_dt)
 
     storage = series_storage_factory()

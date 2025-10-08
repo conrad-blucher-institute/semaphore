@@ -21,7 +21,7 @@ NOTE:: Original code was taken from:
 # 
 #
 from math import sin, cos, radians
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import requests
 from typing import List, Dict, TypeVar, NewType, Tuple, Generic, Callable
@@ -214,7 +214,7 @@ class NDFD_EXP(IDataIngestion):
  
             df = get_input_dataFrame()
             for row in data_dictionary:
-                timeVerified = datetime.fromtimestamp(row[0])
+                timeVerified = datetime.fromtimestamp(row[0], tz=timezone.utc)
                 if timeRequest.interval is not None:
                     if(timeVerified.timestamp() % timeRequest.interval.total_seconds() != 0):
                         continue
@@ -445,7 +445,7 @@ def date_validation(timeDescription : TimeDescription) -> bool:
     to_datetime = timeDescription.toDateTime
     from_datetime = timeDescription.fromDateTime
 
-    now = datetime.now().replace(minute=0, second=0, microsecond=0)
+    now = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
 
     if from_datetime < now or to_datetime < now:
         raise Semaphore_Ingestion_Exception(f'Invalid Date Time Provided. Ingestion request cannot execute')
