@@ -53,7 +53,7 @@
         { 
             "_name": "Wind Speed Prediction",
             "location": "VirginiaKey",
-            "source": "NDFD_EXP",
+            "source": "NDFD_JSON",
             "series": "pWnSpd",
             "unit": "mps",
             "interval": 3600,
@@ -71,7 +71,7 @@
         { 
             "_name": "Wind Direction Prediction",
             "location": "VirginiaKey",
-            "source": "NDFD_EXP",
+            "source": "NDFD_JSON",
             "series": "pWnDir",
             "unit": "degrees",
             "interval": 3600,
