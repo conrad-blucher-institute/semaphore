@@ -166,10 +166,9 @@ class NOAATANDC(IDataIngestion):
         except ValueError as e:
             log(f'NOAA COOPS invalid request error: {e}')
             return None
-        
-        # If a single point was requested we make sure only the right point is returned
+
         if isSinglePoint:
-            data = data.loc[[fromTime]]
+            data = data.loc[[fromTime.replace(tzinfo=None)]]
 
         return data, lat_lon
 
@@ -196,7 +195,7 @@ class NOAATANDC(IDataIngestion):
         for idx in data.index:
 
             # parse
-            dt = idx.to_pydatetime()
+            dt = idx.to_pydatetime().replace(tzinfo=timezone.utc)
             value = data['v'][idx]
 
             df.loc[len(df)] = [
@@ -236,7 +235,7 @@ class NOAATANDC(IDataIngestion):
         for idx in data.index:
 
             # parse
-            dt = idx.to_pydatetime()
+            dt = idx.to_pydatetime().replace(tzinfo=timezone.utc)
             value = data['v'][idx]
 
             df.loc[len(df)] = [
@@ -284,7 +283,7 @@ class NOAATANDC(IDataIngestion):
         for idx in wlData.index:
 
             # parse
-            dt = idx.to_pydatetime()
+            dt = idx.to_pydatetime().replace(tzinfo=timezone.utc)
             water_level = wlData['v'][idx]
             predictive_water_level = pData['v'][idx]
             surge = str(float(water_level) - float(predictive_water_level))
@@ -329,7 +328,7 @@ class NOAATANDC(IDataIngestion):
         for idx in data.index:
 
             # parse
-            dt = idx.to_pydatetime()
+            dt = idx.to_pydatetime().replace(tzinfo=timezone.utc)
             wind_dir = data['d'][idx]
 
             df.loc[len(df)] = [
@@ -369,7 +368,7 @@ class NOAATANDC(IDataIngestion):
         for idx in data.index:
 
             # parse
-            dt = idx.to_pydatetime()
+            dt = idx.to_pydatetime().replace(tzinfo=timezone.utc)
             wind_spd = data['s'][idx]
 
             df.loc[len(df)] = [
@@ -420,7 +419,7 @@ class NOAATANDC(IDataIngestion):
         for idx in data.index:
 
             # parse
-            dt = idx.to_pydatetime()
+            dt = idx.to_pydatetime().replace(tzinfo=timezone.utc)
             wind_speed = float(data['s'][idx])
             wind_dir = float(data['d'][idx])
             x_comp = wind_speed * cos(wind_dir - offset)
@@ -523,7 +522,7 @@ class NOAATANDC(IDataIngestion):
         for idx in data.index:
 
             # parse
-            dt = idx.to_pydatetime()
+            dt = idx.to_pydatetime().replace(tzinfo=timezone.utc)
             value = data['v'][idx]
 
             df.loc[len(df)] = [
@@ -562,7 +561,7 @@ class NOAATANDC(IDataIngestion):
         for idx in data.index:
 
             # parse
-            dt = idx.to_pydatetime()
+            dt = idx.to_pydatetime().replace(tzinfo=timezone.utc)
             value = data['v'][idx]
 
             df.loc[len(df)] = [

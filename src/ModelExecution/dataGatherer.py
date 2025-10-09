@@ -105,11 +105,19 @@ class DataGatherer:
                 # Create an instance of the data integrity class and execute it
                 series = data_integrity_factory(dependentSeries.dataIntegrityCall.call).exec(series)
 
-            # Reindex the data based on the interval
+            # Set the index
+            series.dataFrame.set_index('timeVerified', inplace=True)
+
+            # Reindex
             series.dataFrame = series.dataFrame.reindex(date_range(
+                name='timeVerified',
                 start=series.timeDescription.fromDateTime,
                 end=series.timeDescription.toDateTime,
-                freq=timedelta(seconds=series.timeDescription.interval.total_seconds())))
+                freq=timedelta(seconds=series.timeDescription.interval.total_seconds()))
+            )
+            
+            # Reset the index
+            series.dataFrame.reset_index(inplace=True)
 
             # Validate the data
             self.__validate_series(series)
