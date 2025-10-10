@@ -15,6 +15,7 @@ from sqlalchemy import create_engine as sqlalchemy_create_engine
 from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, CursorResult, Select, select, distinct, Boolean, Interval, text
 from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.dialects import postgresql
 from os import getenv
 from datetime import timedelta, datetime, timezone
 import pandas as pd
@@ -85,6 +86,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             bind_params['dataDatum'] = seriesDescription.dataDatum
         
         inputs_select_latest_stmt = inputs_select_latest_stmt.bindparams(**bind_params)
+
+        compiled_query = inputs_select_latest_stmt.compile(
+            dialect=postgresql.dialect(),
+            compile_kwargs={"literal_binds": True}
+        )
+        print(compiled_query)
+
         
         tupleishResult = self.__dbSelection(inputs_select_latest_stmt).fetchall()
         
@@ -397,35 +405,26 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
         ids = [row[0] for row in result]
         return resultSeries, ids
-    
-    def is_fresh_by_acquired_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: timedelta):
+
+    def db_contains_all_fresh_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime):
         """
-        Returns True (fresh) if the OLDEST acquiredTime in the series is within the allowed
+        Returns True both
+            - The data is fresh, meaning it was not generated outside the freshness window
+            - The data includes the toTime, meaning the source needs to provide new data.
         freshness window of the reference time; otherwise returns False (stale).
 
         Expected attributes:
         :param seriesDescription: SeriesDescription - A series description object
         :param timeDescription: TimeDescription - A hydrated time description object
-        :param referenceTime: timedelta - The time data is being requested. Usually, it is now.
+        :param referenceTime: datetime - The time data is being requested. Usually, it is now.
 
         """
+
+        # region Freshness Check
         stalenessOffset = timeDescription.stalenessOffset
         query_stmt = text(f"""
         SELECT  
-        i."id",
-        i."generatedTime",
-        i."acquiredTime",
-        i."verifiedTime",
-        i."dataValue",
-        i."isActual",
-        i."dataUnit",
-        i."dataSource",
-        i."dataLocation",
-        i."dataSeries",
-        i."dataDatum",
-        i."latitude",
-        i."longitude",
-        i."ensembleMemberID"
+        i."acquiredTime"
         FROM inputs AS i
         WHERE i."dataSource"   = :dataSource
         AND i."dataLocation" = :dataLocation
@@ -444,39 +443,56 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         }
         if seriesDescription.dataDatum is not None:
             bind_params['dataDatum'] = seriesDescription.dataDatum
-        
         query_stmt = query_stmt.bindparams(**bind_params)
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
         
-        if not tupleishResult:
+        if not tupleishResult: # Data is not yet in the DB so we need to request it
             return False
-            
-        acquiredTime = tupleishResult[0][2]
+
+        acquiredTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
+        age: timedelta = referenceTime - acquiredTime
+        is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
+
+        # endregion
+
+        # region toTime Inclusion Check
+
+        # A query to get the latest verified time in the DB for this series in the requested time range
+        query_stmt = text(f"""
+        SELECT  
+        i."verifiedTime"
+        FROM inputs AS i
+        WHERE i."dataSource"   = :dataSource
+        AND i."dataLocation" = :dataLocation
+        AND i."dataSeries"   = :dataSeries
+        AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
+        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        ORDER BY i."verifiedTime" DESC
+        LIMIT 1;
+        """)
+        bind_params = {
+            'dataSource': seriesDescription.dataSource,
+            'dataLocation': seriesDescription.dataLocation,
+            'dataSeries': seriesDescription.dataSeries,
+            'from_dt': timeDescription.fromDateTime,
+            'to_dt': timeDescription.toDateTime
+        }
+        if seriesDescription.dataDatum is not None:
+            bind_params['dataDatum'] = seriesDescription.dataDatum
+        query_stmt = query_stmt.bindparams(**bind_params)
         
-         # Coerce to pandas Timestamp (handles string or datetime)
-        acq = pd.to_datetime(acquiredTime, errors="coerce")
-        
-        if pd.isna(acq):
+        tupleishResult = self.__dbSelection(query_stmt).fetchall()
+        if not tupleishResult: # Data is not yet in the DB so we need to request it
             return False
 
-        # Normalize reference_time
-        ref = pd.to_datetime(referenceTime, errors="coerce")
-        if pd.isna(ref):
-            return False
+        latest_verifiedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
+        is_inclusive = latest_verifiedTime >= timeDescription.toDateTime
 
-        # Make both tz-naive for comparison
-        if isinstance(ref, pd.Timestamp) and ref.tz is not None:
-            ref = ref.tz_localize(None)
-        if isinstance(acq, pd.Timestamp) and acq.tz is not None:
-            acq = acq.tz_localize(None)
+        # endregion
 
-        # Compute age; clamp negatives (in case acq > ref due to clock skew)
-        age = ref - acq
-        if age < pd.Timedelta(0):
-            age = pd.Timedelta(0)
+        return is_fresh and is_inclusive  
 
-        return age <= (pd.to_timedelta(stalenessOffset) if stalenessOffset is not None else timedelta(hours=7))
         
         
         

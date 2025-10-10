@@ -57,7 +57,7 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
     
     @abstractmethod
-    def is_fresh_by_acquired_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, reference_time: datetime) -> bool:
+    def db_contains_all_fresh_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, reference_time: datetime) -> bool:
         raise NotImplementedError()
 
 

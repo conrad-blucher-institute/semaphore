@@ -55,7 +55,7 @@ class SeriesProvider():
         reference_time = datetime.now(timezone.utc)
         
         #Determine if the data in the db is stale
-        db_is_fresh = self.seriesStorage.is_fresh_by_acquired_time(seriesDescription, timeDescription, reference_time)
+        db_is_fresh = self.seriesStorage.db_contains_all_fresh_data(seriesDescription, timeDescription, reference_time)
 
         #If the data is fresh then we return it
         if db_is_fresh:
