@@ -410,7 +410,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         """
         stalenessOffset = timeDescription.stalenessOffset
-        query_stmt = text("""
+        query_stmt = text(f"""
         SELECT  
         i."id",
         i."generatedTime",
@@ -430,18 +430,22 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         WHERE i."dataSource"   = :dataSource
         AND i."dataLocation" = :dataLocation
         AND i."dataSeries"   = :dataSeries
-        AND i."dataDatum"    = :dataDatum
+        AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
         AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
         ORDER BY i."acquiredTime" ASC
         LIMIT 1;
-        """).bindparams(
-            dataSource=seriesDescription.dataSource,
-            dataLocation=seriesDescription.dataLocation,
-            dataSeries=seriesDescription.dataSeries,
-            dataDatum=seriesDescription.dataDatum,
-            from_dt=timeDescription.fromDateTime,
-            to_dt=timeDescription.toDateTime,
-        )
+        """)
+        bind_params = {
+            'dataSource': seriesDescription.dataSource,
+            'dataLocation': seriesDescription.dataLocation,
+            'dataSeries': seriesDescription.dataSeries,
+            'from_dt': timeDescription.fromDateTime,
+            'to_dt': timeDescription.toDateTime
+        }
+        if seriesDescription.dataDatum is not None:
+            bind_params['dataDatum'] = seriesDescription.dataDatum
+        
+        query_stmt = query_stmt.bindparams(**bind_params)
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
         
