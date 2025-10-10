@@ -72,7 +72,7 @@ class EnsemblePandasInterpolation(IDataIntegrity):
         df_ensemble_data = pd.DataFrame(ensemble_data, index=input_df.index).astype(float)
 
         # Create a continues index that will mark gaps with nans
-        df_ensemble_data = df_ensemble_data.reindex(pd.date_range(start=df_ensemble_data.index[0], end=df_ensemble_data.index[-1], freq=timeDescription.interval))
+        df_ensemble_data = df_ensemble_data.reindex(pd.date_range(name= 'timeVerified', start=df_ensemble_data.index[0], end=df_ensemble_data.index[-1], freq=timeDescription.interval))
 
         # We want to not interpolate if there are too many Nans in a row. However the pandas limit parameter only stops interpolation once its
         # counted a cumulative sum of Nans higher than limit. Thus it keeps the Nans in that group where the cumulative sum was still < limit.
