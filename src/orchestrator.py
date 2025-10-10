@@ -88,7 +88,7 @@ class Orchestrator:
                 log(f'Error:: Prediction failed due to Semaphore Exception\n{se}')
                 self.__handle_failed_prediction(se, reference_time, model_name, DSPEC, toss)
             except Semaphore_Data_Exception as sde:
-                log(f'Warning:: Prediction failed due to lack of data.')
+                log(f'Warning:: Prediction failed due to lack of data.\n{sde}')
                 self.__handle_failed_prediction(sde, reference_time, model_name, DSPEC, toss)
             except Semaphore_Ingestion_Exception as sie:
                 log(f'Error:: Prediction failed due to Semaphore Ingestion Exception\n{sie}')
