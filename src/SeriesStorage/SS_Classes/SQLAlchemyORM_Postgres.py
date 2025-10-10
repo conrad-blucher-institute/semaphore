@@ -525,6 +525,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         :param list[tupleish] -a list of selections from the table formatted in tupleish
         :return: DataFrame - a dataframe with the data formatted for use in a series
         """
+
         # Convert returned DB rows into a dataframe to make manipulation easier 
         df_results = pd.DataFrame(
             data=results, 
@@ -534,64 +535,41 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 "dataDatum", "latitude", "longitude", "ensembleMemberID"
             ]
         )
-        
-        if df_results.empty:
-            return get_input_dataFrame()
-        
+
         # --- Normalize dtypes and ADD TIMEZONE INFO ---
         df_results["generatedTime"] = pd.to_datetime(df_results["generatedTime"], errors="coerce").dt.tz_localize(timezone.utc)
         df_results["verifiedTime"] = pd.to_datetime(df_results["verifiedTime"], errors="coerce").dt.tz_localize(timezone.utc)
-        df_results["acquiredTime"] = pd.to_datetime(df_results["acquiredTime"], errors="coerce").dt.tz_localize(timezone.utc)  # Added this too for completeness
-        df_results["ensembleMemberID"] = pd.to_numeric(df_results["ensembleMemberID"], errors="coerce")  # NaN if not ensembleembleMemberID"] = pd.to_numeric(df_results["ensembleMemberID"], errors="coerce")  # NaN if not ensemble
-
+        df_results["acquiredTime"] = pd.to_datetime(df_results["acquiredTime"], errors="coerce").dt.tz_localize(timezone.utc)
 
         # A formatted dataframe to place the spliced data 
         df_out = get_input_dataFrame()
-        for vt, group in df_results.groupby("verifiedTime", sort=True):
-            has_ensemble = group["ensembleMemberID"].notna().any()
 
-            if has_ensemble:
-                # Ensemble: Retrieve all ensemble members within the selected verified time
-                ens = group[group["ensembleMemberID"].notna()].sort_values(
-                ["generatedTime", "ensembleMemberID"], ascending=[False, True]
-                )
-                for row in ens.itertuples(index=False):
-                    df_out.loc[len(df_out)] = [
-                        row.dataValue,         
-                        row.dataUnit,
-                        row.verifiedTime,
-                        row.generatedTime,
-                        row.longitude,
-                        row.latitude,
-                    ]
+        # We have to post process the results as this could be ensemble data or not
+        # grouping by verifiedTime groups the data by time point
+        for _, group in df_results.groupby("verifiedTime"):
+
+            # ensembleMemberID is None if not an ensemble, so we check the first row of the group
+            firstRow = group.iloc[0]
+            isEnsemble = firstRow["ensembleMemberID"] is not None
+            
+            # If its an ensemble the dataValue is all the values sorted by there ID (to ensure correct order)
+            # If not an ensemble we just take the solitary dataValue
+            if isEnsemble:
+                group = group.sort_values(by=("ensembleMemberID"))
+                dataValues = group["dataValue"].to_list()
             else:
-                # No ensemble: return the single latest row for every verified time
-                idx = group["generatedTime"].idxmax()
-                row = group.loc[idx]
-
-                df_out.loc[len(df_out)] = [
-                    row["dataValue"],            # dataValue 
-                    row["dataUnit"],             # dataUnit
-                    vt,                          # timeVerified
-                    row["generatedTime"],        # timeGenerated
-                    row["longitude"],            # longitude
-                    row["latitude"],             # latitude
-                ]
-        df_out = df_out.rename(
-            columns={
-                "verifiedTime": "timeVerified",
-                "generatedTime": "timeGenerated"
-            }
-        )
-
-        df_out = df_out.sort_values(
-             ["timeVerified", "timeGenerated"],
-            ascending=[True, False],
-            kind="mergesort"
-        ).reset_index(drop=True)
-        
+                dataValues = group["dataValue"].iloc[0]
+            
+            # Pack the data into the out dataframe
+            df_out.loc[len(df_out)] = [
+                dataValues,                   # dataValue
+                firstRow["dataUnit"],         # dataUnit
+                firstRow["verifiedTime"],     # timeVerified
+                firstRow["generatedTime"],    # timeGenerated
+                firstRow["longitude"],        # longitude
+                firstRow["latitude"]          # latitude
+            ]
         return df_out
-
 
     def __splice_output(self, results: list[tuple]) -> DataFrame:
         """Converts DB row results into a proper output dataframe to be packed into a series.
