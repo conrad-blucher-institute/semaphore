@@ -122,6 +122,9 @@ class LIGHTHOUSE(IDataIngestion):
 
             dt = datetime.fromtimestamp(epochTimeStamp, tz=timezone.utc)
 
+            if dataPoint[dataValueIndex] == None: # If lighthouse does not have a requested value, it will return None
+                continue
+
             df.loc[len(df)] = [
                 dataPoint[dataValueIndex],          # dataValue
                 seriesInfoMap[SIMSeriesUnitIndex],  # dataUnit
