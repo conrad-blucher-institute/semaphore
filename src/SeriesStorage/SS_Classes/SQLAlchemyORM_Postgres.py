@@ -71,7 +71,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             i."verifiedTime" DESC,
             i."generatedTime" ASC,
             i."ensembleMemberID" DESC;
-    """)
+        """)
         
         # Only bind dataDatum if it's not None
         bind_params = {
@@ -476,7 +476,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         if age < pd.Timedelta(0):
             age = pd.Timedelta(0)
 
-        return age <= pd.to_timedelta(stalenessOffset)
+        return age <= (pd.to_timedelta(stalenessOffset) if stalenessOffset is not None else timedelta(hours=7))
         
         
         
