@@ -282,18 +282,25 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                     "longitude": series.dataFrame.iloc[df_index]['longitude'],
                     "ensembleMemberID": value_index if isEnsemble else None # Only set for ensemble inputs
                 }
-                insertionRows.append(new_row)         
+                insertionRows.append(new_row)
+
+    
+        # It seems that Postgres has a limit of 65535 parameters per query. If you have a lot of rows (say 6700, then you only have ~9 parameters per row)
+        # Our rows have more parameters than that so we if we have more than 999 rows we are trying to insert we need to batch them
+        batch_size = 999  # Set your desired batch size
+        batched_rows = [insertionRows[i:i + batch_size] for i in range(0, len(insertionRows), batch_size)]
         
-        # Insert the rows into the inputs table returning what is inserted as a sanity check
-        # On conflict we update the acquired time to now
-        with self.__get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.__metadata.tables['inputs'])
-                                    .values(insertionRows)
-                                    .on_conflict_do_update(constraint='inputs_AK00', set_={"acquiredTime": now})
-                                    .returning(self.__metadata.tables['inputs'])
-                                )
-            result = cursor.fetchall()
-            conn.commit()
+        for batch in batched_rows:
+            # Insert the rows into the inputs table returning what is inserted as a sanity check
+            # On conflict we update the acquired time to now
+            with self.__get_engine().connect() as conn:
+                cursor = conn.execute(insert(self.__metadata.tables['inputs'])
+                                        .values(batch)
+                                        .on_conflict_do_update(constraint='inputs_AK00', set_={"acquiredTime": now})
+                                        .returning(self.__metadata.tables['inputs'])
+                                    )
+                result = cursor.fetchall()
+                conn.commit()
         
         # Create a series object to return with the inserted data
         resultSeries = Series(series.description, series.timeDescription)
