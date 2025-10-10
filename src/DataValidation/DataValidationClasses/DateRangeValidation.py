@@ -45,7 +45,9 @@ class DateRangeValidation(IDataValidation):
         
 
         if missing_value_count > 0:
-            log(f'DateRangeValidation: Series {series.description} is missing {missing_value_count} values.')
+            log(f'DateRangeValidation: Series {series} is missing {missing_value_count} values.')
+            for missing_time in df_to_validate[df_to_validate['dataValue'].isnull()].index:
+                log(f'\tMissing time: {missing_time}')
             return False
         return True
 
