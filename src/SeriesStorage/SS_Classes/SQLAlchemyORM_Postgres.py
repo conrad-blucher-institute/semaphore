@@ -87,20 +87,15 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         inputs_select_latest_stmt = inputs_select_latest_stmt.bindparams(**bind_params)
 
-        compiled_query = inputs_select_latest_stmt.compile(
-            dialect=postgresql.dialect(),
-            compile_kwargs={"literal_binds": True}
-        )
-        print(compiled_query)
-
-        
         tupleishResult = self.__dbSelection(inputs_select_latest_stmt).fetchall()
         
         df_inputResult = self.__splice_input(tupleishResult)
         
+        ordered_df = self.__select_latest_generated_per_verified(df_inputResult)
+        
         # Sending all rows found downstream the input gatherer will handle interval alignment
         series = Series(seriesDescription, timeDescription)
-        series.dataFrame = df_inputResult
+        series.dataFrame = ordered_df
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
@@ -539,6 +534,38 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         return result
 
+
+    def __select_latest_generated_per_verified(self, df: pd.DataFrame) -> DataFrame:
+        """
+        Return one row per verifiedTime, choosing the row with the latest generatedTime.
+
+        The function does not modify the input DataFrame in place.
+        """
+        
+         # Collect the best row per timeVerified
+
+        df_out = get_input_dataFrame()
+
+        # groupby key must be the column name string
+        for verified_time, group in df.groupby("timeVerified", dropna=False):
+            # Select the max in the group (latest generated)
+            latest_generated = group["timeGenerated"].max()
+            latest_candidates = group[group["timeGenerated"] == latest_generated]
+
+            picked_row = latest_candidates.iloc[0]
+
+            # Add to new dataframe
+            df_out.loc[len(df_out)] = [
+                picked_row["dataValue"],    # value 
+                picked_row["dataUnit"],     # dataUnit
+                picked_row["timeVerified"], # timeVerified
+                picked_row["timeGenerated"],# timeGenerated
+                picked_row["longitude"],    # longitude
+                picked_row["latitude"]      # latitude
+            ]
+
+        return df_out
+    
     def __splice_input(self, results: list[tuple]) -> DataFrame:
         """ Converts DB rows to a proper input dataframe to be packed into a series.
         This method also handles ensemble data by grouping them into single rows as expected by Semaphore.
@@ -566,7 +593,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         # We have to post process the results as this could be ensemble data or not
         # grouping by verifiedTime groups the data by time point
-        for _, group in df_results.groupby("verifiedTime"):
+        for _, group in df_results.groupby(["verifiedTime", "generatedTime"]): # group by verified time and generated time to prevent collapsing when there are multiple generated times for one verified time
 
             # ensembleMemberID is None if not an ensemble, so we check the first row of the group
             firstRow = group.iloc[0]
@@ -577,18 +604,28 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             if isEnsemble:
                 group = group.sort_values(by=("ensembleMemberID"))
                 dataValues = group["dataValue"].to_list()
-            else:
-                dataValues = group["dataValue"].iloc[0]
+                
+                # Pack the data into the out dataframe
+                df_out.loc[len(df_out)] = [
+                    dataValues,                   # dataValue
+                    firstRow["dataUnit"],         # dataUnit
+                    firstRow["verifiedTime"],     # timeVerified
+                    firstRow["generatedTime"],    # timeGenerated
+                    firstRow["longitude"],        # longitude
+                    firstRow["latitude"]          # latitude
+                ]
             
-            # Pack the data into the out dataframe
-            df_out.loc[len(df_out)] = [
-                dataValues,                   # dataValue
-                firstRow["dataUnit"],         # dataUnit
-                firstRow["verifiedTime"],     # timeVerified
-                firstRow["generatedTime"],    # timeGenerated
-                firstRow["longitude"],        # longitude
-                firstRow["latitude"]          # latitude
-            ]
+            else:
+                for _, row in group.iterrows():
+                    df_out.loc[len(df_out)] = [
+                        row["dataValue"],  # full list for ensembles; scalar otherwise
+                        row["dataUnit"],         # dataUnit
+                        row["verifiedTime"],     # timeVerified
+                        row["generatedTime"],    # timeGenerated
+                        row["longitude"],        # longitude
+                        row["latitude"]          # latitude
+                    ]
+            
         return df_out
 
     def __splice_output(self, results: list[tuple]) -> DataFrame:

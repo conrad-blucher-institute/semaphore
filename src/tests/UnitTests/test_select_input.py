@@ -16,7 +16,7 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from sqlalchemy import create_engine, Boolean, MetaData, Table, Column, Integer, String, DateTime, insert
 from sqlalchemy.pool import StaticPool
-from DataClasses import SeriesDescription, TimeDescription
+from DataClasses import SeriesDescription, TimeDescription, get_input_dataFrame
 from pathlib import Path
 _mp = MonkeyPatch()
 
@@ -122,62 +122,57 @@ def seed_inputs_once(engine, inputs_table):
     "series_kwargs, from_str, to_str, expected_values",
     [
         (
-        #Tests missing rows
+        #Tests missing rows, past and future generated time
             dict(dataSource="NOAATANDC", dataSeries="dWl",
                  dataLocation="NorthJetty", dataDatum="NAVD"),
             "2025091200", "2025091223",
         [
-            {"dataValue": 11, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": -97.4, "latitude": 27.8},
-            {"dataValue": 21, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 03:00:00", "longitude": -97.4, "latitude": 27.8},
-            {"dataValue": 20, "dataUnit": "m", "timeVerified": "2025-09-12 02:00:00", "timeGenerated": "2025-09-12 05:00:00", "longitude": -97.4, "latitude": 27.8},
-            {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 05:00:00", "timeGenerated": "2025-09-12 09:00:00", "longitude": -97.4, "latitude": 27.8},
+            {"dataValue": 2, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00+00:00", "timeGenerated": "2025-09-11 01:00:00+00:00", "longitude": -97.4, "latitude": 27.8},
+            {"dataValue": 4, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00+00:00", "timeGenerated": "2025-09-11 03:00:00+00:00", "longitude": -97.4, "latitude": 27.8},
+            {"dataValue": 6, "dataUnit": "m", "timeVerified": "2025-09-12 02:00:00+00:00", "timeGenerated": "2025-09-12 05:00:00+00:00", "longitude": -97.4, "latitude": 27.8},
+            {"dataValue": 8, "dataUnit": "m", "timeVerified": "2025-09-12 05:00:00+00:00", "timeGenerated": "2025-09-12 08:00:00+00:00", "longitude": -97.4, "latitude": 27.8},
         ]
 
         ),
-        #Tests multiple verified times for one generated time
+        #Tests multiple generated times for one verified time
         (
             dict(dataSource="NDFD_EXP", dataSeries="pWnSpd",
                  dataLocation="Aransas", dataDatum="NA"),
             "2025091200", "2025091223",
             [
-                {"dataValue": 11, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 21, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:32:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 02:00:00", "timeGenerated": "2025-09-12 01:10:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 12, "dataUnit": "m", "timeVerified": "2025-09-12 03:00:00", "timeGenerated": "2025-09-12 00:05:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 21, "dataUnit": "m", "timeVerified": "2025-09-12 04:00:00", "timeGenerated": "2025-09-12 01:15:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 20, "dataUnit": "m", "timeVerified": "2025-09-12 05:00:00", "timeGenerated": "2025-09-12 01:30:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 06:00:00", "timeGenerated": "2025-09-12 01:54:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 10, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00+00:00", "timeGenerated": "2025-09-11 01:00:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 11, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00+00:00", "timeGenerated": "2025-09-11 01:32:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 15, "dataUnit": "m", "timeVerified": "2025-09-12 02:00:00+00:00", "timeGenerated": "2025-09-11 01:10:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 17, "dataUnit": "m", "timeVerified": "2025-09-12 03:00:00+00:00", "timeGenerated": "2025-09-11 00:05:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 19, "dataUnit": "m", "timeVerified": "2025-09-12 04:00:00+00:00", "timeGenerated": "2025-09-11 01:15:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 21, "dataUnit": "m", "timeVerified": "2025-09-12 05:00:00+00:00", "timeGenerated": "2025-09-11 01:30:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 24, "dataUnit": "m", "timeVerified": "2025-09-12 06:00:00+00:00", "timeGenerated": "2025-09-11 01:54:00+00:00", "longitude": 0, "latitude": 0},
             ]
 
         ),
-        #Tests ensembles
+        #Tests ensembles - multiple verified times for one generated time
         (
             dict(dataSource="TWC", dataSeries="pAirTemp",
                  dataLocation="SBirdIsland", dataDatum="NA"),
             "2025091200", "2025091201",
-            [
-                {"dataValue": 12, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 00:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 11, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 00:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 21, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 00:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 21, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 00:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 20, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 00:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 20, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 00:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 00:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 00:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 00:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 00:00:00", "longitude": 0, "latitude": 0},
-
-                {"dataValue": 12, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 11, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 21, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 21, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 20, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 20, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-            ]
+             [
+                {
+                    "dataValue": [26, 27, 28, 29, 30, 31, 32, 33, 34, 35],
+                    "dataUnit": "m",
+                    "timeVerified": "2025-09-12 00:00:00+00:00",
+                    "timeGenerated": "2025-09-12 00:00:00+00:00",
+                    "longitude": 0,
+                    "latitude": 0
+                },
+                {
+                    "dataValue": [36, 37, 38, 39, 40, 41, 42, 43, 44, 45],
+                    "dataUnit": "m",
+                    "timeVerified": "2025-09-12 01:00:00+00:00",
+                    "timeGenerated": "2025-09-12 01:00:00+00:00",
+                    "longitude": 0,
+                    "latitude": 0
+                }
+    ]
  
         ),
         #Tests same generated time and same verified time, but no ensemble
@@ -186,14 +181,14 @@ def seed_inputs_once(engine, inputs_table):
                  dataLocation="PortLavaca", dataDatum="NA"),
             "2025091200", "2025091223",
             [
-                {"dataValue": 12, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00", "timeGenerated": "2025-09-12 00:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 11, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00", "timeGenerated": "2025-09-12 01:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 21, "dataUnit": "m", "timeVerified": "2025-09-12 02:00:00", "timeGenerated": "2025-09-12 02:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 21, "dataUnit": "m", "timeVerified": "2025-09-12 03:00:00", "timeGenerated": "2025-09-12 03:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 20, "dataUnit": "m", "timeVerified": "2025-09-12 04:00:00", "timeGenerated": "2025-09-12 04:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 20, "dataUnit": "m", "timeVerified": "2025-09-12 05:00:00", "timeGenerated": "2025-09-12 05:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 06:00:00", "timeGenerated": "2025-09-12 06:00:00", "longitude": 0, "latitude": 0},
-                {"dataValue": 30, "dataUnit": "m", "timeVerified": "2025-09-12 07:00:00", "timeGenerated": "2025-09-12 07:00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 56, "dataUnit": "m", "timeVerified": "2025-09-12 00:00:00+00:00", "timeGenerated": "2025-09-12 00:00:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 57, "dataUnit": "m", "timeVerified": "2025-09-12 01:00:00+00:00", "timeGenerated": "2025-09-12 01:00:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 58, "dataUnit": "m", "timeVerified": "2025-09-12 02:00:00+00:00", "timeGenerated": "2025-09-12 02:00:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 59, "dataUnit": "m", "timeVerified": "2025-09-12 03:00:00+00:00", "timeGenerated": "2025-09-12 03:00:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 60, "dataUnit": "m", "timeVerified": "2025-09-12 04:00:00+00:00", "timeGenerated": "2025-09-12 04:00:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 61, "dataUnit": "m", "timeVerified": "2025-09-12 05:00:00+00:00", "timeGenerated": "2025-09-12 05:00:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 62, "dataUnit": "m", "timeVerified": "2025-09-12 06:00:00+00:00", "timeGenerated": "2025-09-12 06:00:00+00:00", "longitude": 0, "latitude": 0},
+                {"dataValue": 63, "dataUnit": "m", "timeVerified": "2025-09-12 07:00:00+00:00", "timeGenerated": "2025-09-12 07:00:00+00:00", "longitude": 0, "latitude": 0},
             ]
  
         )
@@ -219,35 +214,36 @@ def test_select_input_with_mock_db(engine, inputs_table, series_kwargs, from_str
     storage = series_storage_factory()
     series = storage.select_input(series_desc, time_desc)
     df = series.dataFrame
+    
+    
+    expected_df = get_input_dataFrame()
+    
+    for r in expected_values:
+        expected_df.loc[len(expected_df)] = [
+            r["dataValue"],                                # dataValue
+            r["dataUnit"],                                 # dataUnit
+            pd.to_datetime(r["timeVerified"],  utc=True),  # timeVerified
+            pd.to_datetime(r["timeGenerated"], utc=True),  # timeGenerated
+            r["longitude"],                                # longitude
+            r["latitude"],                                 # latitude
+        ]
+    
 
-    # Full print for debug
-    # print("\nDATAFRAME:\n" + df.to_string(index=False, max_rows=None, max_cols=None))
-    # Assert on full row equality 
-    def _normalize(df_like):
-            cols = ["dataValue", "dataUnit", "timeVerified", "timeGenerated", "longitude", "latitude"]
-            if isinstance(df_like, list):  # expected_values
-                df_like = pd.DataFrame(df_like, columns=cols)
+    # print(f'FINAL DF:\n {df.to_string()}')
+    # print(f'EXPECTED DF:\n {expected_df.to_string()}')
+    # Compare (turn off strict dtype check if your prod DF casts differently)
+    # ---- Normalize + sort before comparing ----
+    # Normalize inner types in-place (no helper function)
+    df_cmp = df.copy()
+    expected_cmp = expected_df.copy()
 
-            out = df_like[cols].copy()
+    for fr in (df_cmp, expected_cmp):
+        fr["dataValue"] = fr["dataValue"].apply(
+            lambda v: [pd.to_numeric(x) for x in v] if isinstance(v, list) else pd.to_numeric(v)
+        )
+        fr["longitude"] = pd.to_numeric(fr["longitude"], errors="coerce")
+        fr["latitude"]  = pd.to_numeric(fr["latitude"],  errors="coerce")
 
-            # datetimes → canonical string
-            for c in ("timeVerified", "timeGenerated"):
-                out[c] = pd.to_datetime(out[c], errors="coerce").dt.strftime("%Y-%m-%d %H:%M:%S")
+    assert_frame_equal(df_cmp, expected_cmp, check_dtype=False)
 
-            # numerics → numeric
-            out["dataValue"] = pd.to_numeric(out["dataValue"], errors="coerce")
-            out["longitude"] = pd.to_numeric(out["longitude"], errors="coerce")
-            out["latitude"]  = pd.to_numeric(out["latitude"], errors="coerce")
-
-            # sort for deterministic order
-            out = out.sort_values(
-                ["timeVerified", "timeGenerated", "dataValue", "dataUnit", "longitude", "latitude"],
-                kind="mergesort"
-            ).reset_index(drop=True)
-            return out
-
-    actual_df   = _normalize(df)
-    print(f'FINAL:{actual_df}')
-    expected_df = _normalize(expected_values)
-
-    assert_frame_equal(actual_df, expected_df, check_dtype=False)
+    
