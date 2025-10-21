@@ -15,7 +15,7 @@ import sys
 import sys
 sys.path.append('/app/src')
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import pytest
 
@@ -24,9 +24,9 @@ from DataIngestion.DI_Classes.NDFD import NDFD
 
 load_dotenv()
 @pytest.mark.parametrize("data_dictionary, toDateTime", [
-    ([[1704520800, 13], [1704531600, 12]], datetime(2024, 1, 6, 2)),
-    ([[1704531600, 12]], datetime(2024, 1, 6, 2)),
-    ([[1704520800, 13]], datetime(2024, 1, 6, 2)),
+    ([[1704520800, 13], [1704531600, 12]], datetime(2024, 1, 6, 2, tzinfo=timezone.utc)),
+    ([[1704531600, 12]], datetime(2024, 1, 6, 2, tzinfo=timezone.utc)),
+    ([[1704520800, 13]], datetime(2024, 1, 6, 2, tzinfo=timezone.utc)),
 ])
 def test_find_closest_average(data_dictionary: list, toDateTime: datetime):
     """This function tests whether the find_closest_average function in NDFD correctly

@@ -14,7 +14,7 @@ run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_model
 import sys
 sys.path.append('/app/src')
 
-from datetime import datetime
+from datetime import datetime, timezone
 import sys
 import pytest
 from unittest.mock import MagicMock, patch
@@ -56,8 +56,6 @@ def mock_dspec():
 def equate_series(left: Series, right: Series):
     """Compares two series objects against one another"""
 
-    assert left.isComplete == right.isComplete, "isComplete doesn't match"
-
     assert left.dataFrame == right.dataFrame, "Series data does not match"
     
     leftD = left.description
@@ -72,7 +70,7 @@ def equate_series(left: Series, right: Series):
 
 
 TEST_DSPEC = mock_dspec()
-TEST_REF_TIME = datetime(2021, 1, 1, 0, 0, 0)
+TEST_REF_TIME = datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 TEST_DESCRIPTION = SemaphoreSeriesDescription(
     'testModelName',
     '0.0.0',
@@ -80,7 +78,7 @@ TEST_DESCRIPTION = SemaphoreSeriesDescription(
     'testLocation',
     'testDatum'
 )
-TEST_SERIES = Series(TEST_DESCRIPTION, True)
+TEST_SERIES = Series(TEST_DESCRIPTION)
 RESULT_DATA = 0
 TEST_SERIES.dataFrame = RESULT_DATA
 

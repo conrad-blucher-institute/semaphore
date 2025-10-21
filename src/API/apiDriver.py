@@ -12,7 +12,7 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription, Series
 from SeriesProvider.SeriesProvider import SeriesProvider
 from fastapi.encoders import jsonable_encoder
@@ -49,8 +49,8 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
         HTTPException: If the series is not found.
     """
     try:
-        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
-        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
     except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
     
@@ -71,7 +71,7 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
     )
 
     provider = SeriesProvider()
-    responseSeries = provider.request_input(requestDescription, timeDescription, saveIngestion=False)
+    responseSeries = provider.request_input(requestDescription, timeDescription)
 
     # Protect the API's JSON ENCODER from freaking out about floats sneaking from the ingestion class
     responseSeries.dataFrame['dataValue'] = responseSeries.dataFrame['dataValue'].astype(str)
@@ -110,8 +110,8 @@ async def get_outputs_time_span(fromDateTime: str, toDateTime: str, modelNames: 
         The results for each model index by the model name. If no data can be found for that model for the provided time range the value will be null.
     """ 
     try:
-        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
-        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
     except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
 
@@ -146,8 +146,8 @@ async def get_output(modelName: str, modelVersion: str, series: str, location: s
         HTTPException: If the series is not found.
     """ 
     try:
-        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H')
-        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H')
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
     except (ValueError, TypeError, OverflowError) as e:
         raise HTTPException(status_code=404, detail=f'{e}')
     
@@ -200,6 +200,7 @@ def serialize_input_series(series: Series) -> dict[any]:
     param: series - Series The input series to serialize.
     return: A dictionary representation of the input series.
 
+    NOTE:: Ensures `isComplete` always exists and is set to True for backward compatibility.
     NOTE:: Expected input series serialization
     {
         "description": {
@@ -210,7 +211,6 @@ def serialize_input_series(series: Series) -> dict[any]:
             "dataIntegrityDescription": null,
             "verificationOverride": null
         },
-        "isComplete": series.isComplete,
         "timeDescription": {
             "fromDateTime": "2025-03-26T00:00:00",
             "toDateTime": "2025-03-26T03:00:00",
@@ -235,6 +235,9 @@ def serialize_input_series(series: Series) -> dict[any]:
 
     # Remove the automatically serialized dataFrame
     del serialized['_Series__dataFrame']
+
+    # Always include isComplete for backward compatibility
+    serialized['isComplete'] = True
 
     # Serialize the dataFrame by our own rules
     serialized_data = []
@@ -264,6 +267,7 @@ def serialize_output_series(series: Series) -> dict[any]:
     param: series - Series The output series to serialize.
     return: A dictionary representation of the output series.
 
+    NOTE:: Ensures `isComplete` always exists and is set to True for backward compatibility.
     NOTE:: Expected out series serialization
     {
         "description": {
@@ -273,7 +277,6 @@ def serialize_output_series(series: Series) -> dict[any]:
             "dataLocation": "SouthBirdIsland",
             "dataDatum": "celsius"
         },
-        "isComplete": series.isComplete,
         "timeDescription": null,
         "nonCompleteReason": null,
         "_Series__data": [
@@ -293,6 +296,9 @@ def serialize_output_series(series: Series) -> dict[any]:
     # Remove the automatically serialized dataFrame
     del serialized['_Series__dataFrame']
 
+    # Always include isComplete for backward compatibility
+    serialized['isComplete'] = True
+
     # Serialize the dataFrame by our own rules
     serialized_data = []
     for _, row in series.dataFrame.iterrows():
@@ -302,5 +308,11 @@ def serialize_output_series(series: Series) -> dict[any]:
             "timeGenerated":  jsonable_encoder(row['timeGenerated']),
             "leadTime":       jsonable_encoder(row['leadTime'])
         })
+
+        # Replace NaNs with None and ensure JSON safe types
+        row_dict = {k: None if pd.isna(v) else v for k, v in row_dict.items()}
+        encoded_row = {k: jsonable_encoder(v) for k, v in row_dict.items()}
+        serialized_data.append(encoded_row)
+
     serialized['_Series__data'] = serialized_data # Add it back to the response
     return serialized

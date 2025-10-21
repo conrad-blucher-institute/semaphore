@@ -14,7 +14,7 @@
 #Imports
 import argparse
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timezone
 from orchestrator import Orchestrator
 
 load_dotenv()
@@ -45,12 +45,12 @@ def main():
     if args.past is not None: 
         #checking that the past time passed is formatted correctly (stolen from Beto)
         try: 
-            execution_time = datetime.strptime(args.past, '%Y%m%d%H%M')
+            execution_time = datetime.strptime(args.past, '%Y%m%d%H%M').replace(tzinfo=timezone.utc)
         except:
             raise ValueError('The provided time was not in the correct format.')
         
         #checking if date provided is in the past
-        if execution_time >= datetime.now(): 
+        if execution_time >= datetime.now(timezone.utc): 
             raise ValueError('You can only run Semaphore with a specified time if you are running it in the past.')
         
     else:

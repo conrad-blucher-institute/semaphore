@@ -15,7 +15,7 @@ This file handles the following:
 #
 #Imports
 from os import path, getenv
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from exceptions import Semaphore_Exception, Semaphore_Data_Exception, Semaphore_Ingestion_Exception
 from discord import Discord_Notify
 from DataClasses import Series, SemaphoreSeriesDescription, get_output_dataFrame
@@ -62,7 +62,7 @@ class Orchestrator:
         # By default the DSPECs will be ordered left -> right from the command
         checked_dspecs = [self.__clean_and_check_dspec(dspec) for dspec in dspecPaths]
         if executionTime is None: 
-                    executionTime = datetime.now()
+                    executionTime = datetime.now(timezone.utc)
 
         for dspecPath in checked_dspecs:
             try:
@@ -88,7 +88,7 @@ class Orchestrator:
                 log(f'Error:: Prediction failed due to Semaphore Exception\n{se}')
                 self.__handle_failed_prediction(se, reference_time, model_name, DSPEC, toss)
             except Semaphore_Data_Exception as sde:
-                log(f'Warning:: Prediction failed due to lack of data.')
+                log(f'Warning:: Prediction failed due to lack of data.\n{sde}')
                 self.__handle_failed_prediction(sde, reference_time, model_name, DSPEC, toss)
             except Semaphore_Ingestion_Exception as sie:
                 log(f'Error:: Prediction failed due to Semaphore Ingestion Exception\n{sie}')
@@ -120,8 +120,7 @@ class Orchestrator:
         :returns: datetime - the reference time.
         '''
 
-        return datetime.utcfromtimestamp(execution_time.timestamp() - (execution_time.timestamp() % dspec.timingInfo.interval))
-
+        return datetime.fromtimestamp(execution_time.timestamp() - (execution_time.timestamp() % dspec.timingInfo.interval),tz=timezone.utc)
 
     def __handle_successful_prediction(self, model_name: str, execution_time: datetime, result_series: Series, toss: bool):
         """Handels a successful run of semaphore, sending a notification and placing the result in the database.
@@ -167,7 +166,7 @@ class Orchestrator:
         :param toss: bool - A flag that will prevent the computed prediction from actually being saved in the database.
         """
 
-        if execution_time is None: execution_time = datetime.min # Execution time could not be instantiated yet
+        if execution_time is None: execution_time = datetime.min.replace(tzinfo=timezone.utc) # Execution time could not be instantiated yet
         if model_name is None: model_name = 'Model Name Not Discovered Yet' # Model name might not be discovered if error was in dspec
 
         self.__safe_discord_notification(model_name, execution_time, exception.error_code, exception.message)
@@ -177,7 +176,7 @@ class Orchestrator:
             
                 # Reconstruct the expected predictions information with a nulled result
                 predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, dspec.outputInfo.series, dspec.outputInfo.location, dspec.outputInfo.datum)
-                result_series = Series(predictionDesc, True)
+                result_series = Series(predictionDesc)
 
                 # Generate null output
                 df_output = get_output_dataFrame() 

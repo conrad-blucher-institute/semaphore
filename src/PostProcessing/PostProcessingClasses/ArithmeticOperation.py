@@ -93,7 +93,7 @@ class ArithmeticOperation(IPostProcessing):
         timeDescription = deepcopy(FIRST_SERIES.timeDescription)
         seriesDescription = deepcopy(FIRST_SERIES.description)
         seriesDescription.dataSeries = OUT_KEY
-        out_series = Series(seriesDescription, True, timeDescription)
+        out_series = Series(seriesDescription, timeDescription)
         out_series.dataFrame = df_result
 
         preprocessedData[OUT_KEY] = out_series

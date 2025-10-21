@@ -11,11 +11,11 @@
 # 
 #
 #Imports
-from datetime import datetime
+from datetime import datetime, timezone
 from os.path import isabs
 from os import getcwd
 from os import makedirs
-from os.path import dirname, exists
+from os.path import exists
 
 
 
@@ -54,13 +54,13 @@ class LogLocationDirector(object):
 		if not exists(directory):
 			makedirs(directory)
 
-		now = datetime.now()
+		now = datetime.now(timezone.utc)
 		self._log_target_path = f'{directory}{now.year}_{now.month}_{model_name}.log'
 
 
 def get_time_stamp() -> None:
 	"""Fetches and formats system time, returns the formatted timestamp."""
-	timestamp = datetime.now()
+	timestamp = datetime.now(timezone.utc)
 	return timestamp.strftime("%d%m%Y_%H-%M")
 
 
@@ -72,7 +72,7 @@ def log(text: str) -> None:
 	text - String
 		The output you want in the log file.
 	"""
-	now = datetime.now()
+	now = datetime.now(timezone.utc)
 	timeStamp = now.strftime("%x %X")
 	msg = f'{timeStamp}: {text}'
 	print(msg) #stdout

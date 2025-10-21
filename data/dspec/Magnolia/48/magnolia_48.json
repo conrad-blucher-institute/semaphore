@@ -85,7 +85,7 @@
         { 
             "_name": "Wind Direction Predicition",
             "location": "PortLavaca",
-            "source": "NDFD_EXP",
+            "source": "NDFD_JSON",
             "series": "pWnDir",
             "unit": "meter",
             "interval": 3600,
@@ -103,7 +103,7 @@
         { 
             "_name": "Wind Speed Prediction",
             "location": "PortLavaca",
-            "source": "NDFD_EXP",
+            "source": "NDFD_JSON",
             "series": "pWnSpd",
             "unit": "mps",
             "interval": 3600,

@@ -18,6 +18,8 @@ from DataIntegrity.IDataIntegrity import IDataIntegrity
 from DataClasses import Series
 from utility import log
 
+from exceptions import Semaphore_Data_Exception
+
 
 
 class PandasInterpolation(IDataIntegrity):
@@ -81,13 +83,13 @@ class PandasInterpolation(IDataIntegrity):
         largerThanLimit = self.__check_gap_distance(filled_input_df, limit, timeDescription.interval)
         if largerThanLimit:
             error_message = f'''Interpolation error,
-                Reason: There are gaps in the data that are larger than the interpolation limit parameter.\n 
-                {seriesDescription} \n 
-                {timeDescription} \n 
+                Reason: There are gaps in the data that are larger than the interpolation limit parameter.
+                limit: {limit}
+                interval: {timeDescription.interval}
+                df:
+                {filled_input_df.to_string()}
             '''
-            log(error_message)
-            inSeries.nonCompleteReason = '' if inSeries.nonCompleteReason is None else inSeries.nonCompleteReason  + f'\n{error_message}'
-            return inSeries  
+            raise Semaphore_Data_Exception(error_message)
             
         # Cast dataValue string to float for interpolation
         filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(float)
@@ -117,7 +119,7 @@ class PandasInterpolation(IDataIntegrity):
         # Reset the index on the DF
         filled_input_df.reset_index(inplace=True)
     
-        outSeries = Series(seriesDescription, True, timeDescription)
+        outSeries = Series(seriesDescription, timeDescription)
         outSeries.dataFrame = filled_input_df
 
         return outSeries

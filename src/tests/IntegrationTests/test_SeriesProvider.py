@@ -16,14 +16,14 @@ sys.path.append('/app/src')
 from dotenv import load_dotenv
     
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from src.SeriesProvider.SeriesProvider import SeriesProvider, TimeDescription, Series, SeriesDescription, SemaphoreSeriesDescription
 
 
 @pytest.mark.parametrize("seriesDescription, timeDescription", [
-    (SeriesDescription('apple', 'pear', 'grape'),TimeDescription(datetime(2001, 12, 28), datetime(2001, 12, 28) + timedelta(hours=24), timedelta(hours=1))), # interval < fromTime - toTime
-    (SeriesDescription('apple', 'pear', 'grape'),TimeDescription(datetime(2001, 12, 28), datetime(2001, 12, 28) + timedelta(hours=24), timedelta(hours=24))),               # Time range = fromTime - toTime
-    (SeriesDescription('apple', 'pear', 'grape'),TimeDescription(datetime(2001, 12, 28), datetime(2001, 12, 28), timedelta(hours=24)))                       # single point interval > fromTime - toTime
+    (SeriesDescription('apple', 'pear', 'grape'),TimeDescription(datetime(2001, 12, 28, tzinfo=timezone.utc), datetime(2001, 12, 28, tzinfo=timezone.utc) + timedelta(hours=24), timedelta(hours=1))), # interval < fromTime - toTime
+    (SeriesDescription('apple', 'pear', 'grape'),TimeDescription(datetime(2001, 12, 28, tzinfo=timezone.utc), datetime(2001, 12, 28, tzinfo=timezone.utc) + timedelta(hours=24), timedelta(hours=24))),               # Time range = fromTime - toTime
+    (SeriesDescription('apple', 'pear', 'grape'),TimeDescription(datetime(2001, 12, 28, tzinfo=timezone.utc), datetime(2001, 12, 28, tzinfo=timezone.utc), timedelta(hours=24)))                       # single point interval > fromTime - toTime
     ])
 def test_request_input(seriesDescription: SeriesDescription, timeDescription: TimeDescription):
     """This tests that request input can run with no errors.
@@ -46,7 +46,7 @@ def test_request_output():
     seriesProvider = SeriesProvider()
 
     semaphoreSeriesDescription = SemaphoreSeriesDescription('pineapple', 'strawberry', 'apple', 'pear')
-    timeDescription = TimeDescription(datetime(2001, 12, 28), datetime(2001, 12, 28) + timedelta(hours=24))
-    series = Series(semaphoreSeriesDescription, True, timeDescription)
+    timeDescription = TimeDescription(datetime(2001, 12, 28, tzinfo=timezone.utc), datetime(2001, 12, 28, tzinfo=timezone.utc) + timedelta(hours=24))
+    series = Series(semaphoreSeriesDescription, timeDescription)
     seriesProvider.request_output('SPECIFIC', semaphoreSeriesDescription=semaphoreSeriesDescription, timeDescription=timeDescription)
     assert True

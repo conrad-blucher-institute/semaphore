@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#SQLAlchemyORM.py
+#SQLAlchemyORM_Postgres.py
 #-------------------------------
 # Created By : Matthew Kastl
 # Created Date: 3/26/2023
@@ -15,8 +15,9 @@ from sqlalchemy import create_engine as sqlalchemy_create_engine
 from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, CursorResult, Select, select, distinct, Boolean, Interval, text
 from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.dialects import postgresql
 from os import getenv
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 import pandas as pd
 from pandas import DataFrame
 
@@ -30,7 +31,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
  
     def __init__(self) -> None:
         """Constructor generates an a db schema. Automatically creates the 
-        metadata object holding the defined schema.
+            metadata object holding the defined schema.
         """
         self.__create_engine(getenv('DB_LOCATION_STRING'), False)
         self.__metadata = MetaData()
@@ -41,31 +42,60 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
     #############################################################################################
 
     def select_input(self, seriesDescription: SeriesDescription, timeDescription : TimeDescription) -> Series:
-        """Selects a given series given a SeriesDescription and TimeDescription
+        """Selects a given series given a SeriesDescription and TimeDescription using splice_input to give the latest generated time per verified time.
            :param seriesDescription: SeriesDescription - A series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
-        inputTable = self.__metadata.tables['inputs']
-        statement = (select(inputTable)
-            .where(inputTable.c.dataSource == seriesDescription.dataSource)
-            .where(inputTable.c.dataLocation == seriesDescription.dataLocation)
-            .where(inputTable.c.dataSeries == seriesDescription.dataSeries)
-            .where(inputTable.c.dataDatum == seriesDescription.dataDatum)
-            .where(inputTable.c.verifiedTime >= timeDescription.fromDateTime)
-            .where(inputTable.c.verifiedTime <= timeDescription.toDateTime)
-            )
-        tupleishResult = self.__dbSelection(statement).fetchall()
+        inputs_select_latest_stmt = text(f""" 
+        SELECT  
+        i."id",
+        i."generatedTime",
+        i."acquiredTime",
+        i."verifiedTime",
+        i."dataValue",
+        i."isActual",
+        i."dataUnit",
+        i."dataSource",
+        i."dataLocation",
+        i."dataSeries",
+        i."dataDatum",
+        i."latitude",
+        i."longitude",
+        i."ensembleMemberID"
+        FROM inputs AS i
+        WHERE i."dataSource"   = :dataSource
+        AND i."dataLocation" = :dataLocation
+        AND i."dataSeries"   = :dataSeries
+        AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
+        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        ORDER BY
+            i."verifiedTime" DESC,
+            i."generatedTime" ASC,
+            i."ensembleMemberID" DESC;
+        """)
+        
+        # Only bind dataDatum if it's not None
+        bind_params = {
+            'dataSource': seriesDescription.dataSource,
+            'dataLocation': seriesDescription.dataLocation,
+            'dataSeries': seriesDescription.dataSeries,
+            'from_dt': timeDescription.fromDateTime,
+            'to_dt': timeDescription.toDateTime
+        }
+        if seriesDescription.dataDatum is not None:
+            bind_params['dataDatum'] = seriesDescription.dataDatum
+        
+        inputs_select_latest_stmt = inputs_select_latest_stmt.bindparams(**bind_params)
+
+        tupleishResult = self.__dbSelection(inputs_select_latest_stmt).fetchall()
+        
         df_inputResult = self.__splice_input(tupleishResult)
         
-        # Prune the results removing any data that does not align with the interval that was requested
-        df_prunedInputs = df_inputResult.copy(deep=True)
-        if timeDescription.interval != None and timeDescription.interval.total_seconds() != 0:
-            for i in range(len(df_inputResult)):
-                if not (df_inputResult.iloc[i]['timeVerified'].timestamp() % timeDescription.interval.total_seconds() == 0):
-                    df_prunedInputs.drop(i, inplace=True)
-
-        series = Series(seriesDescription, True, timeDescription)
-        series.dataFrame = df_prunedInputs
+        ordered_df = self.__select_latest_generated_per_verified(df_inputResult)
+        
+        # Sending all rows found downstream the input gatherer will handle interval alignment
+        series = Series(seriesDescription, timeDescription)
+        series.dataFrame = ordered_df
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
@@ -74,7 +104,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param timeDescription: TimeDescription - A hydrated time description object
         """
 
-        series = Series(semaphoreSeriesDescription, True, timeDescription)
+        series = Series(semaphoreSeriesDescription, timeDescription)
         
 
         outputTable = self.__metadata.tables['outputs']
@@ -147,7 +177,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         # Parse out model information from first output result
         description = SemaphoreSeriesDescription(tupleishResult[0][3], tupleishResult[0][4], tupleishResult[0][8], tupleishResult[0][7], tupleishResult[0][6])
-        series = Series(description, False)
+        series = Series(description)
         series.dataFrame = outputResult
         return series
     
@@ -188,7 +218,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # Parse out model information from first output result
         first = result[0]
         description = SemaphoreSeriesDescription(first[3], first[4], first[8], first[7], first[6])
-        series = Series(description, False)
+        series = Series(description)
         series.dataFrame = outputResult
         return series
     
@@ -231,7 +261,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         # If dataValue is a list its an ensemble
         isEnsemble = isinstance(series.dataFrame['dataValue'].iloc[0], list) 
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         insertionRows = []
 
         for df_index, row in series.dataFrame.iterrows():
@@ -255,20 +285,28 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                     "longitude": series.dataFrame.iloc[df_index]['longitude'],
                     "ensembleMemberID": value_index if isEnsemble else None # Only set for ensemble inputs
                 }
-                insertionRows.append(new_row)         
+                insertionRows.append(new_row)
+
+    
+        # It seems that Postgres has a limit of 65535 parameters per query. If you have a lot of rows (say 6700, then you only have ~9 parameters per row)
+        # Our rows have more parameters than that so we if we have more than 999 rows we are trying to insert we need to batch them
+        batch_size = 999  # Set your desired batch size
+        batched_rows = [insertionRows[i:i + batch_size] for i in range(0, len(insertionRows), batch_size)]
         
-        # Insert the rows into the inputs table returning what is inserted as a sanity check
-        with self.__get_engine().connect() as conn:
-            cursor = conn.execute(insert(self.__metadata.tables['inputs'])
-                                    .on_conflict_do_nothing('inputs_AK00')
-                                    .returning(self.__metadata.tables['inputs'])
-                                    .values(insertionRows)
-                                )
-            result = cursor.fetchall()
-            conn.commit()
+        for batch in batched_rows:
+            # Insert the rows into the inputs table returning what is inserted as a sanity check
+            # On conflict we update the acquired time to now
+            with self.__get_engine().connect() as conn:
+                cursor = conn.execute(insert(self.__metadata.tables['inputs'])
+                                        .values(batch)
+                                        .on_conflict_do_update(constraint='inputs_AK00', set_={"acquiredTime": now})
+                                        .returning(self.__metadata.tables['inputs'])
+                                    )
+                result = cursor.fetchall()
+                conn.commit()
         
         # Create a series object to return with the inserted data
-        resultSeries = Series(series.description, True, series.timeDescription)
+        resultSeries = Series(series.description, series.timeDescription)
         resultSeries.dataFrame = self.__splice_input(result) #Turn tuple objects into actual objects
         return resultSeries
     
@@ -358,10 +396,110 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             conn.commit()
 
         # Create a series object to return with the inserted data
-        resultSeries = Series(series.description, True, series.timeDescription)
+        resultSeries = Series(series.description, series.timeDescription)
         resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
         ids = [row[0] for row in result]
         return resultSeries, ids
+
+    def db_has_freshly_acquired_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> bool:
+        """
+        Returns true if the database has fresh data for all data described in the request.
+        Data is considered fresh if it was acquired within the window of [reference time, staleness offset]. The staleness offset
+        is configured for this request in the TimeDescription object. Staleness is a measure with acquired time not verified time.
+
+        Expected attributes:
+        :param seriesDescription: SeriesDescription - A series description object
+        :param timeDescription: TimeDescription - A hydrated time description object
+        :param referenceTime: datetime - The time data is being requested. Usually, it is now.
+
+        """
+
+        # region Freshness Check
+        query_stmt = text(f"""
+        SELECT  
+        i."acquiredTime"
+        FROM inputs AS i
+        WHERE i."dataSource"   = :dataSource
+        AND i."dataLocation" = :dataLocation
+        AND i."dataSeries"   = :dataSeries
+        AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
+        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        ORDER BY i."acquiredTime" ASC
+        LIMIT 1;
+        """)
+        bind_params = {
+            'dataSource': seriesDescription.dataSource,
+            'dataLocation': seriesDescription.dataLocation,
+            'dataSeries': seriesDescription.dataSeries,
+            'from_dt': timeDescription.fromDateTime,
+            'to_dt': timeDescription.toDateTime
+        }
+        if seriesDescription.dataDatum is not None:
+            bind_params['dataDatum'] = seriesDescription.dataDatum
+        query_stmt = query_stmt.bindparams(**bind_params)
+        
+        tupleishResult = self.__dbSelection(query_stmt).fetchall()
+        
+        if not tupleishResult: # Data is not yet in the DB so we need to request it
+            return False
+
+        acquiredTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
+        age: timedelta = referenceTime - acquiredTime
+        stalenessOffset = timeDescription.stalenessOffset
+        is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
+        # endregion
+        return is_fresh
+       
+
+    def db_has_data_in_time_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
+        """
+        Returns true if the database has data up to the toTime specified in the TimeDescription. This means 
+        that the database isn't missing new data.
+
+        Expected attributes:
+        :param seriesDescription: SeriesDescription - A series description object
+        :param timeDescription: TimeDescription - A hydrated time description object
+        """
+        # region toTime Inclusion Check
+
+        # A query to get the latest verified time in the DB for this series in the requested time range
+        query_stmt = text(f"""
+        SELECT  
+        i."verifiedTime"
+        FROM inputs AS i
+        WHERE i."dataSource"   = :dataSource
+        AND i."dataLocation" = :dataLocation
+        AND i."dataSeries"   = :dataSeries
+        AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
+        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        ORDER BY i."verifiedTime" DESC
+        LIMIT 1;
+        """)
+        bind_params = {
+            'dataSource': seriesDescription.dataSource,
+            'dataLocation': seriesDescription.dataLocation,
+            'dataSeries': seriesDescription.dataSeries,
+            'from_dt': timeDescription.fromDateTime,
+            'to_dt': timeDescription.toDateTime
+        }
+        if seriesDescription.dataDatum is not None:
+            bind_params['dataDatum'] = seriesDescription.dataDatum
+        query_stmt = query_stmt.bindparams(**bind_params)
+        
+        tupleishResult = self.__dbSelection(query_stmt).fetchall()
+        if not tupleishResult: # Data is not yet in the DB so we need to request it
+            return False
+
+        latest_verifiedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
+        is_inclusive = latest_verifiedTime >= timeDescription.toDateTime
+
+        # endregion
+        return is_inclusive
+
+        
+        
+        
+        
 
     #############################################################################################
     ################################################################################## DB Managment Methods
@@ -404,6 +542,38 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         return result
 
+
+    def __select_latest_generated_per_verified(self, df: pd.DataFrame) -> DataFrame:
+        """
+        Return one row per verifiedTime, choosing the row with the latest generatedTime.
+
+        The function does not modify the input DataFrame in place.
+        """
+        
+         # Collect the best row per timeVerified
+
+        df_out = get_input_dataFrame()
+
+        # groupby key must be the column name string
+        for verified_time, group in df.groupby("timeVerified", dropna=False):
+            # Select the max in the group (latest generated)
+            latest_generated = group["timeGenerated"].max()
+            latest_candidates = group[group["timeGenerated"] == latest_generated]
+
+            picked_row = latest_candidates.iloc[0]
+
+            # Add to new dataframe
+            df_out.loc[len(df_out)] = [
+                picked_row["dataValue"],    # value 
+                picked_row["dataUnit"],     # dataUnit
+                picked_row["timeVerified"], # timeVerified
+                picked_row["timeGenerated"],# timeGenerated
+                picked_row["longitude"],    # longitude
+                picked_row["latitude"]      # latitude
+            ]
+
+        return df_out
+    
     def __splice_input(self, results: list[tuple]) -> DataFrame:
         """ Converts DB rows to a proper input dataframe to be packed into a series.
         This method also handles ensemble data by grouping them into single rows as expected by Semaphore.
@@ -421,12 +591,17 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             ]
         )
 
+        # --- Normalize dtypes and ADD TIMEZONE INFO ---
+        df_results["generatedTime"] = pd.to_datetime(df_results["generatedTime"], errors="coerce").dt.tz_localize(timezone.utc)
+        df_results["verifiedTime"] = pd.to_datetime(df_results["verifiedTime"], errors="coerce").dt.tz_localize(timezone.utc)
+        df_results["acquiredTime"] = pd.to_datetime(df_results["acquiredTime"], errors="coerce").dt.tz_localize(timezone.utc)
+
         # A formatted dataframe to place the spliced data 
         df_out = get_input_dataFrame()
 
         # We have to post process the results as this could be ensemble data or not
         # grouping by verifiedTime groups the data by time point
-        for _, group in df_results.groupby("verifiedTime"):
+        for _, group in df_results.groupby(["verifiedTime", "generatedTime"]): # group by verified time and generated time to prevent collapsing when there are multiple generated times for one verified time
 
             # ensembleMemberID is None if not an ensemble, so we check the first row of the group
             firstRow = group.iloc[0]
@@ -437,21 +612,29 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             if isEnsemble:
                 group = group.sort_values(by=("ensembleMemberID"))
                 dataValues = group["dataValue"].to_list()
-            else:
-                dataValues = group["dataValue"].iloc[0]
+                
+                # Pack the data into the out dataframe
+                df_out.loc[len(df_out)] = [
+                    dataValues,                   # dataValue
+                    firstRow["dataUnit"],         # dataUnit
+                    firstRow["verifiedTime"],     # timeVerified
+                    firstRow["generatedTime"],    # timeGenerated
+                    firstRow["longitude"],        # longitude
+                    firstRow["latitude"]          # latitude
+                ]
             
-            # Pack the data into the out dataframe
-            df_out.loc[len(df_out)] = [
-                dataValues,                   # dataValue
-                firstRow["dataUnit"],         # dataUnit
-                firstRow["verifiedTime"],     # timeVerified
-                firstRow["generatedTime"],    # timeGenerated
-                firstRow["longitude"],        # longitude
-                firstRow["latitude"]          # latitude
-            ]
-
+            else:
+                for _, row in group.iterrows():
+                    df_out.loc[len(df_out)] = [
+                        row["dataValue"],  # full list for ensembles; scalar otherwise
+                        row["dataUnit"],         # dataUnit
+                        row["verifiedTime"],     # timeVerified
+                        row["generatedTime"],    # timeGenerated
+                        row["longitude"],        # longitude
+                        row["latitude"]          # latitude
+                    ]
+            
         return df_out
-
 
     def __splice_output(self, results: list[tuple]) -> DataFrame:
         """Converts DB row results into a proper output dataframe to be packed into a series.
@@ -467,7 +650,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 "dataUnit", "dataLocation", "dataSeries", "dataDatum", "ensembleMemberID"
             ]
         )
+
+        if df_results.empty:
+            return get_output_dataFrame()
         
+        # --- ADD TIMEZONE INFO to timeGenerated ---
+        df_results["timeGenerated"] = pd.to_datetime(df_results["timeGenerated"], errors="coerce").dt.tz_localize(timezone.utc)
+
         # A formatted dataframe to place the spliced data 
         df_out = get_output_dataFrame()
 

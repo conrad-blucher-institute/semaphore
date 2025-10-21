@@ -11,15 +11,15 @@
 #
 import pandas as pd
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 import requests
 import re
-
 
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
+
 
 class NDBC(IDataIngestion):
 
@@ -103,7 +103,8 @@ class NDBC(IDataIngestion):
                 month= int(date_info[1]),
                 day= int(date_info[2]),
                 hour= int(date_info[3]),
-                minute= int(date_info[4])
+                minute= int(date_info[4]), 
+                tzinfo=timezone.utc
             )
             data.insert(0, dt)
             parsed_data.append(data)
@@ -127,6 +128,7 @@ class NDBC(IDataIngestion):
 
         df, units = self.__download_NDBC_data(NDBC_location_code)
 
+        # Filter data to requested time range - return all valid data points within range
         df_inTimeRange = df.loc[timeDescription.toDateTime:timeDescription.fromDateTime]
 
         df_result = get_input_dataFrame()
@@ -134,6 +136,7 @@ class NDBC(IDataIngestion):
             dataValue = row[seriesDescription.dataSeries]
             dataUnit = self.unitConversionDict[units[df.columns.get_loc(seriesDescription.dataSeries)]]
             dateTime = dt_idx
+            # Skip missing values (MM in NDBC data)
             if dataValue != 'MM':
                 df_result.loc[len(df_result)] = [
                     dataValue,  # dataValue
@@ -145,7 +148,7 @@ class NDBC(IDataIngestion):
                 ]
         df_result['dataValue'] = df_result['dataValue'].astype(str)
         
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = df_result
         return series
     
@@ -196,7 +199,7 @@ class NDBC(IDataIngestion):
         # Cast back to string
         one_row_df['dataValue'].astype(str)
 
-        series = Series(seriesDescription, True, timeDescription)
+        series = Series(seriesDescription, timeDescription)
         series.dataFrame = one_row_df
         return series
 

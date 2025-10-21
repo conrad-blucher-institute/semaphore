@@ -57,8 +57,7 @@ class ModelRunner:
                 dataSeries=     DSPEC.outputInfo.series, 
                 dataLocation=   DSPEC.outputInfo.location, 
                 dataDatum=      DSPEC.outputInfo.datum
-            ), 
-            isComplete= True
+            )
         )
         series.dataFrame= processedOutputs
 

@@ -16,7 +16,7 @@ sys.path.append('/app/src')
 
 import pytest
 from unittest.mock import patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from DataIngestion.DI_Classes.TWC import TWC
 from DataClasses import SeriesDescription, TimeDescription
 from exceptions import Semaphore_Ingestion_Exception
@@ -31,8 +31,8 @@ def mock_series_description():
 @pytest.fixture
 def mock_time_description():
     mock_td = MagicMock(spec=TimeDescription, autospec=True) 
-    mock_td.configure_mock(fromDateTime=datetime.utcnow() + timedelta(hours=1))
-    mock_td.configure_mock(toDateTime=datetime.utcnow() + timedelta(hours=25))
+    mock_td.configure_mock(fromDateTime=datetime.now(timezone.utc) + timedelta(hours=1))
+    mock_td.configure_mock(toDateTime=datetime.now(timezone.utc) + timedelta(hours=25))
     return mock_td
 
 
@@ -50,7 +50,8 @@ def test_ingest_series_success(mock_urlopen, mock_series_storage_factory, mock_s
     {
         "metadata": {
             "latitude": 40.7128,
-            "longitude": -74.0060
+            "longitude": -74.0060,
+            "initTime": 1735689600
         },
         "forecasts1Hour": {
             "fcstValid": [1697040000, 1697043600],
@@ -77,6 +78,11 @@ def test_ingest_series_success(mock_urlopen, mock_series_storage_factory, mock_s
     assert result.timeDescription == mock_time_description
     assert result.dataFrame is not None
     assert len(result.dataFrame) == 2  # Two timestamps in the mocked response
+
+    # check that each row has the same timeGenerated value
+    expected_timeGenerated = datetime.fromtimestamp(1735689600, tz=timezone.utc)
+    for i in range(len(result.dataFrame)):
+        assert result.dataFrame.iloc[i]['timeGenerated'] == expected_timeGenerated
 
     # Verify the mocked methods were called
     mock_series_storage.find_lat_lon_coordinates.assert_called_once_with("TestLocation")

@@ -105,7 +105,7 @@
         {
             "_name": "wind speed future",
             "location": "Rockport",
-            "source": "NDFD_EXP",
+            "source": "NDFD_JSON",
             "series": "pWnSpd",
             "unit": "mps",
             "interval": 3600,
@@ -115,7 +115,7 @@
         {
             "_name": "wind direction future",
             "location": "Rockport",
-            "source": "NDFD_EXP",
+            "source": "NDFD_JSON",
             "series": "pWnDir",
             "unit": "degrees",
             "interval": 3600,

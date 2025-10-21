@@ -80,7 +80,7 @@ class MagnoliaPredictionsPostProcess(IPostProcessing):
 
         transformed_outkey = args['Magnolia_WL_outKey']
         desc.dataSeries = transformed_outkey
-        transformed_series = Series(desc, True, magnolia_predHarmSecond.timeDescription)
+        transformed_series = Series(desc, magnolia_predHarmSecond.timeDescription)
         transformed_series.dataFrame = df_result
         preprocessedData[transformed_outkey] = transformed_series
 

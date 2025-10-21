@@ -55,6 +55,14 @@ class ISeriesStorage(ABC):
     @abstractmethod
     def insert_output(self, series: Series) -> Series:
         raise NotImplementedError()
+    
+    @abstractmethod
+    def db_has_freshly_acquired_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, reference_time: datetime) -> bool:
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def db_has_data_in_time_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
+        raise NotImplementedError()
 
 
 def series_storage_factory() -> ISeriesStorage:

@@ -20,7 +20,8 @@ from exceptions import Semaphore_Ingestion_Exception
 from numpy import ndarray
 import numpy as np
 
-from datetime import datetime
+from datetime import datetime, timezone
+from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 from os import getenv
@@ -84,7 +85,8 @@ class TWC(IDataIngestion):
         api_permission = f'apiKey={self.api_key}'
 
         # Ensure the requested time range is not in the past
-        now = datetime.utcnow().replace(minute=0, second=0, microsecond=0)
+        now = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
+        now = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
         if timeDescription.fromDateTime < now:
             raise Semaphore_Ingestion_Exception("ERROR: Requested time range starts in the past. Please provide a valid time range.")
         
@@ -148,7 +150,13 @@ class TWC(IDataIngestion):
 
         # Get the validation times for the data we requested
         unix_validation_timestamps: list[int] = response_data['fcstValid']
-        validation_timestamps = [datetime.utcfromtimestamp(ts) for ts in unix_validation_timestamps]
+        validation_timestamps = [datetime.fromtimestamp(ts, tz=timezone.utc) for ts in unix_validation_timestamps]
+
+        # Get the generated time (init time)
+        # TWC does not provide a dedicated generated time, so we use the initTime from metadata.
+        # TWC also only provides 1 initTime per request, so we set all rows to the same value.
+        initTime_epoch = response_metadata['initTime']
+        timeGenerated = datetime.fromtimestamp(initTime_epoch, tz=timezone.utc)
 
         # Get ensemble members shaped (ensemble_member_index, time_index), indexing first value b/c we only requested one prototype (temperature)
         data_buckets: list[list[float]] = response_data['prototypes'][0]['forecast']
@@ -162,7 +170,7 @@ class TWC(IDataIngestion):
                 ensemble_data,                      # dataValue (list of values for each ensemble member)
                 'celsius',                          # dataUnit
                 validation_time,                    # timeVerified
-                None,                               # timeGenerated
+                timeGenerated,                      # timeGenerated
                 response_metadata['longitude'],     # longitude
                 response_metadata['latitude']       # latitude
             ]
@@ -170,7 +178,6 @@ class TWC(IDataIngestion):
         # Pack data into Series object and return
         out_series = Series(
             description=seriesDescription,
-            isComplete=True,
             timeDescription=timeDescription,
         )
         out_series.dataFrame = out_df
