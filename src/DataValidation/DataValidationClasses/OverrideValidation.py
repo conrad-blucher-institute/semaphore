@@ -27,12 +27,11 @@ class OverrideValidation(IDataValidation):
             :param series: Series - The series to validate
             :return: bool - True if the series passes validation, False otherwise
         """
-
         if series.dataFrame is None or len(series.dataFrame) <= 0:
             return False # No data to validate
 
-        LABEL = series.seriesDescription.verificationOverride.get('label')
-        VALUE = series.seriesDescription.verificationOverride.get('value')
+        LABEL = series.description.verificationOverride.get('label')
+        VALUE = series.description.verificationOverride.get('value')
 
         df_to_validate = series.dataFrame
         
