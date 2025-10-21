@@ -167,8 +167,8 @@ class NOAATANDC(IDataIngestion):
             log(f'NOAA COOPS invalid request error: {e}')
             return None
 
-        if isSinglePoint:
-            data = data.loc[[fromTime.replace(tzinfo=timezone.utc)]]
+        if isSinglePoint: # Select only the single point we want
+            data = data.loc[[fromTime.replace(tzinfo=None)]]
 
         return data, lat_lon
 
