@@ -6,7 +6,7 @@
     "modelFileName": "./Magnolia/24hr_leadtime_2ndANN",
     "timingInfo":{
         "active": true,
-        "offset": 1320,
+        "offset": 1860,
         "interval": 3600
     },
     "outputInfo": {
