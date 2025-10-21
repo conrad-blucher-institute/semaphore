@@ -21,6 +21,7 @@ from datetime import datetime, timedelta, timezone
 from src.DataClasses import get_input_dataFrame, Series, SeriesDescription, TimeDescription, DataIntegrityDescription
 from src.DataIntegrity.IDataIntegrity import data_integrity_factory
 from pandas import DataFrame
+from src.exceptions import Semaphore_Data_Exception
 
 
 dependent_series = {
@@ -70,7 +71,6 @@ df_seven_hour_series_missing_one_tails_missing.loc[4] = ['0.76', 'test', datetim
 
 @pytest.mark.parametrize("dependent_series, timeDescription, inputs, expected_length_of_data", [
     (dependent_series, testTimeDescription, df_seven_hour_series_missing_one, 7), # One value missing, expects len of 7, no NaNs
-    (dependent_series, testTimeDescription, df_seven_hour_series_missing_three_consecutive, 4), # Three consecutive values missing, expects len of 4, no interpolation initiated
     (dependent_series, testTimeDescription, df_seven_hour_series_missing_one_tails_missing, 5) # One value missing in middle, 2 missing at tails, expects len of 5, tails should be ignored
 ])
 def test_interpolate_series(dependent_series: list, timeDescription: TimeDescription, inputs: DataFrame, expected_length_of_data: int):

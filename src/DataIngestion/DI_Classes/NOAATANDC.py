@@ -168,7 +168,7 @@ class NOAATANDC(IDataIngestion):
             return None
 
         if isSinglePoint:
-            data = data.loc[[fromTime.replace(tzinfo=None)]]
+            data = data.loc[[fromTime.replace(tzinfo=timezone.utc)]]
 
         return data, lat_lon
 
