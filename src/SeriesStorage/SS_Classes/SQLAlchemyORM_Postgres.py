@@ -401,12 +401,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         ids = [row[0] for row in result]
         return resultSeries, ids
 
-    def db_contains_all_fresh_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime):
+    def db_has_freshly_acquired_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> bool:
         """
-        Returns True both
-            - The data is fresh, meaning it was not generated outside the freshness window
-            - The data includes the toTime, meaning the source needs to provide new data.
-        freshness window of the reference time; otherwise returns False (stale).
+        Returns true if the database has fresh data for all data described in the request.
+        Data is considered fresh if it was acquired within the window of [reference time, staleness offset]. The staleness offset
+        is configured for this request in the TimeDescription object. Staleness is a measure with acquired time not verified time.
 
         Expected attributes:
         :param seriesDescription: SeriesDescription - A series description object
@@ -416,7 +415,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
 
         # region Freshness Check
-        stalenessOffset = timeDescription.stalenessOffset
         query_stmt = text(f"""
         SELECT  
         i."acquiredTime"
@@ -447,10 +445,21 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         acquiredTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
         age: timedelta = referenceTime - acquiredTime
+        stalenessOffset = timeDescription.stalenessOffset
         is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
-
         # endregion
+        return is_fresh
+       
 
+    def db_has_data_in_time_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
+        """
+        Returns true if the database has data up to the toTime specified in the TimeDescription. This means 
+        that the database isn't missing new data.
+
+        Expected attributes:
+        :param seriesDescription: SeriesDescription - A series description object
+        :param timeDescription: TimeDescription - A hydrated time description object
+        """
         # region toTime Inclusion Check
 
         # A query to get the latest verified time in the DB for this series in the requested time range
@@ -485,8 +494,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         is_inclusive = latest_verifiedTime >= timeDescription.toDateTime
 
         # endregion
-
-        return is_fresh and is_inclusive  
+        return is_inclusive
 
         
         

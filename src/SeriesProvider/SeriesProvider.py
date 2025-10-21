@@ -54,24 +54,18 @@ class SeriesProvider():
         
         reference_time = datetime.now(timezone.utc)
         
-        #Determine if the data in the db is stale
-        db_is_fresh = self.seriesStorage.db_contains_all_fresh_data(seriesDescription, timeDescription, reference_time)
+        # We request new data if:
+        #   - The data in the db is stale.
+        #   - The db does not have data newly made data. (Made by data source)
+        db_is_fresh = self.seriesStorage.db_has_freshly_acquired_data(seriesDescription, timeDescription, reference_time)
+        db_has_new = self.seriesStorage.db_has_data_in_time_range(seriesDescription, timeDescription)
+        if not db_is_fresh or not db_has_new:
+            self.__data_ingestion_query(seriesDescription, timeDescription)
 
-        #If the data is fresh then we return it
-        if db_is_fresh:
-            return self.__data_base_query(seriesDescription, timeDescription)
-        
-
-        #If the data is stale we query dataingestion and save it to update the acquired time
-        self.__data_ingestion_query(seriesDescription, timeDescription)
-        
-        #Query and return the new results from the data base 
-        new_DB_results = self.__data_base_query(seriesDescription, timeDescription)
-        return new_DB_results
-        
-   
+        return self.__data_base_query(seriesDescription, timeDescription)
     
-    def request_output(self, method: str, **kwargs) -> Series | None: 
+
+    def request_output(self, method: str, **kwargs) -> Series | None:
         ''' Selects the correct method from the ORM, calling it, and passing it the correct args
             :param method: str - This is a string value to select which style of request you are trying to make
             :param **kwargs - This is python kwargs formatted depending on method, see below
