@@ -322,9 +322,10 @@ class NDFD_JSON(IDataIngestion):
 
             # Parse the duration using regex to extract hours only
             # Also hand cases where days are given
-            duration_pattern = r'P(?:(\d+)D)?(?:T(?:(\d+)H)?)?'
+            duration_pattern = r'P(?:(\d+)D)?(?:T(?:(\d+)H)?)?$'  # Added $ to match entire string
             match = re.match(duration_pattern, duration_str)
-            if not match:
+            
+            if not match or (not match.group(1) and not match.group(2)):
                 raise ValueError(f"Invalid duration format: {duration_str}")
 
             days = int(match.group(1)) if match.group(1) else 0
