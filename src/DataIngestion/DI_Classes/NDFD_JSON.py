@@ -310,7 +310,7 @@ class NDFD_JSON(IDataIngestion):
     def _get_start_time_and_duration(self, iso8601_time: str) -> tuple[datetime, int]:
         """
         Parses an ISO 8601 time string with duration and returns the start time and duration as a tuple.
-        :param iso8601_time: str - The ISO 8601 time string with duration (e.g., "2025-08-27T11:00:00+00:00/PT3H")
+        :param iso8601_time: str - The ISO 8601 time string with duration (e.g., "2025-08-27T11:00:00+00:00/PT3H" or "2025-10-23T08:00:00+00:00/P1DT18H")
         :return: tuple - A tuple containing the start time as a datetime object and the duration as a timedelta object.
         """
         try:
@@ -321,14 +321,21 @@ class NDFD_JSON(IDataIngestion):
             start_time = datetime.fromisoformat(start_time_str.replace('Z', '+00:00'))
 
             # Parse the duration using regex to extract hours only
-            duration_pattern = r'PT(\d+)H'
+            # Also hand cases where days are given
+            duration_pattern = r'P(?:(\d+)D)?(?:T(?:(\d+)H)?)?$'  # Added $ to match entire string
             match = re.match(duration_pattern, duration_str)
-            if not match:
+            
+            if not match or (not match.group(1) and not match.group(2)):
                 raise ValueError(f"Invalid duration format: {duration_str}")
 
-            duration = int(match.group(1))
+            days = int(match.group(1)) if match.group(1) else 0
+            hours = int(match.group(2)) if match.group(2) else 0
+
+            # Convert everything to hours
+            duration = (days * 24) + hours
 
             return start_time, duration
+        
         except Exception as e:
             raise ValueError(f"Error parsing ISO 8601 time: {iso8601_time}, {e}")
 
