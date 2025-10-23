@@ -53,6 +53,10 @@ class SeriesProvider():
         log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
         
         reference_time = datetime.now(timezone.utc)
+
+        # If the data source is from the semaphore ingestion class, we ignore the default behavior and always request new data.
+        if seriesDescription.dataSource == 'SEMAPHORE':
+            return self.__data_ingestion_query(seriesDescription, timeDescription)
         
         # We request new data if:
         #   - The data in the db is stale.
@@ -117,11 +121,12 @@ class SeriesProvider():
         log(f'Init DB Query...')
         return  self.seriesStorage.select_input(seriesDescription, timeDescription)
         
-    def __data_ingestion_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription):
+    def __data_ingestion_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
         """ Handles the process of getting requested data from series storage.
         :param seriesDescription: SeriesDescription - The semantic description of request
         :param timeDescription: TimeDescription - The temporal description of the request
         
+        :returns Series | None - The results from the ingestion process, or None if no data was ingested.
         """
         log(f'Init DI Query...')
         data_ingestion_class = data_ingestion_factory(seriesDescription)
@@ -144,3 +149,5 @@ class SeriesProvider():
             
             if(inserted_series is None or len(inserted_series.dataFrame) == 0): # A sanity check that the data is actually getting inserted!
                 log('WARNING:: A data insertion was triggered but no data was actually inserted!')
+        
+        return data_ingestion_results
