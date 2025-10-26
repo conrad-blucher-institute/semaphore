@@ -55,7 +55,7 @@ class SeriesProvider():
         reference_time = datetime.now(timezone.utc)
 
         # If the data source is from the semaphore ingestion class, we ignore the default behavior and always request new data.
-        if seriesDescription.dataSource == 'SEMAPHORE':
+        if seriesDescription.dataSource.upper() == 'SEMAPHORE':
             return self.__data_ingestion_query(seriesDescription, timeDescription)
         
         # We request new data if:
