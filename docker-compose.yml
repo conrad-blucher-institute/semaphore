@@ -61,7 +61,7 @@ services:
     volumes:
       - ./data:/app/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -f host.docker.internal:8888/health"]
+      test: ["CMD", "curl -f host.docker.internal:8888/health"]
       interval: 5s
       timeout: 5s
       retries: 5
