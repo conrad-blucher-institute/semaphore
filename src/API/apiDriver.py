@@ -185,6 +185,9 @@ def serialize_series(series: Series) -> dict[any]:
     anything downstream
     """
 
+    if series is None:
+        return dict()
+
     if isinstance(series.description, SemaphoreSeriesDescription):
         return serialize_output_series(series)
 
@@ -310,7 +313,13 @@ def serialize_output_series(series: Series) -> dict[any]:
         })
 
         # Replace NaNs with None and ensure JSON safe types
-        row_dict = {k: None if pd.isna(v) else v for k, v in row_dict.items()}
+        row_dict = {}
+        for k, v in row.items():
+            if type(v) == list:
+                    row_dict[k] = None if pd.isna(v).any() else v
+            else:
+                row_dict[k] = None if pd.isna(v) else v
+
         encoded_row = {k: jsonable_encoder(v) for k, v in row_dict.items()}
         serialized_data.append(encoded_row)
 
