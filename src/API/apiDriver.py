@@ -245,8 +245,8 @@ def serialize_input_series(series: Series) -> dict[any]:
         row_dict = {
             "dataValue":        row['dataValue'],
             "dataUnit":         row['dataUnit'],
-            "timeVerified":     row['timeVerified'],
-            "timeGenerated":    row['timeGenerated'],
+            "timeVerified":     row['timeVerified'].replace(tzinfo=None),
+            "timeGenerated":    row['timeGenerated'].replace(tzinfo=None),
             "longitude":        row['longitude'],
             "latitude":         row['latitude']
         }
@@ -305,7 +305,7 @@ def serialize_output_series(series: Series) -> dict[any]:
         serialized_data.append({
             "dataValue":      jsonable_encoder(row['dataValue']),
             "dataUnit":       jsonable_encoder(row['dataUnit']),
-            "timeGenerated":  jsonable_encoder(row['timeGenerated']),
+            "timeGenerated":  jsonable_encoder(row['timeGenerated'].replace(tzinfo=None)),
             "leadTime":       jsonable_encoder(row['leadTime'])
         })
 
