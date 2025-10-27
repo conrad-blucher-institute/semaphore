@@ -140,7 +140,9 @@ class NOAATANDC(IDataIngestion):
                 or None if station mapping fails or API request fails
         """
         stationID = self.__get_station_number(seriesDescription.dataLocation)
-        if stationID == None: return None
+        if stationID == None: 
+            log(f'NOAA COOPS stationID fetch failed for location: {seriesDescription.dataLocation}')
+            return None, None
 
 
         toTime = timeDescription.toDateTime
@@ -165,7 +167,7 @@ class NOAATANDC(IDataIngestion):
             )
         except ValueError as e:
             log(f'NOAA COOPS invalid request error: {e}')
-            return None
+            return None, None
 
         if isSinglePoint: # Select only the single point we want
             data = data.loc[[fromTime.replace(tzinfo=None)]]

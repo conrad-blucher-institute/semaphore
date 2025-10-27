@@ -134,11 +134,12 @@ class TestNOAATANDCUnit:
                 series_desc = SeriesDescription("NOAATANDC", "dWl", "packChan", "MHHW")
                 time_desc = TimeDescription(self.from_date, self.to_date, timedelta(hours=1))
                 
-                result = self.noaa_ingester._NOAATANDC__fetch_NOAA_data(
+                result_data, lat_lon = self.noaa_ingester._NOAATANDC__fetch_NOAA_data(
                     series_desc, time_desc, 'water_level'
                 )
                 
-                assert result is None
+                assert result_data is None
+                assert lat_lon is None
                 mock_log.assert_called_once()
                 assert 'NOAA COOPS invalid request error' in mock_log.call_args[0][0]
     
