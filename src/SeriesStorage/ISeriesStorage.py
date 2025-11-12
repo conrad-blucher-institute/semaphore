@@ -61,7 +61,7 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
     
     @abstractmethod
-    def db_has_data_in_time_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
+    def db_has_requested_to_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
         raise NotImplementedError()
 
 
