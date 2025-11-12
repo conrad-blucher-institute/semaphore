@@ -60,10 +60,11 @@ class SeriesProvider():
         
         # We request new data if:
         #   - The data in the db is stale.
-        #   - The db does not have data newly made data. (Made by data source)
+        #   - The db does not have data for the requested toTime.
         db_is_fresh = self.seriesStorage.db_has_freshly_acquired_data(seriesDescription, timeDescription, reference_time)
-        db_has_new = self.seriesStorage.db_has_data_in_time_range(seriesDescription, timeDescription)
-        if not db_is_fresh or not db_has_new:
+        db_has_data_for_to_time = self.seriesStorage.db_has_requested_to_time(seriesDescription, timeDescription)
+
+        if not db_is_fresh or not db_has_data_for_to_time:
             self.__data_ingestion_query(seriesDescription, timeDescription)
 
         return self.__data_base_query(seriesDescription, timeDescription)
