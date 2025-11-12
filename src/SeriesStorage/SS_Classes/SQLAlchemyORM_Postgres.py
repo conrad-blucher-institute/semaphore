@@ -451,18 +451,30 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return is_fresh
        
 
-    def db_has_data_in_time_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
+    def db_has_requested_to_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
         """
-        Returns true if the database has data up to the toTime specified in the TimeDescription. This means 
-        that the database isn't missing new data.
+        This function checks if the DB has data for the requested toTime.
+        It will query the db and check for the greatest verified time that is <= the requested toTime.
+        This is because the greatest verified time for the requested toTime may not be exaclty the requested toTime.
 
-        Expected attributes:
-        :param seriesDescription: SeriesDescription - A series description object
-        :param timeDescription: TimeDescription - A hydrated time description object
+        This is done by 
+            1. selecting the verified times
+            2. filtering by the verified times that are less than or equal to the requested toTime
+            2. ordering them descending (greatest first)
+            3. limiting to 1 result to get the greatest verified time
+            4. checking if the returned verified time is >= the requested toTime
+
+        params:
+            seriesDescription: SeriesDescription - A series description object
+            timeDescription: TimeDescription - A hydrated time description object
+
+        Returns bool:
+            true - the db has data for the requested toTime point
+            false - the db does not have data for the requested toTime point
         """
         # region toTime Inclusion Check
 
-        # A query to get the latest verified time in the DB for this series in the requested time range
+        # this query gets the latest verified time in the DB for the requested toTime
         query_stmt = text(f"""
         SELECT  
         i."verifiedTime"
@@ -471,7 +483,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         AND i."dataLocation" = :dataLocation
         AND i."dataSeries"   = :dataSeries
         AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
-        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        AND i."verifiedTime" <= :to_dt
         ORDER BY i."verifiedTime" DESC
         LIMIT 1;
         """)
@@ -479,19 +491,27 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             'dataSource': seriesDescription.dataSource,
             'dataLocation': seriesDescription.dataLocation,
             'dataSeries': seriesDescription.dataSeries,
-            'from_dt': timeDescription.fromDateTime,
             'to_dt': timeDescription.toDateTime
         }
+
+        # only bind dataDatum if it's not None
         if seriesDescription.dataDatum is not None:
             bind_params['dataDatum'] = seriesDescription.dataDatum
+        
         query_stmt = query_stmt.bindparams(**bind_params)
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
-        if not tupleishResult: # Data is not yet in the DB so we need to request it
+
+        print(f'Fetched tuplishResult for db_has_data_in_time_range: {tupleishResult}')
+
+        # Data is not in DB
+        if not tupleishResult: 
             return False
 
         latest_verifiedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
         is_inclusive = latest_verifiedTime >= timeDescription.toDateTime
+
+        print(f"is_inclusive: {is_inclusive} | latest_verifiedTime: {latest_verifiedTime} | requested toDateTime: {timeDescription.toDateTime}")
 
         # endregion
         return is_inclusive
