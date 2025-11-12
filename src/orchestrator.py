@@ -16,10 +16,11 @@ This file handles the following:
 #Imports
 from os import path, getenv
 from datetime import datetime, timedelta, timezone
+import traceback
 from exceptions import Semaphore_Exception, Semaphore_Data_Exception, Semaphore_Ingestion_Exception
 from discord import Discord_Notify
 from DataClasses import Series, SemaphoreSeriesDescription, get_output_dataFrame
-from utility import log, LogLocationDirector
+from utility import log, LogLocationDirector, log_error, log_success
 
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from ModelExecution.dataGatherer import DataGatherer
@@ -85,13 +86,19 @@ class Orchestrator:
                         raise Semaphore_Exception('Error:: An unknown error ocurred!')
                 
             except Semaphore_Exception as se:
-                log(f'Error:: Prediction failed due to Semaphore Exception\n{se}')
+                log_error(f'Error:: Prediction failed due to Semaphore Exception')
+                log_error(f'Exception message: {se}')
+                log_error(f'Full stack trace:\n{traceback.format_exc()}')
                 self.__handle_failed_prediction(se, reference_time, model_name, DSPEC, toss)
             except Semaphore_Data_Exception as sde:
-                log(f'Warning:: Prediction failed due to lack of data.\n{sde}')
+                log_error(f'Warning:: Prediction failed due to lack of data')
+                log_error(f'Exception message: {sde}')
+                log_error(f'Full stack trace:\n{traceback.format_exc()}')
                 self.__handle_failed_prediction(sde, reference_time, model_name, DSPEC, toss)
             except Semaphore_Ingestion_Exception as sie:
-                log(f'Error:: Prediction failed due to Semaphore Ingestion Exception\n{sie}')
+                log_error(f'Error:: Prediction failed due to Semaphore Ingestion Exception')
+                log_error(f'Exception message: {sie}')
+                log_error(f'Full stack trace:\n{traceback.format_exc()}')
                 self.__handle_failed_prediction(sie, reference_time, model_name, DSPEC, toss)
 
     
@@ -140,10 +147,12 @@ class Orchestrator:
                 series_storage = series_storage_factory()
                 inserted_results, _ = series_storage.insert_output_and_model_run(result_series, execution_time, 0)
 
-                log(inserted_results)
-                log(inserted_results.dataFrame if inserted_results is not None else '')
+                # SUCCESS: Log successful database insertion
+                log_success(f"Model {model_name} completed successfully ✓")
+                log_success(f"Results inserted: {inserted_results}")
+                log_success(inserted_results.dataFrame if inserted_results is not None else 'No dataframe')
         except:
-            log(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))    
+            log_error(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))    
 
 
     def __handle_failed_prediction(
@@ -187,10 +196,12 @@ class Orchestrator:
                 series_storage = series_storage_factory()
                 inserted_results, _ = series_storage.insert_output_and_model_run(result_series, execution_time, exception.error_code)
 
-                log(inserted_results)
-                log(inserted_results.dataFrame if inserted_results is not None else '')
+                # ERROR: Log failed prediction details (always verbose)
+                log_error(f"Model {model_name} FAILED - Null result inserted")
+                log_error(f"Failed results: {inserted_results}")
+                log_error(inserted_results.dataFrame if inserted_results is not None else 'No dataframe')
         except:
-            log(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))
+            log_error(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))
     
 
     def __safe_discord_notification(self, model_name: str, execution_time: datetime, error_code: int, message: str):
@@ -214,4 +225,4 @@ class Orchestrator:
                 discord_notify = Discord_Notify(webhook)
                 discord_notify.send_notification(model_name, execution_time, error_code, message)
         except Exception as e:
-            log(Semaphore_Exception('ERROR:: An error occurred while trying to send a discord notification'))
+            log_error(Semaphore_Exception('ERROR:: An error occurred while trying to send a discord notification'))

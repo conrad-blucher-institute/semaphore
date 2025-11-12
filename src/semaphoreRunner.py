@@ -16,6 +16,7 @@ import argparse
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 from orchestrator import Orchestrator
+from utility import VerbosityController
 
 load_dotenv()
 
@@ -38,8 +39,21 @@ def main():
     parser.add_argument("-t", "--toss", action='store_true', required=False,
                         help = "This flag will prevent the computed prediction from actually being saved in the database")
 
+    parser.add_argument("-v", "--verbose", action='store_true', required=False,
+                        help="Enable verbose logging. By default, only errors and failures are logged verbosely. This flag enables verbose logging for all operations.")
+
     #parsing arguments
     args = parser.parse_args()
+
+    if args.verbose:
+        # Verbose mode: log everything
+        VerbosityController().verbose_mode = True
+        VerbosityController().log_failures_only = False
+        print("Verbose logging enabled - all operations will be logged")
+    else:
+        # Default mode: only log errors verbosely
+        VerbosityController().verbose_mode = False
+        VerbosityController().log_failures_only = True
 
     #if there is past time given
     if args.past is not None: 

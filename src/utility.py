@@ -12,11 +12,10 @@
 #
 #Imports
 from datetime import datetime, timezone
-from os.path import isabs
-from os import getcwd
+from os.path import isabs, exists
+from os import getcwd, makedirs
 from os import makedirs
 from os.path import exists
-
 
 
 class LogLocationDirector(object):
@@ -58,30 +57,91 @@ class LogLocationDirector(object):
 		self._log_target_path = f'{directory}{now.year}_{now.month}_{model_name}.log'
 
 
+class VerbosityController(object):
+    """Singleton to control logging verbosity across the application."""
+    _verbose_mode = False
+    _log_failures_only = False  # Set to True to only log failures by default
+    
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(VerbosityController, cls).__new__(cls)
+        return cls.instance
+    
+    @property
+    def verbose_mode(self) -> bool:
+        return self._verbose_mode
+    
+    @verbose_mode.setter
+    def verbose_mode(self, value: bool):
+        self._verbose_mode = value
+    
+    @property
+    def log_failures_only(self) -> bool:
+        return self._log_failures_only
+    
+    @log_failures_only.setter
+    def log_failures_only(self, value: bool):
+        self._log_failures_only = value
+
+
 def get_time_stamp() -> None:
 	"""Fetches and formats system time, returns the formatted timestamp."""
 	timestamp = datetime.now(timezone.utc)
 	return timestamp.strftime("%d%m%Y_%H-%M")
 
 
-def log(text: str) -> None:
+def log(text: str, is_error: bool = False, force_log: bool = False) -> None:
 	"""An stdout wrapper that prints a message to stdout and to a log file.
 	Will only write to log file if LogLocationDirector has been set.
 	Parameters
 	-------
 	text - String
 		The output you want in the log file.
+	is_error - bool
+        If True, this is an error/failure message (always logged to file)
+    force_log - bool
+        If True, always log to file regardless of verbosity settings
 	"""
+	verbosity = VerbosityController()
+	
+	# Determine if we should write to log file
+	should_write_to_file = (force_log or is_error or verbosity.verbose_mode or not verbosity.log_failures_only)
+
 	now = datetime.now(timezone.utc)
 	timeStamp = now.strftime("%x %X")
 	msg = f'{timeStamp}: {text}'
-	print(msg) #stdout
 
-	# Write to log file.
-	log_file = LogLocationDirector().log_target_path
-	if log_file is not None:
-		with open(log_file, 'a') as log_file:
-			log_file.write(f'{msg}\n')
+	# Conditionally print to stdout based on verbosity
+	if should_write_to_file:
+		print(msg)  # Only print if we would also log it, this way model logs only have what we want
+
+	# Conditionally write to log file
+	if should_write_to_file:
+		log_file = LogLocationDirector().log_target_path
+		if log_file is not None:
+			with open(log_file, 'a') as log_file:
+				log_file.write(f'{msg}\n')
+
+def log_success(text: str) -> None:
+    """Log a success message. Uses minimal logging by default unless verbose mode enabled.
+    
+    Parameters
+    -------
+    text - str
+        The success message to log
+    """
+    log(text, is_error=False, force_log=True)
+
+
+def log_error(text: str) -> None:
+    """Log an error message. Always logged verbosely regardless of settings.
+    
+    Parameters
+    -------
+    text - str
+        The error message to log
+    """
+    log(text, is_error=True, force_log=True)
 
 
 def construct_true_path(path: str) -> str:
