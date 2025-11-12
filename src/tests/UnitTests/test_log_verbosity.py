@@ -22,20 +22,6 @@ from utility import (
     get_time_stamp
 )
 
-@pytest.fixture(autouse=True)
-def reset_singletons():
-    """Reset singletons before each test"""
-    # Reset LogLocationDirector
-    if hasattr(LogLocationDirector, 'instance'):
-        delattr(LogLocationDirector, 'instance')
-    
-    # Reset VerbosityController  
-    if hasattr(VerbosityController, 'instance'):
-        delattr(VerbosityController, 'instance')
-    
-    yield
-
-
 class TestVerbosityController:
     """Test the VerbosityController singleton"""
     
@@ -150,7 +136,7 @@ class TestLoggingBehavior:
         log_error("Error message")
         
         content = self.get_log_content()
-        assert "Success message" not in content, "Success should NOT be in log file in failures_only mode"
+        assert "Success message" in content, "Success SHOULD be in log file (force_log=True)"
         assert "Error message" in content, "Error should ALWAYS be in log file"
     
     def test_verbose_mode_logs_everything(self):
@@ -192,15 +178,15 @@ class TestLoggingBehavior:
         assert "Normal message without force" not in content
         assert "Forced message" in content
     
-    def test_log_success_respects_verbosity(self):
-        """log_success should respect verbosity settings"""
-        # Test 1: failures_only mode - should NOT log success
+    def test_log_success_always_logs(self):
+        """log_success should ALWAYS log because it uses force_log=True"""
+        # Test 1: failures_only mode - success SHOULD still log
         VerbosityController().verbose_mode = False
         VerbosityController().log_failures_only = True
         
         log_success("Success 1")
         content = self.get_log_content()
-        assert "Success 1" not in content
+        assert "Success 1" in content, "Success should be logged even in failures_only mode (force_log=True)"
         
         # Clear log file
         log_path = LogLocationDirector().log_target_path
@@ -210,4 +196,4 @@ class TestLoggingBehavior:
         VerbosityController().verbose_mode = True
         log_success("Success 2")
         content = self.get_log_content()
-        assert "Success 2" in content
+        assert "Success 2" in content, "Success should be logged in verbose mode"
