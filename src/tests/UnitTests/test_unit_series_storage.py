@@ -176,11 +176,41 @@ def test_determine_staleness_with_mock_db(engine, inputs_table, series_kwargs, f
                  dataLocation="Aransas", dataDatum="NA"),
             "2025091200", "2025091223",
             False
+        ),
+        # test that when the toTime is exactly the latest verified time, it returns True
+        # so no DI occurs
+        (
+            dict(dataSource="NDFD_EXP", dataSeries="pWnSpd",
+                 dataLocation="Aransas", dataDatum="NA"),
+            "2025091200",       # from time
+            "2025091206",       # to time
+            True                # expected result
+        ),
+        # tests that when the toTime requested is beyond the latest verified time,
+        # it returns False, triggering DI
+        (
+            dict(dataSource="NDFD_EXP", dataSeries="pWnSpd",
+                 dataLocation="Aransas", dataDatum="NA"),
+            "2025091200",       # from time
+            "2025091207",       # to time
+            False                # expected result
+        ),
+        # tests that when the toTime is before the latest verified time,
+        # it returns True, no DI
+        (
+            dict(dataSource="NDFD_EXP", dataSeries="pWnSpd",
+                    dataLocation="Aransas", dataDatum="NA"),
+            "2025091200",       # from time
+            "2025091205",       # to time
+            True                # expected result
         )
     ],
     ids=[
         "NOAATANDC",
         "NDFD_EXP",
+        "NDFD_EXP_ExactToTime",
+        "NDFD_EXP_BeyondToTime",
+        "NDFD_EXP_BeforeToTime"
     ],
 )
 def test_determine_timeSpan_with_mock_db(engine, inputs_table, series_kwargs, from_str, to_str, expected_result):
@@ -195,7 +225,7 @@ def test_determine_timeSpan_with_mock_db(engine, inputs_table, series_kwargs, fr
     time_desc.stalenessOffset = timedelta(hours=1)
 
     storage = series_storage_factory()
-    actual_result = storage.db_has_data_in_time_range(series_desc, time_desc)
+    actual_result = storage.db_has_requested_to_time(series_desc, time_desc)
 
     assert actual_result is expected_result
     
