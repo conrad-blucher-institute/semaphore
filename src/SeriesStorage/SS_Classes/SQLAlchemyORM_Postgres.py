@@ -455,7 +455,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
         This function checks if the DB has data for the requested toTime.
         It will query the db and check for the greatest verified time that is <= the requested toTime.
-        This is because the greatest verified time for the requested toTime may not be exaclty the requested toTime.
+        This is because the greatest verified time for the requested toTime may not be exactly the requested toTime.
 
         This is done by 
             1. selecting the verified times
