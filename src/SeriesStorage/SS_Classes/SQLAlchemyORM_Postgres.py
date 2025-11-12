@@ -460,9 +460,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         This is done by 
             1. selecting the verified times
             2. filtering by the verified times that are less than or equal to the requested toTime
-            2. ordering them descending (greatest first)
-            3. limiting to 1 result to get the greatest verified time
-            4. checking if the returned verified time is >= the requested toTime
+            3. ordering them descending (greatest first)
+            4. limiting to 1 result to get the greatest verified time
+            5. checking if the returned verified time from the db is >= the requested toTime
 
         params:
             seriesDescription: SeriesDescription - A series description object
