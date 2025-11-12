@@ -12,11 +12,10 @@
 #
 #Imports
 from datetime import datetime, timezone
-from os.path import isabs, exists, getsize
-from os import getcwd, makedirs, rename, stat
+from os.path import isabs, exists
+from os import getcwd, makedirs
 from os import makedirs
 from os.path import exists
-from typing import Optional
 
 
 class LogLocationDirector(object):
