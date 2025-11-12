@@ -502,16 +502,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
 
-        print(f'Fetched tuplishResult for db_has_data_in_time_range: {tupleishResult}')
-
         # Data is not in DB
         if not tupleishResult: 
             return False
 
         latest_verifiedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
         is_inclusive = latest_verifiedTime >= timeDescription.toDateTime
-
-        print(f"is_inclusive: {is_inclusive} | latest_verifiedTime: {latest_verifiedTime} | requested toDateTime: {timeDescription.toDateTime}")
 
         # endregion
         return is_inclusive
