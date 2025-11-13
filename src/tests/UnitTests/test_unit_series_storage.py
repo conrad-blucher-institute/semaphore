@@ -127,19 +127,26 @@ def seed_inputs_once(engine, inputs_table):
             dict(dataSource="NOAATANDC", dataSeries="dWl",
                  dataLocation="NorthJetty", dataDatum="NAVD"),
             "2025091200", "2025091223",
-        True
+        True #Returned date: 2025-09-12 01:00
         ),
         #Tests multiple verified times for one generated time
         (
             dict(dataSource="NDFD_EXP", dataSeries="pWnSpd",
                  dataLocation="Aransas", dataDatum="NA"),
             "2025091200", "2025091223",
-            False
+            False #Returned date: 2025-09-12 00:05
+        ),
+        (
+            dict(dataSource="TWC", dataSeries="pAirTemp",
+                 dataLocation="SBirdIsland", dataDatum="NA"),
+            "2025091200", "2025091223",
+            True #Returned date: 2025-09-12 01:00
         )
     ],
     ids=[
         "NOAATANDC",
         "NDFD_EXP",
+        "TWC"
     ],
 )
 def test_determine_staleness_with_mock_db(engine, inputs_table, series_kwargs, from_str, to_str, expected_result):
@@ -151,7 +158,7 @@ def test_determine_staleness_with_mock_db(engine, inputs_table, series_kwargs, f
     to_dt   = datetime.strptime(to_str,   "%Y%m%d%H").replace(tzinfo=timezone.utc)
     time_desc = TimeDescription(fromDateTime=from_dt, toDateTime=to_dt)
     time_desc.interval = timedelta(hours=1)
-    reference_time = datetime.combine(date(2025, 9, 12), time(4, 0), tzinfo=timezone.utc)
+    reference_time = datetime.combine(date(2025, 9, 12), time(2, 0), tzinfo=timezone.utc)
     time_desc.stalenessOffset = timedelta(hours=1)
 
     storage = series_storage_factory()
