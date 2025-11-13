@@ -414,25 +414,29 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         """
 
-        # region Freshness Check
         query_stmt = text(f"""
-        SELECT  
-        i."acquiredTime"
+        WITH most_recent_per_verification AS (
+        SELECT DISTINCT
+        FIRST_VALUE("generatedTime") OVER (
+        PARTITION BY "verifiedTime"
+        ORDER BY "generatedTime" DESC
+        ) as most_recent_gen_time
         FROM inputs AS i
         WHERE i."dataSource"   = :dataSource
         AND i."dataLocation" = :dataLocation
         AND i."dataSeries"   = :dataSeries
         AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
         AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
-        ORDER BY i."acquiredTime" ASC
-        LIMIT 1;
+        )
+        SELECT MIN(most_recent_gen_time) as oldest_recent_generated_time
+        FROM most_recent_per_verification;
         """)
         bind_params = {
             'dataSource': seriesDescription.dataSource,
             'dataLocation': seriesDescription.dataLocation,
             'dataSeries': seriesDescription.dataSeries,
             'from_dt': timeDescription.fromDateTime,
-            'to_dt': timeDescription.toDateTime
+            'to_dt': timeDescription.toDateTime,
         }
         if seriesDescription.dataDatum is not None:
             bind_params['dataDatum'] = seriesDescription.dataDatum
@@ -440,14 +444,14 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
         
-        if not tupleishResult: # Data is not yet in the DB so we need to request it
+        if not tupleishResult: #Data is not present in the DB
             return False
-
-        acquiredTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
-        age: timedelta = referenceTime - acquiredTime
+        
+        oldestGeneratedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
+        age: timedelta = referenceTime - oldestGeneratedTime
         stalenessOffset = timeDescription.stalenessOffset
         is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
-        # endregion
+  
         return is_fresh
        
 
