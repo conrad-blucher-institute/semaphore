@@ -39,39 +39,39 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
     #############################################################################################
     ################################################################################## Public methods
-    #############################################################################################
-
+    #############################################################################################\
+    
     def select_input(self, seriesDescription: SeriesDescription, timeDescription : TimeDescription) -> Series:
         """Selects a given series given a SeriesDescription and TimeDescription using splice_input to give the latest generated time per verified time.
            :param seriesDescription: SeriesDescription - A series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
         inputs_select_latest_stmt = text(f""" 
-        SELECT  
-        i."id",
-        i."generatedTime",
-        i."acquiredTime",
-        i."verifiedTime",
-        i."dataValue",
-        i."isActual",
-        i."dataUnit",
-        i."dataSource",
-        i."dataLocation",
-        i."dataSeries",
-        i."dataDatum",
-        i."latitude",
-        i."longitude",
-        i."ensembleMemberID"
-        FROM inputs AS i
-        WHERE i."dataSource"   = :dataSource
-        AND i."dataLocation" = :dataLocation
-        AND i."dataSeries"   = :dataSeries
-        AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
-        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        WITH RankedData AS (
+            SELECT *,
+                ROW_NUMBER() OVER (
+                    PARTITION BY 
+                        "verifiedTime",
+                        "ensembleMemberID"
+                    ORDER BY 
+                        "generatedTime" DESC
+                ) AS rn
+            FROM inputs AS i
+            WHERE i."dataSource"   = :dataSource
+            AND i."dataLocation" = :dataLocation
+            AND i."dataSeries"   = :dataSeries
+            AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
+            AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        )
+        SELECT
+            *
+        FROM
+            RankedData
+        WHERE
+            rn = 1
         ORDER BY
-            i."verifiedTime" DESC,
-            i."generatedTime" ASC,
-            i."ensembleMemberID" DESC;
+            "verifiedTime",
+            "ensembleMemberID";
         """)
         
         # Only bind dataDatum if it's not None
@@ -88,14 +88,20 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         inputs_select_latest_stmt = inputs_select_latest_stmt.bindparams(**bind_params)
 
         tupleishResult = self.__dbSelection(inputs_select_latest_stmt).fetchall()
+        print(f'TUPLE: {tupleishResult}')
+        
         
         df_inputResult = self.__splice_input(tupleishResult)
         
+        print(f'DF INPUT: {df_inputResult}')
+        
         ordered_df = self.__select_latest_generated_per_verified(df_inputResult)
+        
+        print(f'ORDERED:{ordered_df}')
         
         # Sending all rows found downstream the input gatherer will handle interval alignment
         series = Series(seriesDescription, timeDescription)
-        series.dataFrame = ordered_df
+        series.dataFrame = df_inputResult
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
@@ -580,6 +586,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         :param list[tupleish] -a list of selections from the table formatted in tupleish
         :return: DataFrame - a dataframe with the data formatted for use in a series
         """
+        
+        # If the SQL added extra computed columns (e.g., rn),
+        # drop them so only the real 14 DB columns remain.
+        if results and len(results[0]) > 14:
+            results = [row[:14] for row in results]
 
         # Convert returned DB rows into a dataframe to make manipulation easier 
         df_results = pd.DataFrame(
