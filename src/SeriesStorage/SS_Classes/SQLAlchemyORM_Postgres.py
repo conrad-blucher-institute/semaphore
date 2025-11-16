@@ -415,10 +415,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
 
         query_stmt = text(f"""
+                          
+        -- Groups all rows by verifiedTime (this includes all ensemble member batches for that verifiedTime). 
+        -- For each verifiedTime, the latest generatedTime is chosen. 
         WITH most_recent_per_verification AS (
         SELECT DISTINCT
-        FIRST_VALUE("generatedTime") OVER (
-        PARTITION BY "verifiedTime"
+        FIRST_VALUE("generatedTime") OVER ( 
+        PARTITION BY "verifiedTime" 
         ORDER BY "generatedTime" DESC
         ) as most_recent_gen_time
         FROM inputs AS i
@@ -428,7 +431,8 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
         AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
         )
-        SELECT MIN(most_recent_gen_time) as oldest_recent_generated_time
+        -- From all of the latest generated times the oldest is returned
+        SELECT MIN(most_recent_gen_time) as oldest_recent_generated_time 
         FROM most_recent_per_verification;
         """)
         bind_params = {
