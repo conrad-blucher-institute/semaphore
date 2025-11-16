@@ -229,8 +229,8 @@ def test_select_input_with_mock_db(engine, inputs_table, series_kwargs, from_str
         ]
     
 
-    print(f'FINAL DF:\n {df.to_string()}')
-    print(f'EXPECTED DF:\n {expected_df.to_string()}')
+    # print(f'FINAL DF:\n {df.to_string()}')
+    # print(f'EXPECTED DF:\n {expected_df.to_string()}')
     # Compare (turn off strict dtype check if your prod DF casts differently)
     # ---- Normalize + sort before comparing ----
     # Normalize inner types in-place (no helper function)

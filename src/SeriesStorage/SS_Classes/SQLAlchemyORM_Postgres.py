@@ -48,7 +48,25 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
         inputs_select_latest_stmt = text(f""" 
         WITH RankedData AS (
-            SELECT *,
+            SELECT  i."id",
+            i."generatedTime",
+            i."acquiredTime",
+            i."verifiedTime",
+            i."dataValue",
+            i."isActual",
+            i."dataUnit",
+            i."dataSource",
+            i."dataLocation",
+            i."dataSeries",
+            i."dataDatum",
+            i."latitude",
+            i."longitude",
+            i."ensembleMemberID",
+            
+            -- Groups rows by verifiedTime and ensembleMemberID.
+            -- Within each group, generatedTime is ordered from newest to oldest (DESC).
+            -- Each row in the group is assigned a row number starting at rn = 1.
+            -- For each ensembleMemberID group, rn = 1 corresponds to the row with the latest generatedTime.
                 ROW_NUMBER() OVER (
                     PARTITION BY 
                         "verifiedTime",
@@ -63,12 +81,27 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
             AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
         )
-        SELECT
-            *
+        -- From the ranked rows, keep only the "best" rank per verifiedTime, ensembleMemberID.
+        SELECT 
+         "id",
+        "generatedTime",
+        "acquiredTime",
+        "verifiedTime",
+        "dataValue",
+        "isActual",
+        "dataUnit",
+        "dataSource",
+        "dataLocation",
+        "dataSeries",
+        "dataDatum",
+        "latitude",
+        "longitude",
+        "ensembleMemberID"
+           
         FROM
             RankedData
         WHERE
-            rn = 1
+            rn = 1 -- Grabs the latest genrated time from each ensemble member id and verified time
         ORDER BY
             "verifiedTime",
             "ensembleMemberID";
@@ -88,16 +121,8 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         inputs_select_latest_stmt = inputs_select_latest_stmt.bindparams(**bind_params)
 
         tupleishResult = self.__dbSelection(inputs_select_latest_stmt).fetchall()
-        print(f'TUPLE: {tupleishResult}')
-        
         
         df_inputResult = self.__splice_input(tupleishResult)
-        
-        print(f'DF INPUT: {df_inputResult}')
-        
-        ordered_df = self.__select_latest_generated_per_verified(df_inputResult)
-        
-        print(f'ORDERED:{ordered_df}')
         
         # Sending all rows found downstream the input gatherer will handle interval alignment
         series = Series(seriesDescription, timeDescription)
@@ -547,38 +572,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             result = conn.execute(stmt)
 
         return result
-
-
-    def __select_latest_generated_per_verified(self, df: pd.DataFrame) -> DataFrame:
-        """
-        Return one row per verifiedTime, choosing the row with the latest generatedTime.
-
-        The function does not modify the input DataFrame in place.
-        """
-        
-         # Collect the best row per timeVerified
-
-        df_out = get_input_dataFrame()
-
-        # groupby key must be the column name string
-        for verified_time, group in df.groupby("timeVerified", dropna=False):
-            # Select the max in the group (latest generated)
-            latest_generated = group["timeGenerated"].max()
-            latest_candidates = group[group["timeGenerated"] == latest_generated]
-
-            picked_row = latest_candidates.iloc[0]
-
-            # Add to new dataframe
-            df_out.loc[len(df_out)] = [
-                picked_row["dataValue"],    # value 
-                picked_row["dataUnit"],     # dataUnit
-                picked_row["timeVerified"], # timeVerified
-                picked_row["timeGenerated"],# timeGenerated
-                picked_row["longitude"],    # longitude
-                picked_row["latitude"]      # latitude
-            ]
-
-        return df_out
     
     def __splice_input(self, results: list[tuple]) -> DataFrame:
         """ Converts DB rows to a proper input dataframe to be packed into a series.
@@ -586,11 +579,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         :param list[tupleish] -a list of selections from the table formatted in tupleish
         :return: DataFrame - a dataframe with the data formatted for use in a series
         """
-        
-        # If the SQL added extra computed columns (e.g., rn),
-        # drop them so only the real 14 DB columns remain.
-        if results and len(results[0]) > 14:
-            results = [row[:14] for row in results]
 
         # Convert returned DB rows into a dataframe to make manipulation easier 
         df_results = pd.DataFrame(
