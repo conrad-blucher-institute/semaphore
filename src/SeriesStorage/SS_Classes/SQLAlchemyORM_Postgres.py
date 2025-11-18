@@ -43,6 +43,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
     def select_input(self, seriesDescription: SeriesDescription, timeDescription : TimeDescription) -> Series:
         """Selects a given series given a SeriesDescription and TimeDescription using splice_input to give the latest generated time per verified time.
+           
            :param seriesDescription: SeriesDescription - A series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
@@ -407,6 +408,18 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         Data is considered fresh if it was acquired within the window of [reference time, staleness offset]. The staleness offset
         is configured for this request in the TimeDescription object. Staleness is a measure with acquired time not verified time.
 
+        Query Assumption:
+        - The data in the "WHERE" section is all we need to query the correct data.
+        - We only care about the worst-case staleness across all verified times in that window.
+        
+           
+        Query Summary: 
+        Groups all rows by verifiedTime and, for each group, selects the latest generatedTime.
+        From this set of “latest-per-verifiedTime” timestamps, the oldest one is then selected and returned.
+        We don’t group by ensemble member ID here because, for staleness, we only care about the freshest run per verifiedTime overall. 
+        Grouping by ensemble member ID would only be necessary if we needed the latest generatedTime per verifiedTime and ensembleMemberId
+        rather than a single timestamp per verifiedTime.(Note that all ensemble groups with the same verified time are compared against eachother using this method.)
+                
         Expected attributes:
         :param seriesDescription: SeriesDescription - A series description object
         :param timeDescription: TimeDescription - A hydrated time description object
