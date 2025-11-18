@@ -44,7 +44,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
     def select_input(self, seriesDescription: SeriesDescription, timeDescription : TimeDescription) -> Series:
         """Selects a given series given a SeriesDescription and TimeDescription using splice_input to give the latest generated time per verified time.
         
-           Query Assumptions: All ensemble groups have the same number of member id's. 
+           Query Assumptions: 
+           - All ensemble groups have the same number of member id's. 
+           - The data in the "WHERE" section is all we need to query the correct data.
            
            Query Summary: The data is ordered into groups with the same verifiedTime AND ensembleMemberId. 
            From EACH group the latest generatedTime is selected. This query effectively gathers the latest 
