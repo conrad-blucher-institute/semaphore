@@ -39,7 +39,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
     #############################################################################################
     ################################################################################## Public methods
-    #############################################################################################\
+    #############################################################################################
     
     def select_input(self, seriesDescription: SeriesDescription, timeDescription : TimeDescription) -> Series:
         """Selects a given series given a SeriesDescription and TimeDescription using splice_input to give the latest generated time per verified time.
@@ -50,8 +50,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
              the full ensemble group with all generatedTimes being the same for each member.
             - For a given dataSource, dataLocation, dataSeries, dataDatum, verifiedTime,
             ensembleMemberID, at least one row has a given generatedTime, so "latest generatedTime" is well-defined.
-            - It is acceptable for the returned series to be assembled from multiple model runs (generatedTimes), as long as each 
-            timestamp is the newest available.
+            - The final output may come from multiple model runs, such as different generatedTimes across verifiedTimes. 
+            Each verified time will have an ensemble group with the same generated time, but the generated 
+            time's will likely be different per verified time.
            
            Query Summary: The data is ordered into groups with the same verifiedTime AND ensembleMemberId. 
            From EACH group the latest generatedTime is selected. This query effectively gathers the latest 
