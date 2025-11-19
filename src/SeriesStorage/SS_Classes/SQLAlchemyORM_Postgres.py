@@ -76,7 +76,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             i."longitude",
             i."ensembleMemberID",
             
-            -- Groups rows by verifiedTime and ensembleMemberID.
+            -- Groups rows by verifiedTime and ensembleMemberID. Non ensemble inputs ensembleMemberId will be null resulting in a single group per verified time.
             -- Within each group, generatedTime is ordered from newest to oldest (DESC).
             -- Each row in the group is assigned a row number starting at rn = 1.
             -- For each ensembleMemberID group, rn = 1 corresponds to the row with the latest generatedTime.
