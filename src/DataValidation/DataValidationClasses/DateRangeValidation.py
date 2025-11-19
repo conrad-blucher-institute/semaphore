@@ -15,12 +15,15 @@ determines the expected date range via the timeDescription and checks for missin
 from DataClasses import Series
 from DataValidation.IDataValidation import IDataValidation
 from utility import log
-from datetime import timedelta
+from datetime import timedelta, datetime
 from pandas import date_range
 
 
 class DateRangeValidation(IDataValidation):
 
+    def __init__(self, referenceTime: datetime = None):
+        self.referenceTime = referenceTime
+        
     def validate(self, series: Series) -> bool:
         """ This method checks for missing date ranges in the the expected time series. 
             :param series: Series - The series to validate
@@ -49,6 +52,12 @@ class DateRangeValidation(IDataValidation):
             for missing_time in df_to_validate[df_to_validate['dataValue'].isnull()].index:
                 log(f'\tMissing time: {missing_time}')
             return False
+        
+        # validate that the data isn't stale 
+        if self.referenceTime is not None and df_to_validate['timeGenerated'].min() - self.referenceTime > series.timeDescription.stalenessOffset:
+            log(f'DateRangeValidation: Series {series} is stale.\n')
+            return False
+        
         return True
 
 
