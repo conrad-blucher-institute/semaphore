@@ -408,9 +408,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         Data is considered fresh if it was acquired within the window of [reference time, staleness offset]. The staleness offset
         is configured for this request in the TimeDescription object. Staleness is a measure with acquired time not verified time.
 
-        Query Assumption:
-        - The data in the "WHERE" section is all we need to query the correct data.
-        - We only care about the worst-case staleness across all verified times in that window.
+        Data Assumptions (in the inputs table):
+        - Every verifiedTime in [from_dt, to_dt] has at least one row in the database.
+        - It’s acceptable to treat the ensemble as fresh if any member is fresh.
+        - If the worst-case generatedTime is fresh, you assume all verifiedTimes are fresh enough.
+        - Freshness is evaluated per verifiedTime, not per ensemble member.
         
            
         Query Summary: 
