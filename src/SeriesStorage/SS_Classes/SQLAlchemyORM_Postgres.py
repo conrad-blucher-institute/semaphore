@@ -45,8 +45,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """Selects a given series given a SeriesDescription and TimeDescription using splice_input to give the latest generated time per verified time.
         
            Data Assumptions (about the inputs table): 
-            - Each model run is logically “complete”: for a given run, every ensemble member 
-             has values for every verifiedTime in the requested window.
+            - Each model run is logically complete: for a given run, every ensemble member 
+             has values for every verifiedTime in the requested window. TWC always generates 
+             the full ensemble group with all generatedTimes being the same for each member.
             - For a given dataSource, dataLocation, dataSeries, dataDatum, verifiedTime,
             ensembleMemberID, at most one row has a given generatedTime, so "latest generatedTime" is well-defined.
             - It is acceptable for the returned series to be assembled from multiple model runs (generatedTimes), as long as each 
