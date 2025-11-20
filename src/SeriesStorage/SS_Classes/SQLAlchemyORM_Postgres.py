@@ -453,6 +453,20 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         Data is considered fresh if it was acquired within the window of [reference time, staleness offset]. The staleness offset
         is configured for this request in the TimeDescription object. Staleness is a measure with acquired time not verified time.
 
+        Data Assumptions (in the inputs table):
+        - Every verifiedTime in [from_dt, to_dt] has at least one row in the database.
+        - It’s acceptable to treat the ensemble as fresh if any member is fresh.
+        - If the worst-case generatedTime is fresh, you assume all verifiedTimes are fresh enough.
+        - Freshness is evaluated per verifiedTime, not per ensemble member.
+        
+           
+        Query Summary: 
+        Groups all rows by verifiedTime and, for each group, selects the latest generatedTime.
+        From this set of “latest-per-verifiedTime” timestamps, the oldest one is then selected and returned.
+        We don’t group by ensemble member ID here because, for staleness, we only care about the freshest run per verifiedTime overall. 
+        Grouping by ensemble member ID would only be necessary if we needed the latest generatedTime per verifiedTime and ensembleMemberId
+        rather than a single timestamp per verifiedTime.(Note that all ensemble groups with the same verified time are compared against eachother using this method.)
+                
         Expected attributes:
         :param seriesDescription: SeriesDescription - A series description object
         :param timeDescription: TimeDescription - A hydrated time description object
@@ -460,25 +474,33 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         """
 
-        # region Freshness Check
         query_stmt = text(f"""
-        SELECT  
-        i."acquiredTime"
+                          
+        -- Groups all rows by verifiedTime (this includes all ensemble member batches for that verifiedTime). 
+        -- For each verifiedTime, the latest generatedTime is chosen. 
+        WITH most_recent_per_verification AS (
+        SELECT DISTINCT
+        FIRST_VALUE("generatedTime") OVER ( 
+        PARTITION BY "verifiedTime" 
+        ORDER BY "generatedTime" DESC
+        ) as most_recent_gen_time
         FROM inputs AS i
         WHERE i."dataSource"   = :dataSource
         AND i."dataLocation" = :dataLocation
         AND i."dataSeries"   = :dataSeries
         AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
         AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
-        ORDER BY i."acquiredTime" ASC
-        LIMIT 1;
+        )
+        -- From all of the latest generated times the oldest is returned
+        SELECT MIN(most_recent_gen_time) as oldest_recent_generated_time 
+        FROM most_recent_per_verification;
         """)
         bind_params = {
             'dataSource': seriesDescription.dataSource,
             'dataLocation': seriesDescription.dataLocation,
             'dataSeries': seriesDescription.dataSeries,
             'from_dt': timeDescription.fromDateTime,
-            'to_dt': timeDescription.toDateTime
+            'to_dt': timeDescription.toDateTime,
         }
         if seriesDescription.dataDatum is not None:
             bind_params['dataDatum'] = seriesDescription.dataDatum
@@ -486,14 +508,14 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
         
-        if not tupleishResult: # Data is not yet in the DB so we need to request it
+        if not tupleishResult: #Data is not present in the DB
             return False
-
-        acquiredTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
-        age: timedelta = referenceTime - acquiredTime
+        
+        oldestGeneratedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
+        age: timedelta = referenceTime - oldestGeneratedTime
         stalenessOffset = timeDescription.stalenessOffset
         is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
-        # endregion
+  
         return is_fresh
        
 
