@@ -40,39 +40,86 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
     #############################################################################################
     ################################################################################## Public methods
     #############################################################################################
-
+    
     def select_input(self, seriesDescription: SeriesDescription, timeDescription : TimeDescription) -> Series:
         """Selects a given series given a SeriesDescription and TimeDescription using splice_input to give the latest generated time per verified time.
+        
+           Data Assumptions (about the inputs table): 
+            - Each ensemble input is logically complete: for a given run, every ensemble member 
+             has values for every verifiedTime in the requested window. TWC always generates 
+             the full ensemble group with all generatedTimes being the same for each member.
+            - For a given dataSource, dataLocation, dataSeries, dataDatum, verifiedTime,
+            ensembleMemberID, at least one row has a given generatedTime, so "latest generatedTime" is well-defined.
+            - The final output may come from multiple model runs, such as different generatedTimes across verifiedTimes. 
+            Each verified time will have an ensemble group with the same generated time, but the generated 
+            time's will likely be different per verified time.
+           
+           Query Summary: The data is ordered into groups with the same verifiedTime AND ensembleMemberId. 
+           From EACH group the latest generatedTime is selected. This query effectively gathers the latest 
+           generated time for each ensemble and non ensemble members.
            
            :param seriesDescription: SeriesDescription - A series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
         inputs_select_latest_stmt = text(f""" 
-        SELECT  
-        i."id",
-        i."generatedTime",
-        i."acquiredTime",
-        i."verifiedTime",
-        i."dataValue",
-        i."isActual",
-        i."dataUnit",
-        i."dataSource",
-        i."dataLocation",
-        i."dataSeries",
-        i."dataDatum",
-        i."latitude",
-        i."longitude",
-        i."ensembleMemberID"
-        FROM inputs AS i
-        WHERE i."dataSource"   = :dataSource
-        AND i."dataLocation" = :dataLocation
-        AND i."dataSeries"   = :dataSeries
-        AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
-        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        WITH RankedData AS (
+            SELECT  i."id",
+            i."generatedTime",
+            i."acquiredTime",
+            i."verifiedTime",
+            i."dataValue",
+            i."isActual",
+            i."dataUnit",
+            i."dataSource",
+            i."dataLocation",
+            i."dataSeries",
+            i."dataDatum",
+            i."latitude",
+            i."longitude",
+            i."ensembleMemberID",
+            
+            -- Groups rows by verifiedTime and ensembleMemberID. Non ensemble inputs ensembleMemberId will be null resulting in a single group per verified time.
+            -- Within each group, generatedTime is ordered from newest to oldest (DESC).
+            -- Each row in the group is assigned a row number starting at rn = 1.
+            -- For each ensembleMemberID group, rn = 1 corresponds to the row with the latest generatedTime.
+                ROW_NUMBER() OVER (
+                    PARTITION BY 
+                        "verifiedTime",
+                        "ensembleMemberID"
+                    ORDER BY 
+                        "generatedTime" DESC
+                ) AS rn
+            FROM inputs AS i
+            WHERE i."dataSource"   = :dataSource
+            AND i."dataLocation" = :dataLocation
+            AND i."dataSeries"   = :dataSeries
+            AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
+            AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        )
+        -- From the ranked rows, keep only the "best" rank per verifiedTime, ensembleMemberID.
+        SELECT 
+         "id",
+        "generatedTime",
+        "acquiredTime",
+        "verifiedTime",
+        "dataValue",
+        "isActual",
+        "dataUnit",
+        "dataSource",
+        "dataLocation",
+        "dataSeries",
+        "dataDatum",
+        "latitude",
+        "longitude",
+        "ensembleMemberID"
+           
+        FROM
+            RankedData
+        WHERE
+            rn = 1 -- Grabs the latest genrated time from each ensemble member id and verified time
         ORDER BY
-            i."verifiedTime" DESC,
-            i."generatedTime" ASC,
-            i."ensembleMemberID" DESC;
+            "verifiedTime",
+            "ensembleMemberID";
         """)
         
         # Only bind dataDatum if it's not None
@@ -92,11 +139,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         df_inputResult = self.__splice_input(tupleishResult)
         
-        ordered_df = self.__select_latest_generated_per_verified(df_inputResult)
-        
         # Sending all rows found downstream the input gatherer will handle interval alignment
         series = Series(seriesDescription, timeDescription)
-        series.dataFrame = ordered_df
+        series.dataFrame = df_inputResult
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
@@ -564,38 +609,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             result = conn.execute(stmt)
 
         return result
-
-
-    def __select_latest_generated_per_verified(self, df: pd.DataFrame) -> DataFrame:
-        """
-        Return one row per verifiedTime, choosing the row with the latest generatedTime.
-
-        The function does not modify the input DataFrame in place.
-        """
-        
-         # Collect the best row per timeVerified
-
-        df_out = get_input_dataFrame()
-
-        # groupby key must be the column name string
-        for verified_time, group in df.groupby("timeVerified", dropna=False):
-            # Select the max in the group (latest generated)
-            latest_generated = group["timeGenerated"].max()
-            latest_candidates = group[group["timeGenerated"] == latest_generated]
-
-            picked_row = latest_candidates.iloc[0]
-
-            # Add to new dataframe
-            df_out.loc[len(df_out)] = [
-                picked_row["dataValue"],    # value 
-                picked_row["dataUnit"],     # dataUnit
-                picked_row["timeVerified"], # timeVerified
-                picked_row["timeGenerated"],# timeGenerated
-                picked_row["longitude"],    # longitude
-                picked_row["latitude"]      # latitude
-            ]
-
-        return df_out
     
     def __splice_input(self, results: list[tuple]) -> DataFrame:
         """ Converts DB rows to a proper input dataframe to be packed into a series.
