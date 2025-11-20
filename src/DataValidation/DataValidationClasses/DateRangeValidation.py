@@ -46,17 +46,24 @@ class DateRangeValidation(IDataValidation):
         # If there are still null values, then there are missing values
         missing_value_count = df_to_validate['dataValue'].isnull().sum()
         
-
         if missing_value_count > 0:
             log(f'DateRangeValidation: Series {series} is missing {missing_value_count} values.')
             for missing_time in df_to_validate[df_to_validate['dataValue'].isnull()].index:
                 log(f'\tMissing time: {missing_time}')
             return False
         
-        # validate that the data isn't stale 
-        if self.referenceTime is not None and df_to_validate['timeGenerated'].min() - self.referenceTime > series.timeDescription.stalenessOffset:
-            log(f'DateRangeValidation: Series {series} is stale.\n')
-            return False
+        # only unit tests will skip this check (unless designed not to)
+        # all models that run will have a reference time
+        if self.referenceTime is not None:
+            # get the difference between the earliest generated time and the reference time
+            # then take the absolute value
+            time_difference = df_to_validate['timeGenerated'].min() - self.referenceTime
+
+            # validate that the data isn't stale 
+            if time_difference > series.timeDescription.stalenessOffset:
+                log(f'DateRangeValidation: Series {series} is stale.\n')
+                log(f'Time difference: {time_difference}. Staleness offset: {series.timeDescription.stalenessOffset}\n')
+                return False
         
         return True
 
