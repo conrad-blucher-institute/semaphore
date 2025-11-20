@@ -39,5 +39,8 @@ var/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Logs
-log.txt
+# Prevent logs from being copied into Docker build context
+logs/
+./logs/
+**/logs/
+*.log
