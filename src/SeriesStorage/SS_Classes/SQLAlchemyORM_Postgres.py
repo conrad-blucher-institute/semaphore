@@ -508,7 +508,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
         
-        if not tupleishResult: #Data is not present in the DB
+        if not tupleishResult or not tupleishResult[0][0]: #Data is not present in the DB
             return False
         
         oldestGeneratedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
