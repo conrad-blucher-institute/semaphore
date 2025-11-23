@@ -49,4 +49,4 @@ USER ${SERVICE_ACCOUNT_USERNAME}
 WORKDIR /app/src
 
 # Set the command to run the apiDriver.py script when the Docker container starts
-CMD ["uvicorn", "API.apiDriver:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "API.apiDriver:app", "--host", "0.0.0.0", "--port", "8000", "--log-config", "./API/semaphore_api_log_config.json", "--workers", "8"]

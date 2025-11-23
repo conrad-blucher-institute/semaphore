@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "filters": {
+    "process_time": {
+      "()": "API.apiDriver.ProcessTimeFilter"
+    }
+  },
+  "formatters": {
+    "access": {
+      "format": "[%(levelname)s] Access Time: %(asctime)s, Process Time: %(process_time).4fs, %(name)s: %(message)s -- "
+    }
+  },
+  "handlers": {
+    "access": {
+      "formatter": "access",
+      "class": "logging.StreamHandler",
+      "stream": "ext://sys.stdout",
+      "filters": ["process_time"]
+    }
+  },
+  "loggers": {
+    "uvicorn.access": {
+      "handlers": ["access"],
+      "level": "INFO",
+      "propagate": false
+    }
+  }
+}
