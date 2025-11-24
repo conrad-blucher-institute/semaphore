@@ -17,24 +17,18 @@ from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescr
 from SeriesProvider.SeriesProvider import SeriesProvider
 from fastapi.encoders import jsonable_encoder
 import pandas as pd
-
 from contextvars import ContextVar
 import logging
-
-
 
 
 load_dotenv()
 
 app = FastAPI(root_path='/semaphore-api',)
-
 @app.get('/')
 def read_main():
     return {'message': 'Hello World'}
 
-
 #region Logging
-
 # Context variable to hold process time for logging
 process_time_var: ContextVar[float] = ContextVar('process_time', default=0.0)
 
