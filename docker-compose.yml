@@ -62,7 +62,7 @@ services:
       - ./data:/app/data
     healthcheck:
       test: ["CMD", "curl", "-f", "host.docker.internal:8888/health"]
-      interval: 5s
+      interval: 60s
       timeout: 5s
       retries: 5
     extra_hosts:
