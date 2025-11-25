@@ -19,7 +19,8 @@ from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, T
 from exceptions import Semaphore_Ingestion_Exception, Semaphore_Exception
 
 from utility import log
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+import pandas as pd
 
 
 
@@ -60,11 +61,13 @@ class SeriesProvider():
         
         # We request new data if:
         #   - The data in the db is stale.
-        #   - The db does not have data for the requested toTime.
+        #   - We can get more verified times for the requested range.
         db_is_fresh = self.seriesStorage.db_has_freshly_acquired_data(seriesDescription, timeDescription, reference_time)
-        db_has_data_for_to_time = self.seriesStorage.db_has_requested_to_time(seriesDescription, timeDescription)
 
-        if not db_is_fresh or not db_has_data_for_to_time:
+        max_verified_time_row = self.seriesStorage.fetch_row_with_max_verified_time_in_range(seriesDescription, timeDescription)
+        should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription, reference_time, max_verified_time_row)
+
+        if not db_is_fresh or should_ingest_for_verified_time:
             self.__data_ingestion_query(seriesDescription, timeDescription)
 
         return self.__data_base_query(seriesDescription, timeDescription)
@@ -152,3 +155,35 @@ class SeriesProvider():
                 log('WARNING:: A data insertion was triggered but no data was actually inserted!')
         
         return data_ingestion_results
+    
+    def __check_verified_time_for_ingestion(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, reference_time: datetime, row: tuple) -> bool:
+        """ 
+        Determines if we should ingest new data based on the most recent verified time in the requested range.
+
+        :param seriesDescription: SeriesDescription - The description for a series
+        :param timeDescription: TimeDescription - The time description for a series
+        :param reference_time: datetime - The reference time of the model execution
+        :param row: tuple - The row with the max verified time in the requested range
+
+        :returns bool 
+
+        True (should ingest) if:
+        - No row exists (database is empty)
+        - The max verified time < requested toDateTime (more data might be available)
+            AND the data was acquired > 7 hours ago (the data's acquired time is greater than the threshold)
+    
+        Returns False (should NOT ingest) if:
+        - The max verified time >= requested toDateTime
+            OR the data's acquired time is within the threshold ( <= 7 hours ago)
+        """
+        if not row:
+            return True
+        
+        verified_time = pd.to_datetime(row[3]).tz_localize(timezone.utc)
+        acquired_time = pd.to_datetime(row[2]).tz_localize(timezone.utc)
+        threshold = timedelta(hours=7)
+
+        difference = reference_time - acquired_time
+
+        return (verified_time < timeDescription.toDateTime and difference > threshold)
+        
