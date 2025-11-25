@@ -450,40 +450,32 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # endregion
         return is_fresh
        
-
-    def db_has_requested_to_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
+    def fetch_row_with_max_verified_time_in_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> tuple | None:
         """
-        This function checks if the DB has data for the requested toTime.
-        It will query the db and check for the greatest verified time that is <= the requested toTime.
-        This is because the greatest verified time for the requested toTime may not be exactly the requested toTime.
-
-        This is done by 
-            1. selecting the verified times
-            2. filtering by the verified times that are less than or equal to the requested toTime
-            3. ordering them descending (greatest first)
-            4. limiting to 1 result to get the greatest verified time
-            5. checking if the returned verified time from the db is >= the requested toTime
+        This function returns the row with the max verified time in the requested range
 
         params:
             seriesDescription: SeriesDescription - A series description object
             timeDescription: TimeDescription - A hydrated time description object
 
-        Returns bool:
-            true - the db has data for the requested toTime point
-            false - the db does not have data for the requested toTime point
-        """
-        # region toTime Inclusion Check
+        Returns:
+            tuple | None - The row with the max verified time in the requested range or None if no data is found
 
-        # this query gets the latest verified time in the DB for the requested toTime
+        The returned tuple will have the order of:
+        (id, generatedTime, acquiredTime, verifiedTime, dataValue, isActual, dataUnit, dataSource, dataLocation,
+        dataSeries, dataDatum, latitude, longitude, ensembleMemberID)
+        """
+
+        # this query gets the row with the max verified time in the requested range
         query_stmt = text(f"""
         SELECT  
-        i."verifiedTime"
+        i.*
         FROM inputs AS i
         WHERE i."dataSource"   = :dataSource
         AND i."dataLocation" = :dataLocation
         AND i."dataSeries"   = :dataSeries
         AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
-        AND i."verifiedTime" <= :to_dt
+        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
         ORDER BY i."verifiedTime" DESC
         LIMIT 1;
         """)
@@ -491,6 +483,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             'dataSource': seriesDescription.dataSource,
             'dataLocation': seriesDescription.dataLocation,
             'dataSeries': seriesDescription.dataSeries,
+            'from_dt': timeDescription.fromDateTime,
             'to_dt': timeDescription.toDateTime
         }
 
@@ -502,20 +495,8 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
 
-        # Data is not in DB
-        if not tupleishResult: 
-            return False
-
-        latest_verifiedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
-        is_inclusive = latest_verifiedTime >= timeDescription.toDateTime
-
-        # endregion
-        return is_inclusive
-
-        
-        
-        
-        
+        # convert the list of tuples to a single tuple and return it, else return None
+        return tuple(tupleishResult[0]) if tupleishResult else None
 
     #############################################################################################
     ################################################################################## DB Managment Methods
