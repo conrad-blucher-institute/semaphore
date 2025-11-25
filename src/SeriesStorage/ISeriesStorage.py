@@ -61,7 +61,7 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
     
     @abstractmethod
-    def db_has_requested_to_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
+    def fetch_row_with_max_verified_time_in_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> tuple | None:
         raise NotImplementedError()
 
 
