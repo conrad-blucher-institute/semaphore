@@ -30,10 +30,10 @@ from DataClasses import SeriesDescription, TimeDescription
     [
         # tests when verified time == toDateTime, no ingestion should occur (False)
         (
-            datetime(2025, 1, 1, 1, 0, 0, tzinfo=timezone.utc),      # reference_time
-            datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),      # acquired_time
-            datetime(2025, 1, 1, 3, 0, 0, tzinfo=timezone.utc),      # verified_time
-            datetime(2025, 1, 1, 3, 0, 0, tzinfo=timezone.utc),      # to_datetime
+            datetime(2025, 1, 1, 1, 0, 0, tzinfo= timezone.utc),      # reference_time
+            datetime(2025, 1, 1, 0, 0, 0),      # acquired_time
+            datetime(2025, 1, 1, 3, 0, 0),      # verified_time
+            datetime(2025, 1, 1, 3, 0, 0),      # to_datetime
             False
 
             # verified time == toDateTime -> no ingestion (return False)
@@ -41,52 +41,52 @@ from DataClasses import SeriesDescription, TimeDescription
         
         # tests when the verified time > toDateTime, no ingestion should occur (False)
         (
-            datetime(2025, 1, 1, 1, 0, 0, tzinfo=timezone.utc),      # reference_time
-            datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),      # acquired_time
-            datetime(2025, 1, 1, 3, 0, 0, tzinfo=timezone.utc),      # verified_time
-            datetime(2025, 1, 1, 2, 0, 0, tzinfo=timezone.utc),      # to_datetime
+            datetime(2025, 1, 1, 1, 0, 0, tzinfo= timezone.utc),      # reference_time
+            datetime(2025, 1, 1, 0, 0, 0),                            # acquired_time
+            datetime(2025, 1, 1, 3, 0, 0),                            # verified_time
+            datetime(2025, 1, 1, 2, 0, 0),                            # to_datetime
             False
 
             # verified time > toDateTime -> no ingestion (return False)
         ),
         
-        # tests when the verified time < toDateTime AND acquired time < threshold
+        # tests when the verified time < toDateTime AND (reference time - acquired time) < threshold
         # no ingestion should occur (False)
         (
-            datetime(2025, 1, 1, 1, 0, 0, tzinfo=timezone.utc),      # reference_time
-            datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),      # acquired_time
-            datetime(2025, 1, 1, 3, 0, 0, tzinfo=timezone.utc),      # verified_time
-            datetime(2025, 1, 1, 4, 0, 0, tzinfo=timezone.utc),      # to_datetime
+            datetime(2025, 1, 1, 0, 59, 59, tzinfo= timezone.utc),      # reference_time
+            datetime(2025, 1, 1, 0, 0, 0),                              # acquired_time
+            datetime(2025, 1, 1, 3, 0, 0),                              # verified_time
+            datetime(2025, 1, 1, 4, 0, 0),                              # to_datetime
             False
 
-            # verified time < toDateTime AND acquired time < threshold
-            # (True AND False) -> no ingestion (return False)
+            # reference time - acquired time = 0:59:59 < 1 hour threshold
+            # -> no ingestion (return False)
         ),
         
-        # tests when the verified time < toDateTime AND acquired time == threshold
+        # tests when the verified time < toDateTime AND (reference time - acquired time) == threshold
         # no ingestion should occur (False)
         (
-            datetime(2025, 1, 1, 7, 0, 0, tzinfo=timezone.utc),      # reference_time
-            datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),      # acquired_time
-            datetime(2025, 1, 1, 3, 0, 0, tzinfo=timezone.utc),      # verified_time
-            datetime(2025, 1, 1, 4, 0, 0, tzinfo=timezone.utc),      # to_datetime
+            datetime(2025, 1, 1, 6, 0, 0, tzinfo= timezone.utc),         # reference_time
+            datetime(2025, 1, 1, 5, 0, 0),                               # acquired_time
+            datetime(2025, 1, 1, 3, 0, 0),                               # verified_time
+            datetime(2025, 1, 1, 4, 0, 0),                               # to_datetime
             False
 
-            # verified time < toDateTime AND acquired time == threshold
-            # (True AND False) -> no ingestion (return False)
+            # reference time - acquired time = 1:00:00 == 1 hour threshold
+            # -> no ingestion (return False)
         ),
         
-        # tests when the verified time < toDateTime AND acquired time > threshold
+        # tests when the verified time < toDateTime AND (reference time - acquired time) > threshold
         # ingestion should occur (True)
         (
-            datetime(2025, 1, 1, 8, 0, 0, tzinfo=timezone.utc),      # reference_time
-            datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),      # acquired_time
-            datetime(2025, 1, 1, 3, 0, 0, tzinfo=timezone.utc),      # verified_time
-            datetime(2025, 1, 1, 4, 0, 0, tzinfo=timezone.utc),      # to_datetime
+            datetime(2025, 1, 1, 6, 0, 1, tzinfo= timezone.utc),      # reference_time
+            datetime(2025, 1, 1, 5, 0, 0),                            # acquired_time
+            datetime(2025, 1, 1, 3, 0, 0),                            # verified_time
+            datetime(2025, 1, 1, 4, 0, 0),                            # to_datetime
             True
 
-            # verified time < toDateTime AND acquired time > threshold
-            # (True AND True) -> ingestion occurs (return True)
+            # reference time - acquired time = 1:00:01 > 1 hour threshold
+            # -> ingestion occurs (return True)
         ),
         
         # tests ingestion should occur when no data is found in the DB
@@ -127,6 +127,10 @@ def test_check_verified_time_for_ingestion(
     We want to call ingestion if both following occur:
     1. the max verified time in the row is strictly < the toDateTime
     2. the acquired time (reference time - acquired time) is strictly > the threshold value
+
+    NOTE::
+    The reference time is the only time that starts as tz aware. All other times
+    will be converted to tz aware in the function being tested.
     """
     # mock the storage factory
     mock_storage_factory.return_value = MagicMock()
@@ -144,7 +148,7 @@ def test_check_verified_time_for_ingestion(
     )
 
     time_description = TimeDescription(
-        fromDateTime=datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+        fromDateTime=datetime(2025, 1, 1, 0, 0, 0),
         toDateTime=to_datetime,
         interval=timedelta(hours=1),
         stalenessOffset=timedelta(hours=7)
@@ -156,7 +160,7 @@ def test_check_verified_time_for_ingestion(
     else:
         row = (
             1,                                                          # id
-            datetime(2025, 1, 1, 1, 0, 0, tzinfo=timezone.utc),         # generatedTime
+            datetime(2025, 1, 1, 1, 0, 0),                              # generatedTime
             acquired_time,                                              # acquiredTime
             verified_time,                                              # verifiedTime
             1.0,                                                        # dataValue

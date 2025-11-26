@@ -170,20 +170,28 @@ class SeriesProvider():
         True (should ingest) if:
         - No row exists (database is empty)
         - The max verified time < requested toDateTime (more data might be available)
-            AND the time since acquisition (reference_time - acquired_time) is strictly greater than the threshold (7 hours)
+            AND the time since acquisition (reference_time - acquired_time) is strictly greater than the threshold (> threshold)
     
         Returns False (should NOT ingest) if:
         - The max verified time >= requested toDateTime
-            OR the time since acquisition (reference_time - acquired_time) is less than or equal to the threshold (<= 7 hours)
+            OR the time since acquisition (reference_time - acquired_time) is less than or equal to the threshold (<= threshold)
+
+        NOTE::
+        The reference_time is set by refence_time = datetime.now(timezone.utc) causing it to be 
+        tz aware and all other times are tz naive, so they must be converted to tz aware for comparison.
         """
         if not row:
             return True
         
-        verified_time = pd.to_datetime(row[3]).tz_convert(timezone.utc)
-        acquired_time = pd.to_datetime(row[2]).tz_convert(timezone.utc)
-        threshold = timedelta(hours=7)
+        # extract times from the row and add timezone info
+        verified_time = row[3].replace(tzinfo=timezone.utc)
+        acquired_time = row[2].replace(tzinfo=timezone.utc)
+        toDateTime = timeDescription.toDateTime.replace(tzinfo=timezone.utc)
+
+        # the threshold is set to the interval
+        threshold = timeDescription.interval
 
         difference = reference_time - acquired_time
 
-        return (verified_time < timeDescription.toDateTime and difference > threshold)
+        return (verified_time < toDateTime and difference > threshold)
         
