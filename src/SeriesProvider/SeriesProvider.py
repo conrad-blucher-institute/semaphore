@@ -179,8 +179,8 @@ class SeriesProvider():
         if not row:
             return True
         
-        verified_time = pd.to_datetime(row[3]).tz_localize(timezone.utc)
-        acquired_time = pd.to_datetime(row[2]).tz_localize(timezone.utc)
+        verified_time = pd.to_datetime(row[3])
+        acquired_time = pd.to_datetime(row[2])
         threshold = timedelta(hours=7)
 
         difference = reference_time - acquired_time
