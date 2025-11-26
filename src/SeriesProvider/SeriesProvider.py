@@ -170,17 +170,17 @@ class SeriesProvider():
         True (should ingest) if:
         - No row exists (database is empty)
         - The max verified time < requested toDateTime (more data might be available)
-            AND the data was acquired > 7 hours ago (the data's acquired time is greater than the threshold)
+            AND the time since acquisition (reference_time - acquired_time) is strictly greater than the threshold (7 hours)
     
         Returns False (should NOT ingest) if:
         - The max verified time >= requested toDateTime
-            OR the data's acquired time is within the threshold ( <= 7 hours ago)
+            OR the time since acquisition (reference_time - acquired_time) is less than or equal to the threshold (<= 7 hours)
         """
         if not row:
             return True
         
-        verified_time = pd.to_datetime(row[3])
-        acquired_time = pd.to_datetime(row[2])
+        verified_time = pd.to_datetime(row[3]).tz_convert(timezone.utc)
+        acquired_time = pd.to_datetime(row[2]).tz_convert(timezone.utc)
         threshold = timedelta(hours=7)
 
         difference = reference_time - acquired_time
