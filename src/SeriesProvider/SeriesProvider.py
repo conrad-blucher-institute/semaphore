@@ -26,6 +26,10 @@ from datetime import datetime, timezone, timedelta
 
 class SeriesProvider():
 
+    # class constants
+    DEFAULT_ACQUIRE_THRESHOLD = timedelta(hours=1)
+    DEFAULT_STALENESS_THRESHOLD = timedelta(hours=7)
+
     def __init__(self) -> None:
         self.seriesStorage = series_storage_factory()
     
@@ -167,7 +171,7 @@ class SeriesProvider():
         :returns bool 
 
         True (should ingest) if:
-        - No row exists (database is empty)
+        - No rows exists for the provided series and time description
         - The max verified time < requested toDateTime (more data might be available)
             AND the time since acquisition (reference_time - acquired_time) is strictly greater than the threshold (> threshold)
     
@@ -176,19 +180,21 @@ class SeriesProvider():
             OR the time since acquisition (reference_time - acquired_time) is less than or equal to the threshold (<= threshold)
 
         NOTE::
-        The reference_time is set by reference_time = datetime.now(timezone.utc) causing it to be 
-        tz aware and all other times are tz naive, so they must be converted to tz aware for comparison.
+        The reference_time and toDateTime are both converted to tz naive for comparison.
         """
         if not row:
             return True
         
         # extract times from the row and add timezone info
-        verified_time = row[3].replace(tzinfo=timezone.utc)
-        acquired_time = row[2].replace(tzinfo=timezone.utc)
-        toDateTime = timeDescription.toDateTime.replace(tzinfo=timezone.utc)
+        verified_time = row[3]
+        acquired_time = row[2]
+
+        # convert the reference time nd toDateTime to tz naive for comparisons
+        reference_time = reference_time.replace(tzinfo=None)
+        toDateTime = timeDescription.toDateTime.replace(tzinfo=None)
 
         # the threshold is set to the interval if it exists, otherwise default to 1 hour
-        threshold = timeDescription.interval if timeDescription.interval is not None else timedelta(hours=1)
+        threshold = timeDescription.interval if timeDescription.interval is not None else self.DEFAULT_ACQUIRE_THRESHOLD
 
         difference = reference_time - acquired_time
 
