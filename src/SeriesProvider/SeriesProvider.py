@@ -20,7 +20,6 @@ from exceptions import Semaphore_Ingestion_Exception, Semaphore_Exception
 
 from utility import log
 from datetime import datetime, timezone, timedelta
-import pandas as pd
 
 
 
@@ -177,7 +176,7 @@ class SeriesProvider():
             OR the time since acquisition (reference_time - acquired_time) is less than or equal to the threshold (<= threshold)
 
         NOTE::
-        The reference_time is set by refence_time = datetime.now(timezone.utc) causing it to be 
+        The reference_time is set by reference_time = datetime.now(timezone.utc) causing it to be 
         tz aware and all other times are tz naive, so they must be converted to tz aware for comparison.
         """
         if not row:
@@ -188,8 +187,8 @@ class SeriesProvider():
         acquired_time = row[2].replace(tzinfo=timezone.utc)
         toDateTime = timeDescription.toDateTime.replace(tzinfo=timezone.utc)
 
-        # the threshold is set to the interval
-        threshold = timeDescription.interval
+        # the threshold is set to the interval if it exists, otherwise default to 1 hour
+        threshold = timeDescription.interval if timeDescription.interval is not None else timedelta(hours=1)
 
         difference = reference_time - acquired_time
 
