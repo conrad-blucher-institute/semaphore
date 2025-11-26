@@ -183,3 +183,64 @@ def test_check_verified_time_for_ingestion(
     )
 
     assert should_ingest == expected_result
+
+def test_check_verified_time_for_ingestion_default_threshold():
+    """
+    This test checks that when no interval is provided in the time description,
+    the default threshold of 1 hour is used.
+    """
+    # mock the storage factory
+    with patch('SeriesProvider.SeriesProvider.series_storage_factory') as mock_storage_factory:
+        mock_storage_factory.return_value = MagicMock()
+        
+        # make a series provider object
+        series_provider = SeriesProvider()
+
+        series_description = SeriesDescription(
+            dataSource="test_source",
+            dataSeries="test_series",
+            dataLocation="test_location",
+            dataDatum=None,
+            dataIntegrityDescription=None,
+            verificationOverride=None
+        )
+
+        time_description = TimeDescription(
+            fromDateTime=datetime(2025, 1, 1, 0, 0, 0),
+            toDateTime=datetime(2025, 1, 1, 4, 0, 0),
+            interval=None,                                              # No interval provided
+            stalenessOffset=timedelta(hours=7)
+        )
+
+        reference_time = datetime(2025, 1, 1, 6, 0, 1, tzinfo= timezone.utc)
+        acquired_time = datetime(2025, 1, 1, 5, 0, 0)
+        verified_time = datetime(2025, 1, 1, 3, 0, 0)
+
+        # reference time - acquired time = 1:00:01 > 1 hour default threshold
+        # -> ingestion occurs (return True)
+
+        row = (
+            1,
+            datetime(2025, 1, 1, 1, 0, 0),
+            acquired_time,
+            verified_time,
+            1.0,
+            True,
+            "unit",
+            "test_source",
+            "test_location",
+            "test_series",
+            None,
+            "0.0",
+            "0.0",
+            None
+        )
+
+        should_ingest = series_provider._SeriesProvider__check_verified_time_for_ingestion(
+            seriesDescription=series_description,
+            timeDescription=time_description,
+            reference_time=reference_time,
+            row=row
+        )
+
+        assert should_ingest is True
