@@ -21,7 +21,7 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta, timezone
 
 from SeriesProvider.SeriesProvider import SeriesProvider
-from DataClasses import Series, SeriesDescription, TimeDescription
+from DataClasses import SeriesDescription, TimeDescription
 
 
 @pytest.mark.parametrize(
@@ -104,8 +104,8 @@ from DataClasses import Series, SeriesDescription, TimeDescription
         "test_VT_equals_toDT",
         "test_VT_greaterthan_toDT",
         "test_AT_below_threshold",
-        "test_AT_equals_theshold",
-        "test_AT_greaterthan_theshold",
+        "test_AT_equals_threshold",
+        "test_AT_greaterthan_threshold",
         "test_no_data"
     ]
 )
