@@ -3,7 +3,7 @@
 #-------------------------------
 # Created By: Christian Quintero on 11/25/2025
 # version 1.0
-# Last Updated: 11/25/2025 by Christian Quintero
+# Last Updated: 11/27/2025 by Christian Quintero
 #----------------------------------
 """
 This provides unit tests for Series Provider
