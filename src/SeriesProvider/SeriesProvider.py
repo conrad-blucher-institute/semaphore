@@ -4,7 +4,7 @@
 # Created By: Matthew Kastl
 # Updated By: Anointiyae Beasley
 # Created Date: 4/30/2023
-# Updated Date: 10/02/2025
+# Updated Date: 11/27/2025
 # version 3.0
 #----------------------------------
 """This class is the start point for interacting with the data section of semaphore. All data requests should go through here.
@@ -58,6 +58,9 @@ class SeriesProvider():
         
         reference_time = datetime.now(timezone.utc)
 
+        # assume we have not ingested data yet
+        already_ingested_data = False
+
         # If the data source is from the semaphore ingestion class, we ignore the default behavior and always request new data.
         if seriesDescription.dataSource.upper() == 'SEMAPHORE':
             return self.__data_ingestion_query(seriesDescription, timeDescription)
@@ -65,13 +68,20 @@ class SeriesProvider():
         # We request new data if:
         #   - The data in the db is stale.
         #   - We can get more verified times for the requested range.
+
+        # always call the db freshness check
         db_is_fresh = self.seriesStorage.db_has_freshly_acquired_data(seriesDescription, timeDescription, reference_time)
-
-
-        should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription, reference_time)
-
-        if not db_is_fresh or should_ingest_for_verified_time:
+        
+        if not db_is_fresh:
             self.__data_ingestion_query(seriesDescription, timeDescription)
+            already_ingested_data = True
+
+        # if we haven't ingested for staleness, check verified time ingestion
+        if not already_ingested_data:
+            should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription, reference_time)
+
+            if should_ingest_for_verified_time:
+                self.__data_ingestion_query(seriesDescription, timeDescription)
 
         return self.__data_base_query(seriesDescription, timeDescription)
     
