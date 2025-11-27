@@ -67,8 +67,8 @@ class SeriesProvider():
         #   - We can get more verified times for the requested range.
         db_is_fresh = self.seriesStorage.db_has_freshly_acquired_data(seriesDescription, timeDescription, reference_time)
 
-        max_verified_time_row = self.seriesStorage.fetch_row_with_max_verified_time_in_range(seriesDescription, timeDescription)
-        should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription, reference_time, max_verified_time_row)
+
+        should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription, reference_time)
 
         if not db_is_fresh or should_ingest_for_verified_time:
             self.__data_ingestion_query(seriesDescription, timeDescription)
@@ -159,14 +159,14 @@ class SeriesProvider():
         
         return data_ingestion_results
     
-    def __check_verified_time_for_ingestion(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, reference_time: datetime, row: tuple) -> bool:
+    def __check_verified_time_for_ingestion(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, reference_time: datetime) -> bool:
         """ 
-        Determines if we should ingest new data based on the most recent verified time in the requested range.
+        Queries the db for the max verified time in the requested range and uses it to 
+        determine if we should ingest new data based on the most recent verified time in the requested range.
 
         :param seriesDescription: SeriesDescription - The description for a series
         :param timeDescription: TimeDescription - The time description for a series
         :param reference_time: datetime - The reference time of the model execution
-        :param row: tuple - The row with the max verified time in the requested range
 
         :returns bool 
 
@@ -182,18 +182,23 @@ class SeriesProvider():
         NOTE::
         The reference_time and toDateTime are both converted to tz naive for comparison.
         """
-        if not row:
+
+        # get the row with the max verified time in the requested range
+        max_verified_time_row = self.seriesStorage.fetch_row_with_max_verified_time_in_range(seriesDescription, timeDescription)
+
+        # check if we have any rows for the provided series and time description
+        if not max_verified_time_row:
             return True
         
         # extract times from the row and add timezone info
-        verified_time = row[3]
-        acquired_time = row[2]
+        verified_time = max_verified_time_row[3]
+        acquired_time = max_verified_time_row[2]
 
-        # convert the reference time nd toDateTime to tz naive for comparisons
+        # convert the reference time and toDateTime to tz naive for comparisons
         reference_time = reference_time.replace(tzinfo=None)
         toDateTime = timeDescription.toDateTime.replace(tzinfo=None)
 
-        # the threshold is set to the interval if it exists, otherwise default to 1 hour
+        # the threshold is set to the interval if it exists, otherwise default
         threshold = timeDescription.interval if timeDescription.interval is not None else self.DEFAULT_ACQUIRE_THRESHOLD
 
         difference = reference_time - acquired_time
