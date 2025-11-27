@@ -19,7 +19,7 @@ from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, T
 from exceptions import Semaphore_Ingestion_Exception, Semaphore_Exception
 
 from utility import log
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 
@@ -61,8 +61,9 @@ class SeriesProvider():
         # We request new data if:
         #   - The data in the db is stale.
         #   - The db does not have data newly made data. (Made by data source)
-        db_is_fresh = self.seriesStorage.db_has_freshly_acquired_data(seriesDescription, timeDescription, reference_time)
-        db_has_new = self.seriesStorage.db_has_data_in_time_range(seriesDescription, timeDescription)
+        db_is_fresh = self.db_has_freshly_acquired_data(seriesDescription, timeDescription, reference_time)
+
+        db_has_new = self.db_has_data_in_time_range(seriesDescription, timeDescription)
         if not db_is_fresh or not db_has_new:
             self.__data_ingestion_query(seriesDescription, timeDescription)
 
@@ -107,7 +108,37 @@ class SeriesProvider():
                     raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("SPECIFIC", semaphoreSeriesDescription= DESCRIPTION, timeDescription= DESCRIPTION)')
             case _:
                 raise NotImplementedError(f'Method {method} has not been implemented in SeriesProvider.request_output')
-              
+    def db_has_freshly_acquired_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> bool:
+        """
+        Returns true if the database has fresh data for all data described in the request.
+        Data is considered fresh if it was acquired within the window of [reference time, staleness offset]. The staleness offset
+        is configured for this request in the TimeDescription object. Staleness is a measure with acquired time not verified time.
+
+        Args:
+            referenceTime (datetime): The time data is being requested. Usually, it is now.
+
+        Returns:
+            is_fresh: Determines whether the data is fresh or not.
+        """
+        
+        oldestGeneratedTime = self.seriesStorage.get_oldest_generated_time(seriesDescription, timeDescription)
+        
+        age: timedelta = referenceTime - oldestGeneratedTime
+        stalenessOffset = timeDescription.stalenessOffset
+        is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
+  
+        return is_fresh
+    
+    def db_has_data_in_time_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
+       
+       max_verified_time = self.seriesStorage.get_max_verified_time(seriesDescription, timeDescription)
+       
+       if max_verified_time is None:
+           return False
+           
+       is_inclusive = max_verified_time >= timeDescription.toDateTime
+
+       return is_inclusive
 
     def __data_base_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) ->Series:
         """ Handles the process of getting requested data from series storage.

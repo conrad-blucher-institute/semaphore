@@ -447,11 +447,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         ids = [row[0] for row in result]
         return resultSeries, ids
 
-    def db_has_freshly_acquired_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> bool:
+    def get_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> timedelta:
         """
-        Returns true if the database has fresh data for all data described in the request.
-        Data is considered fresh if it was acquired within the window of [reference time, staleness offset]. The staleness offset
-        is configured for this request in the TimeDescription object. Staleness is a measure with acquired time not verified time.
+        Returns the oldest generated time within a time window.
 
         Data Assumptions (in the inputs table):
         - Every verifiedTime in [from_dt, to_dt] has at least one row in the database.
@@ -470,8 +468,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         Expected attributes:
         :param seriesDescription: SeriesDescription - A series description object
         :param timeDescription: TimeDescription - A hydrated time description object
-        :param referenceTime: datetime - The time data is being requested. Usually, it is now.
-
         """
 
         query_stmt = text(f"""
@@ -512,14 +508,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             return False
         
         oldestGeneratedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
-        age: timedelta = referenceTime - oldestGeneratedTime
-        stalenessOffset = timeDescription.stalenessOffset
-        is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
-  
-        return is_fresh
+        
+        return oldestGeneratedTime
        
 
-    def db_has_data_in_time_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
+    def get_max_verified_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime | None:
         """
         Returns true if the database has data up to the toTime specified in the TimeDescription. This means 
         that the database isn't missing new data.
@@ -555,14 +548,16 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         query_stmt = query_stmt.bindparams(**bind_params)
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
-        if not tupleishResult: # Data is not yet in the DB so we need to request it
-            return False
+        if not tupleishResult: # Data is not yet in the DB
+            return None
+        
+        max_verifiedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
+        
+        return max_verifiedTime
+        
+        
 
-        latest_verifiedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
-        is_inclusive = latest_verifiedTime >= timeDescription.toDateTime
-
-        # endregion
-        return is_inclusive
+        
 
         
         
