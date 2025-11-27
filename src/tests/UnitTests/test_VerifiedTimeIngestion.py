@@ -133,7 +133,8 @@ def test_check_verified_time_for_ingestion(
     will be converted to tz aware in the function being tested.
     """
     # mock the storage factory
-    mock_storage_factory.return_value = MagicMock()
+    mock_storage = MagicMock()
+    mock_storage_factory.return_value = mock_storage
     
     # make a series provider object
     series_provider = SeriesProvider()
@@ -175,11 +176,13 @@ def test_check_verified_time_for_ingestion(
             None                                                        # ensembleMemberID
         )
 
+    # force series storage to return the test row
+    mock_storage.fetch_row_with_max_verified_time_in_range.return_value = row
+
     should_ingest = series_provider._SeriesProvider__check_verified_time_for_ingestion(
         seriesDescription=series_description,
         timeDescription=time_description,
         reference_time=reference_time,
-        row=row
     )
 
     assert should_ingest == expected_result
@@ -191,7 +194,8 @@ def test_check_verified_time_for_ingestion_default_threshold():
     """
     # mock the storage factory
     with patch('SeriesProvider.SeriesProvider.series_storage_factory') as mock_storage_factory:
-        mock_storage_factory.return_value = MagicMock()
+        mock_storage = MagicMock()
+        mock_storage_factory.return_value = mock_storage
         
         # make a series provider object
         series_provider = SeriesProvider()
@@ -236,11 +240,13 @@ def test_check_verified_time_for_ingestion_default_threshold():
             None
         )
 
+        # force series storage to return the test row
+        mock_storage.fetch_row_with_max_verified_time_in_range.return_value = row
+
         should_ingest = series_provider._SeriesProvider__check_verified_time_for_ingestion(
             seriesDescription=series_description,
             timeDescription=time_description,
             reference_time=reference_time,
-            row=row
         )
 
         assert should_ingest is True
