@@ -121,16 +121,28 @@ class SeriesProvider():
             is_fresh: Determines whether the data is fresh or not.
         """
         
-        oldestGeneratedTime = self.seriesStorage.get_oldest_generated_time(seriesDescription, timeDescription)
+        oldest_generated_time = self.seriesStorage.get_oldest_generated_time(seriesDescription, timeDescription)
+
+        if oldest_generated_time is None:
+            return False
         
-        age: timedelta = referenceTime - oldestGeneratedTime
+        age: timedelta = referenceTime - oldest_generated_time
         stalenessOffset = timeDescription.stalenessOffset
         is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
   
         return is_fresh
     
     def db_has_data_in_time_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
-       
+       """ Returns true if the database has data up to the toTime specified in the TimeDescription. This means 
+        that the database isn't missing new data.
+
+        Args:
+            :param seriesDescription: SeriesDescription - A series description object
+            :param timeDescription: TimeDescription - A hydrated time description object
+
+        Returns:
+            bool: True or false based on if the data is inclusive or not.
+        """
        max_verified_time = self.seriesStorage.get_max_verified_time(seriesDescription, timeDescription)
        
        if max_verified_time is None:

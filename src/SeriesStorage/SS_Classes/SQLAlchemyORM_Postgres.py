@@ -447,7 +447,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         ids = [row[0] for row in result]
         return resultSeries, ids
 
-    def get_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> timedelta:
+    def get_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime | None:
         """
         Returns the oldest generated time within a time window.
 
@@ -505,7 +505,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
         
         if not tupleishResult or not tupleishResult[0][0]: #Data is not present in the DB
-            return False
+            return None
         
         oldestGeneratedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
         
@@ -514,8 +514,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
     def get_max_verified_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime | None:
         """
-        Returns true if the database has data up to the toTime specified in the TimeDescription. This means 
-        that the database isn't missing new data.
+        Returns the max/latest verified time in the db within a time window.
 
         Expected attributes:
         :param seriesDescription: SeriesDescription - A series description object
@@ -551,9 +550,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         if not tupleishResult: # Data is not yet in the DB
             return None
         
-        max_verifiedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
+        max_verified_time = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
         
-        return max_verifiedTime
+        return max_verified_time
         
         
 

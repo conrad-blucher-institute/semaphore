@@ -16,7 +16,7 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from sqlalchemy import create_engine, Boolean, MetaData, Table, Column, Integer, String, DateTime, insert
 from sqlalchemy.pool import StaticPool
-from SeriesProvider.SeriesProvider import db_has_freshly_acquired_data, db_has_data_in_time_range
+from SeriesProvider import SeriesProvider
 from DataClasses import SeriesDescription, TimeDescription
 from pathlib import Path
 _mp = MonkeyPatch()
@@ -162,8 +162,8 @@ def test_determine_staleness_with_mock_db(engine, inputs_table, series_kwargs, f
     reference_time = datetime.combine(date(2025, 9, 12), time(2, 0), tzinfo=timezone.utc)
     time_desc.stalenessOffset = timedelta(hours=1)
 
-    storage = series_storage_factory()
-    actual_result = db_has_freshly_acquired_data(series_desc, time_desc, reference_time)
+    seriesProvider = SeriesProvider()
+    actual_result = seriesProvider.db_has_freshly_acquired_data(series_desc, time_desc, reference_time)
 
     assert actual_result is expected_result
     
@@ -202,8 +202,9 @@ def test_determine_timeSpan_with_mock_db(engine, inputs_table, series_kwargs, fr
     time_desc.interval = timedelta(hours=1)
     time_desc.stalenessOffset = timedelta(hours=1)
 
-    storage = series_storage_factory()
-    actual_result = db_has_data_in_time_range(series_desc, time_desc)
+
+    seriesProvider = SeriesProvider()
+    actual_result = seriesProvider.db_has_data_in_time_range(series_desc, time_desc)
 
     assert actual_result is expected_result
     
