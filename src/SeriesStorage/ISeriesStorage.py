@@ -57,11 +57,11 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
     
     @abstractmethod
-    def db_has_freshly_acquired_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, reference_time: datetime) -> bool:
+    def get_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime:
         raise NotImplementedError()
     
     @abstractmethod
-    def db_has_data_in_time_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
+    def get_max_verified_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime:
         raise NotImplementedError()
 
 
