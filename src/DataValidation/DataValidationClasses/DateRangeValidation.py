@@ -15,12 +15,15 @@ determines the expected date range via the timeDescription and checks for missin
 from DataClasses import Series
 from DataValidation.IDataValidation import IDataValidation
 from utility import log
-from datetime import timedelta
+from datetime import timedelta, datetime
 from pandas import date_range
 
 
 class DateRangeValidation(IDataValidation):
 
+    def __init__(self, referenceTime: datetime = None):
+        self.referenceTime = referenceTime
+        
     def validate(self, series: Series) -> bool:
         """ This method checks for missing date ranges in the the expected time series. 
             :param series: Series - The series to validate
@@ -43,12 +46,24 @@ class DateRangeValidation(IDataValidation):
         # If there are still null values, then there are missing values
         missing_value_count = df_to_validate['dataValue'].isnull().sum()
         
-
         if missing_value_count > 0:
             log(f'DateRangeValidation: Series {series} is missing {missing_value_count} values.')
             for missing_time in df_to_validate[df_to_validate['dataValue'].isnull()].index:
                 log(f'\tMissing time: {missing_time}')
             return False
+        
+        # only unit tests will skip this check unless they set a reference time
+        if self.referenceTime is not None and series.timeDescription.stalenessOffset is not None:
+            
+            # calculate time difference between reference time and latest generated time
+            time_difference = self.referenceTime - df_to_validate['timeGenerated'].min()
+
+            # validate that the data isn't stale 
+            if time_difference > series.timeDescription.stalenessOffset:
+                log(f'DateRangeValidation: Series {series} is stale.\n')
+                log(f'Time difference: {time_difference}. Staleness offset: {series.timeDescription.stalenessOffset}\n')
+                return False
+        
         return True
 
 
