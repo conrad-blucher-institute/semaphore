@@ -185,11 +185,6 @@ class DataGatherer:
 
         # Build staleness offset
         stalenessOffset = dependentSeries.stalenessOffset
-
-        # build the staleness offset if needed
-        if stalenessOffset is None:
-            stalenessOffset = timedelta(seconds=3600 * 7)      # Default to 7 hour
-
         
         # Check if it's only one point
         if (toOffset == fromOffset): 
