@@ -54,6 +54,7 @@ class DateRangeValidation(IDataValidation):
             return False
         
         # only unit tests will skip this check unless they set a reference time
+        # and measurements that do not have stalenessOffset set will skip this check
         if self.referenceTime is not None and series.timeDescription.stalenessOffset is not None:
             
             # calculate time difference between reference time and latest generated time

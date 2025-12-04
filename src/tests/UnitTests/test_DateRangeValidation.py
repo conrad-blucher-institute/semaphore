@@ -1,3 +1,18 @@
+# -*- coding: utf-8 -*-
+# test_DateRangeValidation.py
+#-------------------------------
+# Created By: Matthew Kastl, Christian Quintero
+# Created Date: 09/16/2025
+# Last Modified By: Christian Quintero on 12/04/2025
+#----------------------------------
+"""
+This file tests the date range validation class
+
+docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_DateRangeValidation.py
+""" 
+#----------------------------------
+# 
+#
 import unittest
 from unittest.mock import MagicMock
 import pandas as pd
@@ -66,7 +81,7 @@ class TestDateRangeValidation(unittest.TestCase):
         # Create a sample DataFrame with hourly data
         start_time = datetime(2023, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
         end_time = datetime(2023, 1, 1, 2, 0, 0, tzinfo=timezone.utc)
-        data = {'timeVerified': pd.date_range(start=start_time, end=end_time, freq='1H', tz='UTC'),
+        data = {'timeVerified': pd.date_range(start=start_time, end=end_time, freq='1h', tz='UTC'),
                 'dataValue': [1, 2, 3]}
         df = pd.DataFrame(data)
 
@@ -107,6 +122,11 @@ class TestDateRangeValidation(unittest.TestCase):
         """Asserts DateRangeValidation can be created from the factory method"""
         validator = data_validation_factory('DateRangeValidation')
         self.assertIsInstance(validator, DateRangeValidation)
+
+    
+    """
+    These next tests validate the staleness check in DateRangeValidation
+    """
 
     def test_validate_staleness_exact_offset(self):
         """ Asserts non stale data passes validation
@@ -189,14 +209,13 @@ class TestDateRangeValidation(unittest.TestCase):
         self.assertFalse(validator.validate(series_mock))
 
     def test_validate_staleness_fresh_data(self):
-        """ Asserts fresh data passes validation with a very strict staleness offset
+        """ Asserts fresh data passes validation with a different offset
 
             difference < offset  == passes validation
 
-            This test checks that data below the staleness offset passes validation.
             In this test, the computed staleness difference check is
             1 second, and is compared to an offset of 2 seconds.
-            1 second !> 2 seconds so the data is fresh and passes validation.
+            1 second < 2 seconds so the data is fresh and passes validation.
         """
 
         # 2023-01-01 00:00:01 UTC
@@ -222,7 +241,7 @@ class TestDateRangeValidation(unittest.TestCase):
         series_mock.timeDescription.fromDateTime = start_time
         series_mock.timeDescription.toDateTime = end_time
         series_mock.timeDescription.interval = timedelta(hours=1)
-        series_mock.timeDescription.stalenessOffset = timedelta(seconds=2) # very strict 2 second offset
+        series_mock.timeDescription.stalenessOffset = timedelta(seconds=2) # 2 second offset
         series_mock.seriesDescription = "Test Series"
 
         validator = data_validation_factory('DateRangeValidation', referenceTime=reference_time)
