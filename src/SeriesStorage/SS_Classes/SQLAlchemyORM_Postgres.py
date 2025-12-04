@@ -447,11 +447,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         ids = [row[0] for row in result]
         return resultSeries, ids
 
-    def db_has_freshly_acquired_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> bool:
+    def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime | None:
         """
-        Returns true if the database has fresh data for all data described in the request.
-        Data is considered fresh if it was acquired within the window of [reference time, staleness offset]. The staleness offset
-        is configured for this request in the TimeDescription object. Staleness is a measure with acquired time not verified time.
+        Returns the oldest generated time within a time window.
 
         Data Assumptions (in the inputs table):
         - Every verifiedTime in [from_dt, to_dt] has at least one row in the database.
@@ -470,8 +468,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         Expected attributes:
         :param seriesDescription: SeriesDescription - A series description object
         :param timeDescription: TimeDescription - A hydrated time description object
-        :param referenceTime: datetime - The time data is being requested. Usually, it is now.
-
         """
 
         query_stmt = text(f"""
@@ -509,31 +505,32 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
         
         if not tupleishResult or not tupleishResult[0][0]: #Data is not present in the DB
-            return False
+            return None
         
         oldestGeneratedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
-        age: timedelta = referenceTime - oldestGeneratedTime
-        stalenessOffset = timeDescription.stalenessOffset
-        is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
-  
-        return is_fresh
+        
+        return oldestGeneratedTime
        
-
-    def db_has_data_in_time_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
+    def fetch_row_with_max_verified_time_in_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> tuple | None:
         """
-        Returns true if the database has data up to the toTime specified in the TimeDescription. This means 
-        that the database isn't missing new data.
+        This function returns the row with the max verified time in the requested range
 
-        Expected attributes:
-        :param seriesDescription: SeriesDescription - A series description object
-        :param timeDescription: TimeDescription - A hydrated time description object
+        params:
+            seriesDescription: SeriesDescription - A series description object
+            timeDescription: TimeDescription - A hydrated time description object
+
+        Returns:
+            tuple | None - The row with the max verified time in the requested range or None if no data is found
+
+        The returned tuple will have the order of:
+        (id, generatedTime, acquiredTime, verifiedTime, dataValue, isActual, dataUnit, dataSource, dataLocation,
+        dataSeries, dataDatum, latitude, longitude, ensembleMemberID)
         """
-        # region toTime Inclusion Check
 
-        # A query to get the latest verified time in the DB for this series in the requested time range
+        # this query gets the row with the max verified time in the requested range
         query_stmt = text(f"""
         SELECT  
-        i."verifiedTime"
+        i.*
         FROM inputs AS i
         WHERE i."dataSource"   = :dataSource
         AND i."dataLocation" = :dataLocation
@@ -550,24 +547,17 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             'from_dt': timeDescription.fromDateTime,
             'to_dt': timeDescription.toDateTime
         }
+
+        # only bind dataDatum if it's not None
         if seriesDescription.dataDatum is not None:
             bind_params['dataDatum'] = seriesDescription.dataDatum
+        
         query_stmt = query_stmt.bindparams(**bind_params)
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
-        if not tupleishResult: # Data is not yet in the DB so we need to request it
-            return False
-
-        latest_verifiedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
-        is_inclusive = latest_verifiedTime >= timeDescription.toDateTime
-
-        # endregion
-        return is_inclusive
-
         
-        
-        
-        
+        # convert the list of tuples to a single tuple and return it, else return None
+        return tuple(tupleishResult[0]) if tupleishResult else None
 
     #############################################################################################
     ################################################################################## DB Managment Methods
