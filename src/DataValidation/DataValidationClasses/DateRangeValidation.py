@@ -31,7 +31,7 @@ class DateRangeValidation(IDataValidation):
         """
 
         if series.dataFrame is None or len(series.dataFrame) <= 0:
-            print('DateRangeValidation: No data in series to validate.')
+            log('DateRangeValidation: No data in series to validate.')
             return False # No data to validate
     
         df_to_validate = series.dataFrame.copy()
@@ -57,7 +57,7 @@ class DateRangeValidation(IDataValidation):
         # and measurements that do not have stalenessOffset set will skip this check
         if self.referenceTime is not None and series.timeDescription.stalenessOffset is not None:
             
-            # calculate time difference between reference time and latest generated time
+            # calculate time difference between reference time and earliest generated time
             time_difference = self.referenceTime - df_to_validate['timeGenerated'].min()
 
             # validate that the data isn't stale 

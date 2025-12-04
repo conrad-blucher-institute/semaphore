@@ -39,7 +39,7 @@ class TestDateRangeValidation(unittest.TestCase):
     def test_validate_valid_series(self):
         """Asserts validate returns True when given a valid series"""
         # Create a sample DataFrame
-        data = {'timeVerified': pd.date_range(start='2023-01-01', end='2023-01-03', freq='1D', tz='UTC'),
+        data = {'timeVerified': pd.date_range(start='2023-01-01', end='2023-01-03', freq='1d', tz='UTC'),
                 'dataValue': [1, 2, 3]}
         df = pd.DataFrame(data)
 
@@ -101,7 +101,7 @@ class TestDateRangeValidation(unittest.TestCase):
     def test_validate_missing_values_at_start_and_end(self):
         """Asserts validate returns False when missing values at the start and end"""
         # Create a sample DataFrame with missing values at the start and end
-        data = {'timeVerified': pd.date_range(start='2023-01-02', end='2023-01-02', freq='1D', tz='UTC'),
+        data = {'timeVerified': pd.date_range(start='2023-01-02', end='2023-01-02', freq='1d', tz='UTC'),
                 'dataValue': [2]}
         df = pd.DataFrame(data)
 

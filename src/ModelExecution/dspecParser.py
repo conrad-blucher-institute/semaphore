@@ -217,7 +217,7 @@ class dspec_sub_Parser_2_0:
                 dSeries.outKey = dSeries_dict.get("outKey")
 
                 # If staleness offset is provided we use it, else we set a default based on range:
-                # --- If data is in the past there is now staleness offset (None)
+                # --- If data is in the past there is no staleness offset (None)
                 # --- If data is current/future we set a default staleness offset of 7 hours
                 fromTimeIsInPast = dSeries.range[1] < 0
                 dSeries.stalenessOffset = dSeries_dict.get("stalenessOffset", None if fromTimeIsInPast else timedelta(hours=7))
