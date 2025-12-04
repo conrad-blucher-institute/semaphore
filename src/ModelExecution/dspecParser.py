@@ -215,7 +215,13 @@ class dspec_sub_Parser_2_0:
                 dSeries.datum = dSeries_dict.get("datum")
                 dSeries.unit = dSeries_dict.get("unit")
                 dSeries.outKey = dSeries_dict.get("outKey")
-                dSeries.stalenessOffset = dSeries_dict.get("stalenessOffset", timedelta(hours=7)) # Staleness offset defaults to 7 hours if not provided
+
+                # If staleness offset is provided we use it, else we set a default based on range:
+                # --- If data is in the past there is no staleness offset (None)
+                # --- If data is current/future we set a default staleness offset of 7 hours
+                fromTimeIsInPast = dSeries.range[1] < 0
+                dSeries.stalenessOffset = dSeries_dict.get("stalenessOffset", None if fromTimeIsInPast else timedelta(hours=7))
+                
                 dSeries.verificationOverride = dSeries_dict.get("verificationOverride")
 
                 # If there is a data Integrity Call we parse it, else its set to None.

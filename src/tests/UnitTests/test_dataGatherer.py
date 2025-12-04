@@ -98,7 +98,8 @@ def test_get_data_repository(data_gatherer, mock_dspec):
     mock_timeDescription.configure_mock(
         fromDateTime = reference_time,
         toDateTime = reference_time + timedelta(seconds=mock_dspec.dependentSeries[0].interval),
-        interval= timedelta(seconds=mock_dspec.dependentSeries[0].interval)
+        interval = timedelta(seconds=mock_dspec.dependentSeries[0].interval),
+        stalenessOffset = timedelta(seconds=3600 * 7)
     )
 
     # Create the mock series description, and set the required attributes for this test
@@ -115,7 +116,8 @@ def test_get_data_repository(data_gatherer, mock_dspec):
     mock_series.configure_mock(dataFrame=DataFrame(
         {
             'dataValue': [1.0, 2.0],
-            'timeVerified': [mock_timeDescription.fromDateTime, mock_timeDescription.toDateTime]
+            'timeVerified': [mock_timeDescription.fromDateTime, mock_timeDescription.toDateTime],
+            'timeGenerated': reference_time
         },
         index=date_range(
             start=mock_timeDescription.fromDateTime,
@@ -213,7 +215,8 @@ def test_data_integrity_call(data_gatherer, mock_dspec, mock_integrity_factory):
     mock_timeDescription.configure_mock(
         fromDateTime = reference_time,
         toDateTime = reference_time + timedelta(seconds=3600),
-        interval= timedelta(seconds=3600)
+        interval = timedelta(seconds=3600),
+        stalenessOffset = timedelta(seconds=3600 * 7)
     )
 
     # Create the mock integrity call
@@ -238,7 +241,8 @@ def test_data_integrity_call(data_gatherer, mock_dspec, mock_integrity_factory):
     mock_series.configure_mock(dataFrame=DataFrame(
         {
             'dataValue': [1.0, 2.0],
-            'timeVerified': [mock_timeDescription.fromDateTime, mock_timeDescription.toDateTime]
+            'timeVerified': [mock_timeDescription.fromDateTime, mock_timeDescription.toDateTime],
+            'timeGenerated': reference_time
         },
         index=date_range(
             start=mock_timeDescription.fromDateTime,
@@ -286,13 +290,15 @@ def test_data_validation_call(data_gatherer):
     mock_time.fromDateTime = reference_time
     mock_time.toDateTime = reference_time + timedelta(seconds= 3600)
     mock_time.interval = timedelta(seconds= 3600)
+    mock_time.stalenessOffset = timedelta(seconds=3600 * 7)
 
     # Create the mock series with the mock time description and description
     mock_series = MagicMock(spec=Series)
     mock_series.configure_mock(description=mock_description, timeDescription=mock_time)
     mock_series.dataFrame = DataFrame({
         "timeVerified": [mock_time.fromDateTime, mock_time.toDateTime],
-        "dataValue": [1.0, 2.0]
+        "dataValue": [1.0, 2.0],
+        "timeGenerated": reference_time
     })
 
     # Patch the validation factory
@@ -303,7 +309,7 @@ def test_data_validation_call(data_gatherer):
         mock_factory.return_value = mock_validator
 
         # Call the private method directly
-        data_gatherer._DataGatherer__validate_series(mock_series)
+        data_gatherer._DataGatherer__validate_series(mock_series, reference_time)
 
         # Assert the factory was called with OverrideValidation
         mock_factory.assert_called_once_with("OverrideValidation")

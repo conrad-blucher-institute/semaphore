@@ -120,7 +120,7 @@ class DataGatherer:
             series.dataFrame.reset_index(inplace=True)
 
             # Validate the data
-            self.__validate_series(series)
+            self.__validate_series(series, referenceTime)
             
             # Store the series in the repository
             series_repository[key] = series
@@ -185,11 +185,6 @@ class DataGatherer:
 
         # Build staleness offset
         stalenessOffset = dependentSeries.stalenessOffset
-
-        # build the staleness offset if needed
-        if stalenessOffset is None:
-            stalenessOffset = timedelta(seconds=3600 * 7)      # Default to 7 hour
-
         
         # Check if it's only one point
         if (toOffset == fromOffset): 
@@ -215,12 +210,13 @@ class DataGatherer:
                             dependentSeries.dataIntegrityCall.args
                     )
     
-    def __validate_series(self, series: Series):
+    def __validate_series(self, series: Series, referenceTime: datetime):
         """ This method checks if the series description has a verification override.
             If it does, it uses the override to validate the series.
             If it doesn't, it uses the date range validation to validate the series.
 
             :param series: Series - The series to validate
+            :param referenceTime: datetime - The reference time for this model
         """
 
         if series.description.verificationOverride is not None:
@@ -231,7 +227,7 @@ class DataGatherer:
                 raise Semaphore_Data_Exception(f'OverrideValidation Failed in Data Gatherer! \n[Series] -> {series}')
         else:
             # if no verification override, default to validate the date range
-            is_valid = data_validation_factory('DateRangeValidation').validate(series)
+            is_valid = data_validation_factory('DateRangeValidation', referenceTime = referenceTime).validate(series)
 
             if not is_valid:
                 raise Semaphore_Data_Exception(f'DateRangeValidation Failed in Data Gatherer! \n[Series] -> {series}')
