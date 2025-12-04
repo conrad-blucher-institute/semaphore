@@ -31,6 +31,7 @@ class DateRangeValidation(IDataValidation):
         """
 
         if series.dataFrame is None or len(series.dataFrame) <= 0:
+            print('DateRangeValidation: No data in series to validate.')
             return False # No data to validate
     
         df_to_validate = series.dataFrame.copy()

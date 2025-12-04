@@ -17,16 +17,40 @@ from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescr
 from SeriesProvider.SeriesProvider import SeriesProvider
 from fastapi.encoders import jsonable_encoder
 import pandas as pd
+from contextvars import ContextVar
+import logging
+
 
 load_dotenv()
 
 app = FastAPI(root_path='/semaphore-api',)
-
 @app.get('/')
 def read_main():
     return {'message': 'Hello World'}
 
+#region Logging
+# Context variable to hold process time for logging
+process_time_var: ContextVar[float] = ContextVar('process_time', default=0.0)
 
+# Custom logging filter to add process time to log records (Makes processtime accessible in log config file)
+class ProcessTimeFilter(logging.Filter):
+    def filter(self, record):
+        record.process_time = process_time_var.get()
+        return True
+
+@app.middleware("http")
+async def response_time_middleware(request, call_next):
+    """ Middleware to measure and log the processing time of each request. 
+        Stores the processing time in a context variable for logging.
+    """
+    start_time = start_time = datetime.now(timezone.utc)
+    response = await call_next(request)
+    process_time = datetime.now(timezone.utc) - start_time
+    process_time_var.set(process_time.total_seconds())
+    return response
+#endregion
+
+#region API Endpoints
 @app.get('/input/source={source}/series={series}/location={location}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
 async def get_input(source: str, series: str, location: str, fromDateTime: str, toDateTime: str, 
                     datum: str = None, interval: int = None):
@@ -196,8 +220,9 @@ def serialize_series(series: Series) -> dict[any]:
     
     else:
         raise NotImplementedError("The series description is not supported")
-    
+#endregion
 
+#region Serializers
 def serialize_input_series(series: Series) -> dict[any]:
     """ Serializes an input series into a dictionary.
     param: series - Series The input series to serialize.
@@ -325,3 +350,4 @@ def serialize_output_series(series: Series) -> dict[any]:
 
     serialized['_Series__data'] = serialized_data # Add it back to the response
     return serialized
+#endregion

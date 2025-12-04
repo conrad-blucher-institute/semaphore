@@ -30,9 +30,9 @@ services:
       - ./data:/app/data
     healthcheck:
       test: ["CMD", "python3", "tools/HEALTHCHECK_CORE.py"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      interval: 30s
+      timeout: 60s
+      retries: 0
     extra_hosts:
       - "host.docker.internal:host-gateway"
   api:
@@ -62,9 +62,9 @@ services:
       - ./data:/app/data
     healthcheck:
       test: ["CMD", "curl", "-f", "host.docker.internal:8888/health"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      interval: 30s
+      timeout: 60s
+      retries: 0
     extra_hosts:
       - "host.docker.internal:host-gateway"
   db:
@@ -84,9 +84,9 @@ services:
       - psql-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      interval: 30s
+      timeout: 60s
+      retries: 0
 volumes:
   psql-data:
 # networks:
