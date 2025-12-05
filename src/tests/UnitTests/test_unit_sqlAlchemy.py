@@ -142,12 +142,20 @@ def seed_inputs_once(engine, inputs_table):
                  dataLocation="SBirdIsland", dataDatum="NA"),
             "2025091200", "2025091223",
             True #Returned date: 2025-09-12 01:00
+        ),
+        (
+        #Tests past data
+            dict(dataSource="HOHONU", dataSeries="dWl",
+                 dataLocation="NorthJetty", dataDatum="NAVD"),
+            "2025091100", "2025091123",
+        True #Returned date: 2025-09-11 01:00
         )
     ],
     ids=[
         "NOAATANDC",
         "NDFD_EXP",
-        "TWC"
+        "TWC",
+        "HOHONU"
     ],
 )
 def test_determine_staleness_with_mock_db(engine, inputs_table, series_kwargs, from_str, to_str, expected_result):
