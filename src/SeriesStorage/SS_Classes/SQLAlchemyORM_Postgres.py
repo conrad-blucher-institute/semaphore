@@ -62,61 +62,49 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param timeDescription: TimeDescription - A hydrated time description object
         """
         inputs_select_latest_stmt = text(f""" 
-        WITH RankedData AS (
-            SELECT  i."id",
-            i."generatedTime",
-            i."acquiredTime",
-            i."verifiedTime",
-            i."dataValue",
-            i."isActual",
-            i."dataUnit",
-            i."dataSource",
-            i."dataLocation",
-            i."dataSeries",
-            i."dataDatum",
-            i."latitude",
-            i."longitude",
-            i."ensembleMemberID",
-            
-            -- Groups rows by verifiedTime and ensembleMemberID. Non ensemble inputs ensembleMemberId will be null resulting in a single group per verified time.
-            -- Within each group, generatedTime is ordered from newest to oldest (DESC).
-            -- Each row in the group is assigned a row number starting at rn = 1.
-            -- For each ensembleMemberID group, rn = 1 corresponds to the row with the latest generatedTime.
-                ROW_NUMBER() OVER (
-                    PARTITION BY 
-                        "verifiedTime",
-                        "ensembleMemberID"
-                    ORDER BY 
-                        "generatedTime" DESC
-                ) AS rn
+        WITH latest_per_group AS (
+            SELECT DISTINCT ON ("verifiedTime", "ensembleMemberID")
+                i."id",
+                i."generatedTime",
+                i."acquiredTime",
+                i."verifiedTime",
+                i."dataValue",
+                i."isActual",
+                i."dataUnit",
+                i."dataSource",
+                i."dataLocation",
+                i."dataSeries",
+                i."dataDatum",
+                i."latitude",
+                i."longitude",
+                i."ensembleMemberID"
             FROM inputs AS i
             WHERE i."dataSource"   = :dataSource
-            AND i."dataLocation" = :dataLocation
-            AND i."dataSeries"   = :dataSeries
-            AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
-            AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+                AND i."dataLocation" = :dataLocation
+                AND i."dataSeries"   = :dataSeries
+                AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
+                AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+            ORDER BY
+                i."verifiedTime",
+                i."ensembleMemberID",
+                i."generatedTime" DESC
         )
-        -- From the ranked rows, keep only the "best" rank per verifiedTime, ensembleMemberID.
-        SELECT 
-         "id",
-        "generatedTime",
-        "acquiredTime",
-        "verifiedTime",
-        "dataValue",
-        "isActual",
-        "dataUnit",
-        "dataSource",
-        "dataLocation",
-        "dataSeries",
-        "dataDatum",
-        "latitude",
-        "longitude",
-        "ensembleMemberID"
-           
-        FROM
-            RankedData
-        WHERE
-            rn = 1 -- Grabs the latest genrated time from each ensemble member id and verified time
+        SELECT
+            "id",
+            MIN("generatedTime") OVER () AS "generatedTime",
+            "acquiredTime",
+            "verifiedTime",
+            "dataValue",
+            "isActual",
+            "dataUnit",
+            "dataSource",
+            "dataLocation",
+            "dataSeries",
+            "dataDatum",
+            "latitude",
+            "longitude",
+            "ensembleMemberID"
+        FROM latest_per_group
         ORDER BY
             "verifiedTime",
             "ensembleMemberID";
@@ -128,7 +116,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             'dataLocation': seriesDescription.dataLocation,
             'dataSeries': seriesDescription.dataSeries,
             'from_dt': timeDescription.fromDateTime,
-            'to_dt': timeDescription.toDateTime
+            'to_dt': timeDescription.toDateTime 
         }
         if seriesDescription.dataDatum is not None:
             bind_params['dataDatum'] = seriesDescription.dataDatum

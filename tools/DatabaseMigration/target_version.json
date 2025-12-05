@@ -1,4 +1,4 @@
 {
-    "Target Version" : "3.3",
-    "Description" : "Add NDFD_JSON as a new data source"
+    "Target Version" : "3.4",
+    "Description" : "Add indexes to inputs table for performance improvements."
 }
