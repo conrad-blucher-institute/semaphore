@@ -139,7 +139,7 @@ class SeriesProvider():
         """
         
         oldest_generated_time = self.seriesStorage.fetch_oldest_generated_time(seriesDescription, timeDescription)
-        
+
         stalenessOffset = timeDescription.stalenessOffset
         if stalenessOffset is None:
             stalenessOffset = timedelta(hours=7) #7 because this accounts for at least 2 data updates for all sources
@@ -152,6 +152,10 @@ class SeriesProvider():
         
         # How far back is the earliest verified time?
         lookback = referenceTime - min_v   # e.g. 24h if min_v = now - 24h
+
+        if lookback < stalenessOffset:
+            lookback = timedelta(0) #Set to 0 so that predictions aren't penalized
+
         
         max_allowed_age = lookback + stalenessOffset
 
