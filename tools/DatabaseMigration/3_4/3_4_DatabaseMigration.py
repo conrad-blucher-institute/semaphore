@@ -24,9 +24,10 @@ class Migrator(IDatabaseMigration):
            :return: bool indicating successful update
         """
 
-
+        stmt_drop_idx_inputs_ordering = text('DROP INDEX IF EXISTS idx_inputs_ordering;')
         stmt_create_idx_inputs_ordering = text('CREATE INDEX idx_inputs_ordering ON inputs ("verifiedTime", "ensembleMemberID", "generatedTime" DESC);')
         with databaseEngine.connect() as connection:
+            connection.execute(stmt_drop_idx_inputs_ordering)
             connection.execute(stmt_create_idx_inputs_ordering)
             connection.commit()
     

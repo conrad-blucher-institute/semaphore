@@ -62,52 +62,32 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param timeDescription: TimeDescription - A hydrated time description object
         """
         inputs_select_latest_stmt = text(f""" 
-        WITH latest_per_group AS (
-            SELECT DISTINCT ON ("verifiedTime", "ensembleMemberID")
-                i."id",
-                i."generatedTime",
-                i."acquiredTime",
-                i."verifiedTime",
-                i."dataValue",
-                i."isActual",
-                i."dataUnit",
-                i."dataSource",
-                i."dataLocation",
-                i."dataSeries",
-                i."dataDatum",
-                i."latitude",
-                i."longitude",
-                i."ensembleMemberID"
+        SELECT DISTINCT ON ("verifiedTime", "ensembleMemberID")
+            i."id",
+            i."generatedTime",
+            i."acquiredTime",
+            i."verifiedTime",
+            i."dataValue",
+            i."isActual",
+            i."dataUnit",
+            i."dataSource",
+            i."dataLocation",
+            i."dataSeries",
+            i."dataDatum",
+            i."latitude",
+            i."longitude",
+            i."ensembleMemberID"
             FROM inputs AS i
-            WHERE i."dataSource"   = :dataSource
+            WHERE         
+                i."dataSource"   = :dataSource
                 AND i."dataLocation" = :dataLocation
                 AND i."dataSeries"   = :dataSeries
                 AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
                 AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
             ORDER BY
-                i."verifiedTime",
-                i."ensembleMemberID",
-                i."generatedTime" DESC
-        )
-        SELECT
-            "id",
-            MIN("generatedTime") OVER () AS "generatedTime",
-            "acquiredTime",
-            "verifiedTime",
-            "dataValue",
-            "isActual",
-            "dataUnit",
-            "dataSource",
-            "dataLocation",
-            "dataSeries",
-            "dataDatum",
-            "latitude",
-            "longitude",
-            "ensembleMemberID"
-        FROM latest_per_group
-        ORDER BY
-            "verifiedTime",
-            "ensembleMemberID";
+            i."verifiedTime",
+            i."ensembleMemberID",
+            i."generatedTime" DESC
         """)
         
         # Only bind dataDatum if it's not None
@@ -463,25 +443,30 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
 
         query_stmt = text(f"""
-                          
-        -- Groups all rows by verifiedTime (this includes all ensemble member batches for that verifiedTime). 
-        -- For each verifiedTime, the latest generatedTime is chosen. 
-        WITH most_recent_per_verification AS (
-        SELECT DISTINCT
-        FIRST_VALUE("generatedTime") OVER ( 
-        PARTITION BY "verifiedTime" 
-        ORDER BY "generatedTime" DESC
-        ) as most_recent_gen_time
-        FROM inputs AS i
-        WHERE i."dataSource"   = :dataSource
-        AND i."dataLocation" = :dataLocation
-        AND i."dataSeries"   = :dataSeries
-        AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
-        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        WITH latest_per_group AS (
+            SELECT DISTINCT ON ("verifiedTime", "ensembleMemberID")
+                i."generatedTime",
+                i."verifiedTime",
+                i."ensembleMemberID"
+            FROM inputs AS i
+            WHERE 	
+				i."dataSource"   = 'TWC'
+				AND i."dataLocation" = 'SBirdIsland'
+				AND i."dataSeries"   = 'pAirTemp'
+				AND i."dataDatum" is NULL
+				AND i."verifiedTime" BETWEEN '2025-11-21 21:00:00+00:00' AND '2025-11-26 20:00:00+00:00'
+            ORDER BY
+                i."verifiedTime",
+                i."ensembleMemberID",
+                i."generatedTime" DESC
         )
-        -- From all of the latest generated times the oldest is returned
-        SELECT MIN(most_recent_gen_time) as oldest_recent_generated_time 
-        FROM most_recent_per_verification;
+        SELECT
+            MIN("generatedTime") OVER () AS "generatedTime"
+        FROM latest_per_group
+        ORDER BY
+            "verifiedTime",
+            "ensembleMemberID"
+		LIMIT 1
         """)
         bind_params = {
             'dataSource': seriesDescription.dataSource,
@@ -496,10 +481,10 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
         
-        if not tupleishResult or not tupleishResult[0][0]: #Data is not present in the DB
+        if not tupleishResult or not tupleishResult[0]: #Data is not present in the DB
             return False
         
-        oldestGeneratedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
+        oldestGeneratedTime = pd.to_datetime(tupleishResult[0]).tz_localize(timezone.utc)
         age: timedelta = referenceTime - oldestGeneratedTime
         stalenessOffset = timeDescription.stalenessOffset
         is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
