@@ -450,11 +450,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 i."ensembleMemberID"
             FROM inputs AS i
             WHERE 	
-				i."dataSource"   = 'TWC'
-				AND i."dataLocation" = 'SBirdIsland'
-				AND i."dataSeries"   = 'pAirTemp'
-				AND i."dataDatum" is NULL
-				AND i."verifiedTime" BETWEEN '2025-11-21 21:00:00+00:00' AND '2025-11-26 20:00:00+00:00'
+				i."dataSource"   = :dataSource
+                AND i."dataLocation" = :dataLocation
+                AND i."dataSeries"   = :dataSeries
+                AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
+                AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
             ORDER BY
                 i."verifiedTime",
                 i."ensembleMemberID",
