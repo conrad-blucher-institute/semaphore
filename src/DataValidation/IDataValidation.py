@@ -24,14 +24,17 @@ class IDataValidation(ABC):
     def validate(self, series: Series) -> bool:
         raise NotImplementedError
     
-def data_validation_factory(dataValidationRequest: str) -> IDataValidation :
+def data_validation_factory(dataValidationRequest: str, **kwargs) -> IDataValidation :
     """ A factory method that generates an instance of a class that implements the IDataValidation interface.
         The class is dynamically imported based on the dataValidationRequest parameter.
+
         :param dataValidationRequest: str - The name of the class to instantiate.
+        :param kwargs: - additional args to pass to the validation constructors
+
         :return: IDataValidation - An instance of a class that implements the IDataValidation interface.
     """
     try:
         MODULE_NAME = 'DataValidationClasses'
-        return getattr(import_module(f'.{MODULE_NAME}.{dataValidationRequest}', 'DataValidation'), dataValidationRequest)()
+        return getattr(import_module(f'.{MODULE_NAME}.{dataValidationRequest}', 'DataValidation'), dataValidationRequest)(**kwargs)
     except (ModuleNotFoundError, AttributeError) as e:
         raise ImportError(f'Error importing post-processing class {dataValidationRequest}: {e}')
