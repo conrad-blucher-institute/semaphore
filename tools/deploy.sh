@@ -12,10 +12,12 @@ mkdir -p ./logs/deployment
 LOG_FILE="./logs/deployment/$(date "+%Y")_$(date "+%m")_deployment.log"
 DEPLOY_TAG="$1"
 
+# Redirect all output to both console and log file
+exec > >(tee -a "$LOG_FILE") 2>&1
+
 # Log deployment start with timestamp and tag
 echo "=== Deployment started at $(date '+%Y-%m-%d %H:%M:%S') with tag: $DEPLOY_TAG ===" | tee -a "$LOG_FILE"
 
-{
 # Lower active containers
 docker compose down
 
@@ -36,7 +38,8 @@ python3 tools/init_cron.py -r ./data/dspec -i ./schedule
 docker exec semaphore-core python3 tools/migrate_db.py 
 
 # Sleep to give HELATHCHECKS time to run
-sleep 10
+echo "Waiting for containers to initialize and pass health checks..."
+sleep 30
 
 # Inspect each container and check if its status is heathy
 core_status=$(docker inspect semaphore-core | grep -o '"Status": "healthy"')
@@ -57,4 +60,3 @@ else
     echo "=== Deployment failed at $(date '+%Y-%m-%d %H:%M:%S') ==="
     exit 1
 fi
-} 2>&1 | tee -a "$LOG_FILE"
