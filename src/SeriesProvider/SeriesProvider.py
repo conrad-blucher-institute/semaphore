@@ -49,15 +49,13 @@ class SeriesProvider():
         return returningSeries
           
     
-    def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series:
+    def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> Series:
         """This method attempts to return a series matching a series description and a time description.
             :param seriesDescription - A description of the wanted series.
             :param timeDescription - A description of the temporal information of the wanted series. 
             :returns series - The series containing as much data as could be found.
         """
         log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
-        
-        reference_time = datetime.now(timezone.utc)
 
         # assume we have not ingested data yet
         already_ingested_data = False
@@ -71,7 +69,7 @@ class SeriesProvider():
         #   - We can get more verified times for the requested range.
 
         # always call the db freshness check
-        db_is_fresh = self.db_has_freshly_acquired_data(seriesDescription, timeDescription, reference_time)
+        db_is_fresh = self.db_has_freshly_acquired_data(seriesDescription, timeDescription, referenceTime)
         
         if not db_is_fresh:
             self.__data_ingestion_query(seriesDescription, timeDescription)
@@ -79,7 +77,7 @@ class SeriesProvider():
 
         # if we haven't ingested for staleness, check verified time ingestion
         if not already_ingested_data:
-            should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription, reference_time)
+            should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription, referenceTime)
 
             if should_ingest_for_verified_time:
                 self.__data_ingestion_query(seriesDescription, timeDescription)
@@ -127,25 +125,30 @@ class SeriesProvider():
                 raise NotImplementedError(f'Method {method} has not been implemented in SeriesProvider.request_output')
     def db_has_freshly_acquired_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> bool:
         """
-        Returns true if the database has fresh data for all data described in the request.
-        Data is considered fresh if it was acquired within the window of [reference time, staleness offset]. The staleness offset
-        is configured for this request in the TimeDescription object. Staleness is a measure with acquired time not verified time.
+        Checks whether the database contains fresh data for the requested series. 
+        
+        Freshness is evaluated using generated time by comparing the age of the oldest
+        generated time against the stalenessOffset. If stalenessOffset is None, freshness checks are disabled.
 
         Args:
-            referenceTime (datetime): The time data is being requested. Usually, it is now.
+            seriesDescription (SeriesDescription): The requested data series.
+            timeDescription (TimeDescription): Contains the staleness offset.
+            referenceTime (datetime): Time at which freshness is evaluated.
 
         Returns:
-            is_fresh: Determines whether the data is fresh or not.
+            bool: True if the data is fresh, False otherwise.
         """
-        
-        oldest_generated_time = self.seriesStorage.fetch_oldest_generated_time(seriesDescription, timeDescription)
-
-        if oldest_generated_time is None:
+        stalenessOffset = timeDescription.stalenessOffset
+        if stalenessOffset is None:
+            return True
+         
+        oldestGeneratedTime = self.seriesStorage.fetch_oldest_generated_time(seriesDescription, timeDescription)
+        if oldestGeneratedTime is None:
             return False
         
-        age: timedelta = referenceTime - oldest_generated_time
-        stalenessOffset = timeDescription.stalenessOffset
-        is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
+        age = abs(referenceTime - oldestGeneratedTime) # Support historical runs
+        
+        is_fresh = age <= stalenessOffset
   
         return is_fresh
     
