@@ -138,7 +138,7 @@ class SeriesProvider():
             is_fresh: Determines whether the data is fresh or not.
         """
         
-        oldest_generated_time = self.seriesStorage.fetch_oldest_generated_time(seriesDescription, timeDescription)
+        oldest_generated_time = self.seriesStorage.fetch_oldest_generated_time(seriesDescription, timeDescription, referenceTime)
 
         if oldest_generated_time is None:
             return False
