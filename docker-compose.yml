@@ -77,7 +77,18 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "${DB_HOST_PORT}:5432"
-    command: ["postgres", "-c", "listen_addresses=*"]
+    command:
+    - postgres
+    - -c
+    - listen_addresses=* #postgress listens on all network interfaces
+    - -c
+    - shared_preload_libraries=pg_stat_statements #Loads the pg_stat_statements module at startup, stracks execution statistics, and stores them in shared memory
+    - -c
+    - pg_stat_statements.max=10000 # Sets the maximum number of distinct SQL statements that Postgres will track.
+    - -c
+    - pg_stat_statements.track=all
+    - -c
+    - pg_stat_statements.save=on #Continues statistics across Postgres restarts
     # networks:
     #   - semaphore-net
     volumes:
