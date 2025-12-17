@@ -478,15 +478,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
         
-        if not tupleishResult or not tupleishResult[0]: #Data is not present in the DB
-            return False
+        # Data is not present in the DB
+        if not tupleishResult or not tupleishResult[0]: 
+            return None
         
         oldestGeneratedTime = pd.to_datetime(tupleishResult[0]).tz_localize(timezone.utc)
-        age: timedelta = referenceTime - oldestGeneratedTime
-        stalenessOffset = timeDescription.stalenessOffset
-        is_fresh = age <= (stalenessOffset if stalenessOffset is not None else timedelta(hours=7)) # Default staleness offset is 7 hours if not specified
-  
-        return is_fresh
+
+        return oldestGeneratedTime
        
     def fetch_row_with_max_verified_time_in_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> tuple | None:
         """
