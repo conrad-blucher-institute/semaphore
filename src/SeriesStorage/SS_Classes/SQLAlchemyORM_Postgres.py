@@ -415,7 +415,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         ids = [row[0] for row in result]
         return resultSeries, ids
 
-    def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> datetime | None:
+    def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime | None:
         """
         Returns the oldest generated time within a time window.
 
@@ -436,7 +436,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         Expected attributes:
         :param seriesDescription: SeriesDescription - A series description object
         :param timeDescription: TimeDescription - A hydrated time description object
-        :param referenceTime: datetime - The reference time to compare staleness against
         """
 
         query_stmt = text(f"""

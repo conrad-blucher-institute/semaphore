@@ -57,7 +57,7 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
     
     @abstractmethod
-    def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> datetime:
+    def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime:
         raise NotImplementedError()
     
     @abstractmethod
