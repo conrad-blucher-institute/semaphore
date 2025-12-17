@@ -481,8 +481,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         if not tupleishResult or not tupleishResult[0][0]: 
             return None
         
-        print(f'Tuplish Result: {tupleishResult}')
-        
         oldestGeneratedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
 
         return oldestGeneratedTime
