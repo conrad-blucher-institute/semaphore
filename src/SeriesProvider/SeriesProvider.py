@@ -53,6 +53,7 @@ class SeriesProvider():
         """This method attempts to return a series matching a series description and a time description.
             :param seriesDescription - A description of the wanted series.
             :param timeDescription - A description of the temporal information of the wanted series. 
+            :param refrenceTime - The time of execution 
             :returns series - The series containing as much data as could be found.
         """
         log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
