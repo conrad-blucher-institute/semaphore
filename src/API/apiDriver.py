@@ -337,13 +337,6 @@ def serialize_output_series(series: Series) -> dict[any]:
     # Serialize the dataFrame by our own rules
     serialized_data = []
     for _, row in series.dataFrame.iterrows():
-        serialized_data.append({
-            "dataValue":      jsonable_encoder(row['dataValue']),
-            "dataUnit":       jsonable_encoder(row['dataUnit']),
-            "timeGenerated":  jsonable_encoder(row['timeGenerated'].replace(tzinfo=None)),
-            "leadTime":       jsonable_encoder(row['leadTime'])
-        })
-
         # Replace NaNs with None and ensure JSON safe types
         row_dict = {}
         for k, v in row.items():
@@ -352,8 +345,12 @@ def serialize_output_series(series: Series) -> dict[any]:
             else:
                 row_dict[k] = None if pd.isna(v) else v
 
-        encoded_row = {k: jsonable_encoder(v) for k, v in row_dict.items()}
-        serialized_data.append(encoded_row)
+        serialized_data.append({
+            "dataValue":      jsonable_encoder(row_dict['dataValue']),
+            "dataUnit":       jsonable_encoder(row_dict['dataUnit']),
+            "timeGenerated":  jsonable_encoder(row_dict['timeGenerated'].replace(tzinfo=None)),
+            "leadTime":       jsonable_encoder(row_dict['leadTime'])
+        })
 
     serialized['_Series__data'] = serialized_data # Add it back to the response
     return serialized
