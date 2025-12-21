@@ -74,7 +74,7 @@ class SeriesProvider():
 
         # if we haven't ingested due to staleness, check verified time ingestion
         if not already_ingested_data:
-            should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription, referenceTime)
+            should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription)
             if should_ingest_for_verified_time:
                 self.__data_ingestion_query(seriesDescription, timeDescription)
 
@@ -192,28 +192,26 @@ class SeriesProvider():
         
         return data_ingestion_results
     
-    def __check_verified_time_for_ingestion(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, reference_time: datetime) -> bool:
+    def __check_verified_time_for_ingestion(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
         """ 
         Queries the db for the max verified time in the requested range and uses it to 
         determine if we should ingest new data based on the most recent verified time in the requested range.
 
         :param seriesDescription: SeriesDescription - The description for a series
         :param timeDescription: TimeDescription - The time description for a series
-        :param reference_time: datetime - The reference time of the model execution
-
         :returns bool 
 
         True (should ingest) if:
         - No rows exists for the provided series and time description
         - The max verified time < requested toDateTime (more data might be available)
-            AND the time since acquisition (reference_time - acquired_time) is strictly greater than the threshold (> threshold)
+            AND the time since acquisition (now - acquired_time) is strictly greater than the threshold (> threshold)
     
         Returns False (should NOT ingest) if:
         - The max verified time >= requested toDateTime
-            OR the time since acquisition (reference_time - acquired_time) is less than or equal to the threshold (<= threshold)
+            OR the time since acquisition (now - acquired_time) is less than or equal to the threshold (<= threshold)
 
         NOTE::
-        The reference_time and toDateTime are both converted to tz naive for comparison.
+        The now time and toDateTime are both converted to tz naive for comparison.
         """
 
         # get the row with the max verified time in the requested range
