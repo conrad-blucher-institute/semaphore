@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-#3_2_DatabaseMigration.py
+#3_5_DatabaseMigration.py
 #----------------------------------
-# Created By: Anointiyae Beasley & Matthew Kastl
-# Created Date:09/11/2025
+# Created By: Anointiyae Beasley
+# Created Date:12/21/2025
 # Version 1.0
 #----------------------------------
-"""This is a database migration script that will update to version 3.4 of the database. This migration enables pg_stat_statements at the database level by creating the extension.
+"""This is a database migration script that will update to version 3.5 of the database. This migration enables pg_stat_statements at the database level by creating the extension.
 Rollback drops the extension, removing the SQL interface. Postgres may still preload the module at startup, but no stats are accessible from the DB after rollback.
  """ 
 #----------------------------------
