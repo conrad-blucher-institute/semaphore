@@ -17,11 +17,8 @@ from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataIngestion.IDataIngestion import data_ingestion_factory
 from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
 from exceptions import Semaphore_Ingestion_Exception, Semaphore_Exception
-
 from utility import log
 from datetime import datetime, timezone, timedelta
-from datetime import datetime, timezone, timedelta
-
 
 
 
@@ -69,17 +66,15 @@ class SeriesProvider():
         #   - The data in the db is stale.
         #   - We can get more verified times for the requested range.
 
-        # always call the db freshness check
+        # always call the db freshness check to ensure we aren't using old data
         db_is_fresh = self.db_has_freshly_acquired_data(seriesDescription, timeDescription, referenceTime)
-        
         if not db_is_fresh:
             self.__data_ingestion_query(seriesDescription, timeDescription)
             already_ingested_data = True
 
-        # if we haven't ingested for staleness, check verified time ingestion
+        # if we haven't ingested due to staleness, check verified time ingestion
         if not already_ingested_data:
-            should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription, referenceTime)
-
+            should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription)
             if should_ingest_for_verified_time:
                 self.__data_ingestion_query(seriesDescription, timeDescription)
 
@@ -197,28 +192,26 @@ class SeriesProvider():
         
         return data_ingestion_results
     
-    def __check_verified_time_for_ingestion(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, reference_time: datetime) -> bool:
+    def __check_verified_time_for_ingestion(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
         """ 
         Queries the db for the max verified time in the requested range and uses it to 
         determine if we should ingest new data based on the most recent verified time in the requested range.
 
         :param seriesDescription: SeriesDescription - The description for a series
         :param timeDescription: TimeDescription - The time description for a series
-        :param reference_time: datetime - The reference time of the model execution
-
         :returns bool 
 
         True (should ingest) if:
         - No rows exists for the provided series and time description
         - The max verified time < requested toDateTime (more data might be available)
-            AND the time since acquisition (reference_time - acquired_time) is strictly greater than the threshold (> threshold)
+            AND the time since acquisition (now - acquired_time) is greater than or equal to the threshold (>= threshold)
     
         Returns False (should NOT ingest) if:
         - The max verified time >= requested toDateTime
-            OR the time since acquisition (reference_time - acquired_time) is less than or equal to the threshold (<= threshold)
+            OR the time since acquisition (now - acquired_time) is less than the threshold (< threshold)
 
         NOTE::
-        The reference_time and toDateTime are both converted to tz naive for comparison.
+        The now time and toDateTime are both converted to tz naive for comparison.
         """
 
         # get the row with the max verified time in the requested range
@@ -232,14 +225,19 @@ class SeriesProvider():
         verified_time = max_verified_time_row[3]
         acquired_time = max_verified_time_row[2]
 
-        # convert the reference time and toDateTime to tz naive for comparisons
-        reference_time = reference_time.replace(tzinfo=None)
+        # convert the model run time (now) and toDateTime to tz naive for comparisons
+        current_time = datetime.now(timezone.utc).replace(tzinfo=None)
         toDateTime = timeDescription.toDateTime.replace(tzinfo=None)
 
         # the threshold is set to the interval if it exists, otherwise default
         threshold = timeDescription.interval if timeDescription.interval is not None else self.DEFAULT_ACQUIRE_THRESHOLD
 
-        difference = reference_time - acquired_time
+        # we have to use actual time, not rounded reference_time in the calculation because otherwise
+        # we don't get an accurate measure of how much time has passed since we last tried to ingest data
+        difference = current_time - acquired_time
 
-        return (verified_time < toDateTime and difference > threshold)
+        # return True if we should ingest new data, False otherwise
+        # we want to ingest again if we don't have all the data and we've 
+        # waited long enough for new data to be available
+        return (verified_time < toDateTime and difference >= threshold)
         
