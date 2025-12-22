@@ -2,8 +2,8 @@
 # test_VerifiedTimeIngestion.py
 #-------------------------------
 # Created By: Christian Quintero on 11/25/2025
-# version 1.0
-# Last Updated: 11/27/2025 by Christian Quintero
+# version 1.1
+# Last Updated: 12/21/2025 by Christian Quintero
 #----------------------------------
 """
 This provides unit tests for Series Provider
@@ -25,67 +25,73 @@ from DataClasses import SeriesDescription, TimeDescription
 
 
 @pytest.mark.parametrize(
-    "reference_time, acquired_time, verified_time, to_datetime, expected_result",
+    "now_parameter, acquired_time, verified_time, to_datetime, expected_result",
+
+    # The equation we are testing is:
+    # verified_time < toDateTime and difference >= threshold
 
     [
-        # tests when verified time == toDateTime, no ingestion should occur (False)
+        # tests when verified time == toDateTime
+        # false is returned (no ingestion)
         (
-            datetime(2025, 1, 1, 1, 0, 0, tzinfo= timezone.utc),      # reference_time
+            datetime(2025, 1, 1, 1, 0, 0),      # now
             datetime(2025, 1, 1, 0, 0, 0),      # acquired_time
             datetime(2025, 1, 1, 3, 0, 0),      # verified_time
             datetime(2025, 1, 1, 3, 0, 0),      # to_datetime
             False
-
-            # verified time == toDateTime -> no ingestion (return False)
         ),
         
-        # tests when the verified time > toDateTime, no ingestion should occur (False)
+        # tests when the verified time > toDateTime
+        # false is returned (no ingestion)
         (
-            datetime(2025, 1, 1, 1, 0, 0, tzinfo= timezone.utc),      # reference_time
-            datetime(2025, 1, 1, 0, 0, 0),                            # acquired_time
-            datetime(2025, 1, 1, 3, 0, 0),                            # verified_time
-            datetime(2025, 1, 1, 2, 0, 0),                            # to_datetime
+            datetime(2025, 1, 1, 1, 0, 0),      # now
+            datetime(2025, 1, 1, 0, 0, 0),      # acquired_time
+            datetime(2025, 1, 1, 3, 0, 0),      # verified_time
+            datetime(2025, 1, 1, 2, 0, 0),      # to_datetime
             False
-
-            # verified time > toDateTime -> no ingestion (return False)
         ),
         
-        # tests when the verified time < toDateTime AND (reference time - acquired time) < threshold
-        # no ingestion should occur (False)
+        # tests when the verified time < toDateTime
+        # and difference (now - acquired time) < threshold
+        # false is returned (no ingestion)
         (
-            datetime(2025, 1, 1, 0, 59, 59, tzinfo= timezone.utc),      # reference_time
-            datetime(2025, 1, 1, 0, 0, 0),                              # acquired_time
-            datetime(2025, 1, 1, 3, 0, 0),                              # verified_time
-            datetime(2025, 1, 1, 4, 0, 0),                              # to_datetime
+            datetime(2025, 1, 1, 0, 59, 59),      # now
+            datetime(2025, 1, 1, 0, 0, 0),        # acquired_time
+            datetime(2025, 1, 1, 3, 0, 0),        # verified_time
+            datetime(2025, 1, 1, 4, 0, 0),        # to_datetime
             False
 
-            # reference time - acquired time = 0:59:59 < 1 hour threshold
+            # now - acquired time = 0:59:59 < 1 hour threshold
             # -> no ingestion (return False)
         ),
         
-        # tests when the verified time < toDateTime AND (reference time - acquired time) == threshold
-        # no ingestion should occur (False)
+        # tests when the verified time < toDateTime
+        # and difference (now - acquired time) == threshold
+        # true is returned (ingestion should occur)
         (
-            datetime(2025, 1, 1, 6, 0, 0, tzinfo= timezone.utc),         # reference_time
-            datetime(2025, 1, 1, 5, 0, 0),                               # acquired_time
-            datetime(2025, 1, 1, 3, 0, 0),                               # verified_time
-            datetime(2025, 1, 1, 4, 0, 0),                               # to_datetime
-            False
-
-            # reference time - acquired time = 1:00:00 == 1 hour threshold
-            # -> no ingestion (return False)
-        ),
-        
-        # tests when the verified time < toDateTime AND (reference time - acquired time) > threshold
-        # ingestion should occur (True)
-        (
-            datetime(2025, 1, 1, 6, 0, 1, tzinfo= timezone.utc),      # reference_time
-            datetime(2025, 1, 1, 5, 0, 0),                            # acquired_time
-            datetime(2025, 1, 1, 3, 0, 0),                            # verified_time
-            datetime(2025, 1, 1, 4, 0, 0),                            # to_datetime
+            datetime(2025, 1, 1, 6, 0, 0),         # now
+            datetime(2025, 1, 1, 5, 0, 0),         # acquired_time
+            datetime(2025, 1, 1, 3, 0, 0),         # verified_time
+            datetime(2025, 1, 1, 4, 0, 0),         # to_datetime
             True
 
-            # reference time - acquired time = 1:00:01 > 1 hour threshold
+            # now - acquired time = 1:00:00 which is equal to the 1 hour threshold
+            # AND the verified time < toDateTime
+            # -> ingestion should occcur (True)
+        ),
+        
+        # tests when the verified time < toDateTime
+        # and difference (now - acquired time) > threshold
+        # ingestion should occur (True)
+        (
+            datetime(2025, 1, 1, 6, 0, 1),      # now
+            datetime(2025, 1, 1, 5, 0, 0),      # acquired_time
+            datetime(2025, 1, 1, 3, 0, 0),      # verified_time
+            datetime(2025, 1, 1, 4, 0, 0),      # to_datetime
+            True
+
+            # now - acquired time = 1:00:01 > 1 hour threshold
+            # AND the verified time < toDateTime
             # -> ingestion occurs (return True)
         ),
         
@@ -109,10 +115,12 @@ from DataClasses import SeriesDescription, TimeDescription
         "test_no_data"
     ]
 )
+@patch('SeriesProvider.SeriesProvider.datetime')
 @patch('SeriesProvider.SeriesProvider.series_storage_factory')
 def test_check_verified_time_for_ingestion(
     mock_storage_factory,
-    reference_time,
+    mock_datetime,
+    now_parameter,
     acquired_time,
     verified_time,
     to_datetime,
@@ -126,15 +134,17 @@ def test_check_verified_time_for_ingestion(
 
     We want to call ingestion if both following occur:
     1. the max verified time in the row is strictly < the toDateTime
-    2. the acquired time (reference time - acquired time) is strictly > the threshold value
+    2. the difference of (now - acquired time) is >= the threshold value
 
     NOTE::
-    The reference time is the only time that starts as tz aware. All other times
-    will be converted to tz aware in the function being tested.
+    All datetime objects are timezone naive.
     """
     # mock the storage factory
     mock_storage = MagicMock()
     mock_storage_factory.return_value = mock_storage
+
+    # mock the current time
+    mock_datetime.now.return_value = now_parameter
     
     # make a series provider object
     series_provider = SeriesProvider()
@@ -182,71 +192,75 @@ def test_check_verified_time_for_ingestion(
     should_ingest = series_provider._SeriesProvider__check_verified_time_for_ingestion(
         seriesDescription=series_description,
         timeDescription=time_description,
-        reference_time=reference_time,
     )
 
     assert should_ingest == expected_result
 
-def test_check_verified_time_for_ingestion_default_threshold():
+@patch('SeriesProvider.SeriesProvider.datetime')
+@patch('SeriesProvider.SeriesProvider.series_storage_factory')
+def test_check_verified_time_for_ingestion_default_threshold(
+    mock_storage_factory,
+    mock_datetime,
+):
     """
     This test checks that when no interval is provided in the time description,
     the default threshold of 1 hour is used.
     """
-    # mock the storage factory
-    with patch('SeriesProvider.SeriesProvider.series_storage_factory') as mock_storage_factory:
-        mock_storage = MagicMock()
-        mock_storage_factory.return_value = mock_storage
+    mock_storage = MagicMock()
+    mock_storage_factory.return_value = mock_storage
         
-        # make a series provider object
-        series_provider = SeriesProvider()
+    # make a series provider object
+    series_provider = SeriesProvider()
 
-        series_description = SeriesDescription(
-            dataSource="test_source",
-            dataSeries="test_series",
-            dataLocation="test_location",
-            dataDatum=None,
-            dataIntegrityDescription=None,
-            verificationOverride=None
-        )
+    series_description = SeriesDescription(
+        dataSource="test_source",
+        dataSeries="test_series",
+        dataLocation="test_location",
+        dataDatum=None,
+        dataIntegrityDescription=None,
+        verificationOverride=None
+    )
 
-        time_description = TimeDescription(
-            fromDateTime=datetime(2025, 1, 1, 0, 0, 0),
-            toDateTime=datetime(2025, 1, 1, 4, 0, 0),
-            interval=None,                                              # No interval provided
-            stalenessOffset=timedelta(hours=7)
-        )
+    time_description = TimeDescription(
+        fromDateTime=datetime(2025, 1, 1, 0, 0, 0),
+        toDateTime=datetime(2025, 1, 1, 4, 0, 0),
+        interval=None,                                              # No interval provided
+        stalenessOffset=timedelta(hours=7)
+    )
 
-        reference_time = datetime(2025, 1, 1, 6, 0, 1, tzinfo= timezone.utc)
-        acquired_time = datetime(2025, 1, 1, 5, 0, 0)
-        verified_time = datetime(2025, 1, 1, 3, 0, 0)
+    acquired_time = datetime(2025, 1, 1, 5, 0, 0)
+    verified_time = datetime(2025, 1, 1, 3, 0, 0)
 
-        # reference time - acquired time = 1:00:01 > 1 hour default threshold
-        # -> ingestion occurs (return True)
+    row = ( 
+        1,
+        datetime(2025, 1, 1, 1, 0, 0),
+        acquired_time,
+        verified_time,
+        1.0,
+        True,
+        "unit",
+        "test_source",
+        "test_location",
+        "test_series",
+        None,
+        "0.0",
+        "0.0",
+        None
+    )
 
-        row = (
-            1,
-            datetime(2025, 1, 1, 1, 0, 0),
-            acquired_time,
-            verified_time,
-            1.0,
-            True,
-            "unit",
-            "test_source",
-            "test_location",
-            "test_series",
-            None,
-            "0.0",
-            "0.0",
-            None
-        )
+    # force series storage to return the test row
+    mock_storage.fetch_row_with_max_verified_time_in_range.return_value = row
 
-        # force series storage to return the test row
-        mock_storage.fetch_row_with_max_verified_time_in_range.return_value = row
+    # force the datetime.now to return our test now parameter
+    mock_datetime.now.return_value = datetime(2025, 1, 1, 6, 0, 0)
 
-        should_ingest = series_provider._SeriesProvider__check_verified_time_for_ingestion(
-            seriesDescription=series_description,
-            timeDescription=time_description,
-            reference_time=reference_time,
-        )
+    should_ingest = series_provider._SeriesProvider__check_verified_time_for_ingestion(
+        seriesDescription=series_description,
+        timeDescription=time_description,
+    )
 
-        assert should_ingest is True
+    # verified time < toDateTime (3 AM < 4 AM)
+    # AND now - acquired time = 6 AM - 5 AM = 1 hour == default threshold of 1 hour
+    # -> ingestion should occur (return True)
+
+    assert should_ingest is True

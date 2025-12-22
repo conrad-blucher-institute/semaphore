@@ -204,11 +204,11 @@ class SeriesProvider():
         True (should ingest) if:
         - No rows exists for the provided series and time description
         - The max verified time < requested toDateTime (more data might be available)
-            AND the time since acquisition (now - acquired_time) is strictly greater than the threshold (> threshold)
+            AND the time since acquisition (now - acquired_time) is greater than or equal to the threshold (>= threshold)
     
         Returns False (should NOT ingest) if:
         - The max verified time >= requested toDateTime
-            OR the time since acquisition (now - acquired_time) is less than or equal to the threshold (<= threshold)
+            OR the time since acquisition (now - acquired_time) is less than the threshold (< threshold)
 
         NOTE::
         The now time and toDateTime are both converted to tz naive for comparison.
