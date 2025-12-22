@@ -52,13 +52,12 @@ class DateRangeValidation(IDataValidation):
             for missing_time in df_to_validate[df_to_validate['dataValue'].isnull()].index:
                 log_error(f'\tMissing time: {missing_time}')
             return False
-        
         # only unit tests will skip this check unless they set a reference time
         # and measurements that do not have stalenessOffset set will skip this check
         if self.referenceTime is not None and series.timeDescription.stalenessOffset is not None:
             
             # calculate time difference between reference time and earliest generated time
-            time_difference = self.referenceTime - df_to_validate['timeGenerated'].min()
+            time_difference = abs(self.referenceTime - df_to_validate['timeGenerated'].min())
 
             # validate that the data isn't stale 
             if time_difference > series.timeDescription.stalenessOffset:

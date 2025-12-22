@@ -207,6 +207,85 @@ class TestDateRangeValidation(unittest.TestCase):
         validator = data_validation_factory('DateRangeValidation', referenceTime=reference_time)
 
         self.assertFalse(validator.validate(series_mock))
+        
+    def test_validate_staleness_stale_future_data(self):
+        """ Asserts generated times made after reference time returns the correct bool.
+
+            difference > offset == fails validation
+
+            In this test, the computed staleness difference check is 
+            8 hours, and is compared to an offset of 7 hours.
+            8 > 7 so the data is stale and fails validation.
+        """
+
+        # 2023-01-01 00:00:00 UTC
+        reference_time = datetime(2023, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    
+        # create sample data with 8 points, 1 hour apart
+        start_time = datetime(2023, 1, 1, 8, 0, 0, tzinfo=timezone.utc)
+        end_time = datetime(2023, 1, 1, 15, 0, 0, tzinfo=timezone.utc)  
+    
+        # create the data frame
+        data = {
+            'timeVerified': pd.date_range(start=start_time, end=end_time, freq='1h', tz='UTC'),
+            'dataValue': [1, 2, 3, 4, 5, 6, 7,8],
+            'timeGenerated': pd.date_range(start=start_time, end=end_time, freq='1h', tz='UTC')
+            # min timeGenerated is 2023-01-01 08:00:00 UTC
+        }
+        df = pd.DataFrame(data)
+
+        # create a mock Series object
+        series_mock = MagicMock()
+        series_mock.dataFrame = df
+        series_mock.timeDescription = MagicMock()
+        series_mock.timeDescription.fromDateTime = start_time
+        series_mock.timeDescription.toDateTime = end_time
+        series_mock.timeDescription.interval = timedelta(hours=1)
+        series_mock.timeDescription.stalenessOffset = timedelta(hours=7)
+        series_mock.seriesDescription = "Test Series"
+
+        validator = data_validation_factory('DateRangeValidation', referenceTime=reference_time)
+
+        self.assertFalse(validator.validate(series_mock))
+        
+    def test_validate_staleness_fresh_future_generated_time(self):
+        """ Asserts generated times made after reference time returns the correct bool.
+
+            In this test, the computed staleness difference check is 
+            7 hours, and is compared to an offset of 7 hours.
+            difference <= offset == passes validation
+        """
+
+        # 2023-01-01 00:00:00 UTC
+        reference_time = datetime(2023, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    
+        # create sample data with 8 points, 1 hour apart
+        start_time = datetime(2023, 1, 1, 7, 0, 0, tzinfo=timezone.utc)
+        end_time = datetime(2023, 1, 1, 14, 0, 0, tzinfo=timezone.utc)  
+    
+        # create the data frame
+        data = {
+            'timeVerified': pd.date_range(start=start_time, end=end_time, freq='1h', tz='UTC'),
+            'dataValue': [1, 2, 3, 4, 5, 6, 7,8],
+            'timeGenerated': pd.date_range(start=start_time, end=end_time, freq='1h', tz='UTC')
+            # min timeGenerated is 2023-01-01 07:00:00 UTC
+        }
+        df = pd.DataFrame(data)
+
+        # create a mock Series object
+        series_mock = MagicMock()
+        series_mock.dataFrame = df
+        series_mock.timeDescription = MagicMock()
+        series_mock.timeDescription.fromDateTime = start_time
+        series_mock.timeDescription.toDateTime = end_time
+        series_mock.timeDescription.interval = timedelta(hours=1)
+        series_mock.timeDescription.stalenessOffset = timedelta(hours=7)
+        series_mock.seriesDescription = "Test Series"
+
+        validator = data_validation_factory('DateRangeValidation', referenceTime=reference_time)
+
+        self.assertTrue(validator.validate(series_mock))
+
 
     def test_validate_staleness_fresh_data(self):
         """ Asserts fresh data passes validation with a different offset
