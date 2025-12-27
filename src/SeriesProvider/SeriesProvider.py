@@ -74,8 +74,8 @@ class SeriesProvider():
 
         # if we haven't ingested due to staleness, check verified time ingestion
         if not already_ingested_data:
-            should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription)
-            if should_ingest_for_verified_time:
+            all_verified_times_present = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription)
+            if not all_verified_times_present:
                 self.__data_ingestion_query(seriesDescription, timeDescription)
 
         return self.__data_base_query(seriesDescription, timeDescription)
@@ -195,23 +195,21 @@ class SeriesProvider():
     def __check_verified_time_for_ingestion(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> bool:
         """ 
         Queries the db for the max verified time in the requested range and uses it to 
-        determine if we should ingest new data based on the most recent verified time in the requested range.
+        determine if we should ingest new data based on if the max verified time includes data up to
+        the requested toDateTime.
 
         :param seriesDescription: SeriesDescription - The description for a series
         :param timeDescription: TimeDescription - The time description for a series
         :returns bool 
 
-        True (should ingest) if:
-        - No rows exists for the provided series and time description
-        - The max verified time < requested toDateTime (more data might be available)
-            AND the time since acquisition (now - acquired_time) is greater than or equal to the threshold (>= threshold)
-    
-        Returns False (should NOT ingest) if:
-        - The max verified time >= requested toDateTime
-            OR the time since acquisition (now - acquired_time) is less than the threshold (< threshold)
+        True: The database contains all verified times up to the requested toDateTime.
+        Therefore, no new data ingestion is needed.
+
+        False: The database is missing 1 or more verified times up to the requested toDateTime.
+        Therefore, new data ingestion should be ingested.
 
         NOTE::
-        The now time and toDateTime are both converted to tz naive for comparison.
+        The toDateTime is converted to tz naive for comparison purposes
         """
 
         # get the row with the max verified time in the requested range
@@ -221,23 +219,12 @@ class SeriesProvider():
         if not max_verified_time_row:
             return True
         
-        # extract times from the row and add timezone info
+        # extract verified time from the row and add timezone info
         verified_time = max_verified_time_row[3]
-        acquired_time = max_verified_time_row[2]
 
-        # convert the model run time (now) and toDateTime to tz naive for comparisons
-        current_time = datetime.now(timezone.utc).replace(tzinfo=None)
+        # convert toDateTime to tz naive for comparison
         toDateTime = timeDescription.toDateTime.replace(tzinfo=None)
 
-        # the threshold is set to the interval if it exists, otherwise default
-        threshold = timeDescription.interval if timeDescription.interval is not None else self.DEFAULT_ACQUIRE_THRESHOLD
-
-        # we have to use actual time, not rounded reference_time in the calculation because otherwise
-        # we don't get an accurate measure of how much time has passed since we last tried to ingest data
-        difference = current_time - acquired_time
-
-        # return True if we should ingest new data, False otherwise
-        # we want to ingest again if we don't have all the data and we've 
-        # waited long enough for new data to be available
-        return (verified_time < toDateTime and difference >= threshold)
+        is_inclusive = verified_time >= toDateTime
+        return is_inclusive
         
