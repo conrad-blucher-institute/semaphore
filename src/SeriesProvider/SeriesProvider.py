@@ -206,7 +206,7 @@ class SeriesProvider():
         Therefore, no new data ingestion is needed.
 
         False: The database is missing 1 or more verified times up to the requested toDateTime.
-        Therefore, new data ingestion should be ingested.
+        Therefore, new data should be ingested.
 
         NOTE::
         The toDateTime is converted to tz naive for comparison purposes
@@ -215,11 +215,11 @@ class SeriesProvider():
         # get the row with the max verified time in the requested range
         max_verified_time_row = self.seriesStorage.fetch_row_with_max_verified_time_in_range(seriesDescription, timeDescription)
 
-        # check if we have any rows for the provided series and time description
+        # no rows found means verified times are missing so ingestion is needed.
         if not max_verified_time_row:
-            return True
+            return False
         
-        # extract verified time from the row and add timezone info
+        # extract verified time from the row
         verified_time = max_verified_time_row[3]
 
         # convert toDateTime to tz naive for comparison
