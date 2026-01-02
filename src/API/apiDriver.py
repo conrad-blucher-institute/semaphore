@@ -87,15 +87,20 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
         location, 
         datum
     )
+    
+    nowTime = datetime.now(timezone.utc)
+    fromTimeIsInPast = from_time_in_past(fromDateTime, nowTime)
 
     timeDescription = TimeDescription(
-        fromDateTime, 
+        fromDateTime,
         toDateTime,
-        interval
+        interval,
+        stalenessOffset=(None if fromTimeIsInPast else timedelta(hours=7))
     )
 
     provider = SeriesProvider()
-    responseSeries = provider.request_input(requestDescription, timeDescription)
+    
+    responseSeries = provider.request_input(requestDescription, timeDescription, nowTime)
 
     # Protect the API's JSON ENCODER from freaking out about floats sneaking from the ingestion class
     responseSeries.dataFrame['dataValue'] = responseSeries.dataFrame['dataValue'].astype(str)
@@ -289,6 +294,8 @@ def serialize_input_series(series: Series) -> dict[any]:
     serialized['_Series__data'] = serialized_data # Add it back to the response
     return serialized
 
+def from_time_in_past(fromDateTime: datetime, now: datetime) -> bool:
+    return fromDateTime < now
 
 def serialize_output_series(series: Series) -> dict[any]:
     """ Serializes an output series into a dictionary.
@@ -330,13 +337,6 @@ def serialize_output_series(series: Series) -> dict[any]:
     # Serialize the dataFrame by our own rules
     serialized_data = []
     for _, row in series.dataFrame.iterrows():
-        serialized_data.append({
-            "dataValue":      jsonable_encoder(row['dataValue']),
-            "dataUnit":       jsonable_encoder(row['dataUnit']),
-            "timeGenerated":  jsonable_encoder(row['timeGenerated'].replace(tzinfo=None)),
-            "leadTime":       jsonable_encoder(row['leadTime'])
-        })
-
         # Replace NaNs with None and ensure JSON safe types
         row_dict = {}
         for k, v in row.items():
@@ -345,8 +345,12 @@ def serialize_output_series(series: Series) -> dict[any]:
             else:
                 row_dict[k] = None if pd.isna(v) else v
 
-        encoded_row = {k: jsonable_encoder(v) for k, v in row_dict.items()}
-        serialized_data.append(encoded_row)
+        serialized_data.append({
+            "dataValue":      jsonable_encoder(row_dict['dataValue']),
+            "dataUnit":       jsonable_encoder(row_dict['dataUnit']),
+            "timeGenerated":  jsonable_encoder(row_dict['timeGenerated'].replace(tzinfo=None)),
+            "leadTime":       jsonable_encoder(row_dict['leadTime'])
+        })
 
     serialized['_Series__data'] = serialized_data # Add it back to the response
     return serialized

@@ -62,8 +62,8 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
            :param timeDescription: TimeDescription - A hydrated time description object
         """
         inputs_select_latest_stmt = text(f""" 
-        WITH RankedData AS (
-            SELECT  i."id",
+        SELECT DISTINCT ON ("verifiedTime", "ensembleMemberID")
+            i."id",
             i."generatedTime",
             i."acquiredTime",
             i."verifiedTime",
@@ -76,50 +76,18 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             i."dataDatum",
             i."latitude",
             i."longitude",
-            i."ensembleMemberID",
-            
-            -- Groups rows by verifiedTime and ensembleMemberID. Non ensemble inputs ensembleMemberId will be null resulting in a single group per verified time.
-            -- Within each group, generatedTime is ordered from newest to oldest (DESC).
-            -- Each row in the group is assigned a row number starting at rn = 1.
-            -- For each ensembleMemberID group, rn = 1 corresponds to the row with the latest generatedTime.
-                ROW_NUMBER() OVER (
-                    PARTITION BY 
-                        "verifiedTime",
-                        "ensembleMemberID"
-                    ORDER BY 
-                        "generatedTime" DESC
-                ) AS rn
+            i."ensembleMemberID"
             FROM inputs AS i
-            WHERE i."dataSource"   = :dataSource
-            AND i."dataLocation" = :dataLocation
-            AND i."dataSeries"   = :dataSeries
-            AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
-            AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
-        )
-        -- From the ranked rows, keep only the "best" rank per verifiedTime, ensembleMemberID.
-        SELECT 
-         "id",
-        "generatedTime",
-        "acquiredTime",
-        "verifiedTime",
-        "dataValue",
-        "isActual",
-        "dataUnit",
-        "dataSource",
-        "dataLocation",
-        "dataSeries",
-        "dataDatum",
-        "latitude",
-        "longitude",
-        "ensembleMemberID"
-           
-        FROM
-            RankedData
-        WHERE
-            rn = 1 -- Grabs the latest genrated time from each ensemble member id and verified time
-        ORDER BY
-            "verifiedTime",
-            "ensembleMemberID";
+            WHERE         
+                i."dataSource"   = :dataSource
+                AND i."dataLocation" = :dataLocation
+                AND i."dataSeries"   = :dataSeries
+                AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
+                AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+            ORDER BY
+            i."verifiedTime",
+            i."ensembleMemberID",
+            i."generatedTime" DESC
         """)
         
         # Only bind dataDatum if it's not None
@@ -128,7 +96,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             'dataLocation': seriesDescription.dataLocation,
             'dataSeries': seriesDescription.dataSeries,
             'from_dt': timeDescription.fromDateTime,
-            'to_dt': timeDescription.toDateTime
+            'to_dt': timeDescription.toDateTime 
         }
         if seriesDescription.dataDatum is not None:
             bind_params['dataDatum'] = seriesDescription.dataDatum
@@ -471,25 +439,30 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
 
         query_stmt = text(f"""
-                          
-        -- Groups all rows by verifiedTime (this includes all ensemble member batches for that verifiedTime). 
-        -- For each verifiedTime, the latest generatedTime is chosen. 
-        WITH most_recent_per_verification AS (
-        SELECT DISTINCT
-        FIRST_VALUE("generatedTime") OVER ( 
-        PARTITION BY "verifiedTime" 
-        ORDER BY "generatedTime" DESC
-        ) as most_recent_gen_time
-        FROM inputs AS i
-        WHERE i."dataSource"   = :dataSource
-        AND i."dataLocation" = :dataLocation
-        AND i."dataSeries"   = :dataSeries
-        AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
-        AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+        WITH latest_per_group AS (
+            SELECT DISTINCT ON ("verifiedTime", "ensembleMemberID")
+                i."generatedTime",
+                i."verifiedTime",
+                i."ensembleMemberID"
+            FROM inputs AS i
+            WHERE 	
+				i."dataSource"   = :dataSource
+                AND i."dataLocation" = :dataLocation
+                AND i."dataSeries"   = :dataSeries
+                AND {'i."dataDatum" = :dataDatum' if seriesDescription.dataDatum is not None else 'i."dataDatum" IS NULL'}
+                AND i."verifiedTime" BETWEEN :from_dt AND :to_dt
+            ORDER BY
+                i."verifiedTime",
+                i."ensembleMemberID",
+                i."generatedTime" DESC
         )
-        -- From all of the latest generated times the oldest is returned
-        SELECT MIN(most_recent_gen_time) as oldest_recent_generated_time 
-        FROM most_recent_per_verification;
+        SELECT
+            MIN("generatedTime") OVER () AS "generatedTime"
+        FROM latest_per_group
+        ORDER BY
+            "verifiedTime",
+            "ensembleMemberID"
+		LIMIT 1
         """)
         bind_params = {
             'dataSource': seriesDescription.dataSource,
@@ -504,11 +477,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         tupleishResult = self.__dbSelection(query_stmt).fetchall()
         
-        if not tupleishResult or not tupleishResult[0][0]: #Data is not present in the DB
+        # Data is not present in the DB
+        if not tupleishResult or not tupleishResult[0][0]: 
             return None
         
         oldestGeneratedTime = pd.to_datetime(tupleishResult[0][0]).tz_localize(timezone.utc)
-        
+
         return oldestGeneratedTime
        
     def fetch_row_with_max_verified_time_in_range(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> tuple | None:

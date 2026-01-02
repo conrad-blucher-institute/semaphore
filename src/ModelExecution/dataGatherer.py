@@ -98,7 +98,7 @@ class DataGatherer:
             key = dependentSeries.outKey
 
             # Request the data from Series provider from its description 
-            series = self.__seriesProvider.request_input(seriesDescription, timeDescription)
+            series = self.__seriesProvider.request_input(seriesDescription, timeDescription, referenceTime)
 
             # Perform data integrity processing if specified
             if dependentSeries.dataIntegrityCall is not None:

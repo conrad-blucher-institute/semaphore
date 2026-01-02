@@ -121,38 +121,47 @@ def seed_inputs_once(engine, inputs_table):
 
 # --- run the same test for multiple series/time windows ---
 @pytest.mark.parametrize(
-    "series_kwargs, from_str, to_str, expected_result",
+    "series_kwargs, from_str, to_str, stalenessOffset, expected_result",
     [
         (
         #Tests missing rows
             dict(dataSource="NOAATANDC", dataSeries="dWl",
                  dataLocation="NorthJetty", dataDatum="NAVD"),
             "2025091200", "2025091223",
-        True #Returned date: 2025-09-12 01:00
+            timedelta(hours=1),
+            True #Returned date: 2025-09-12 01:00
         ),
         #Tests multiple verified times for one generated time
         (
             dict(dataSource="NDFD_EXP", dataSeries="pWnSpd",
                  dataLocation="Aransas", dataDatum="NA"),
             "2025091200", "2025091223",
+            timedelta(hours=1),
             False #Returned date: 2025-09-12 00:05
         ),
         (
             dict(dataSource="TWC", dataSeries="pAirTemp",
                  dataLocation="SBirdIsland", dataDatum="NA"),
             "2025091200", "2025091223",
+            timedelta(hours=1),
             True #Returned date: 2025-09-12 01:00
+        ),
+        (
+            dict(dataSource="NDFD_EXP", dataSeries="pWnSpd",
+                 dataLocation="Aransas", dataDatum="NA"),
+            "2025091200", "2025091223",
+            None,
+            True 
         )
     ],
     ids=[
         "NOAATANDC",
         "NDFD_EXP",
-        "TWC"
+        "TWC",
+        "NoneCase"
     ],
 )
-def test_determine_staleness_with_mock_db(engine, inputs_table, series_kwargs, from_str, to_str, expected_result):
-    from SeriesStorage.ISeriesStorage import series_storage_factory 
-
+def test_determine_staleness_with_mock_db(engine, inputs_table, series_kwargs, from_str, to_str, stalenessOffset, expected_result):
     
     series_desc = SeriesDescription(**series_kwargs)
     from_dt = datetime.strptime(from_str, "%Y%m%d%H").replace(tzinfo=timezone.utc)
@@ -160,7 +169,7 @@ def test_determine_staleness_with_mock_db(engine, inputs_table, series_kwargs, f
     time_desc = TimeDescription(fromDateTime=from_dt, toDateTime=to_dt)
     time_desc.interval = timedelta(hours=1)
     reference_time = datetime.combine(date(2025, 9, 12), time(2, 0), tzinfo=timezone.utc)
-    time_desc.stalenessOffset = timedelta(hours=1)
+    time_desc.stalenessOffset = stalenessOffset
 
     seriesProvider = SeriesProvider()
     actual_result = seriesProvider.db_has_freshly_acquired_data(series_desc, time_desc, reference_time)

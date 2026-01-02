@@ -31,8 +31,9 @@ def test_request_input(seriesDescription: SeriesDescription, timeDescription: Ti
     """
     load_dotenv()
     seriesProvider = SeriesProvider()
+    timeDescription.stalenessOffset = None
     try:
-        seriesProvider.request_input(seriesDescription, timeDescription)
+        seriesProvider.request_input(seriesDescription, timeDescription, datetime(2001, 12, 28, tzinfo=timezone.utc))
     except ModuleNotFoundError: #Catches when the DI factory is called, which is far out of this unit test
         assert True 
 
