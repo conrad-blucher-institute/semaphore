@@ -162,7 +162,7 @@ def _ensure_ref_values(conn, md: MetaData, ref_table_name: str, values: set[str]
     if not values:
         return
     if ref_table_name not in md.tables:
-        # If your schema doesn't have this ref table, skip.
+        # If the schema doesn't have this ref table, skip.
         return
 
     ref_table = md.tables[ref_table_name]
@@ -216,7 +216,7 @@ def seed_inputs_once(engine: Engine, metadata: MetaData, inputs_table):
     inserted_ids: list[int] = []
 
     with engine.begin() as conn:
-        # Ensure ref tables exist for FK constraints (your schema uses code/displayName)
+        # Ensure ref tables exist for FK constraints 
         _ensure_ref_values(conn, metadata, "ref_dataUnit", data_units)
         _ensure_ref_values(conn, metadata, "ref_dataSource", data_sources)
         _ensure_ref_values(conn, metadata, "ref_dataLocation", data_locations)

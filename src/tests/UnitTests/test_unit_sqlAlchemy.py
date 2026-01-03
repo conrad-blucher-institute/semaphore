@@ -125,7 +125,6 @@ def load_rows_from_csv(csv_path: str) -> list[dict]:
 def _pick_lookup_column(ref_table) -> str:
     """
     Choose the column that the FK likely points to.
-    In your schema, ref_dataUnit uses 'code' (not 'dataUnit').
     """
     preferred = ["code", "value", "name", "key", "slug"]
     for col in preferred:
