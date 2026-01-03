@@ -107,6 +107,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         
         df_inputResult = self.__splice_input(tupleishResult)
         
+        
         # Sending all rows found downstream the input gatherer will handle interval alignment
         series = Series(seriesDescription, timeDescription)
         series.dataFrame = df_inputResult
