@@ -209,7 +209,7 @@ class SeriesProvider():
         - The max verified time is >= requested toDateTime
 
         NOTE::
-        The now time and toDateTime are both converted to tz naive for comparison.
+        The requested toDateTime is converted to tz naive for comparison.
         """
 
         # get the row with the max verified time in the requested range
