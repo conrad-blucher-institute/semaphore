@@ -69,7 +69,6 @@ class SeriesProvider():
         # always call the db freshness check to ensure we aren't using old data
         db_is_fresh = self.db_has_freshly_acquired_data(seriesDescription, timeDescription, referenceTime)
         if not db_is_fresh:
-            print('Ingesting due to staleness check')
             self.__data_ingestion_query(seriesDescription, timeDescription)
             already_ingested_data = True
 
@@ -77,7 +76,6 @@ class SeriesProvider():
         if not already_ingested_data:
             should_ingest_for_verified_time = self.__check_verified_time_for_ingestion(seriesDescription, timeDescription)
             if should_ingest_for_verified_time:
-                print('Ingesting due to verified time check')
                 self.__data_ingestion_query(seriesDescription, timeDescription)
 
         return self.__data_base_query(seriesDescription, timeDescription)
