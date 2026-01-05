@@ -36,6 +36,36 @@ Currently, you can run Semaphore through the make_and_save_prediction and make_p
 4. You can specify `--host` and `--port` if you so desire
 5. uvicorn will give you a link to the index page of the API. Add `/docs` to the URL to access the docs page
 
+## Semaphore DB Monitoring
+Semaphore uses PostgreSQL’s pg_stat_statements extension to track which SQL queries are being executed, how often they run, and how expensive they are. This is useful for identifying slow or frequently called queries that may need optimization.
+
+- Replace POSTGRES_USER and POSTGRES_DB with real .env variables to access the db container: `docker compose exec db psql -U "POSTGRES_USER " -d "POSTGRES_DB "`
+- Run command: `SHOW shared_preload_libraries;`
+- The result should be "pg_stat_statements". If this is not listed, the database will not collect query statistics.
+- This prints one row at a time in a readable format: \x on (To turn it off: \x off
+)
+- Wait for traffic to run for a bit then query the statements to see the most expensive SQL queries:
+SELECT
+    query,
+    calls,
+    total_exec_time,
+    mean_exec_time,
+    max_exec_time
+FROM pg_stat_statements
+ORDER BY total_exec_time DESC
+LIMIT 5;
+
+- List query id's:
+SELECT
+  queryid,
+  calls,
+  round(total_exec_time::numeric, 2) AS total_ms,
+  left(regexp_replace(query, '\s+', ' ', 'g'), 180) AS query_preview
+FROM pg_stat_statements
+ORDER BY total_exec_time DESC
+LIMIT 10;
+
+
 ## Authors
 * [@Matthew Kastl](https://github.com/matdenkas) - mkastl@islander.tamucc.edu
 * [@Beto Estrada](https://github.com/bestrada33) - bestrada4@islander.tamucc.edu
