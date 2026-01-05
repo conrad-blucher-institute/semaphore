@@ -203,15 +203,13 @@ class SeriesProvider():
 
         True (should ingest) if:
         - No rows exists for the provided series and time description
-        - The max verified time < requested toDateTime (more data might be available)
-            AND the time since acquisition (now - acquired_time) is greater than or equal to the threshold (>= threshold)
-    
-        Returns False (should NOT ingest) if:
-        - The max verified time >= requested toDateTime
-            OR the time since acquisition (now - acquired_time) is less than the threshold (< threshold)
+        - The max verified time is < requested toDateTime (more data might be available)
+
+        False (should NOT ingest) if:
+        - The max verified time is >= requested toDateTime
 
         NOTE::
-        The now time and toDateTime are both converted to tz naive for comparison.
+        The requested toDateTime is converted to tz naive for comparison.
         """
 
         # get the row with the max verified time in the requested range
@@ -223,21 +221,11 @@ class SeriesProvider():
         
         # extract times from the row and add timezone info
         verified_time = max_verified_time_row[3]
-        acquired_time = max_verified_time_row[2]
 
-        # convert the model run time (now) and toDateTime to tz naive for comparisons
-        current_time = datetime.now(timezone.utc).replace(tzinfo=None)
+        # convert the toDateTime to tz naive for comparisons
         toDateTime = timeDescription.toDateTime.replace(tzinfo=None)
 
-        # the threshold is set to the interval if it exists, otherwise default
-        threshold = timeDescription.interval if timeDescription.interval is not None else self.DEFAULT_ACQUIRE_THRESHOLD
-
-        # we have to use actual time, not rounded reference_time in the calculation because otherwise
-        # we don't get an accurate measure of how much time has passed since we last tried to ingest data
-        difference = current_time - acquired_time
-
         # return True if we should ingest new data, False otherwise
-        # we want to ingest again if we don't have all the data and we've 
-        # waited long enough for new data to be available
-        return (verified_time < toDateTime and difference >= threshold)
+        # we want to ingest again if we don't have all the data
+        return (verified_time < toDateTime)
         
