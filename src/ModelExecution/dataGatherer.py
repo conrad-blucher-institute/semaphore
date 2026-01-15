@@ -105,7 +105,9 @@ class DataGatherer:
                 # Create an instance of the data integrity class and execute it
                 series = data_integrity_factory(dependentSeries.dataIntegrityCall.call).exec(series)
 
-            # For NDBC we reindex to 10 minute intervals, otherwise use the series interval
+            # For NDBC we reindex to 10 minute intervals since the verified times given to us
+            # are for 10, 20, 40, and 50 minutes past the hour and not at the top of the hour.
+            # For all other sources, use the interval as specified in the dspec
             frequency = 600 if dependentSeries.source == 'NDBC' else dependentSeries.interval
 
             # Set the index
