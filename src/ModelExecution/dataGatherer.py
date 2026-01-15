@@ -105,6 +105,9 @@ class DataGatherer:
                 # Create an instance of the data integrity class and execute it
                 series = data_integrity_factory(dependentSeries.dataIntegrityCall.call).exec(series)
 
+            # For NDBC we reindex to 10 minute intervals, otherwise use the series interval
+            frequency = 600 if dependentSeries.source == 'NDBC' else dependentSeries.interval
+
             # Set the index
             series.dataFrame.set_index('timeVerified', inplace=True)
 
@@ -113,7 +116,7 @@ class DataGatherer:
                 name='timeVerified',
                 start=series.timeDescription.fromDateTime,
                 end=series.timeDescription.toDateTime,
-                freq=timedelta(seconds=series.timeDescription.interval.total_seconds()))
+                freq=timedelta(seconds=frequency))
             )
             
             # Reset the index
