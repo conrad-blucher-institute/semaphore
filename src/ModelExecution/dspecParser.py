@@ -220,7 +220,7 @@ class dspec_sub_Parser_2_0:
                 # --- If data is in the past there is no staleness offset (None)
                 # --- If data is current/future we set a default staleness offset of 7 hours
                 fromTimeIsInPast = dSeries.range[1] < 0
-                dSeries.stalenessOffset = dSeries_dict.get("stalenessOffset", None if fromTimeIsInPast else timedelta(hours=7))
+                dSeries.stalenessOffset = dSeries_dict.get("stalenessOffset", None if fromTimeIsInPast else timedelta(hours=12))
                 
                 dSeries.verificationOverride = dSeries_dict.get("verificationOverride")
 
