@@ -91,6 +91,7 @@
             "interval": 3600,
             "range": [43, 1],
             "outKey": "PL_PWNDIR_F43",
+            "stalenessOffset": 36000,
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
                 "args": {
@@ -109,6 +110,7 @@
             "interval": 3600,
             "range": [43, 1],
             "outKey": "PL_PWSPD_F43",
+            "stalenessOffset": 36000,
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {

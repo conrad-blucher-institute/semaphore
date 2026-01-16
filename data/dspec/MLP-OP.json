@@ -46,7 +46,8 @@
             "unit": "celsius",
             "interval": 10800,
             "range": [16, 1],
-            "outKey": "SBI_PAT_16"
+            "outKey": "SBI_PAT_16",
+            "stalenessOffset": 36000
         }
     ],
     "postProcessCall": [],

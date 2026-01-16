@@ -118,7 +118,8 @@
                     "limit_area":"inside"    
                 }
             },
-            "outKey": "WSPD_FUTR_48"
+            "outKey": "WSPD_FUTR_48",
+            "stalenessOffset": 36000
         },
         {
             "_name": "wind direction future",
@@ -136,7 +137,8 @@
                     "limit_area":"inside"    
                 }
             },
-            "outKey": "WDIR_FUTR_48"
+            "outKey": "WDIR_FUTR_48",
+            "stalenessOffset": 36000
         }
     ],
     "postProcessCall": [

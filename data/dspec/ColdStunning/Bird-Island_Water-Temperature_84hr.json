@@ -71,6 +71,7 @@
                 1
             ],
             "outKey": "south-bird-island_predicted_air-temp_90",
+            "stalenessOffset": 36000,
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
