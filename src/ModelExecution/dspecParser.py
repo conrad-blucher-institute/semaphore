@@ -216,19 +216,15 @@ class dspec_sub_Parser_2_0:
                 dSeries.unit = dSeries_dict.get("unit")
                 dSeries.outKey = dSeries_dict.get("outKey")
 
-                # If staleness offset is provided we use it, else we set a default based on range and source:
+                # If staleness offset is provided we use it, else we set a default based on range:
                 # --- If data is in the past there is no staleness offset (None)
-                # --- If data is current/future, set staleness offset based on source:
-                #     - NDFD_JSON: 12 hours (updates irregularly, can have 9+ hour gaps)
-                #     - Other sources: 7 hours
+                # --- If data is current/future we set a default staleness offset of 7 hours
                 fromTimeIsInPast = dSeries.range[1] < 0
-                if fromTimeIsInPast:
-                    default_staleness = None
-                elif dSeries.source == "NDFD_JSON":
-                    default_staleness = timedelta(hours=12)
-                else:
-                    default_staleness = timedelta(hours=7)
-                dSeries.stalenessOffset = dSeries_dict.get("stalenessOffset", default_staleness)
+                stalenessOffsetValue = dSeries_dict.get("stalenessOffset", None if fromTimeIsInPast else timedelta(hours=7))
+                # Convert integer seconds to timedelta if needed
+                if isinstance(stalenessOffsetValue, int):
+                    stalenessOffsetValue = timedelta(seconds=stalenessOffsetValue)
+                dSeries.stalenessOffset = stalenessOffsetValue
 
                 dSeries.verificationOverride = dSeries_dict.get("verificationOverride")
 

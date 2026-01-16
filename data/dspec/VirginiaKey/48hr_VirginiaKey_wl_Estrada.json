@@ -59,6 +59,7 @@
             "interval": 3600,
             "range": [48, 1],
             "outKey": "VK_PWSPD_F48",
+            "stalenessOffset": 36000,
 			"dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
@@ -77,6 +78,7 @@
             "interval": 3600,
             "range": [48, 1],
             "outKey": "VK_PWDIR_F48",
+            "stalenessOffset": 36000,
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
                 "args": {
