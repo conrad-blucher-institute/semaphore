@@ -159,6 +159,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             :param from_time: datetime - The earliest time to include
         '''        
 
+
         # Get the lead time for time calculations
         # Because we are inferring model information
         # We select the latest version of the model under that name
@@ -202,14 +203,20 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             :param model_name: str - The name of the model to query
 
             NOTE:: Things like model version and time will just be the latest in the DB
-        '''        
-        outputTable = self.__metadata.tables['outputs']
-        statement = (select(outputTable)
-                    .where(outputTable.c.modelName == model_name)
-                    .order_by(outputTable.c.modelVersion.desc())
-                    .order_by(outputTable.c.timeGenerated.desc())
-                    )
-        tupleishResult = self.__dbSelection(statement).first() # because of order this should be latest
+        '''   
+
+        stmt_find_latest_output = text(f"""
+            SELECT *
+            FROM outputs AS o
+            WHERE o."modelName" = :model_name
+            ORDER BY o."modelVersion" DESC, o."timeGenerated" DESC
+            LIMIT 1;
+        """)     
+        bind_params = {
+            'model_name': model_name
+        }
+        stmt_find_latest_output = stmt_find_latest_output.bindparams(**bind_params)
+        tupleishResult = self.__dbSelection(stmt_find_latest_output).first() # because of order this should be latest
 
         if not tupleishResult: # If there are no results, no model information can't be inferred 
             return None    
@@ -217,13 +224,18 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         latest_time = tupleishResult[1]
 
         # STEP 2: Get ALL outputs with the same timeGenerated
-        statement = (
-            select(outputTable)
-            .where(outputTable.c.modelName == model_name)
-            .where(outputTable.c.timeGenerated == latest_time)
-        )
-
-        result = self.__dbSelection(statement).fetchall()
+        stmt_collect_all_latest_outputs = text(f"""
+            SELECT *
+            FROM outputs AS o
+            WHERE o."modelName" = :model_name
+            AND o."timeGenerated" = :latest_time;
+        """)     
+        bind_params = {
+            'model_name': model_name,
+            'latest_time': latest_time
+        }
+        stmt_collect_all_latest_outputs = stmt_collect_all_latest_outputs.bindparams(**bind_params)
+        result = self.__dbSelection(stmt_collect_all_latest_outputs).fetchall()
 
         if not result:
             return None
@@ -232,7 +244,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         # Parse out model information from first output result
         first = result[0]
-        description = SemaphoreSeriesDescription(first[3], first[4], first[8], first[7], first[6])
+        description = SemaphoreSeriesDescription(first[3], first[4], first[8], first[7], first[6]) # Hydrate metadata from first row info
         series = Series(description)
         series.dataFrame = outputResult
         return series
