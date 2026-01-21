@@ -37,6 +37,7 @@
             "interval": 3600,
             "range": [12, 1],
             "outKey": "PL_WNDIR_F12",
+            "stalenessOffset": 36000,
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
                 "args": {
@@ -55,6 +56,7 @@
             "interval": 3600,
             "range": [12, 1],
             "outKey": "PL_WNDSPD_F12",
+            "stalenessOffset": 36000,
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
