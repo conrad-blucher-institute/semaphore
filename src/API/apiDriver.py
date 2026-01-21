@@ -118,7 +118,9 @@ async def get_outputs_latest(modelNames: list[str] = Query(None)):
     Returns:
         The results for each model index by the model name. If no data can be found for that model the value will be null.
     """ 
-
+    if not modelNames:
+        raise HTTPException(status_code=422, detail='No model names were provided')
+    
     provider = SeriesProvider()
     results = {}
     for modelName in modelNames: 
