@@ -23,8 +23,8 @@
             "source": "NDBC",
             "series": "DPD",
             "unit": "seconds",
-            "interval": 3600,
-            "range": [0, -23],
+            "interval": 600,
+            "range": [0, -138],
             "verificationOverride": {"label": "greaterThanOrEqual", "value": 4},
             "outKey": "DPD_24"
         },
@@ -34,8 +34,8 @@
             "source": "NDBC",
             "series": "APD",
             "unit": "seconds",
-            "interval": 3600,
-            "range": [0, -23],
+            "interval": 600,
+            "range": [0, -138],
             "verificationOverride": {"label": "greaterThanOrEqual", "value": 4},
             "outKey": "APD_24"
         },
@@ -45,8 +45,8 @@
             "source": "NDBC",
             "series": "WVHT",
             "unit": "meter",
-            "interval": 3600,
-            "range": [0, -23],
+            "interval": 600,
+            "range": [0, -138],
             "verificationOverride": {"label": "greaterThanOrEqual", "value": 4},
             "outKey": "WVHT_24"
         },

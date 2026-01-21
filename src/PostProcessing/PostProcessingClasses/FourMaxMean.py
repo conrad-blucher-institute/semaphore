@@ -17,6 +17,7 @@ from DataClasses import Series, get_input_dataFrame
 from ModelExecution.dspecParser import PostProcessCall
 from copy import deepcopy
 from utility import log
+import pandas as pd
 
 class FourMaxMean(IPostProcessing):
     """
@@ -56,13 +57,15 @@ class FourMaxMean(IPostProcessing):
         IN_SERIES = preprocessedData[args['target_inKey']]
         IN_SERIES_DATA = IN_SERIES.dataFrame['dataValue'].astype(float).to_list()
         OUT_KEY = args['outkey']
+
+        # filter out any NaN values
+        filtered_data = [value for value in IN_SERIES_DATA if not pd.isna(value)]
         
-
-        if len(IN_SERIES_DATA) <= int(args['warning_trigger']):
-            log(f'Warning:: Above FourMaxMean call has less values than the warning trigger. Trigger: {args["warning_trigger"]} Values Received: {len(IN_SERIES_DATA)}')
-
+        if len(filtered_data) <= int(args['warning_trigger']):
+            log(f'Warning:: Above FourMaxMean call has less values than the warning trigger. Trigger: {args["warning_trigger"]} Values Received: {len(filtered_data)}')
+        
         # Compute the mean of the four highest data points
-        four_highest = sorted(IN_SERIES_DATA)[-4:]
+        four_highest = sorted(filtered_data)[-4:]
         mean_four_max_val = sum(four_highest) / 4.0
         
         # The four max mean operation changes none of the meta information
