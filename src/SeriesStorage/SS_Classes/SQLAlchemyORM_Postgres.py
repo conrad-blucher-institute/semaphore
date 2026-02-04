@@ -20,6 +20,7 @@ from os import getenv
 from datetime import timedelta, datetime, timezone
 import pandas as pd
 from pandas import DataFrame
+import numpy as np
 
 from SeriesStorage.ISeriesStorage import ISeriesStorage
 
@@ -698,7 +699,22 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         return df_out
 
+    def __serialize_data(self, df: DataFrame) -> DataFrame:
+        """
+        This method serializes the dataValue column in a dataframe 
+        
+        params:
+            df: DataFrame - The dataframe to serialize
 
+        returns:
+            DataFrame - The dataframe with the serialized dataValue column
+        """
+        # convert dataValue column to bytes
+        dataValue_column = df['dataValue']
+        serialized_dataValue = np.array(dataValue_column.tolist()).tobytes()
+        df['dataValue'] = serialized_dataValue
+        return df
+    
     def insert_lat_lon_test(self, code: str, displayName: str, notes: str, latitude: str, longitude: str):
         """This method inserts lat and lon information
         """

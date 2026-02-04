@@ -16,6 +16,7 @@ High-level flow:
 5) Compare the returned DataFrame to an expected DataFrame.
 6) Cleanup: delete only the rows inserted by this test module.
 
+docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py
 """
 # -------------------------------
 
@@ -28,10 +29,13 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+import numpy as np
 from sqlalchemy import MetaData, create_engine, delete, insert, select
 from sqlalchemy.engine import Engine
 
 from SeriesProvider import SeriesProvider
+from SeriesStorage.SS_Classes.SQLAlchemyORM_Postgres import SQLAlchemyORM_Postgres
+from unittest.mock import patch
 from DataClasses import SeriesDescription, TimeDescription
 
 
@@ -198,7 +202,7 @@ def _ensure_ref_values(conn, md: MetaData, ref_table_name: str, values: set[str]
 # Seed + cleanup
 # -------------------------------
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="module")
 def seed_inputs_once(engine: Engine, metadata: MetaData, inputs_table):
     """
     Reads CSV, ensures referenced ref_* values exist (FK-safe),
@@ -293,7 +297,8 @@ def seed_inputs_once(engine: Engine, metadata: MetaData, inputs_table):
     ],
     ids=["NOAATANDC", "NDFD_EXP", "TWC", "NoneCase"],
 )
-def test_determine_staleness_with_mock_db(engine, series_kwargs, from_str, to_str, stalenessOffset, reference_time, expected_result):
+def test_determine_staleness_with_mock_db(
+    engine, seed_inputs_once, series_kwargs, from_str, to_str, stalenessOffset, reference_time, expected_result):
     """
     Verifies SeriesProvider.db_has_freshly_acquired_data(...) returns the expected bool
     given seeded inputs rows and a known reference_time.
@@ -311,3 +316,107 @@ def test_determine_staleness_with_mock_db(engine, series_kwargs, from_str, to_st
     actual_result = seriesProvider.db_has_freshly_acquired_data(series_desc, time_desc, reference_time)
 
     assert actual_result is expected_result
+
+
+@pytest.mark.parametrize(
+    "data_array",
+    [
+        (
+            # Test case 1: shape (3, 3, 3)
+            # basic test with a shaped array
+            [np.array([
+                [
+                    [1.0, 2.0, 3.0],
+                    [4.0, 5.0, 6.0],
+                    [7.0, 8.0, 9.0]
+                ],
+                [
+                    [10.0, 11.0, 12.0],
+                    [13.0, 14.0, 15.0],
+                    [16.0, 17.0, 18.0]
+                ],
+                [
+                    [19.0, 20.0, 21.0],
+                    [22.0, 23.0, 24.0],
+                    [25.0, 26.0, 27.0]
+                ]
+            ])],
+        ),
+        (
+            # Test case 2: shape (1, 1, 1)
+            # to test single points
+            [np.array(
+                [
+                    [
+                        [42.0]
+                    ]
+                ]
+            )],
+        ),
+        (
+            # Test case 3: shape (3, 5, 2)
+            # to test when dimensions are not all equal
+            [np.array([
+                [
+                    [1.0, 2.0],
+                    [3.0, 4.0],
+                    [5.0, 6.0],
+                    [7.0, 8.0],
+                    [9.0, 10.0]
+                ],
+                [
+                    [11.0, 12.0],
+                    [13.0, 14.0],
+                    [15.0, 16.0],
+                    [17.0, 18.0],
+                    [19.0, 20.0]
+                ],
+                [
+                    [21.0, 22.0],
+                    [23.0, 24.0],
+                    [25.0, 26.0],
+                    [27.0, 28.0],
+                    [29.0, 30.0]
+                ]
+            ])]
+        ),
+    ],
+    ids=["3x3x3", '1x1x1', '3x5x2']
+)
+def test_serialize_data(data_array):
+    """
+    This test checks that the __serialize_data method correctly converts the dataValue column
+    of a DataFrame to bytes.
+
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize_data -s
+    """
+
+    df = pd.DataFrame({
+        'ID': 1,
+        'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=None),
+        'leadTime': datetime(2026, 1, 1, 1, 0, tzinfo=None),
+        'modelName': 'TestModel',
+        'modelVersion': '1.0',
+        'dataValue': data_array,
+        'dataUnit': 'celsius',
+        'dataLocation': 'TestLocation',
+        'dataSeries': 'TestSeries',
+        'dataDatum': 'TestDatum',
+    })
+
+    # skip the db connection by replacing the __init__ method
+    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
+        storage = SQLAlchemyORM_Postgres()
+
+        # verify that no engine is set by attempting to get the engine
+        try:
+            storage._SQLAlchemyORM_Postgres__get_engine()
+            assert False, "Expected an exception due to no engine being set."
+        except Exception as e:
+            assert "no engine has been created" in str(e)
+
+        # call the serializer 
+        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+
+        # assert that the dataValue column is of type bytes
+        assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
