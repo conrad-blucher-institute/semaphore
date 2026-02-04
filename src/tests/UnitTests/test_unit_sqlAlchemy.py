@@ -381,12 +381,12 @@ def test_determine_staleness_with_mock_db(
     ],
     ids=["3x3x3", '1x1x1', '3x5x2']
 )
-def test_serialize_data(data_array):
+def test_serialize(data_array):
     """
     This test checks that the __serialize_data method correctly converts a single row in a 
     dataframe to bytes in the dataValue column using different shaped arrays in the dataValue column.
 
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize_data -s
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize -s
     """
 
     df = pd.DataFrame({
@@ -517,3 +517,165 @@ def test_serialize_multiple_rows():
         for idx, row in serialized_df.iterrows():
             assert isinstance(row['dataValue'], bytes)
 
+def test_deserialize():
+    """
+    This test checks that the __deserialize_data method correctly converts bytes in a 
+    single dataframe row back to the original array in the dataValue column.
+
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_deserialize -s
+    """
+
+    # shape (3, 5, 2)
+    data_array = [
+        [
+            [1.0, 2.0],
+            [3.0, 4.0],
+            [5.0, 6.0],
+            [7.0, 8.0],
+            [9.0, 10.0]
+        ],
+        [
+            [11.0, 12.0],
+            [13.0, 14.0],
+            [15.0, 16.0],
+            [17.0, 18.0],
+            [19.0, 20.0]
+        ],
+        [
+            [21.0, 22.0],
+            [23.0, 24.0],
+            [25.0, 26.0],
+            [27.0, 28.0],
+            [29.0, 30.0]
+        ]
+    ]
+
+    df = pd.DataFrame({
+        'ID': [1],
+        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)],
+        'leadTime': [timedelta(days=5)],
+        'modelName': ['TestModel'],
+        'modelVersion': ['1.0'],
+        'dataValue': [data_array],
+        'dataUnit': ['celsius'],
+        'dataLocation': ['TestLocation'],
+        'dataSeries': ['TestSeries'],
+        'dataDatum': ['TestDatum'],
+    })
+
+    # skip the db connection by replacing the __init__ method
+    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
+        storage = SQLAlchemyORM_Postgres()
+
+        # verify that no engine is set by attempting to get the engine
+        try:
+            storage._SQLAlchemyORM_Postgres__get_engine()
+            assert False, "Expected an exception due to no engine being set."
+        except Exception as e:
+            assert "no engine has been created" in str(e)
+
+        # first serialize the data
+        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+
+        # ensure the data was serialized to bytes
+        assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
+
+        # deserialize the data
+        deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_df)
+
+        # assert that the deserialized dataframe matches the original dataframe
+        assert df.equals(deserialized_df)
+
+def test_deserialize_multiple_rows():
+    """
+    This test checks that the __deserialize_data method correctly converts bytes in a 
+    dataframe with multiple rows back to the original arrays in the dataValue column for each row.
+
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_deserialize_multiple_rows -s
+    """
+
+    # the data array for each row
+    data_column = [
+        # row 1
+        # shape (1, 1, 1)
+        [
+            [
+                [42.0]
+            ]
+        ],
+        # row 2
+        # shape (3, 5, 4)
+        [
+            [
+                [1.0, 2.0, 3.0, 4.0],
+                [5.0, 6.0, 7.0, 8.0],
+                [9.0, 10.0, 11.0, 12.0],
+                [13.0, 14.0, 15.0, 16.0],
+                [17.0, 18.0, 19.0, 20.0]
+            ],
+            [
+                [21.0, 22.0, 23.0, 24.0],
+                [25.0, 26.0, 27.0, 28.0],
+                [29.0, 30.0, 31.0, 32.0],
+                [33.0, 34.0, 35.0, 36.0],
+                [37.0, 38.0, 39.0, 40.0]
+            ],
+            [
+                [41.0, 42.0, 43.0, 44.0],
+                [45.0, 46.0, 47.0, 48.0],
+                [49.0, 50.0, 51.0, 52.0],
+                [53.0, 54.0, 55.0, 56.0],
+                [57.0, 58.0, 59.0, 60.0]
+            ]
+        ],
+        # row 3 
+        # shape (2, 3, 1)
+        [
+            [
+                [100.0],
+                [200.0],
+                [300.0]
+            ],
+            [
+                [400.0],
+                [500.0],
+                [600.0]
+            ]
+        ]
+    ]
+
+    df = pd.DataFrame({
+        'ID': [1, 2, 3],
+        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)] * 3,
+        'leadTime': [timedelta(days=5)] * 3,
+        'modelName': ['TestModel'] * 3,
+        'modelVersion': ['1.0'] * 3,
+        'dataValue': data_column,
+        'dataUnit': ['celsius'] * 3,
+        'dataLocation': ['TestLocation'] * 3,
+        'dataSeries': ['TestSeries'] * 3,
+        'dataDatum': ['TestDatum'] * 3,
+    })
+
+    # skip the db connection by replacing the __init__ method
+    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
+        storage = SQLAlchemyORM_Postgres()
+
+        # verify that no engine is set by attempting to get the engine
+        try:
+            storage._SQLAlchemyORM_Postgres__get_engine()
+            assert False, "Expected an exception due to no engine being set."
+        except Exception as e:
+            assert "no engine has been created" in str(e)
+
+        # first serialize the data
+        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+
+        # ensure the data was serialized to bytes
+        assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
+
+        # then deserialize the data
+        deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_df)
+
+        # assert that the deserialized dataframe matches the original dataframe
+        assert df.equals(deserialized_df)

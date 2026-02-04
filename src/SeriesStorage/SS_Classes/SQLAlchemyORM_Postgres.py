@@ -21,6 +21,7 @@ from datetime import timedelta, datetime, timezone
 import pandas as pd
 from pandas import DataFrame
 import numpy as np
+import pickle
 
 from SeriesStorage.ISeriesStorage import ISeriesStorage
 
@@ -709,17 +710,38 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         returns:
             DataFrame - The dataframe with the serialized dataValue column
         """
-
         serialized_values = []
 
         # loop over each row and serialize the dataValue column
         for idx, row in df.iterrows():
             data_value = row['dataValue']
-            serialized_value = np.array(data_value).tobytes()
+            serialized_value = pickle.dumps(data_value)
             serialized_values.append(serialized_value)
         
         # replace the entire dataValue column with the serialized values
         df['dataValue'] = serialized_values
+        return df
+
+    def __deserialize_data(self, df: DataFrame) -> DataFrame:
+        """
+        This method deserializes the dataValue column in a dataframe
+
+        params:
+            df: DataFrame - The dataframe to deserialize
+
+        returns:
+            DataFrame - The dataframe with the deserialized dataValue column
+        """
+        deserialized_values = []
+
+        # loop over each row and deserialize the dataValue column
+        for idx, row in df.iterrows():
+            serialized_value = row['dataValue']
+            data_value = pickle.loads(serialized_value)
+            deserialized_values.append(data_value)
+        
+        # replace the entire dataValue column with the deserialized values
+        df['dataValue'] = deserialized_values
         return df
     
     def insert_lat_lon_test(self, code: str, displayName: str, notes: str, latitude: str, longitude: str):
