@@ -709,10 +709,17 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         returns:
             DataFrame - The dataframe with the serialized dataValue column
         """
-        # convert dataValue column to bytes
-        dataValue_column = df['dataValue']
-        serialized_dataValue = np.array(dataValue_column.tolist()).tobytes()
-        df['dataValue'] = serialized_dataValue
+
+        serialized_values = []
+
+        # loop over each row and serialize the dataValue column
+        for idx, row in df.iterrows():
+            data_value = row['dataValue']
+            serialized_value = np.array(data_value).tobytes()
+            serialized_values.append(serialized_value)
+        
+        # replace the entire dataValue column with the serialized values
+        df['dataValue'] = serialized_values
         return df
     
     def insert_lat_lon_test(self, code: str, displayName: str, notes: str, latitude: str, longitude: str):

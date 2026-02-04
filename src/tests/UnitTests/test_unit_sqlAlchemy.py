@@ -324,7 +324,7 @@ def test_determine_staleness_with_mock_db(
         (
             # Test case 1: shape (3, 3, 3)
             # basic test with a shaped array
-            [np.array([
+            [
                 [
                     [1.0, 2.0, 3.0],
                     [4.0, 5.0, 6.0],
@@ -340,23 +340,21 @@ def test_determine_staleness_with_mock_db(
                     [22.0, 23.0, 24.0],
                     [25.0, 26.0, 27.0]
                 ]
-            ])],
+            ],
         ),
         (
             # Test case 2: shape (1, 1, 1)
             # to test single points
-            [np.array(
+            [
                 [
-                    [
-                        [42.0]
-                    ]
+                    [42.0]
                 ]
-            )],
+            ],
         ),
         (
             # Test case 3: shape (3, 5, 2)
             # to test when dimensions are not all equal
-            [np.array([
+            [
                 [
                     [1.0, 2.0],
                     [3.0, 4.0],
@@ -378,30 +376,30 @@ def test_determine_staleness_with_mock_db(
                     [27.0, 28.0],
                     [29.0, 30.0]
                 ]
-            ])]
+            ]
         ),
     ],
     ids=["3x3x3", '1x1x1', '3x5x2']
 )
 def test_serialize_data(data_array):
     """
-    This test checks that the __serialize_data method correctly converts the dataValue column
-    of a DataFrame to bytes.
+    This test checks that the __serialize_data method correctly converts a single row in a 
+    dataframe to bytes in the dataValue column using different shaped arrays in the dataValue column.
 
     docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize_data -s
     """
 
     df = pd.DataFrame({
-        'ID': 1,
-        'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=None),
-        'leadTime': datetime(2026, 1, 1, 1, 0, tzinfo=None),
-        'modelName': 'TestModel',
-        'modelVersion': '1.0',
-        'dataValue': data_array,
-        'dataUnit': 'celsius',
-        'dataLocation': 'TestLocation',
-        'dataSeries': 'TestSeries',
-        'dataDatum': 'TestDatum',
+        'ID': [1],
+        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)],
+        'leadTime': [timedelta(days=5)],
+        'modelName': ['TestModel'],
+        'modelVersion': ['1.0'],
+        'dataValue': [data_array],
+        'dataUnit': ['celsius'],
+        'dataLocation': ['TestLocation'],
+        'dataSeries': ['TestSeries'],
+        'dataDatum': ['TestDatum'],
     })
 
     # skip the db connection by replacing the __init__ method
@@ -420,3 +418,102 @@ def test_serialize_data(data_array):
 
         # assert that the dataValue column is of type bytes
         assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
+
+def test_serialize_multiple_rows():
+    """
+    This test checks that the __serialize_data method correctly converts dataframes with multiple rows 
+    to bytes in the dataValue column for each row.
+
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize_multiple_rows -s
+    """
+
+    # the data array for each row
+    data_column = [
+        # row 1
+        # shape (3, 3, 3)
+        [
+            [
+                [1.0, 2.0, 3.0],
+                [4.0, 5.0, 6.0],
+                [7.0, 8.0, 9.0]
+            ],
+            [
+                [10.0, 11.0, 12.0],
+                [13.0, 14.0, 15.0],
+                [16.0, 17.0, 18.0]
+            ],
+            [
+                [19.0, 20.0, 21.0],
+                [22.0, 23.0, 24.0],
+                [25.0, 26.0, 27.0]
+            ]
+        ],
+        # row 2
+        # shape (1, 1, 1)
+        [
+            [
+                [42.0]
+            ],
+        ],
+
+        # row 3
+        # shape (3, 5, 2)
+        [
+            [
+                [1.0, 2.0],
+                [3.0, 4.0],
+                [5.0, 6.0],
+                [7.0, 8.0],
+                [9.0, 10.0]
+            ],
+            [
+                [11.0, 12.0],
+                [13.0, 14.0],
+                [15.0, 16.0],
+                [17.0, 18.0],
+                [19.0, 20.0]
+            ],
+            [
+                [21.0, 22.0],
+                [23.0, 24.0],
+                [25.0, 26.0],
+                [27.0, 28.0],
+                [29.0, 30.0]
+            ]
+        ]
+    ]
+
+    df = pd.DataFrame({
+        'ID': [1, 2, 3],
+        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)] * 3,
+        'leadTime': [timedelta(days=5)] * 3,
+        'modelName': ['TestModel'] * 3,
+        'modelVersion': ['1.0'] * 3,
+        'dataValue': data_column,
+        'dataUnit': ['celsius'] * 3,
+        'dataLocation': ['TestLocation'] * 3,
+        'dataSeries': ['TestSeries'] * 3,
+        'dataDatum': ['TestDatum'] * 3,
+    })
+
+    # skip the db connection by replacing the __init__ method
+    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
+        storage = SQLAlchemyORM_Postgres()
+
+        # verify that no engine is set by attempting to get the engine
+        try:
+            storage._SQLAlchemyORM_Postgres__get_engine()
+            assert False, "Expected an exception due to no engine being set."
+        except Exception as e:
+            assert "no engine has been created" in str(e)
+
+        # call the serializer 
+        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+
+        # assert that the number of rows is preserved
+        assert len(serialized_df) == 3
+
+        # assert that the dataValue column is of type bytes for each row
+        for idx, row in serialized_df.iterrows():
+            assert isinstance(row['dataValue'], bytes)
+
