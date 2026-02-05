@@ -27,7 +27,7 @@
             "interval": 3600,
             "range":  [43, 31],
             "outKey": "MG_48_output_48",
-            "stalenessOffset": 46800
+            "stalenessOffset": 45000
         },
         { 
             "_name": "Wind Direction Prediction",
