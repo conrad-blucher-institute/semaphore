@@ -23,7 +23,7 @@ class PackedPredictionTensor(IOutputHandler):
         """ Stores model predictions as a single structured prediction tensor.
 
             Ensures predictions are represented as a 3D ndarray in the form
-            (members, lead_times, outputs), reshaping 2D outputs when necessary,
+            (members, input_vectors, outputs), reshaping 2D outputs when necessary,
             and stores the resulting tensor directly in dataValue.
 
             :param predictions: list[any] - The predictions from the model runs
@@ -32,16 +32,16 @@ class PackedPredictionTensor(IOutputHandler):
             :returns DataFrame - The output DF
             """
         pred = predictions
-        if predictions.ndim == 2:
+        
+        if predictions.ndim == 2:# For models that have 1 member (MRE and scalar models).
             members = 1
-            n, outputs = predictions.shape  # (N, 1)
+            input_vectors, outputs = predictions.shape  # (input_vectors, outputs)
 
-            if n % members != 0:
+            if input_vectors % members != 0:
                 raise ValueError(
                     f"Cannot reshape predictions of shape {predictions.shape} "
-                    f"into (members, lead_times, outputs)"
+                    f"into (members, input_vectors, outputs)"
                 )
-            input_vectors = n // members
             pred = predictions.reshape(members, input_vectors, outputs)
 
         df = get_output_dataFrame()
