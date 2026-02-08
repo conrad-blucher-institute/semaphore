@@ -414,10 +414,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         resultSeries = Series(series.description, series.timeDescription)
         resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
 
-        if result:
-            id = result[0][0]
-        else:
-            id = None
+        id = result[0][0] if result else None
         
         return resultSeries, id
 
