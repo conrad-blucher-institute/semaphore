@@ -349,26 +349,23 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 - The results from inserting into the model_runs table
         """
 
-        output_series, output_ids = self.insert_output(output_series)
+        output_series, output_id = self.insert_output(output_series)
 
-
-        if len(output_ids) == 0:
+        if not output_id:
             log('WARNING:: Series Storage was told to insert to both the output and model run table. This failed because no outputs were inserted. This could be caused by the prediction already existing in the database!')
             return output_series, None
 
-        model_run_rows = []
-        for id in output_ids:
-            model_run_row = {"outputID": None, "executionTime": None, "returnCode": None}
-            model_run_row["outputID"] = id
-            model_run_row["executionTime"] = execution_time
-            model_run_row["returnCode"] = return_code
-            model_run_rows.append(model_run_row)
+        model_run_row = {
+            "outputID": output_id,
+            "executionTime": execution_time,
+            "returnCode": return_code
+        }
 
         model_runs = self.__metadata.tables['model_runs']
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(model_runs)
                                   .returning(model_runs)
-                                  .values(model_run_rows)
+                                  .values(model_run_row)
                                   )
             model_run_result = cursor.fetchall()
             conn.commit()
@@ -380,46 +377,35 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
     def insert_output(self, series: Series) -> tuple[Series, list[int]]:
         """This method inserts actual/predictions into the output table
             :param series: Series - A series object with a time description,  semaphore series description, and outputdata
-            :return tuple[Series, list[int]]: 
+            :return tuple[Series, int | None]: 
                 - A series object that contains the actually inserted data
-                - A list of the pK ids the rows took
+                - The PK id the row took or None if no row was inserted
         """
 
         if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
 
-        # If dataValue is a list its an ensemble
-        isEnsemble = isinstance(series.dataFrame['dataValue'].iloc[0], list) 
+        row_to_insert = {
+            "timeGenerated": series.dataFrame.iloc[0]['timeGenerated'],
+            "leadTime": series.dataFrame.iloc[0]['leadTime'],
+            "modelName": series.description.modelName,
+            "modelVersion": series.description.modelVersion,
+            "dataValue": series.dataFrame.iloc[0]['dataValue'],
+            "dataUnit": series.dataFrame.iloc[0]['dataUnit'],
+            "dataLocation": series.description.dataLocation,
+            "dataSeries": series.description.dataSeries,
+            "dataDatum": series.description.dataDatum,
+        }
 
-        insertionRows = []
-        for df_index, row in series.dataFrame.iterrows():
+        # serialize the dataValue column
+        row_to_insert['dataValue'] = self.__serialize_data(row_to_insert['dataValue'])
 
-            # We need to iterate over every value in dataValue if it is an ensemble
-            # but non ensemble inputs are just a single value so we convert them
-            # temporarily to a list to make the iteration easier
-            dataValues = row["dataValue"] if isEnsemble else [ row["dataValue"] ] 
-
-            for value_index, value in enumerate(dataValues):
-                insertionValueRow = {
-                    "timeGenerated": series.dataFrame.iloc[df_index]['timeGenerated'], 
-                    "leadTime": series.dataFrame.iloc[df_index]['leadTime'], 
-                    "modelName": series.description.modelName, 
-                    "modelVersion": series.description.modelVersion, 
-                    "dataValue": value, 
-                    "dataUnit": series.dataFrame.iloc[df_index]['dataUnit'], 
-                    "dataLocation": series.description.dataLocation,
-                    "dataSeries": series.description.dataSeries, 
-                    "dataDatum": series.description.dataDatum, 
-                    "ensembleMemberID": value_index if isEnsemble else None # Only set for ensemble inputs
-                }
-                insertionRows.append(insertionValueRow)  
-
-        # Insert the rows into the outputs table returning what is inserted as a sanity check
+        # Insert the row into the outputs table returning what is inserted as a sanity check
         outputTable = self.__metadata.tables['outputs']
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(outputTable)
-                                  .on_conflict_do_nothing('outputs_AK00')
+                                  .on_conflict_do_nothing(constraint='outputs_AK00')
                                   .returning(outputTable)
-                                  .values(insertionRows)
+                                  .values(row_to_insert)
                                   )
             result = cursor.fetchall()
             conn.commit()
@@ -427,8 +413,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # Create a series object to return with the inserted data
         resultSeries = Series(series.description, series.timeDescription)
         resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
-        ids = [row[0] for row in result]
-        return resultSeries, ids
+
+        if result:
+            id = result[0][0]
+        else:
+            id = None
+        
+        return resultSeries, id
 
     def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime | None:
         """
@@ -662,7 +653,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             data=results, 
             columns=[
                 "ID", "timeGenerated", "leadTime", "modelName", "modelVersion", "dataValue", 
-                "dataUnit", "dataLocation", "dataSeries", "dataDatum", "ensembleMemberID"
+                "dataUnit", "dataLocation", "dataSeries", "dataDatum"
             ]
         )
 
@@ -675,52 +666,36 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # A formatted dataframe to place the spliced data 
         df_out = get_output_dataFrame()
 
-        # We have to post process the results as this could be ensemble data or not
-        # we group data with identical temporal information    
         for _, group in df_results.groupby(["timeGenerated", "leadTime"]):
-    
+
+            # we group data with identical temporal information  
             firstRow = group.iloc[0]
-            isEnsemble = firstRow["ensembleMemberID"] is not None
-            
-            # If its an ensemble the dataValue is all the values sorted by there ID (to ensure correct order)
-            # If not an ensemble we just take the solitary dataValue
-            if isEnsemble:
-                group = group.sort_values(by=("modelName"))
-                dataValues = group["dataValue"].to_list()
-            else:
-                dataValues = group["dataValue"].iloc[0]
             
             # Pack the data into the out dataframe
             df_out.loc[len(df_out)] = [
-                dataValues,                 # dataValue    
+                firstRow["dataValue"],      # dataValue    
                 firstRow["dataUnit"],       # dataUnit
                 firstRow["timeGenerated"],  # timeGenerated
                 firstRow["leadTime"]        # leadTime
             ]
 
+        # deserialize the dataframe
+        df_out = self.__deserialize_data(df_out)
+
         return df_out
 
-    def __serialize_data(self, df: DataFrame) -> DataFrame:
+    def __serialize_data(self, data: np.ndarray) -> bytes:
         """
-        This method serializes the dataValue column in a dataframe 
+        This method serializes a numpy ndarray into bytes
         
         params:
-            df: DataFrame - The dataframe to serialize
+            data: ndarray - The data to serialize
 
         returns:
-            DataFrame - The dataframe with the serialized dataValue column
+            bytes - The serialized data in bytes
         """
-        serialized_values = []
-
-        # loop over each row and serialize the dataValue column
-        for idx, row in df.iterrows():
-            data_value = row['dataValue']
-            serialized_value = pickle.dumps(data_value)
-            serialized_values.append(serialized_value)
-        
-        # replace the entire dataValue column with the serialized values
-        df['dataValue'] = serialized_values
-        return df
+        serialized_values = pickle.dumps(data)
+        return serialized_values
 
     def __deserialize_data(self, df: DataFrame) -> DataFrame:
         """

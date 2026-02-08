@@ -383,139 +383,34 @@ def test_determine_staleness_with_mock_db(
 )
 def test_serialize(data_array):
     """
-    This test checks that the __serialize_data method correctly converts a single row in a 
-    dataframe to bytes in the dataValue column using different shaped arrays in the dataValue column.
+    This test checks that the __serialize_data method correctly converts a single row's 
+    dataValue to bytes using different shaped arrays in the dataValue column.
 
     docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize -s
     """
 
-    df = pd.DataFrame({
+    row = {
         'ID': [1],
-        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)],
-        'leadTime': [timedelta(days=5)],
-        'modelName': ['TestModel'],
-        'modelVersion': ['1.0'],
-        'dataValue': [data_array],
-        'dataUnit': ['celsius'],
-        'dataLocation': ['TestLocation'],
-        'dataSeries': ['TestSeries'],
-        'dataDatum': ['TestDatum'],
-    })
+        'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=None),
+        'leadTime': timedelta(days=5),
+        'modelName': 'TestModel',
+        'modelVersion': '1.0',
+        'dataValue': data_array,
+        'dataUnit': 'celsius',
+        'dataLocation': 'TestLocation',
+        'dataSeries': 'TestSeries',
+        'dataDatum': 'TestDatum'
+    }
 
     # skip the db connection by replacing the __init__ method
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
 
-        # verify that no engine is set by attempting to get the engine
-        try:
-            storage._SQLAlchemyORM_Postgres__get_engine()
-            assert False, "Expected an exception due to no engine being set."
-        except Exception as e:
-            assert "no engine has been created" in str(e)
-
         # call the serializer 
-        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+        row['dataValue'] = storage._SQLAlchemyORM_Postgres__serialize_data(row['dataValue'])
 
         # assert that the dataValue column is of type bytes
-        assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
-
-def test_serialize_multiple_rows():
-    """
-    This test checks that the __serialize_data method correctly converts dataframes with multiple rows 
-    to bytes in the dataValue column for each row.
-
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize_multiple_rows -s
-    """
-
-    # the data array for each row
-    data_column = [
-        # row 1
-        # shape (3, 3, 3)
-        [
-            [
-                [1.0, 2.0, 3.0],
-                [4.0, 5.0, 6.0],
-                [7.0, 8.0, 9.0]
-            ],
-            [
-                [10.0, 11.0, 12.0],
-                [13.0, 14.0, 15.0],
-                [16.0, 17.0, 18.0]
-            ],
-            [
-                [19.0, 20.0, 21.0],
-                [22.0, 23.0, 24.0],
-                [25.0, 26.0, 27.0]
-            ]
-        ],
-        # row 2
-        # shape (1, 1, 1)
-        [
-            [
-                [42.0]
-            ],
-        ],
-
-        # row 3
-        # shape (3, 5, 2)
-        [
-            [
-                [1.0, 2.0],
-                [3.0, 4.0],
-                [5.0, 6.0],
-                [7.0, 8.0],
-                [9.0, 10.0]
-            ],
-            [
-                [11.0, 12.0],
-                [13.0, 14.0],
-                [15.0, 16.0],
-                [17.0, 18.0],
-                [19.0, 20.0]
-            ],
-            [
-                [21.0, 22.0],
-                [23.0, 24.0],
-                [25.0, 26.0],
-                [27.0, 28.0],
-                [29.0, 30.0]
-            ]
-        ]
-    ]
-
-    df = pd.DataFrame({
-        'ID': [1, 2, 3],
-        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)] * 3,
-        'leadTime': [timedelta(days=5)] * 3,
-        'modelName': ['TestModel'] * 3,
-        'modelVersion': ['1.0'] * 3,
-        'dataValue': data_column,
-        'dataUnit': ['celsius'] * 3,
-        'dataLocation': ['TestLocation'] * 3,
-        'dataSeries': ['TestSeries'] * 3,
-        'dataDatum': ['TestDatum'] * 3,
-    })
-
-    # skip the db connection by replacing the __init__ method
-    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
-        storage = SQLAlchemyORM_Postgres()
-
-        # verify that no engine is set by attempting to get the engine
-        try:
-            storage._SQLAlchemyORM_Postgres__get_engine()
-            assert False, "Expected an exception due to no engine being set."
-        except Exception as e:
-            assert "no engine has been created" in str(e)
-
-        # call the serializer 
-        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
-
-        # assert that the number of rows is preserved
-        assert len(serialized_df) == 3
-
-        # assert that the dataValue column is of type bytes for each row
-        for idx, row in serialized_df.iterrows():
-            assert isinstance(row['dataValue'], bytes)
+        assert isinstance(row['dataValue'], bytes)
 
 def test_deserialize():
     """
@@ -550,41 +445,42 @@ def test_deserialize():
         ]
     ]
 
-    df = pd.DataFrame({
-        'ID': [1],
-        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)],
-        'leadTime': [timedelta(days=5)],
-        'modelName': ['TestModel'],
-        'modelVersion': ['1.0'],
-        'dataValue': [data_array],
-        'dataUnit': ['celsius'],
-        'dataLocation': ['TestLocation'],
-        'dataSeries': ['TestSeries'],
-        'dataDatum': ['TestDatum'],
-    })
+    # original row dict
+    row = {
+        'ID': 1,
+        'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=None),
+        'leadTime': timedelta(days=5),
+        'modelName': 'TestModel',
+        'modelVersion': '1.0',
+        'dataValue': data_array,
+        'dataUnit': 'celsius',
+        'dataLocation': 'TestLocation',
+        'dataSeries': 'TestSeries',
+        'dataDatum': 'TestDatum',
+    }
 
     # skip the db connection by replacing the __init__ method
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
 
-        # verify that no engine is set by attempting to get the engine
-        try:
-            storage._SQLAlchemyORM_Postgres__get_engine()
-            assert False, "Expected an exception due to no engine being set."
-        except Exception as e:
-            assert "no engine has been created" in str(e)
-
         # first serialize the data
-        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+        serialized_row = row.copy()
+        serialized_row['dataValue'] = storage._SQLAlchemyORM_Postgres__serialize_data(row['dataValue'])
 
         # ensure the data was serialized to bytes
-        assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
+        assert isinstance(serialized_row['dataValue'], bytes)
+
+        # convert the row to a dataframe to match the expected input type of the deserializer
+        df = pd.DataFrame([serialized_row])
 
         # deserialize the data
-        deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_df)
+        deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(df)
 
-        # assert that the deserialized dataframe matches the original dataframe
-        assert df.equals(deserialized_df)
+        # convert the result df to a dict for easier comparison
+        result_dict = deserialized_df.iloc[0].to_dict()
+
+        # assert that the deserialized row matches the original row
+        assert row == result_dict
 
 def test_deserialize_multiple_rows():
     """
@@ -644,6 +540,7 @@ def test_deserialize_multiple_rows():
         ]
     ]
 
+    # original dataframe
     df = pd.DataFrame({
         'ID': [1, 2, 3],
         'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)] * 3,
@@ -660,16 +557,11 @@ def test_deserialize_multiple_rows():
     # skip the db connection by replacing the __init__ method
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
+        serialized_df = df.copy()
 
-        # verify that no engine is set by attempting to get the engine
-        try:
-            storage._SQLAlchemyORM_Postgres__get_engine()
-            assert False, "Expected an exception due to no engine being set."
-        except Exception as e:
-            assert "no engine has been created" in str(e)
-
-        # first serialize the data
-        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+        # first serialize each row's dataValue
+        for i in range(len(df)):
+            serialized_df.loc[i, 'dataValue'] = storage._SQLAlchemyORM_Postgres__serialize_data(df['dataValue'].iloc[i])
 
         # ensure the data was serialized to bytes
         assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
