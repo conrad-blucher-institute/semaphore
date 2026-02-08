@@ -21,7 +21,7 @@ from datetime import timedelta, datetime, timezone
 import pandas as pd
 from pandas import DataFrame
 import numpy as np
-import pickle
+from io import BytesIO
 
 from SeriesStorage.ISeriesStorage import ISeriesStorage
 
@@ -374,7 +374,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return output_series, model_run_result
         
 
-    def insert_output(self, series: Series) -> tuple[Series, list[int]]:
+    def insert_output(self, series: Series) -> tuple[Series, int | None]:
         """This method inserts actual/predictions into the output table
             :param series: Series - A series object with a time description,  semaphore series description, and outputdata
             :return tuple[Series, int | None]: 
@@ -691,8 +691,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         returns:
             bytes - The serialized data in bytes
         """
-        serialized_values = pickle.dumps(data)
-        return serialized_values
+        buffer = BytesIO()
+        np.save(buffer, data)
+        return buffer.getvalue()
 
     def __deserialize_data(self, df: DataFrame) -> DataFrame:
         """
@@ -709,7 +710,8 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # loop over each row and deserialize the dataValue column
         for idx, row in df.iterrows():
             serialized_value = row['dataValue']
-            data_value = pickle.loads(serialized_value)
+            buffer = BytesIO(serialized_value)
+            data_value = np.load(buffer)
             deserialized_values.append(data_value)
         
         # replace the entire dataValue column with the deserialized values

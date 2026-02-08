@@ -390,12 +390,12 @@ def test_serialize(data_array):
     """
 
     row = {
-        'ID': [1],
+        'ID': 1,
         'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=None),
         'leadTime': timedelta(days=5),
         'modelName': 'TestModel',
         'modelVersion': '1.0',
-        'dataValue': data_array,
+        'dataValue': np.array(data_array),
         'dataUnit': 'celsius',
         'dataLocation': 'TestLocation',
         'dataSeries': 'TestSeries',
@@ -421,7 +421,7 @@ def test_deserialize():
     """
 
     # shape (3, 5, 2)
-    data_array = [
+    data_array = np.array([
         [
             [1.0, 2.0],
             [3.0, 4.0],
@@ -443,7 +443,7 @@ def test_deserialize():
             [27.0, 28.0],
             [29.0, 30.0]
         ]
-    ]
+    ])
 
     # original row dict
     row = {
@@ -476,11 +476,11 @@ def test_deserialize():
         # deserialize the data
         deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(df)
 
-        # convert the result df to a dict for easier comparison
-        result_dict = deserialized_df.iloc[0].to_dict()
+        # convert the original row to a dataframe for comparison
+        expected_df = pd.DataFrame([row])
 
-        # assert that the deserialized row matches the original row
-        assert row == result_dict
+        # assert that the deserialized dataframe matches the original dataframe
+        assert expected_df.equals(deserialized_df)
 
 def test_deserialize_multiple_rows():
     """
@@ -494,13 +494,15 @@ def test_deserialize_multiple_rows():
     data_column = [
         # row 1
         # shape (1, 1, 1)
+        np.array(
         [
             [
                 [42.0]
             ]
-        ],
+        ]),
         # row 2
         # shape (3, 5, 4)
+        np.array(
         [
             [
                 [1.0, 2.0, 3.0, 4.0],
@@ -523,9 +525,10 @@ def test_deserialize_multiple_rows():
                 [53.0, 54.0, 55.0, 56.0],
                 [57.0, 58.0, 59.0, 60.0]
             ]
-        ],
+        ]),
         # row 3 
         # shape (2, 3, 1)
+        np.array(
         [
             [
                 [100.0],
@@ -537,7 +540,7 @@ def test_deserialize_multiple_rows():
                 [500.0],
                 [600.0]
             ]
-        ]
+        ])
     ]
 
     # original dataframe
