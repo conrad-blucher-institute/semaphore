@@ -53,7 +53,7 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def insert_output(self, series: Series) -> Series:
+    def insert_output(self, series: Series) -> tuple[Series, int | None]:
         raise NotImplementedError()
     
     @abstractmethod
