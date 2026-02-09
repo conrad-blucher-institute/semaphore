@@ -386,32 +386,26 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
 
-        # If dataValue is a list its an ensemble
-        isEnsemble = isinstance(series.dataFrame['dataValue'].iloc[0], list) 
+        # call the serializer to convert the dataValue column to bytes
+        series.dataFrame = self.__serialize_data(series.dataFrame)
 
+        # create the rows to insert
         insertionRows = []
         for df_index, row in series.dataFrame.iterrows():
 
-            # We need to iterate over every value in dataValue if it is an ensemble
-            # but non ensemble inputs are just a single value so we convert them
-            # temporarily to a list to make the iteration easier
-            dataValues = row["dataValue"] if isEnsemble else [ row["dataValue"] ] 
-
-            for value_index, value in enumerate(dataValues):
-                insertionValueRow = {
-                    "timeGenerated": series.dataFrame.iloc[df_index]['timeGenerated'], 
-                    "leadTime": series.dataFrame.iloc[df_index]['leadTime'], 
-                    "modelName": series.description.modelName, 
-                    "modelVersion": series.description.modelVersion, 
-                    "dataValue": value, 
-                    "dataUnit": series.dataFrame.iloc[df_index]['dataUnit'], 
-                    "dataLocation": series.description.dataLocation,
-                    "dataSeries": series.description.dataSeries, 
-                    "dataDatum": series.description.dataDatum, 
-                    "ensembleMemberID": value_index if isEnsemble else None # Only set for ensemble inputs
-                }
-                insertionRows.append(insertionValueRow)  
-
+            insertionValueRow = {
+                "timeGenerated": series.dataFrame.iloc[df_index]['timeGenerated'], 
+                "leadTime": series.dataFrame.iloc[df_index]['leadTime'], 
+                "modelName": series.description.modelName, 
+                "modelVersion": series.description.modelVersion, 
+                "dataValue": series.dataFrame.iloc[df_index]['dataValue'], 
+                "dataUnit": series.dataFrame.iloc[df_index]['dataUnit'], 
+                "dataLocation": series.description.dataLocation,
+                "dataSeries": series.description.dataSeries, 
+                "dataDatum": series.description.dataDatum, 
+            }
+            insertionRows.append(insertionValueRow)
+        
         # Insert the rows into the outputs table returning what is inserted as a sanity check
         outputTable = self.__metadata.tables['outputs']
         with self.__get_engine().connect() as conn:
