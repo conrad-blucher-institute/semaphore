@@ -321,96 +321,191 @@ def test_determine_staleness_with_mock_db(
 @pytest.mark.parametrize(
     "data_array",
     [
-        (
-            # Test case 1: shape (3, 3, 3)
-            # basic test with a shaped array
+        # Test case 1: shape (3, 3, 3)
+        # basic test with a shaped array
+        np.array([
             [
-                [
-                    [1.0, 2.0, 3.0],
-                    [4.0, 5.0, 6.0],
-                    [7.0, 8.0, 9.0]
-                ],
-                [
-                    [10.0, 11.0, 12.0],
-                    [13.0, 14.0, 15.0],
-                    [16.0, 17.0, 18.0]
-                ],
-                [
-                    [19.0, 20.0, 21.0],
-                    [22.0, 23.0, 24.0],
-                    [25.0, 26.0, 27.0]
-                ]
+                [1.0, 2.0, 3.0],
+                [4.0, 5.0, 6.0],
+                [7.0, 8.0, 9.0]
             ],
-        ),
-        (
-            # Test case 2: shape (1, 1, 1)
-            # to test single points
             [
-                [
-                    [42.0]
-                ]
+                [10.0, 11.0, 12.0],
+                [13.0, 14.0, 15.0],
+                [16.0, 17.0, 18.0]
             ],
-        ),
-        (
-            # Test case 3: shape (3, 5, 2)
-            # to test when dimensions are not all equal
             [
-                [
-                    [1.0, 2.0],
-                    [3.0, 4.0],
-                    [5.0, 6.0],
-                    [7.0, 8.0],
-                    [9.0, 10.0]
-                ],
-                [
-                    [11.0, 12.0],
-                    [13.0, 14.0],
-                    [15.0, 16.0],
-                    [17.0, 18.0],
-                    [19.0, 20.0]
-                ],
-                [
-                    [21.0, 22.0],
-                    [23.0, 24.0],
-                    [25.0, 26.0],
-                    [27.0, 28.0],
-                    [29.0, 30.0]
-                ]
+                [19.0, 20.0, 21.0],
+                [22.0, 23.0, 24.0],
+                [25.0, 26.0, 27.0]
             ]
-        ),
+        ]),
+
+        # Test case 2: shape (1, 1, 1)
+        # to test single points
+        np.array([
+            [
+                [42.0]
+            ]
+        ]),
+
+        # Test case 3: shape (3, 5, 2)
+        # to test when dimensions are not all equal
+        np.array([
+            [
+                [1.0, 2.0],
+                [3.0, 4.0],
+                [5.0, 6.0],
+                [7.0, 8.0],
+                [9.0, 10.0]
+            ],
+            [
+                [11.0, 12.0],
+                [13.0, 14.0],
+                [15.0, 16.0],
+                [17.0, 18.0],
+                [19.0, 20.0]
+            ],
+            [
+                [21.0, 22.0],
+                [23.0, 24.0],
+                [25.0, 26.0],
+                [27.0, 28.0],
+                [29.0, 30.0]
+            ]
+        ])
     ],
     ids=["3x3x3", '1x1x1', '3x5x2']
 )
 def test_serialize(data_array):
     """
-    This test checks that the __serialize_data method correctly converts a single row's 
-    dataValue to bytes using different shaped arrays in the dataValue column.
+    This test checks that the __serialize_data method correctly converts a single row in a 
+    dataframe to bytes in the dataValue column using different shaped arrays in the dataValue column.
 
     docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize -s
     """
 
-    row = {
-        'ID': 1,
-        'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=None),
-        'leadTime': timedelta(days=5),
-        'modelName': 'TestModel',
-        'modelVersion': '1.0',
-        'dataValue': np.array(data_array),
-        'dataUnit': 'celsius',
-        'dataLocation': 'TestLocation',
-        'dataSeries': 'TestSeries',
-        'dataDatum': 'TestDatum'
-    }
+    df = pd.DataFrame({
+        'ID': [1],
+        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)],
+        'leadTime': [timedelta(days=5)],
+        'modelName': ['TestModel'],
+        'modelVersion': ['1.0'],
+        'dataValue': [data_array],
+        'dataUnit': ['celsius'],
+        'dataLocation': ['TestLocation'],
+        'dataSeries': ['TestSeries'],
+        'dataDatum': ['TestDatum'],
+    })
 
     # skip the db connection by replacing the __init__ method
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
 
+        # assert that the data array is an ndarray before serialization
+        assert isinstance(df['dataValue'].iloc[0], np.ndarray)
+
         # call the serializer 
-        row['dataValue'] = storage._SQLAlchemyORM_Postgres__serialize_data(row['dataValue'])
+        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
 
         # assert that the dataValue column is of type bytes
-        assert isinstance(row['dataValue'], bytes)
+        assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
+
+def test_serialize_multiple_rows():
+    """
+    This test checks that the __serialize_data method correctly converts dataframes with multiple rows 
+    to bytes in the dataValue column for each row.
+
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize_multiple_rows -s
+    """
+
+    # the dataframe column with each row containing a different shaped array
+    data_column = [
+        # row 1
+        # shape (3, 3, 3)
+        np.array([
+            [
+                [1.0, 2.0, 3.0],
+                [4.0, 5.0, 6.0],
+                [7.0, 8.0, 9.0]
+            ],
+            [
+                [10.0, 11.0, 12.0],
+                [13.0, 14.0, 15.0],
+                [16.0, 17.0, 18.0]
+            ],
+            [
+                [19.0, 20.0, 21.0],
+                [22.0, 23.0, 24.0],
+                [25.0, 26.0, 27.0]
+            ]
+        ]),
+
+        # row 2
+        # shape (1, 1, 1)
+        np.array([
+            [
+                [42.0]
+            ],
+        ]),
+
+        # row 3
+        # shape (3, 5, 2)
+        np.array([
+            [
+                [1.0, 2.0],
+                [3.0, 4.0],
+                [5.0, 6.0],
+                [7.0, 8.0],
+                [9.0, 10.0]
+            ],
+            [
+                [11.0, 12.0],
+                [13.0, 14.0],
+                [15.0, 16.0],
+                [17.0, 18.0],
+                [19.0, 20.0]
+            ],
+            [
+                [21.0, 22.0],
+                [23.0, 24.0],
+                [25.0, 26.0],
+                [27.0, 28.0],
+                [29.0, 30.0]
+            ]
+        ])
+    ]
+
+    df = pd.DataFrame({
+        'ID': [1, 2, 3],
+        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)] * 3,
+        'leadTime': [timedelta(days=5)] * 3,
+        'modelName': ['TestModel'] * 3,
+        'modelVersion': ['1.0'] * 3,
+        'dataValue': data_column,
+        'dataUnit': ['celsius'] * 3,
+        'dataLocation': ['TestLocation'] * 3,
+        'dataSeries': ['TestSeries'] * 3,
+        'dataDatum': ['TestDatum'] * 3,
+    })
+
+    # skip the db connection by replacing the __init__ method
+    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
+        storage = SQLAlchemyORM_Postgres()
+
+        # assert that the data array is an ndarray before serialization for each row
+        for idx, row in df.iterrows():
+            assert isinstance(row['dataValue'], np.ndarray)
+        
+        # call the serializer 
+        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+
+        # assert that the number of rows is preserved
+        assert len(serialized_df) == 3
+
+        # assert that the dataValue column is of type bytes for each row
+        for idx, row in serialized_df.iterrows():
+            assert isinstance(row['dataValue'], bytes)
 
 def test_deserialize():
     """
@@ -445,42 +540,38 @@ def test_deserialize():
         ]
     ])
 
-    # original row dict
-    row = {
-        'ID': 1,
-        'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=None),
-        'leadTime': timedelta(days=5),
-        'modelName': 'TestModel',
-        'modelVersion': '1.0',
-        'dataValue': data_array,
-        'dataUnit': 'celsius',
-        'dataLocation': 'TestLocation',
-        'dataSeries': 'TestSeries',
-        'dataDatum': 'TestDatum',
-    }
+    df = pd.DataFrame({
+        'ID': [1],
+        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)],
+        'leadTime': [timedelta(days=5)],
+        'modelName': ['TestModel'],
+        'modelVersion': ['1.0'],
+        'dataValue': [data_array],
+        'dataUnit': ['celsius'],
+        'dataLocation': ['TestLocation'],
+        'dataSeries': ['TestSeries'],
+        'dataDatum': ['TestDatum'],
+    })
 
     # skip the db connection by replacing the __init__ method
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
 
+        # assert that the data array is an ndarray before serialization
+        assert isinstance(df['dataValue'].iloc[0], np.ndarray)
+
         # first serialize the data
-        serialized_row = row.copy()
-        serialized_row['dataValue'] = storage._SQLAlchemyORM_Postgres__serialize_data(row['dataValue'])
+        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
 
         # ensure the data was serialized to bytes
-        assert isinstance(serialized_row['dataValue'], bytes)
-
-        # convert the row to a dataframe to match the expected input type of the deserializer
-        df = pd.DataFrame([serialized_row])
+        assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
 
         # deserialize the data
-        deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(df)
-
-        # convert the original row to a dataframe for comparison
-        expected_df = pd.DataFrame([row])
+        deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_df)
 
         # assert that the deserialized dataframe matches the original dataframe
-        assert expected_df.equals(deserialized_df)
+        # this includes the original values and the original shape 
+        assert df.equals(deserialized_df)
 
 def test_deserialize_multiple_rows():
     """
@@ -494,16 +585,15 @@ def test_deserialize_multiple_rows():
     data_column = [
         # row 1
         # shape (1, 1, 1)
-        np.array(
-        [
+        np.array([
             [
                 [42.0]
             ]
         ]),
+
         # row 2
         # shape (3, 5, 4)
-        np.array(
-        [
+        np.array([
             [
                 [1.0, 2.0, 3.0, 4.0],
                 [5.0, 6.0, 7.0, 8.0],
@@ -526,10 +616,10 @@ def test_deserialize_multiple_rows():
                 [57.0, 58.0, 59.0, 60.0]
             ]
         ]),
+
         # row 3 
         # shape (2, 3, 1)
-        np.array(
-        [
+        np.array([
             [
                 [100.0],
                 [200.0],
@@ -543,7 +633,6 @@ def test_deserialize_multiple_rows():
         ])
     ]
 
-    # original dataframe
     df = pd.DataFrame({
         'ID': [1, 2, 3],
         'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)] * 3,
@@ -560,17 +649,21 @@ def test_deserialize_multiple_rows():
     # skip the db connection by replacing the __init__ method
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
-        serialized_df = df.copy()
 
-        # first serialize each row's dataValue
-        for i in range(len(df)):
-            serialized_df.loc[i, 'dataValue'] = storage._SQLAlchemyORM_Postgres__serialize_data(df['dataValue'].iloc[i])
+        # assert that the data array is an ndarray before serialization for each row
+        for idx, row in df.iterrows():
+            assert isinstance(row['dataValue'], np.ndarray)
 
-        # ensure the data was serialized to bytes
-        assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
+        # first serialize the data
+        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+
+        # assert that the dataValue column is of type bytes for each row
+        for idx, row in serialized_df.iterrows():
+            assert isinstance(row['dataValue'], bytes)
 
         # then deserialize the data
         deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_df)
 
         # assert that the deserialized dataframe matches the original dataframe
+        # this includes the original values and the original shape for each row
         assert df.equals(deserialized_df)
