@@ -349,23 +349,25 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 - The results from inserting into the model_runs table
         """
 
-        output_series, output_id = self.insert_output(output_series)
+        output_series, output_ids = self.insert_output(output_series)
 
-        if not output_id:
+        if len(output_ids) == 0:
             log('WARNING:: Series Storage was told to insert to both the output and model run table. This failed because no outputs were inserted. This could be caused by the prediction already existing in the database!')
             return output_series, None
 
-        model_run_row = {
-            "outputID": output_id,
-            "executionTime": execution_time,
-            "returnCode": return_code
-        }
+        model_run_rows = []
+        for id in output_ids:
+            model_run_row = {"outputID": None, "executionTime": None, "returnCode": None}
+            model_run_row["outputID"] = id
+            model_run_row["executionTime"] = execution_time
+            model_run_row["returnCode"] = return_code
+            model_run_rows.append(model_run_row)
 
         model_runs = self.__metadata.tables['model_runs']
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(insert(model_runs)
                                   .returning(model_runs)
-                                  .values(model_run_row)
+                                  .values(model_run_rows)
                                   )
             model_run_result = cursor.fetchall()
             conn.commit()
