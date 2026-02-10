@@ -59,6 +59,7 @@ class DateRangeValidation(IDataValidation):
             time_difference = abs(self.referenceTime - df_to_validate['timeGenerated'].min())
 
             # validate that the data isn't stale
+            # Note that staleness check is brittle for predictions.
             if time_difference > series.timeDescription.stalenessOffset:
                 log_error(f'DateRangeValidation: Series {series} is stale.\n')
                 log_error(f'Time difference: {time_difference}. Staleness offset: {series.timeDescription.stalenessOffset}\n')
