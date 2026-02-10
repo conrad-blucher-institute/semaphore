@@ -27,14 +27,18 @@ from dotenv import load_dotenv
 @pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_min_output", [
+    
+    # lowering number of expected points for hourly interval from 241 to 220 to account for some missing data points in lighthouse during this time range
     # series: dWaterTmp - wtp
-    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 7), time(11, 0), tzinfo=timezone.utc), timedelta(seconds=3600)), 241), # 1hr interval
+    (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 7), time(11, 0), tzinfo=timezone.utc), timedelta(seconds=3600)), 220), # 1hr interval
     (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 6), time(12, 0), tzinfo=timezone.utc), timedelta(seconds=360)), 11), # 6min interval
     (SeriesDescription('LIGHTHOUSE', 'dWaterTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 6), time(12, 0), tzinfo=timezone.utc), None), 11), # no interval
     # series: dAirTmp - atp
-    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 7), time(11, 0), tzinfo=timezone.utc), timedelta(seconds=3600)), 241), # 1hr interval
+    (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 7), time(11, 0), tzinfo=timezone.utc), timedelta(seconds=3600)), 220), # 1hr interval
     (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 6), time(12, 0), tzinfo=timezone.utc), timedelta(seconds=360)), 11),  # 6min interval
     (SeriesDescription('LIGHTHOUSE', 'dAirTmp', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 6), time(12, 0), tzinfo=timezone.utc), None), 11), # no interval
+    # series: pHarm 
+    (SeriesDescription('LIGHTHOUSE', 'pHarm', 'PortLavaca', 'MLLW'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 6), time(12, 0), tzinfo=timezone.utc), timedelta(seconds=360)), 11),
     # series: erroneous
     (SeriesDescription('LIGHTHOUSE', 'apple', 'SouthBirdIsland'), TimeDescription(datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc), datetime.combine(date(2023, 9, 7), time(11, 0), tzinfo=timezone.utc), timedelta(seconds=3600)), None),
 ])
@@ -85,3 +89,43 @@ def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: Ti
     elif expected_output == "has_data":
         assert result is not None
         assert len(result.dataFrame) > 0
+
+@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
+
+def test_pHarm_timeGenerated_is_current():
+    """This function tests that pHarm series sets timeGenerated to current time rather than reference time"""
+    load_dotenv()
+    
+    lighthouse = LIGHTHOUSE()
+    
+    # Use historical data
+    seriesDescription = SeriesDescription('LIGHTHOUSE', 'pHarm', 'PortLavaca', 'MLLW')
+    timeDescription = TimeDescription(
+        datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc),
+        datetime.combine(date(2023, 9, 6), time(12, 0), tzinfo=timezone.utc),
+        timedelta(seconds=360)
+    )
+    
+    # Record the time before calling the function
+    time_before_call = datetime.now(timezone.utc)
+    
+    result: Series = lighthouse._LIGHTHOUSE__pull_pd_endpoint_dataPoint(seriesDescription, timeDescription)
+    
+    # Record the time after calling the function
+    time_after_call = datetime.now(timezone.utc)
+    
+    assert result is not None
+    assert len(result.dataFrame) > 0
+    
+    # For pHarm, timeGenerated should be the current time (between time_before_call and time_after_call)
+    # while timeVerified should be the historical reference time
+    for _, row in result.dataFrame.iterrows():
+        time_verified = row['timeVerified']
+        time_generated = row['timeGenerated']
+        
+        # timeVerified should be in the historical range
+        assert timeDescription.fromDateTime <= time_verified <= timeDescription.toDateTime
+        
+        # timeGenerated should be current time (within our call window)
+        assert time_before_call <= time_generated <= time_after_call, \
+            f"timeGenerated {time_generated} should be current time, not historical time"
