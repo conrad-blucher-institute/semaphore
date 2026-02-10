@@ -10,7 +10,7 @@
 
     },
     "outputInfo": {
-        "outputMethod": "OnePackedFloat",
+        "outputMethod": "PackedPredictionTensor",
         "leadTime": 86400,
         "series": "testSeries",
         "location": "packChan",

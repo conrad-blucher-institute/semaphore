@@ -10,7 +10,7 @@
         "interval": 3600
     },
     "outputInfo": {
-        "outputMethod": "MultiPackedFloat",
+        "outputMethod": "PackedPredictionTensor",
         "leadTime": 237600,
         "series": "pWaterTmp",
         "location": "SouthBirdIsland",
