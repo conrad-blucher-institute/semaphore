@@ -46,26 +46,29 @@ class SeriesProvider():
         return returningSeries
           
     
-    def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> Series:
+    def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime, skipIngestionLogic: bool = False) -> Series:
         """This method attempts to return a series matching a series description and a time description.
             :param seriesDescription - A description of the wanted series.
             :param timeDescription - A description of the temporal information of the wanted series. 
             :param refrenceTime - The time of execution 
+            :param skipIngestionLogic - A flag to determine whether to skip the ingestion logic and directly query the database for the requested series. Default is False.
             :returns series - The series containing as much data as could be found.
         """
         log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
-
-        # assume we have not ingested data yet
-        already_ingested_data = False
 
         # If the data source is from the semaphore ingestion class, we ignore the default behavior and always request new data.
         if seriesDescription.dataSource.upper() == 'SEMAPHORE':
             return self.__data_ingestion_query(seriesDescription, timeDescription)
         
+        if skipIngestionLogic:
+            return self.__data_base_query(seriesDescription, timeDescription)
+        
+        # assume we have not ingested data yet
+        already_ingested_data = False
+
         # We request new data if:
         #   - The data in the db is stale.
         #   - We can get more verified times for the requested range.
-
         # always call the db freshness check to ensure we aren't using old data
         db_is_fresh = self.db_has_freshly_acquired_data(seriesDescription, timeDescription, referenceTime)
         if not db_is_fresh:
@@ -119,6 +122,8 @@ class SeriesProvider():
                     raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("SPECIFIC", semaphoreSeriesDescription= DESCRIPTION, timeDescription= DESCRIPTION)')
             case _:
                 raise NotImplementedError(f'Method {method} has not been implemented in SeriesProvider.request_output')
+            
+            
     def db_has_freshly_acquired_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> bool:
         """
         Checks whether the database contains fresh data for the requested series. 
