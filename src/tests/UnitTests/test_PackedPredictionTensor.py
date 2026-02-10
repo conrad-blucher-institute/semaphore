@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #test_PackedPredictionTensor.py
 #-------------------------------
-# Created By: aNOINTIYAE bEASLEY
+# Created By: Anointiyae Beasley
 # version 1.0
 #----------------------------------
 """ This tests the PackedPredictionTensor output handler class

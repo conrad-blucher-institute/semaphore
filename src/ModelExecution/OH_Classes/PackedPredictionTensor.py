@@ -4,7 +4,7 @@
 # Created By: Anointiyae Beasley
 # version 1.0
 #----------------------------------
-"""This OH class is to handle prediction of multiple input vectors.
+"""This OH class is to handle reshaping the 2D array predictions to a 3D array in this format: (members, input_vectors, outputs).
  """ 
 #----------------------------------
 # 
@@ -36,12 +36,6 @@ class PackedPredictionTensor(IOutputHandler):
         if predictions.ndim == 2:# For models that have 1 member (MRE and scalar models).
             members = 1
             input_vectors, outputs = predictions.shape  # (input_vectors, outputs)
-
-            if input_vectors % members != 0:
-                raise ValueError(
-                    f"Cannot reshape predictions of shape {predictions.shape} "
-                    f"into (members, input_vectors, outputs)"
-                )
             pred = predictions.reshape(members, input_vectors, outputs)
 
         df = get_output_dataFrame()
