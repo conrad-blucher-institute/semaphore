@@ -122,10 +122,15 @@ async def get_outputs_latest(modelNames: list[str] = Query(None)):
         raise HTTPException(status_code=422, detail='No model names were provided')
     
     provider = SeriesProvider()
-    results = {}
-    for modelName in modelNames: 
-        results[modelName] = serialize_series(provider.request_output('LATEST', model_name= modelName))
-    return results
+    resultSeries = provider.request_output('LATEST', model_names= modelNames)
+    if not resultSeries:
+        raise HTTPException(status_code=404, detail='No outputs found for the provided model names')
+
+    serializedResults = {}
+    for series in resultSeries:
+        serializedResults[series.description.modelName] = serialize_series(series)
+    
+    return serializedResults
 
 
 @app.get('/output_time_span/')
