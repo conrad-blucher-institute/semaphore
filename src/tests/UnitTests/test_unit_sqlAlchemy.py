@@ -373,9 +373,13 @@ def test_determine_staleness_with_mock_db(
                 [27.0, 28.0],
                 [29.0, 30.0]
             ]
-        ])
+        ]),
+
+        # Test case 4: None value
+        # to test how the serializer handles None values in the dataValue column
+        None
     ],
-    ids=["3x3x3", '1x1x1', '3x5x2']
+    ids=["3x3x3", '1x1x1', '3x5x2', 'None']
 )
 def test_serialize(data_array):
     """
@@ -401,6 +405,13 @@ def test_serialize(data_array):
     # skip the db connection by replacing the __init__ method
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
+
+        # for the None test case check that the type is None 
+        # because nothing should have been serialized
+        if data_array is None:
+            serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+            assert serialized_df['dataValue'].iloc[0] is None
+            return
 
         # assert that the data array is an ndarray before serialization
         assert isinstance(df['dataValue'].iloc[0], np.ndarray)
@@ -507,38 +518,49 @@ def test_serialize_multiple_rows():
         for idx, row in serialized_df.iterrows():
             assert isinstance(row['dataValue'], bytes)
 
-def test_deserialize():
+
+@pytest.mark.parametrize(
+    "data_array",
+    [
+        # Test case 1: shape (3, 3, 3)
+        # basic test with a shaped array
+        np.array([
+            [
+                [1.0, 2.0],
+                [3.0, 4.0],
+                [5.0, 6.0],
+                [7.0, 8.0],
+                [9.0, 10.0]
+            ],
+            [
+                [11.0, 12.0],
+                [13.0, 14.0],
+                [15.0, 16.0],
+                [17.0, 18.0],
+                [19.0, 20.0]
+            ],
+            [
+                [21.0, 22.0],
+                [23.0, 24.0],
+                [25.0, 26.0],
+                [27.0, 28.0],
+                [29.0, 30.0]
+            ]
+        ]),
+
+        # Test case 2: None value
+        # to test how the deserializer handles None values in the dataValue column
+        None
+    ],
+    ids=["3x3x3", "None"]
+)
+def test_deserialize(data_array):
     """
     This test checks that the __deserialize_data method correctly converts bytes in a 
     single dataframe row back to the original array in the dataValue column.
 
     docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_deserialize -s
     """
-
-    # shape (3, 5, 2)
-    data_array = np.array([
-        [
-            [1.0, 2.0],
-            [3.0, 4.0],
-            [5.0, 6.0],
-            [7.0, 8.0],
-            [9.0, 10.0]
-        ],
-        [
-            [11.0, 12.0],
-            [13.0, 14.0],
-            [15.0, 16.0],
-            [17.0, 18.0],
-            [19.0, 20.0]
-        ],
-        [
-            [21.0, 22.0],
-            [23.0, 24.0],
-            [25.0, 26.0],
-            [27.0, 28.0],
-            [29.0, 30.0]
-        ]
-    ])
 
     df = pd.DataFrame({
         'ID': [1],
@@ -556,6 +578,15 @@ def test_deserialize():
     # skip the db connection by replacing the __init__ method
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
+
+        # for the None case, check that None just passes through the serializer and deserializer unchanged without error
+        if data_array is None:
+            serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+            assert serialized_df['dataValue'].iloc[0] is None
+    
+            deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_df)
+            assert deserialized_df['dataValue'].iloc[0] is None
+            return
 
         # assert that the data array is an ndarray before serialization
         assert isinstance(df['dataValue'].iloc[0], np.ndarray)
