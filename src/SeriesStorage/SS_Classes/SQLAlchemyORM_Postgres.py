@@ -3,10 +3,15 @@
 #-------------------------------
 # Created By : Matthew Kastl
 # Created Date: 3/26/2023
-# version 9.0
+# version 10.0
 #-------------------------------
-""" This file is an implementation of the SQLAlchemy ORM geared towards Semaphore and its schema. 
- """ 
+"""
+This file is an implementation of the SQLAlchemy ORM geared towards Semaphore and its schema.
+
+NOTE:: As of version 10.0 in early 2026, this storage class uses binary serialization to store outputs.
+All outputs should be serialized into bytes before insertion and deserialized back
+into their original form after selection.
+""" 
 #-------------------------------
 # 
 #
