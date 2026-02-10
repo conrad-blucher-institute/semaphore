@@ -683,7 +683,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             # If its an ensemble the dataValue is all the values sorted by there ID (to ensure correct order)
             # If not an ensemble we just take the solitary dataValue
             if isEnsemble:
-                group = group.sort_values(by=("modelName"))
+                group = group.sort_values(by=("ensembleMemberID"))
                 dataValues = group["dataValue"].to_list()
             else:
                 dataValues = group["dataValue"].iloc[0]
