@@ -131,8 +131,8 @@ class LIGHTHOUSE(IDataIngestion):
             if dataPoint[dataValueIndex] == None: # If lighthouse does not have a requested value, it will return None
                 continue
 
-            # Use now_time for pHarm, otherwise use dt
-            time_generated = now_time if is_pharm else dt
+            # Use now_time for prediction series, otherwise use dt
+            time_generated = now_time if is_prediction else dt
             
             df.loc[len(df)] = [
                 dataPoint[dataValueIndex],          # dataValue
