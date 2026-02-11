@@ -115,10 +115,10 @@ class LIGHTHOUSE(IDataIngestion):
         dataTimestampIndex = 0
         df = get_input_dataFrame()
         
-        # Check if this is pHarm series and if so use the current time for timeGenerated
-        # this is a prediction rather than a measurement so we'll use the time we grabbed it
-        is_pharm = seriesDescription.dataSeries == 'pHarm'
-        now_time = datetime.now(timezone.utc) if is_pharm else None
+        # Check if this is a prediction like the pHarm series and if so use the current time for timeGenerated.
+        # This is a prediction rather than a measurement so we'll use the time we grabbed it.
+        is_prediction = seriesDescription.dataSeries[0] == 'p'
+        now_time = datetime.now(timezone.utc) if is_prediction else None
         
         for dataPoint in data:
          # Lighthouse returns epoch time in milliseconds

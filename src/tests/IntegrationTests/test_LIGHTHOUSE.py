@@ -92,8 +92,8 @@ def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: Ti
 
 @pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
 
-def test_pHarm_timeGenerated_is_current():
-    """This function tests that pHarm series sets timeGenerated to current time rather than the datapoint's verified time"""
+def test_prediction_timeGenerated_is_current():
+    """This function tests that prediction series (prefix 'p') sets timeGenerated to current time rather than the datapoint's verified time"""
     load_dotenv()
     
     lighthouse = LIGHTHOUSE()
@@ -117,7 +117,7 @@ def test_pHarm_timeGenerated_is_current():
     assert result is not None
     assert len(result.dataFrame) > 0
     
-    # For pHarm, timeGenerated should be the current time (between time_before_call and time_after_call)
+    # For prediction series, timeGenerated should be the current time (between time_before_call and time_after_call)
     # while timeVerified should be the historical reference time
     for _, row in result.dataFrame.iterrows():
         time_verified = row['timeVerified']
