@@ -93,7 +93,7 @@ def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: Ti
 @pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
 
 def test_pHarm_timeGenerated_is_current():
-    """This function tests that pHarm series sets timeGenerated to current time rather than reference time"""
+    """This function tests that pHarm series sets timeGenerated to current time rather than the datapoint's verified time"""
     load_dotenv()
     
     lighthouse = LIGHTHOUSE()
