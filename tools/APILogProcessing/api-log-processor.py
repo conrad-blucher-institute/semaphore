@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from __future__ import annotations
 import re
 import json
@@ -5,7 +6,6 @@ import argparse
 from typing import Optional
 import pandas as pd
 
-#!/usr/bin/env python3
 """
 This script processes API log files retrieved via docker logs commands and generates a report 
 with various statistics about the API usage. It extracts relevant information from log lines, 
