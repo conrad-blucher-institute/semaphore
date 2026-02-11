@@ -89,7 +89,7 @@ class SeriesProvider():
 
             NOTE:: Latest assumes model version and time by just selecting the very last made prediction
             method= 'LATEST'
-            request_output('LATEST', model_name=REQUESTED_MODEL_NAMES)
+            request_output('LATEST', model_names=REQUESTED_MODEL_NAMES)
 
             NOTE:: Time span returns all the predictions for a model in a given time span, assumes model details from the last prediction
             made from that model. 
