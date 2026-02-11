@@ -695,10 +695,10 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
         This method serializes a dataframe's dataValue column into bytes
 
-        NOTE:: If a dataValue is None it is left None and not serialized. This can happen
-        if we insert a null into the database for a failed model run or if the
-        dataValue is actually None. Trying to serialize a None will throw
-        an error so we have to check for it before serialization.
+        NOTE:: If a dataValue is None it is converted to nan then serialized.
+        This is to prevent errors when trying to serialize a None
+        but nan can be serialized without issue.
+        None -> nan -> bytes. 
         
         params:
             df: DataFrame - The dataframe to serialize
@@ -711,9 +711,10 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # loop over each row and serialize the dataValue column
         for idx, row in df.iterrows():
             value = row['dataValue']
-            if value is None:
-                serialized_values.append(None)
-                continue
+
+            # if a None is found, we convert to nan before serializing
+            value = np.nan if value is None else value
+
             buffer = BytesIO()
             np.save(buffer, value, allow_pickle=False)
             serialized_values.append(buffer.getvalue())
@@ -726,10 +727,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
         This method deserializes the dataValue column in a dataframe
 
-        NOTE:: If a dataValue is None it is left None and not deserialized. This can happen
-        if we insert a null into the database for a failed model run or if the
-        dataValue is actually None. Trying to deserialize a None will throw
-        an error so we have to check for it before deserialization.
+        NOTE:: If a dataValue is nan it can be deserialized back into a nan.
+        This deserialized nan will still have the NDarray data type, so
+        np.all() is used to check the nan value, then it is converted back
+        to None to allow for proper handling. 
+        bytes -> nan -> None.
 
         params:
             df: DataFrame - The dataframe to deserialize
@@ -742,11 +744,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # loop over each row and deserialize the dataValue column
         for idx, row in df.iterrows():
             serialized_value = row['dataValue']
-            if serialized_value is None:
-                deserialized_values.append(None)
-                continue
             buffer = BytesIO(serialized_value)
             data_value = np.load(buffer, allow_pickle=False)
+
+            # if nan is found, we convert to None after deserializing
+            data_value = None if np.all(np.isnan(data_value)) else data_value
             deserialized_values.append(data_value)
         
         # replace the entire dataValue column with the deserialized values

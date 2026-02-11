@@ -406,15 +406,9 @@ def test_serialize(data_array):
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
 
-        # for the None test case check that the type is None 
-        # because nothing should have been serialized
-        if data_array is None:
-            serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
-            assert serialized_df['dataValue'].iloc[0] is None
-            return
-
-        # assert that the data array is an ndarray before serialization
-        assert isinstance(df['dataValue'].iloc[0], np.ndarray)
+        if data_array is not None:
+            # assert that the data array is an ndarray before serialization
+            assert isinstance(df['dataValue'].iloc[0], np.ndarray)
 
         # call the serializer 
         serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
@@ -579,11 +573,12 @@ def test_deserialize(data_array):
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
 
-        # for the None case, check that None just passes through the serializer and deserializer unchanged without error
         if data_array is None:
+            # should convert None to nan and serialize the nan
             serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
-            assert serialized_df['dataValue'].iloc[0] is None
-    
+            assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
+
+            # should convert nan back to None after deserializing
             deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_df)
             assert deserialized_df['dataValue'].iloc[0] is None
             return
