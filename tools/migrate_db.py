@@ -203,7 +203,7 @@ def main():
         except ValueError:
             raise ValueError(f'Invalid version string: {args.version}, aborting!')    
         
-        if target_desc > 255:
+        if len(target_desc) > 255:
             raise ValueError('Description must be 255 characters or less, aborting!')
         
     else:  
