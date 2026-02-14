@@ -54,7 +54,7 @@ class SeriesProvider():
 
             :param seriesDescription - A description of the wanted series.
             :param timeDescription - A description of the temporal information of the wanted series. 
-            :param refrenceTime - The time of execution 
+            :param referenceTime - The time of execution 
             :param skipIngestionLogic - A flag to determine whether to skip the ingestion logic and directly query the database for the requested series. Default is False.
             :returns series - The series containing as much data as could be found.
         """
