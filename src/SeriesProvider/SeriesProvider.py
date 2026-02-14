@@ -48,6 +48,10 @@ class SeriesProvider():
     
     def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime, skipIngestionLogic: bool = False) -> Series:
         """This method attempts to return a series matching a series description and a time description.
+
+        NOTE::if the data source in the series description is "SEMAPHORE", we skip all freshness and verified time checks and directly query for new data, 
+            as this is a special case used to ingest outputs as inputs for other models.
+
             :param seriesDescription - A description of the wanted series.
             :param timeDescription - A description of the temporal information of the wanted series. 
             :param refrenceTime - The time of execution 
@@ -61,7 +65,7 @@ class SeriesProvider():
             return self.__data_ingestion_query(seriesDescription, timeDescription)
         
         if skipIngestionLogic:
-            return self.__data_base_query(seriesDescription, timeDescription)
+            return self.seriesStorage.select_input(seriesDescription, timeDescription)
         
         # assume we have not ingested data yet
         already_ingested_data = False
@@ -81,7 +85,7 @@ class SeriesProvider():
             if should_ingest_for_verified_time:
                 self.__data_ingestion_query(seriesDescription, timeDescription)
 
-        return self.__data_base_query(seriesDescription, timeDescription)
+        return self.seriesStorage.select_input(seriesDescription, timeDescription)
     
 
     def request_output(self, method: str, **kwargs) -> Series | None:
@@ -153,18 +157,6 @@ class SeriesProvider():
   
         return is_fresh
     
-
-    def __data_base_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) ->Series:
-        """ Handles the process of getting requested data from series storage.
-        :param seriesDescription: SeriesDescription - The semantic description of request
-        :param timeDescription: TimeDescription - The temporal description of the request
-        :returns Series
-            - Validated results: Series - The results from the DB that have gone through validation.
-            - Raw results: Series - The raw results from the database.
-        """
-
-        log(f'Init DB Query...')
-        return  self.seriesStorage.select_input(seriesDescription, timeDescription)
         
     def __data_ingestion_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
         """ Handles the process of getting requested data from series storage.
