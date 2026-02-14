@@ -16,7 +16,6 @@ Arguments:
 - logfile (str): Path to the log file to process. Defaults to 'api.log'.
 - --raw_out, -ro (str): Optional. Path to write the raw JSON output of the processed log data. (Better if you want to do further processing)
 - --out, -o (str): Optional. Path to write the generated report. If not provided, the report is printed to stdout.
-import re
 """
 
 LINE_RE = re.compile(
