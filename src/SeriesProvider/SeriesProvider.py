@@ -65,6 +65,7 @@ class SeriesProvider():
             return self.__data_ingestion_query(seriesDescription, timeDescription)
         
         if skipIngestionLogic:
+            log(f'Init DB Query...')
             return self.seriesStorage.select_input(seriesDescription, timeDescription)
         
         # assume we have not ingested data yet
@@ -85,6 +86,7 @@ class SeriesProvider():
             if should_ingest_for_verified_time:
                 self.__data_ingestion_query(seriesDescription, timeDescription)
 
+        log(f'Init DB Query...')
         return self.seriesStorage.select_input(seriesDescription, timeDescription)
     
 
