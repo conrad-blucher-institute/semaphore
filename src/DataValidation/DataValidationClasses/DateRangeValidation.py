@@ -60,6 +60,7 @@ class DateRangeValidation(IDataValidation):
 
             # validate that the data isn't stale
             # Note that staleness check is brittle for predictions.
+            # Do not modify unless you know what you are doing!!!!!
             if time_difference > series.timeDescription.stalenessOffset:
                 log_error(f'DateRangeValidation: Series {series} is stale.\n')
                 log_error(f'Time difference: {time_difference}. Staleness offset: {series.timeDescription.stalenessOffset}\n')
