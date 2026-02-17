@@ -15,15 +15,6 @@ sys.path.insert(0, '/app/src')
 # NOW import without 'src.' prefix since we added /app/src to path
 from utility import LogLocationDirector, VerbosityController
 
-import sys
-import os
-import pytest
-
-sys.path.insert(0, '/app/src')
-
-from utility import LogLocationDirector, VerbosityController
-
-
 def pytest_addoption(parser):
     parser.addoption("--run-slow", action="store_true", default=False, help="Run tests marked as slow")
     parser.addoption("--only-slow", action="store_true", default=False, help="Run ONLY tests marked as slow")
