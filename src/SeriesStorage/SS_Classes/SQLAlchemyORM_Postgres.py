@@ -414,6 +414,8 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
 
+        if len(series.dataFrame) != 1: raise ValueError(f'Output series dataframe should only have one row, got {len(series.dataFrame)}')
+
         # pack the output data into a row
         row_to_insert = {
             "timeGenerated": series.dataFrame.iloc[0]['timeGenerated'],
@@ -703,9 +705,20 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return df_out
 
     def __splice_output(self, results: list[tuple]) -> DataFrame:
-        """Converts DB row results into a proper output dataframe to be packed into a series.
-        param: list[tupleish] - a list of selections from the table formatted in tupleish
-        returns: DataFrame - a dataframe with the data formatted for use in a series
+        """
+        Converts DB row results into a proper output dataframe to be packed into a series.
+
+        :param results - list[tupleish] - a list of selected rows from the table formatted in tupleish.
+            On model runs, there should only be one row in the list such as 
+            [(ID, timeGenerated, leadTime, modelName, modelVersion, dataValue, dataUnit, dataLocation, dataSeries, dataDatum)]
+            
+            On output selections, there may be many rows returned from the DB with each row having the columns listed above.
+
+        :returns: DataFrame - a dataframe with the data formatted for use in a series
+            On model runs, the dataframe will have only 1 row with the columns
+            [dataValue, dataUnit, timeGenerated, leadTime]
+
+            On output selections, the dataframe may have many rows but will still have the columns above
         """
 
         # Convert returned DB rows into a dataframe to make manipulation easier 
