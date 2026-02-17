@@ -4,6 +4,7 @@
 # pytest configuration file
 # This file is automatically loaded by pytest
 #----------------------------------
+from html import parser
 import sys
 import os
 import pytest
@@ -24,12 +25,8 @@ from utility import LogLocationDirector, VerbosityController
 
 
 def pytest_addoption(parser):
-    parser.addoption(
-        "--run-slow",
-        action="store_true",
-        default=False,
-        help="Run tests marked as slow (skipped by default)"
-    )
+    parser.addoption("--run-slow", action="store_true", default=False, help="Run tests marked as slow")
+    parser.addoption("--only-slow", action="store_true", default=False, help="Run ONLY tests marked as slow")
 
 
 def pytest_configure(config):
@@ -40,11 +37,18 @@ def pytest_configure(config):
 
 
 def pytest_collection_modifyitems(config, items):
-    if not config.getoption("--run-slow"):
-        skip_slow = pytest.mark.skip(reason="slow test; use --run-slow to run")
-        for item in items:
-            if "slow" in item.keywords:
-                item.add_marker(skip_slow)
+    run_slow = config.getoption("--run-slow")
+    only_slow = config.getoption("--only-slow")
+
+    skip_slow = pytest.mark.skip(reason="slow test; use --run-slow to run")
+    skip_fast = pytest.mark.skip(reason="skipping non-slow tests; remove --only-slow to run")
+
+    for item in items:
+        is_slow = "slow" in item.keywords
+        if only_slow and not is_slow:
+            item.add_marker(skip_fast)
+        elif not run_slow and not only_slow and is_slow:
+            item.add_marker(skip_slow)
 
 
 @pytest.fixture(autouse=True)
