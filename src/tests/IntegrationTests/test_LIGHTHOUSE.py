@@ -24,7 +24,7 @@ from src.DataIngestion.IDataIngestion import data_ingestion_factory
 from src.DataIngestion.DI_Classes.LIGHTHOUSE import LIGHTHOUSE
 from dotenv import load_dotenv
 
-@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
+@pytest.mark.slow
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_min_output", [
     
@@ -69,7 +69,7 @@ def test_pull_pd_endpoint_dataPoint(seriesDescription: SeriesDescription, timeDe
                 assert start_time <= row_timestamp <= end_time, f"Data point {row['timeVerified']} is outside requested range"
 
 
-@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
+@pytest.mark.slow
 
 @pytest.mark.parametrize("seriesDescription, timeDescription, expected_output", [
     # series: erroneous
@@ -90,7 +90,7 @@ def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: Ti
         assert result is not None
         assert len(result.dataFrame) > 0
 
-@pytest.mark.skipif(True, reason="Data Ingestion Classes Tests Run Very Slowly")
+@pytest.mark.slow
 
 def test_prediction_timeGenerated_is_current():
     """This function tests that prediction series (prefix 'p') sets timeGenerated to current time rather than the datapoint's verified time"""
