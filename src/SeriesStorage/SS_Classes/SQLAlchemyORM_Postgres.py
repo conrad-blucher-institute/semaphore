@@ -8,7 +8,8 @@
 """
 This file is an implementation of the SQLAlchemy ORM geared towards Semaphore and its schema.
 
-NOTE:: As of version 10.0 in early 2026, this storage class uses binary serialization to store outputs.
+NOTE:: As of version 10.0 in early 2026, this storage class uses binary serialization for the
+dataValue column in a dataframe to store outputs.
 All outputs should be serialized into bytes before insertion and deserialized back
 into their original form after selection.
 """ 
@@ -27,6 +28,7 @@ import pandas as pd
 from pandas import DataFrame
 import numpy as np
 from io import BytesIO
+from numpy import ndarray
 
 from SeriesStorage.ISeriesStorage import ISeriesStorage
 
@@ -345,88 +347,139 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return resultSeries
     
     def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict | None]:
-        """This method inserts actual/predictions into the output table and model run information into the model run table
-            :param series: Series - A series object with a time description,  semaphore series description, and outputdata
-            :param dateTime: execution_time - A datetime object set to the time this instance of semaphore was ran
-            :param int: return_code - A int code for the run
-            :return tuple[Series, dict]: 
-                - A series object that contains the actually inserted data
-                - The results from inserting into the model_runs table
+        """
+        This method inserts actual/predictions into the output table and model run information into the model run table
+            
+        :param output_series: Series - A series object with a time description,  semaphore series description, and outputdata
+        :param dateTime: execution_time - A datetime object set to the time this instance of semaphore was ran
+        :param int: return_code - A int code for the run
+        
+        :returns tuple[Series, dict]: 
+            - A series object that contains the actually inserted data
+            - The results from inserting into the model_runs table
         """
 
-        output_series, output_ids = self.insert_output(output_series)
+        output_series, output_id = self.insert_output(output_series)
 
-        if len(output_ids) == 0:
+        if output_id is None:
             log('WARNING:: Series Storage was told to insert to both the output and model run table. This failed because no outputs were inserted. This could be caused by the prediction already existing in the database!')
             return output_series, None
 
-        model_run_rows = []
-        for id in output_ids:
-            model_run_row = {"outputID": None, "executionTime": None, "returnCode": None}
-            model_run_row["outputID"] = id
-            model_run_row["executionTime"] = execution_time
-            model_run_row["returnCode"] = return_code
-            model_run_rows.append(model_run_row)
+        model_run_row = {
+            "outputID": output_id,
+            "executionTime": execution_time,
+            "returnCode": return_code
+        }
 
-        model_runs = self.__metadata.tables['model_runs']
+        stmt = text("""
+        INSERT INTO model_runs (
+            "outputID",
+            "executionTime",
+            "returnCode"
+        )
+        VALUES (
+            :outputID,
+            :executionTime,
+            :returnCode
+        )
+        RETURNING *;
+        """)
+
+        bind_params = {
+            'outputID': model_run_row["outputID"],
+            'executionTime': model_run_row["executionTime"],
+            'returnCode': model_run_row["returnCode"]
+        }
+        stmt = stmt.bindparams(**bind_params)
+
         with self.__get_engine().connect() as conn:
-            cursor = conn.execute(insert(model_runs)
-                                  .returning(model_runs)
-                                  .values(model_run_rows)
-                                  )
+            cursor = conn.execute(stmt)
             model_run_result = cursor.fetchall()
             conn.commit()
-
 
         return output_series, model_run_result
         
 
-    def insert_output(self, series: Series) -> tuple[Series, list[int]]:
-        """This method inserts actual/predictions into the output table
-            :param series: Series - A series object with a time description,  semaphore series description, and outputdata
-            :return tuple[Series, list[int]]: 
-                - A series object that contains the actually inserted data
-                - A list of the pK ids the rows took
+    def insert_output(self, series: Series) -> tuple[Series, int | None]:
+        """
+        This method inserts a single row for actual/predictions into the output table
+
+        :param series: Series - A series object with a time description, semaphore series description, and output data
+        
+        :returns tuple[Series, int | None]: 
+            - A series object that contains the actually inserted data
+            - An integer representing the primary key ID the output took in the database
+                or None if no row was inserted due to a conflict with an existing row
         """
 
         if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
 
-        # call the serializer to convert the dataValue column to bytes
-        series.dataFrame = self.__serialize_data(series.dataFrame)
+        # pack the output data into a row
+        row_to_insert = {
+            "timeGenerated": series.dataFrame.iloc[0]['timeGenerated'],
+            "leadTime": series.dataFrame.iloc[0]['leadTime'],
+            "modelName": series.description.modelName,
+            "modelVersion": series.description.modelVersion,
+            "dataValue": series.dataFrame.iloc[0]['dataValue'],
+            "dataUnit": series.dataFrame.iloc[0]['dataUnit'],
+            "dataLocation": series.description.dataLocation,
+            "dataSeries": series.description.dataSeries,
+            "dataDatum": series.description.dataDatum,
+        }
 
-        # create the rows to insert
-        insertionRows = []
-        for df_index, row in series.dataFrame.iterrows():
+        # serialize the dataValue into bytes for storage
+        row_to_insert["dataValue"] = self.__serialize_data(row_to_insert["dataValue"])
 
-            insertionValueRow = {
-                "timeGenerated": series.dataFrame.iloc[df_index]['timeGenerated'], 
-                "leadTime": series.dataFrame.iloc[df_index]['leadTime'], 
-                "modelName": series.description.modelName, 
-                "modelVersion": series.description.modelVersion, 
-                "dataValue": series.dataFrame.iloc[df_index]['dataValue'], 
-                "dataUnit": series.dataFrame.iloc[df_index]['dataUnit'], 
-                "dataLocation": series.description.dataLocation,
-                "dataSeries": series.description.dataSeries, 
-                "dataDatum": series.description.dataDatum, 
-            }
-            insertionRows.append(insertionValueRow)
-        
-        # Insert the rows into the outputs table returning what is inserted as a sanity check
-        outputTable = self.__metadata.tables['outputs']
+        stmt = text("""
+        INSERT INTO outputs (
+            "timeGenerated",
+            "leadTime",
+            "modelName",
+            "modelVersion",
+            "dataValue",
+            "dataUnit",
+            "dataLocation",
+            "dataSeries",
+            "dataDatum"
+            )
+        VALUES (
+            :timeGenerated,
+            :leadTime,
+            :modelName,
+            :modelVersion,
+            :dataValue,
+            :dataUnit,
+            :dataLocation,
+            :dataSeries,
+            :dataDatum
+        )
+        ON CONFLICT ON CONSTRAINT outputs_AK00 DO NOTHING
+        RETURNING *;
+        """)
+        bind_params = {
+            'timeGenerated': row_to_insert["timeGenerated"],
+            'leadTime': row_to_insert["leadTime"],
+            'modelName': row_to_insert["modelName"],
+            'modelVersion': row_to_insert["modelVersion"],
+            'dataValue': row_to_insert["dataValue"],
+            'dataUnit': row_to_insert["dataUnit"],
+            'dataLocation': row_to_insert["dataLocation"],
+            'dataSeries': row_to_insert["dataSeries"],
+            'dataDatum': row_to_insert["dataDatum"]
+        }
+        stmt = stmt.bindparams(**bind_params)
+
+        # insert the row into the outputs table returning what is inserted as a sanity check
         with self.__get_engine().connect() as conn:
-            cursor = conn.execute(insert(outputTable)
-                                  .on_conflict_do_nothing('outputs_AK00')
-                                  .returning(outputTable)
-                                  .values(insertionRows)
-                                  )
+            cursor = conn.execute(stmt)
             result = cursor.fetchall()
             conn.commit()
 
         # Create a series object to return with the inserted data
         resultSeries = Series(series.description, series.timeDescription)
         resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
-        ids = [row[0] for row in result]
-        return resultSeries, ids
+        id = result[0][0] if result else None
+        return resultSeries, id
 
     def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime | None:
         """
@@ -677,83 +730,67 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
             # we group data with identical temporal information  
             firstRow = group.iloc[0]
+
+            # deserialize the data back into an ndarray
+            deserialized_data = self.__deserialize_data(firstRow["dataValue"])
             
             # Pack the data into the out dataframe
             df_out.loc[len(df_out)] = [
-                firstRow["dataValue"],      # dataValue    
+                deserialized_data,          # dataValue    
                 firstRow["dataUnit"],       # dataUnit
                 firstRow["timeGenerated"],  # timeGenerated
                 firstRow["leadTime"]        # leadTime
             ]
 
-        # deserialize the dataframe
-        df_out = self.__deserialize_data(df_out)
-
         return df_out
 
-    def __serialize_data(self, df: DataFrame) -> DataFrame:
+    def __serialize_data(self, array: np.ndarray) -> bytes:
         """
-        This method serializes a dataframe's dataValue column into bytes
-
-        NOTE:: If a dataValue is None it is converted to nan then serialized.
-        This is to prevent errors when trying to serialize a None
-        but nan can be serialized without issue.
-        None -> nan -> bytes. 
+        This method serializes an ndarray into bytes.
         
-        params:
-            df: DataFrame - The dataframe to serialize
+        :param array: np.ndarray - The array to serialize
+            The array is expected to have three dimensions of (members, inputs, outputs) and have 
+            one of the following shapes depending on the type of model:
+                (1, 1, 1) for single point models
+                (1, 100, 1) for MRE models
+                (10, 100, 100) for CRPS models
 
-        returns:
-            DataFrame - A dataframe with the dataValue column serialized into bytes
+        :returns bytes - The serialized array
+
+        NOTE:: If an array is None it is converted to nan then serialized.
+        This is to prevent errors when trying to serialize a None
+        but nan can be serialized without issue. The process for this
+        is None -> nan -> bytes. 
         """
-        serialized_values = []
+        array_to_serialize = array.copy() if array is not None else np.array(np.nan)
 
-        # loop over each row and serialize the dataValue column
-        for idx, row in df.iterrows():
-            value = row['dataValue']
+        buffer = BytesIO()
+        np.save(buffer, array_to_serialize, allow_pickle=False)
+        serialized_array = buffer.getvalue()
 
-            # if a None is found, we convert to nan before serializing
-            value = np.nan if value is None else value
+        return serialized_array
 
-            buffer = BytesIO()
-            np.save(buffer, value, allow_pickle=False)
-            serialized_values.append(buffer.getvalue())
-
-        # replace the entire dataValue column with the serialized values
-        df['dataValue'] = serialized_values
-        return df
-
-    def __deserialize_data(self, df: DataFrame) -> DataFrame:
+    def __deserialize_data(self, serialized_data: bytes) -> np.ndarray:
         """
-        This method deserializes the dataValue column in a dataframe
+        This method deserializes bytes into an ndarray.
 
-        NOTE:: If a dataValue is nan it can be deserialized back into a nan.
+        :param serialized_data: bytes - The bytes to deserialize
+
+        :returns ndarray - An array with the original data values
+
+        NOTE:: If an array is nan it can be deserialized back into a nan.
         This deserialized nan will still have the NDarray data type, so
         np.all() is used to check the nan value, then it is converted back
-        to None to allow for proper handling. 
+        to None to allow for proper handling. The process for this is
         bytes -> nan -> None.
-
-        params:
-            df: DataFrame - The dataframe to deserialize
-
-        returns:
-            DataFrame - The dataframe with the deserialized dataValue column
         """
-        deserialized_values = []
+        buffer = BytesIO(serialized_data)
+        array = np.load(buffer, allow_pickle=False)
 
-        # loop over each row and deserialize the dataValue column
-        for idx, row in df.iterrows():
-            serialized_value = row['dataValue']
-            buffer = BytesIO(serialized_value)
-            data_value = np.load(buffer, allow_pickle=False)
+        # if nan is found, we convert to None after deserializing
+        array = None if np.all(np.isnan(array)) else array
 
-            # if nan is found, we convert to None after deserializing
-            data_value = None if np.all(np.isnan(data_value)) else data_value
-            deserialized_values.append(data_value)
-        
-        # replace the entire dataValue column with the deserialized values
-        df['dataValue'] = deserialized_values
-        return df
+        return array
     
     def insert_lat_lon_test(self, code: str, displayName: str, notes: str, latitude: str, longitude: str):
         """This method inserts lat and lon information

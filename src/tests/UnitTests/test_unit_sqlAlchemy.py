@@ -376,31 +376,17 @@ def test_determine_staleness_with_mock_db(
         ]),
 
         # Test case 4: None value
-        # to test how the serializer handles None values in the dataValue column
+        # to test how the serializer handles None values
         None
     ],
     ids=["3x3x3", '1x1x1', '3x5x2', 'None']
 )
 def test_serialize(data_array):
     """
-    This test checks that the __serialize_data method correctly converts a single row in a 
-    dataframe to bytes in the dataValue column using different shaped arrays in the dataValue column.
+    This test checks that the __serialize_data method correctly converts an ndarray into bytes
 
     docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize -s
     """
-
-    df = pd.DataFrame({
-        'ID': [1],
-        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)],
-        'leadTime': [timedelta(days=5)],
-        'modelName': ['TestModel'],
-        'modelVersion': ['1.0'],
-        'dataValue': [data_array],
-        'dataUnit': ['celsius'],
-        'dataLocation': ['TestLocation'],
-        'dataSeries': ['TestSeries'],
-        'dataDatum': ['TestDatum'],
-    })
 
     # skip the db connection by replacing the __init__ method
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
@@ -408,109 +394,12 @@ def test_serialize(data_array):
 
         if data_array is not None:
             # assert that the data array is an ndarray before serialization
-            assert isinstance(df['dataValue'].iloc[0], np.ndarray)
+            assert isinstance(data_array, np.ndarray)
 
         # call the serializer 
-        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+        serialized_array = storage._SQLAlchemyORM_Postgres__serialize_data(data_array)
 
-        # assert that the dataValue column is of type bytes
-        assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
-
-def test_serialize_multiple_rows():
-    """
-    This test checks that the __serialize_data method correctly converts dataframes with multiple rows 
-    to bytes in the dataValue column for each row.
-
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize_multiple_rows -s
-    """
-
-    # the dataframe column with each row containing a different shaped array
-    data_column = [
-        # row 1
-        # shape (3, 3, 3)
-        np.array([
-            [
-                [1.0, 2.0, 3.0],
-                [4.0, 5.0, 6.0],
-                [7.0, 8.0, 9.0]
-            ],
-            [
-                [10.0, 11.0, 12.0],
-                [13.0, 14.0, 15.0],
-                [16.0, 17.0, 18.0]
-            ],
-            [
-                [19.0, 20.0, 21.0],
-                [22.0, 23.0, 24.0],
-                [25.0, 26.0, 27.0]
-            ]
-        ]),
-
-        # row 2
-        # shape (1, 1, 1)
-        np.array([
-            [
-                [42.0]
-            ],
-        ]),
-
-        # row 3
-        # shape (3, 5, 2)
-        np.array([
-            [
-                [1.0, 2.0],
-                [3.0, 4.0],
-                [5.0, 6.0],
-                [7.0, 8.0],
-                [9.0, 10.0]
-            ],
-            [
-                [11.0, 12.0],
-                [13.0, 14.0],
-                [15.0, 16.0],
-                [17.0, 18.0],
-                [19.0, 20.0]
-            ],
-            [
-                [21.0, 22.0],
-                [23.0, 24.0],
-                [25.0, 26.0],
-                [27.0, 28.0],
-                [29.0, 30.0]
-            ]
-        ])
-    ]
-
-    df = pd.DataFrame({
-        'ID': [1, 2, 3],
-        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)] * 3,
-        'leadTime': [timedelta(days=5)] * 3,
-        'modelName': ['TestModel'] * 3,
-        'modelVersion': ['1.0'] * 3,
-        'dataValue': data_column,
-        'dataUnit': ['celsius'] * 3,
-        'dataLocation': ['TestLocation'] * 3,
-        'dataSeries': ['TestSeries'] * 3,
-        'dataDatum': ['TestDatum'] * 3,
-    })
-
-    # skip the db connection by replacing the __init__ method
-    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
-        storage = SQLAlchemyORM_Postgres()
-
-        # assert that the data array is an ndarray before serialization for each row
-        for idx, row in df.iterrows():
-            assert isinstance(row['dataValue'], np.ndarray)
-        
-        # call the serializer 
-        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
-
-        # assert that the number of rows is preserved
-        assert len(serialized_df) == 3
-
-        # assert that the dataValue column is of type bytes for each row
-        for idx, row in serialized_df.iterrows():
-            assert isinstance(row['dataValue'], bytes)
+        assert isinstance(serialized_array, bytes)
 
 
 @pytest.mark.parametrize(
@@ -543,82 +432,20 @@ def test_serialize_multiple_rows():
         ]),
 
         # Test case 2: None value
-        # to test how the deserializer handles None values in the dataValue column
-        None
-    ],
-    ids=["3x3x3", "None"]
-)
-def test_deserialize(data_array):
-    """
-    This test checks that the __deserialize_data method correctly converts bytes in a 
-    single dataframe row back to the original array in the dataValue column.
+        # to test how the deserializer handles None values
+        None,
 
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_deserialize -s
-    """
-
-    df = pd.DataFrame({
-        'ID': [1],
-        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)],
-        'leadTime': [timedelta(days=5)],
-        'modelName': ['TestModel'],
-        'modelVersion': ['1.0'],
-        'dataValue': [data_array],
-        'dataUnit': ['celsius'],
-        'dataLocation': ['TestLocation'],
-        'dataSeries': ['TestSeries'],
-        'dataDatum': ['TestDatum'],
-    })
-
-    # skip the db connection by replacing the __init__ method
-    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
-        storage = SQLAlchemyORM_Postgres()
-
-        if data_array is None:
-            # should convert None to nan and serialize the nan
-            serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
-            assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
-
-            # should convert nan back to None after deserializing
-            deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_df)
-            assert deserialized_df['dataValue'].iloc[0] is None
-            return
-
-        # assert that the data array is an ndarray before serialization
-        assert isinstance(df['dataValue'].iloc[0], np.ndarray)
-
-        # first serialize the data
-        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
-
-        # ensure the data was serialized to bytes
-        assert isinstance(serialized_df['dataValue'].iloc[0], bytes)
-
-        # deserialize the data
-        deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_df)
-
-        # assert that the deserialized dataframe's dataValue column
-        # matches the original dataframe's dataValue column for each row, including values and shape
-        np.testing.assert_array_equal(deserialized_df['dataValue'].iloc[0], df['dataValue'].iloc[0])
-
-def test_deserialize_multiple_rows():
-    """
-    This test checks that the __deserialize_data method correctly converts bytes in a 
-    dataframe with multiple rows back to the original arrays in the dataValue column for each row.
-
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_deserialize_multiple_rows -s
-    """
-
-    # the data array for each row
-    data_column = [
-        # row 1
-        # shape (1, 1, 1)
+        # Test case 3: shape (1, 1, 1)
+        # to test deserializing a single point
         np.array([
             [
                 [42.0]
             ]
         ]),
 
-        # row 2
-        # shape (3, 5, 4)
+
+        # Test case 4: shape (3, 5, 4)
+        # to test deserializing when dimensions are not all equal
         np.array([
             [
                 [1.0, 2.0, 3.0, 4.0],
@@ -643,8 +470,8 @@ def test_deserialize_multiple_rows():
             ]
         ]),
 
-        # row 3 
-        # shape (2, 3, 1)
+        # Test case 5: shape (2, 3, 1)
+        # another test for odd shapes
         np.array([
             [
                 [100.0],
@@ -657,40 +484,42 @@ def test_deserialize_multiple_rows():
                 [600.0]
             ]
         ])
-    ]
+    ],
+    ids=["3x3x3", "None", "1x1x1", "3x5x4", "2x3x1"]
+)
+def test_deserialize(data_array):
+    """
+    This test checks that the __deserialize_data method correctly converts bytes in a 
+    single data_array back to the original array
 
-    df = pd.DataFrame({
-        'ID': [1, 2, 3],
-        'timeGenerated': [datetime(2026, 1, 1, 0, 0, tzinfo=None)] * 3,
-        'leadTime': [timedelta(days=5)] * 3,
-        'modelName': ['TestModel'] * 3,
-        'modelVersion': ['1.0'] * 3,
-        'dataValue': data_column,
-        'dataUnit': ['celsius'] * 3,
-        'dataLocation': ['TestLocation'] * 3,
-        'dataSeries': ['TestSeries'] * 3,
-        'dataDatum': ['TestDatum'] * 3,
-    })
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_deserialize -s
+    """
 
     # skip the db connection by replacing the __init__ method
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
 
-        # assert that the data array is an ndarray before serialization for each row
-        for idx, row in df.iterrows():
-            assert isinstance(row['dataValue'], np.ndarray)
+        if data_array is None:
+            # should convert None to nan and serialize the nan
+            serialized_array = storage._SQLAlchemyORM_Postgres__serialize_data(data_array)
+            assert isinstance(serialized_array, bytes)
+
+            # should convert nan back to None after deserializing
+            deserialized_array = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_array)
+            assert deserialized_array is None
+            return
+
+        # assert that the data array is an ndarray before serialization
+        assert isinstance(data_array, np.ndarray)
 
         # first serialize the data
-        serialized_df = storage._SQLAlchemyORM_Postgres__serialize_data(df)
+        serialized_array = storage._SQLAlchemyORM_Postgres__serialize_data(data_array)
 
-        # assert that the dataValue column is of type bytes for each row
-        for idx, row in serialized_df.iterrows():
-            assert isinstance(row['dataValue'], bytes)
+        # ensure the data was serialized to bytes
+        assert isinstance(serialized_array, bytes)
 
-        # then deserialize the data
-        deserialized_df = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_df)
+        # deserialize the data
+        deserialized_array = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_array)
 
-        # assert that the deserialized dataframe's dataValue column
-        # matches the original dataframe's dataValue column for each row, including values and shape
-        for idx, row in deserialized_df.iterrows():
-            np.testing.assert_array_equal(row['dataValue'], df['dataValue'].iloc[idx])
+        # assert that the deserialized array matches the original array
+        np.testing.assert_array_equal(deserialized_array, data_array)
