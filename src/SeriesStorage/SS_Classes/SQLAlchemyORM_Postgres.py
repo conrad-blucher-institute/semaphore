@@ -757,17 +757,17 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         return df_out
 
-    def __serialize_data(self, array: np.ndarray) -> bytes:
+    def __serialize_data(self, array: np.ndarray | None) -> bytes:
         """
         This method serializes an ndarray into bytes.
         
-        :param array: np.ndarray - The array to serialize
+        :param array: np.ndarray | None - The array to serialize or None on run fails
             The array is expected to have three dimensions of (members, inputs, outputs) and have 
             one of the following shapes depending on the type of model:
                 (1, 1, 1) for single point models
                 (1, 100, 1) for MRE models
                 (10, 100, 100) for CRPS models
-
+        
         :returns bytes - The serialized array
 
         NOTE:: If an array is None it is converted to nan then serialized.
@@ -783,13 +783,14 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         return serialized_array
 
-    def __deserialize_data(self, serialized_data: bytes) -> np.ndarray:
+    def __deserialize_data(self, serialized_data: bytes) -> np.ndarray | None:
         """
         This method deserializes bytes into an ndarray.
 
         :param serialized_data: bytes - The bytes to deserialize
 
-        :returns ndarray - An array with the original data values
+        :returns ndarray | None - An array with the original data values or None
+        if the original array was None
 
         NOTE:: If an array is nan it can be deserialized back into a nan.
         This deserialized nan will still have the NDarray data type, so
