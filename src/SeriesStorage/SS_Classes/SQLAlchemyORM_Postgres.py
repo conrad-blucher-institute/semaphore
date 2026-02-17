@@ -8,9 +8,9 @@
 """
 This file is an implementation of the SQLAlchemy ORM geared towards Semaphore and its schema.
 
-NOTE:: As of version 10.0 in early 2026, this storage class uses binary serialization for the
-dataValue column in a dataframe to store outputs.
-All outputs should be serialized into bytes before insertion and deserialized back
+NOTE:: As of version 10.0 in early 2026, this storage class uses binary serialization for 
+ndarrays in the dataValue column of dataframes.
+All outputs should have their dataValue's ndarrray serialized into bytes before insertion and deserialized back
 into their original form after selection.
 """ 
 #-------------------------------

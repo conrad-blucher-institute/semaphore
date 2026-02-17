@@ -405,7 +405,7 @@ def test_serialize(data_array):
 @pytest.mark.parametrize(
     "data_array",
     [
-        # Test case 1: shape (3, 3, 3)
+        # Test case 1: shape (3, 5, 2)
         # basic test with a shaped array
         np.array([
             [
@@ -485,7 +485,7 @@ def test_serialize(data_array):
             ]
         ])
     ],
-    ids=["3x3x3", "None", "1x1x1", "3x5x4", "2x3x1"]
+    ids=["3x5x3", "None", "1x1x1", "3x5x4", "2x3x1"]
 )
 def test_deserialize(data_array):
     """
