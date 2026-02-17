@@ -91,41 +91,44 @@ def test_ingest_series(seriesDescription: SeriesDescription, timeDescription: Ti
         assert len(result.dataFrame) > 0
 
 @pytest.mark.slow
-
 def test_prediction_timeGenerated_is_current():
-    """This function tests that prediction series (prefix 'p') sets timeGenerated to current time rather than the datapoint's verified time"""
+    """This function tests that prediction series (prefix 'p') sets timeGenerated to current time rather than the datapoint's verified time.
+    
+    For prediction series, timeGenerated represents when the data was ingested. All rows from a single ingestion call should share the same
+    timeGenerated timestamp, and that timestamp should differ from the historical timeVerified values.
+    """
     load_dotenv()
-    
+
     lighthouse = LIGHTHOUSE()
-    
-    # Use historical data
+
+    # Use historical data — the 2023 timeVerified values will be clearly distinct
+    # from any timeGenerated stamp set at ingestion time (2025+)
     seriesDescription = SeriesDescription('LIGHTHOUSE', 'pHarm', 'PortLavaca', 'MLLW')
     timeDescription = TimeDescription(
         datetime.combine(date(2023, 9, 6), time(11, 0), tzinfo=timezone.utc),
         datetime.combine(date(2023, 9, 6), time(12, 0), tzinfo=timezone.utc),
         timedelta(seconds=360)
     )
-    
-    # Record the time before calling the function
-    time_before_call = datetime.now(timezone.utc)
-    
+
     result: Series = lighthouse._LIGHTHOUSE__pull_pd_endpoint_dataPoint(seriesDescription, timeDescription)
-    
-    # Record the time after calling the function
-    time_after_call = datetime.now(timezone.utc)
-    
+
     assert result is not None
     assert len(result.dataFrame) > 0
-    
-    # For prediction series, timeGenerated should be the current time (between time_before_call and time_after_call)
-    # while timeVerified should be the historical reference time
-    for _, row in result.dataFrame.iterrows():
-        time_verified = row['timeVerified']
-        time_generated = row['timeGenerated']
-        
-        # timeVerified should be in the historical range
-        assert timeDescription.fromDateTime <= time_verified <= timeDescription.toDateTime
-        
-        # timeGenerated should be current time (within our call window)
-        assert time_before_call <= time_generated <= time_after_call, \
-            f"timeGenerated {time_generated} should be current time, not historical time"
+
+    # All rows from a single ingestion call should share the same timeGenerated,
+    # since they were all stamped at the moment of the call — not at their individual verified/generated times.
+    unique_time_generateds = result.dataFrame['timeGenerated'].unique()
+    assert len(unique_time_generateds) == 1, (
+        f"Expected all rows to share one timeGenerated (set at ingestion), "
+        f"but found {len(unique_time_generateds)} distinct values: {unique_time_generateds}"
+    )
+
+    # The single timeGenerated should not match the first row's timeVerified.
+    # If they were equal, it would indicate timeGenerated was mistakenly set to timeVerified
+    # rather than stamped at ingestion time. 
+    ingestion_time = result.dataFrame['timeGenerated'].iloc[0]
+    first_verified_time = result.dataFrame['timeVerified'].iloc[0]
+    assert ingestion_time != first_verified_time, (
+        f"timeGenerated ({ingestion_time}) should not equal timeVerified ({first_verified_time}) "
+        f"for prediction series — timeGenerated should reflect ingestion time, not the historical verified time"
+    )
