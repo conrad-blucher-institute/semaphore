@@ -8,7 +8,7 @@
 """
 This file is an implementation of the SQLAlchemy ORM geared towards Semaphore and its schema.
 
-NOTE:: As of version 10.0 in early 2026, this storage class uses binary serialization for 
+NOTE:: As of version 10.0, this storage class uses binary serialization for 
 ndarrays in the dataValue column of dataframes.
 All outputs should have their dataValue's ndarrray serialized into bytes before insertion and deserialized back
 into their original form after selection.
@@ -821,6 +821,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         buffer = BytesIO()
         np.save(buffer, array_to_serialize, allow_pickle=False)
         serialized_array = buffer.getvalue()
+        buffer.close()
 
         return serialized_array
 
@@ -841,6 +842,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
         buffer = BytesIO(serialized_data)
         array = np.load(buffer, allow_pickle=False)
+        buffer.close()
 
         # if nan is found, we convert to None after deserializing
         array = None if np.all(np.isnan(array)) else array

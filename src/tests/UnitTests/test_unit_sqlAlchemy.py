@@ -483,9 +483,22 @@ def test_serialize(data_array):
                 [500.0],
                 [600.0]
             ]
+        ]),
+
+        # Test case 6: shape (0,0,0)
+        # to test how the deserializer handles empty arrays
+        np.array([[[]]]),
+
+        # Test case: 7: shape (1, 2, 3)
+        # to test when nans are present.
+        np.array([
+            [
+                [1.0, np.nan, 3.0],
+                [4.0, 5.0, np.nan]
+            ]
         ])
     ],
-    ids=["3x5x3", "None", "1x1x1", "3x5x4", "2x3x1"]
+    ids=["3x5x2", "None", "1x1x1", "3x5x4", "2x3x1", "0x0x0", "nans"]
 )
 def test_deserialize(data_array):
     """
