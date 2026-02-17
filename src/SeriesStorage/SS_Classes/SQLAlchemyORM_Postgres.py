@@ -123,137 +123,182 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
-        """Selects an output series given a SemaphoreSeriesDescription and TimeDescription
+        """Selects an output series given a SemaphoreSeriesDescription and TimeDescription.
+            This method first queries for the lead time for a model run that matches the model and data description.
+            Then it uses that lead time to adjust the from and to generated times in the time description to
+            make a second query for outputs that match a more specific description.
+            This query can return many rows at once if there are many generated times that fall within the time window after lead time adjustment.
+
            :param semaphoreSeriesDescription: SemaphoreSeriesDescription - A  semaphore series description object
            :param timeDescription: TimeDescription - A hydrated time description object
         """
 
         series = Series(semaphoreSeriesDescription, timeDescription)
         
+        stmt = text("""
+            SELECT "leadTime" FROM outputs
+            WHERE "dataLocation" = :dataLocation
+            AND "dataSeries" = :dataSeries
+            AND "dataDatum" = :dataDatum
+            AND "modelName" = :modelName
+            LIMIT 1
+        """)
 
-        outputTable = self.__metadata.tables['outputs']
-        #Get the lead time for time calculations
-        statement = (select(distinct(outputTable.c.leadTime))
-                    .where(outputTable.c.dataLocation == semaphoreSeriesDescription.dataLocation)
-                    .where(outputTable.c.dataSeries == semaphoreSeriesDescription.dataSeries)
-                    .where(outputTable.c.dataDatum == semaphoreSeriesDescription.dataDatum)
-                    .where(outputTable.c.modelName == semaphoreSeriesDescription.modelName)
-                    )
-        leadTimes = self.__dbSelection(statement).fetchall()
-        if len(self.__dbSelection(statement).fetchall()) == 0: #If no lead time is found for some reason return nothing and log this
-            log(f'SQLAlchemyORM | select_output | No leadtime found for SemaphoreSeriesDescription:{semaphoreSeriesDescription}')
+        bind_params = {
+            'dataLocation': semaphoreSeriesDescription.dataLocation,
+            'dataSeries': semaphoreSeriesDescription.dataSeries,
+            'dataDatum': semaphoreSeriesDescription.dataDatum,
+            'modelName': semaphoreSeriesDescription.modelName
+        }
+
+        stmt = stmt.bindparams(**bind_params)
+        leadTimes = self.__dbSelection(stmt).fetchall()
+
+        # if no lead time is found for some reason return nothing and log this
+        if len(leadTimes) == 0:
+            log(f'SQLAlchemyORM | select_specific_output | No leadtime found for SemaphoreSeriesDescription:{semaphoreSeriesDescription}')
             return series
-            
+        
         leadTime = leadTimes[0]
         fromGeneratedTime = timeDescription.fromDateTime - leadTime[0]
         toGeneratedTime = timeDescription.toDateTime - leadTime[0]
-         
-        statement = (select(outputTable)
-                    .where(outputTable.c.modelName == semaphoreSeriesDescription.modelName)
-                    .where(outputTable.c.dataLocation == semaphoreSeriesDescription.dataLocation)
-                    .where(outputTable.c.dataSeries == semaphoreSeriesDescription.dataSeries)
-                    .where(outputTable.c.dataDatum == semaphoreSeriesDescription.dataDatum)
-                    .where(outputTable.c.timeGenerated >= fromGeneratedTime)
-                    .where(outputTable.c.timeGenerated <= toGeneratedTime)
-                    )
-        tupleishResult = self.__dbSelection(statement).fetchall()
+
+        stmt = text("""
+            SELECT * FROM outputs
+            WHERE "modelName" = :modelName
+            AND "dataLocation" = :dataLocation
+            AND "dataSeries" = :dataSeries
+            AND "dataDatum" = :dataDatum
+            AND "timeGenerated" >= :fromGeneratedTime
+            AND "timeGenerated" <= :toGeneratedTime
+        """)
+
+        bind_params = {
+            'modelName': semaphoreSeriesDescription.modelName,
+            'dataLocation': semaphoreSeriesDescription.dataLocation,
+            'dataSeries': semaphoreSeriesDescription.dataSeries,
+            'dataDatum': semaphoreSeriesDescription.dataDatum,
+            'fromGeneratedTime': fromGeneratedTime,
+            'toGeneratedTime': toGeneratedTime
+        }
+
+        stmt = stmt.bindparams(**bind_params)
+        tupleishResult = self.__dbSelection(stmt).fetchall()
         series.dataFrame = self.__splice_output(tupleishResult)
         return series
     
 
     def select_output(self, model_name: str, from_time: datetime, to_time: datetime) -> Series | None: 
-        ''' This selects outputs based just on a model name and a time range, all other information is inferred
+        ''' This selects outputs based just on a model name and a time range, all other information is inferred.
+            The modelname will be used to select the lead time for the most recent model run with that model name,
+            then a second query is made to select all rows for that model name that have a generated time that falls within
+            the calculated time range. Many rows will be returned if there are many rows for that time range.
+
             :param model_name: str - The name of the model to query
             :param to_time: datetime - The latest time to include
             :param from_time: datetime - The earliest time to include
-        '''        
-
+        '''
 
         # Get the lead time for time calculations
         # Because we are inferring model information
         # We select the latest version of the model under that name
         # and the lead time from its latest prediction
-        outputTable = self.__metadata.tables['outputs']
-        statement = (select(outputTable.c.leadTime)
-                    .where(outputTable.c.modelName == model_name)
-                    .order_by(outputTable.c.modelVersion.desc())
-                    .order_by(outputTable.c.timeGenerated.desc())
-                    )
-        leadTimes = self.__dbSelection(statement).fetchall()
-        if len(self.__dbSelection(statement).fetchall()) == 0: #If no lead time is found for some reason return nothing and log this
-            log(f'SQLAlchemyORM | select_latest_output | No leadtime found for model_name:{model_name}')
+        stmt = text("""
+            SELECT "leadTime" FROM outputs
+            WHERE "modelName" = :model_name
+            ORDER BY "modelVersion" DESC, "timeGenerated" DESC
+            LIMIT 1
+        """)
+
+        bind_params = {
+            'model_name': model_name
+        }
+
+        stmt = stmt.bindparams(**bind_params)
+        leadTimes = self.__dbSelection(stmt).fetchall()
+        
+        # if no lead time is found for some reason return nothing and log this
+        if len(leadTimes) == 0: 
+            log(f'SQLAlchemyORM | select_output | No leadtime found for model_name:{model_name}')
             return None
-            
+        
         leadTime = leadTimes[0]
         fromGeneratedTime = from_time - leadTime[0]
         toGeneratedTime = to_time - leadTime[0]
-         
-        statement = (select(outputTable)
-                    .where(outputTable.c.modelName == model_name)
-                    .where(outputTable.c.timeGenerated >= fromGeneratedTime)
-                    .where(outputTable.c.timeGenerated <= toGeneratedTime)
-                    )
-        tupleishResult = self.__dbSelection(statement).fetchall()
+        
+        stmt = text("""
+            SELECT * FROM outputs
+            WHERE "modelName" = :model_name
+            AND "timeGenerated" >= :fromGeneratedTime
+            AND "timeGenerated" <= :toGeneratedTime
+        """)
 
-        if not tupleishResult: # If there are no results, no model information can be inferred 
+        bind_params = {
+            'model_name': model_name,
+            'fromGeneratedTime': fromGeneratedTime,
+            'toGeneratedTime': toGeneratedTime
+        }
+
+        stmt = stmt.bindparams(**bind_params)
+        tupleishResult = self.__dbSelection(stmt).fetchall()
+
+        if not tupleishResult:
             return None    
 
         outputResult = self.__splice_output(tupleishResult)
 
         # Parse out model information from first output result
-        description = SemaphoreSeriesDescription(tupleishResult[0][3], tupleishResult[0][4], tupleishResult[0][8], tupleishResult[0][7], tupleishResult[0][6])
+        # this is constant metadata across all the rows returned
+        row = tupleishResult[0]
+        description = SemaphoreSeriesDescription(
+            row[3],   # modelName
+            row[4],   # modelVersion
+            row[8],   # dataSeries
+            row[7],   # dataLocation
+            row[6]    # dataDatum
+        )
         series = Series(description)
         series.dataFrame = outputResult
         return series
     
 
     def select_latest_output(self, model_name: str) -> Series | None: 
-        ''' This selects *all* outputs based just on a model name and a time range, all other information is inferred
+        ''' This selects outputs based just on a model name, all other information is inferred.
+            Exactly 1 row is returned that is the latest generated time for that model name.
+
             :param model_name: str - The name of the model to query
 
             NOTE:: Things like model version and time will just be the latest in the DB
         '''   
 
-        stmt_find_latest_output = text(f"""
+        stmt_find_latest_output = text("""
             SELECT *
             FROM outputs AS o
             WHERE o."modelName" = :model_name
             ORDER BY o."modelVersion" DESC, o."timeGenerated" DESC
-            LIMIT 1;
-        """)     
+            LIMIT 1
+        """)
+
         bind_params = {
             'model_name': model_name
         }
         stmt_find_latest_output = stmt_find_latest_output.bindparams(**bind_params)
-        tupleishResult = self.__dbSelection(stmt_find_latest_output).first() # because of order this should be latest
+        tupleishResult = self.__dbSelection(stmt_find_latest_output).fetchall()
 
-        if not tupleishResult: # If there are no results, no model information can't be inferred 
-            return None    
-
-        latest_time = tupleishResult[1]
-
-        # STEP 2: Get ALL outputs with the same timeGenerated
-        stmt_collect_all_latest_outputs = text(f"""
-            SELECT *
-            FROM outputs AS o
-            WHERE o."modelName" = :model_name
-            AND o."timeGenerated" = :latest_time;
-        """)     
-        bind_params = {
-            'model_name': model_name,
-            'latest_time': latest_time
-        }
-        stmt_collect_all_latest_outputs = stmt_collect_all_latest_outputs.bindparams(**bind_params)
-        result = self.__dbSelection(stmt_collect_all_latest_outputs).fetchall()
-
-        if not result:
+        if not tupleishResult:
             return None
         
-        outputResult = self.__splice_output(result)  # Use all fetched outputs, not just the first one 
+        outputResult = self.__splice_output(tupleishResult)
 
-        # Parse out model information from first output result
-        first = result[0]
-        description = SemaphoreSeriesDescription(first[3], first[4], first[8], first[7], first[6]) # Hydrate metadata from first row info
+        # Parse out model information from the output result
+        row = tupleishResult[0]
+        description = SemaphoreSeriesDescription(
+            row[3],  # modelName
+            row[4],  # modelVersion
+            row[8],  # dataSeries
+            row[7],  # dataLocation
+            row[6]   # dataDatum
+        )
         series = Series(description)
         series.dataFrame = outputResult
         return series
