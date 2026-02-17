@@ -739,20 +739,16 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # A formatted dataframe to place the spliced data 
         df_out = get_output_dataFrame()
 
-        for _, group in df_results.groupby(["timeGenerated", "leadTime"]):
-
-            # we group data with identical temporal information  
-            firstRow = group.iloc[0]
-
+        for idx, row in df_results.iterrows():
             # deserialize the data back into an ndarray
-            deserialized_data = self.__deserialize_data(firstRow["dataValue"])
+            deserialized_data = self.__deserialize_data(row["dataValue"])
             
             # Pack the data into the out dataframe
             df_out.loc[len(df_out)] = [
-                deserialized_data,          # dataValue    
-                firstRow["dataUnit"],       # dataUnit
-                firstRow["timeGenerated"],  # timeGenerated
-                firstRow["leadTime"]        # leadTime
+                deserialized_data,     # dataValue    
+                row["dataUnit"],       # dataUnit
+                row["timeGenerated"],  # timeGenerated
+                row["leadTime"]        # leadTime
             ]
 
         return df_out
