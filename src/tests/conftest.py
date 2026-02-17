@@ -4,9 +4,7 @@
 # pytest configuration file
 # This file is automatically loaded by pytest
 #----------------------------------
-from html import parser
 import sys
-import os
 import pytest
 
 # Add src directory to Python path
