@@ -81,13 +81,13 @@ class SeriesProvider():
         return self.__data_base_query(seriesDescription, timeDescription)
     
 
-    def request_output(self, method: str, **kwargs) -> Series | None:
+    def request_output(self, method: str, **kwargs) -> Series | list[Series] | None:
         ''' Selects the correct method from the ORM, calling it, and passing it the correct args
             :param method: str - This is a string value to select which style of request you are trying to make
             :param **kwargs - This is python kwargs formatted depending on method, see below
             :return series | None
 
-            NOTE:: Latest assumes model version and time by just selecting the very last made prediction
+            NOTE:: Latest is the very last made prediction regardless of version.
             method= 'LATEST'
             request_output('LATEST', model_names=REQUESTED_MODEL_NAMES)
 
