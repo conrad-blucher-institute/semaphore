@@ -201,7 +201,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
     def select_latest_output(self, model_names: list[str]) -> list[Series] | None: 
         ''' This selects the latest output for each model in the list of model names, all other information is inferred.
-            NOTE:: Things like model version and time will just be the latest in the DB
+            NOTE:: This will return the latest prediction, per model, that was generated regardless of version.
         '''   
 
         stmt_collect_all_latest_outputs = text(f"""
@@ -213,7 +213,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             WHERE o."modelName" IN :model_names
             GROUP BY o."modelName"
         )
-        SELECT o.*
+        SELECT o."id", o."generatedTime", o.leadTime, o."modelName", o."modelVersion", o."dataValue", o."dataUnit", o."dataLocation", o."dataSeries", o."dataDatum", o.ensembleMemberID
         FROM outputs AS o
         INNER JOIN latest_time_per_model AS ltpm
             ON o."modelName" = ltpm."modelName"
