@@ -17,6 +17,15 @@ from sqlalchemy import Engine, text
 class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
+        """This function updates the database by retiring the current outputs table and replacing it with a new one that does not include ensemble member id and uses BYTEA for dataValue.
+
+           :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
+           :return: bool indicating successful update
+
+           Updates DB:
+           - Renames the current outputs table and it's constraints to "retired_outputs".
+           - Creates a new outputs table with no ensemble member id and uses BYTEA for datavalue
+        """
         with databaseEngine.connect() as connection:
 
             # 0) If we already have retired_outputs, we already updated. Bypass.
