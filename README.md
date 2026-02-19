@@ -65,6 +65,72 @@ FROM pg_stat_statements
 ORDER BY total_exec_time DESC
 LIMIT 10;
 
+## Semaphore Tools
+Semaphore has a tools folder with some useful tools for monitoring how the semaphore system is performing across dev and prod. 
+
+### parse_semaphore_logs.sh
+`parse_semaphore_logs.sh` is a bash utility that scans Semaphore model log files 
+for a given date range and produces a CSV summarizing each model run — whether it 
+succeeded, failed, and why.
+
+#### Usage
+```bash
+./tools/parse_semaphore_logs.sh  
+```
+
+Dates must be in `MM/DD/YY` format. For example:
+```bash
+./tools/parse_semaphore_logs.sh 02/07/26 02/18/26
+```
+
+The script can be run from anywhere in the repo. It resolves all paths relative 
+to its own location, so you don't need to `cd` anywhere first.
+
+#### How It Works
+1. **Selects log files by date range** — rather than scanning all logs, it builds 
+   `YYYY_M_` filename patterns from your date range (e.g. `2026_2_*.log`) and only 
+   opens files that could contain relevant entries. This keeps it fast even with 
+   hundreds of model log directories.
+
+2. **Parses each file line by line** — it looks for three kinds of log events:
+   - Lines containing `completed successfully` → recorded as a `success`
+   - Lines containing `DateRangeValidation:` → signals the start of a failure block, 
+     and the script begins accumulating context lines
+   - Lines containing `FAILED - Null result inserted` → closes the failure block and 
+     writes a `failed` row, extracting the reason and details from the accumulated context
+
+3. **Writes results to a timestamped CSV** saved in `parsed_semaphore_logs/` at the 
+   repo root. The folder is created automatically if it doesn't exist.
+
+4. **Prints a summary** to stdout when finished — total entries, success/failure 
+   counts, success rate, top failure reasons, and which models failed most often.
+
+#### Output
+Results are saved to:
+```
+semaphore/parsed_semaphore_logs/semaphore_dev_stats_YYYYMMDD_HHMMSS.csv
+```
+
+The CSV has the following columns:
+
+| Column | Description |
+|---|---|
+| `timestamp` | When the model run occurred (`MM/DD/YY HH:MM:SS`) |
+| `model_name` | Name of the model that ran |
+| `status` | `success` or `failed` |
+| `failure_reason` | `missing_data`, `stale_data`, or `unknown` (empty on success) |
+| `data_source` | The data source identified in the validation error, if present |
+| `missing_data_details` | Structured detail string — may include `missing_count`, `times`, and/or `time_diff` fields separated by `\|` |
+| `log_file` | The log filename the entry came from |
+| `line_number` | Line number in that file where the event was detected |
+`
+To get the output CSV from the dev server to your home machine run the following commands: 
+1. On sherlock-dev in the semaphore.svc `sudo cp /home/semaphore.svc/semaphore/tools/parsed_semaphore_logs/semaphore_dev_stats_[TIMESTAMP OF FILE].csv /home/[YOUR USERNAME].admin/`
+2. On local machine `scp [YOUR USERNAME].admin@sherlock-dev:/home/[YOUR USERNAME].admin/semaphore_dev_stats_[TIMESTAMP OF FILE].csv [WHERE YOU WANT FILE TO GO] (EX: C:\Users\steph\Downloads\)`
+
+To get the output CSV from the prod server to your home machine run the following commands: 
+1. on sherlock-prod in the semaphore.svc `sudo cp /home/semaphore.svc/semaphore/tools/parsed_semaphore_logs/semaphore_dev_stats_[TIMESTAMP OF FILE].csv /home/[YOUR USERNAME]].admin/`
+2. On local machine `scp [YOUR USERNAME].admin@sherlock-prod.tamucc.edu:/home/[YOUR USERNAME].admin/semaphore_dev_stats_[TIMESTAMP OF FILE].csv [WHERE YOU WANT FILE TO GO]`
 
 ## Authors
 * [@Matthew Kastl](https://github.com/matdenkas) - mkastl@islander.tamucc.edu
