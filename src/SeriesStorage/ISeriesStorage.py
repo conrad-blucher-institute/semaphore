@@ -49,7 +49,7 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
     
     @abstractmethod
-    def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict | None]:
+    def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, tuple | None]:
         raise NotImplementedError()
 
     @abstractmethod

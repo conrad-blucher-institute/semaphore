@@ -3,7 +3,7 @@
 # -------------------------------
 # Created By : Anointiyae Beasley
 # Created Date: 2025-09-11
-# version 1.0
+# version 2.0
 # -------------------------------
 """Tests for the SQLAlchemy storage layer.
 
@@ -392,9 +392,14 @@ def test_serialize(data_array):
     with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
         storage = SQLAlchemyORM_Postgres()
 
-        if data_array is not None:
-            # assert that the data array is an ndarray before serialization
-            assert isinstance(data_array, np.ndarray)
+        if data_array is None:
+            # the serializer should just return the None without serializing
+            serialized_array = storage._SQLAlchemyORM_Postgres__serialize_data(data_array)
+            assert serialized_array is None
+            return
+
+        # assert that the data array is an ndarray before serialization
+        assert isinstance(data_array, np.ndarray)
 
         # call the serializer 
         serialized_array = storage._SQLAlchemyORM_Postgres__serialize_data(data_array)
@@ -513,11 +518,11 @@ def test_deserialize(data_array):
         storage = SQLAlchemyORM_Postgres()
 
         if data_array is None:
-            # should convert None to nan and serialize the nan
+            # should return the None without serializing or deserializing
             serialized_array = storage._SQLAlchemyORM_Postgres__serialize_data(data_array)
-            assert isinstance(serialized_array, bytes)
+            assert serialized_array is None
 
-            # should convert nan back to None after deserializing
+            # should return None when deserializing None
             deserialized_array = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_array)
             assert deserialized_array is None
             return

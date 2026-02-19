@@ -10,8 +10,8 @@ This file is an implementation of the SQLAlchemy ORM geared towards Semaphore an
 
 NOTE:: As of version 10.0, this storage class uses binary serialization for 
 ndarrays in the dataValue column of dataframes.
-All outputs should have their dataValue's ndarrray serialized into bytes before insertion and deserialized back
-into their original form after selection.
+Every model run will have their ndarray serialized to bytes before insertion into the database 
+and deserialized back to ndarrays after selection from the database.
 """ 
 #-------------------------------
 # 
@@ -123,14 +123,17 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
-        """Selects an output series given a SemaphoreSeriesDescription and TimeDescription.
-            This method first queries for the lead time for a model run that matches the model and data description.
-            Then it uses that lead time to adjust the from and to generated times in the time description to
-            make a second query for outputs that match a more specific description.
-            This query can return many rows at once if there are many generated times that fall within the time window after lead time adjustment.
+        """
+        Selects an output series given a SemaphoreSeriesDescription and TimeDescription.
+        This method first queries for the lead time for a model run that matches the model and data description
+        then it uses that lead time to adjust the from and to generated times in the time description to
+        make a second query for outputs that match a more specific description. This works because
+        each model corresponds to a specific lead time, so all rows for a given model name will have the same lead time.
 
-           :param semaphoreSeriesDescription: SemaphoreSeriesDescription - A  semaphore series description object
-           :param timeDescription: TimeDescription - A hydrated time description object
+        This query can return many rows at once if there are many generated times that fall within the time window after lead time adjustment.
+
+        :param semaphoreSeriesDescription: SemaphoreSeriesDescription - A  semaphore series description object
+        :param timeDescription: TimeDescription - A hydrated time description object
         """
 
         series = Series(semaphoreSeriesDescription, timeDescription)
@@ -141,6 +144,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             AND "dataSeries" = :dataSeries
             AND "dataDatum" = :dataDatum
             AND "modelName" = :modelName
+            AND "modelVersion" = :modelVersion
             LIMIT 1
         """)
 
@@ -148,24 +152,25 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             'dataLocation': semaphoreSeriesDescription.dataLocation,
             'dataSeries': semaphoreSeriesDescription.dataSeries,
             'dataDatum': semaphoreSeriesDescription.dataDatum,
-            'modelName': semaphoreSeriesDescription.modelName
+            'modelName': semaphoreSeriesDescription.modelName,
+            'modelVersion': semaphoreSeriesDescription.modelVersion
         }
 
         stmt = stmt.bindparams(**bind_params)
-        leadTimes = self.__dbSelection(stmt).fetchall()
+        leadTime = self.__dbSelection(stmt).fetchone()
 
         # if no lead time is found for some reason return nothing and log this
-        if len(leadTimes) == 0:
+        if leadTime is None:
             log(f'SQLAlchemyORM | select_specific_output | No leadtime found for SemaphoreSeriesDescription:{semaphoreSeriesDescription}')
             return series
         
-        leadTime = leadTimes[0]
         fromGeneratedTime = timeDescription.fromDateTime - leadTime[0]
         toGeneratedTime = timeDescription.toDateTime - leadTime[0]
 
         stmt = text("""
             SELECT * FROM outputs
             WHERE "modelName" = :modelName
+            AND "modelVersion" = :modelVersion
             AND "dataLocation" = :dataLocation
             AND "dataSeries" = :dataSeries
             AND "dataDatum" = :dataDatum
@@ -175,6 +180,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         bind_params = {
             'modelName': semaphoreSeriesDescription.modelName,
+            'modelVersion': semaphoreSeriesDescription.modelVersion,
             'dataLocation': semaphoreSeriesDescription.dataLocation,
             'dataSeries': semaphoreSeriesDescription.dataSeries,
             'dataDatum': semaphoreSeriesDescription.dataDatum,
@@ -192,7 +198,10 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         ''' This selects outputs based just on a model name and a time range, all other information is inferred.
             The modelname will be used to select the lead time for the most recent model run with that model name,
             then a second query is made to select all rows for that model name that have a generated time that falls within
-            the calculated time range. Many rows will be returned if there are many rows for that time range.
+            the calculated time range. This works beacuse each model corresponds to a specific lead time,
+            so all rows for a given model name will have the same lead time.
+            
+            Many rows will be returned if there are many rows for that time range.
 
             :param model_name: str - The name of the model to query
             :param to_time: datetime - The latest time to include
@@ -215,19 +224,29 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         }
 
         stmt = stmt.bindparams(**bind_params)
-        leadTimes = self.__dbSelection(stmt).fetchall()
+        leadTime = self.__dbSelection(stmt).fetchone()
         
         # if no lead time is found for some reason return nothing and log this
-        if len(leadTimes) == 0: 
+        if leadTime is None: 
             log(f'SQLAlchemyORM | select_output | No leadtime found for model_name:{model_name}')
             return None
         
-        leadTime = leadTimes[0]
         fromGeneratedTime = from_time - leadTime[0]
         toGeneratedTime = to_time - leadTime[0]
         
         stmt = text("""
-            SELECT * FROM outputs
+            SELECT
+            "id",
+            "timeGenerated",
+            "leadTime",
+            "modelName",
+            "modelVersion",
+            "dataValue",
+            "dataUnit",
+            "dataLocation",
+            "dataSeries",
+            "dataDatum"
+            FROM outputs
             WHERE "modelName" = :model_name
             AND "timeGenerated" >= :fromGeneratedTime
             AND "timeGenerated" <= :toGeneratedTime
@@ -255,7 +274,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             row[4],   # modelVersion
             row[8],   # dataSeries
             row[7],   # dataLocation
-            row[6]    # dataDatum
+            row[9]    # dataDatum
         )
         series = Series(description)
         series.dataFrame = outputResult
@@ -272,10 +291,20 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         '''   
 
         stmt_find_latest_output = text("""
-            SELECT *
-            FROM outputs AS o
-            WHERE o."modelName" = :model_name
-            ORDER BY o."modelVersion" DESC, o."timeGenerated" DESC
+            SELECT
+            "id",
+            "timeGenerated",
+            "leadTime",
+            "modelName",
+            "modelVersion",
+            "dataValue",
+            "dataUnit",
+            "dataLocation",
+            "dataSeries",
+            "dataDatum"
+            FROM outputs
+            WHERE "modelName" = :model_name
+            ORDER BY "modelVersion" DESC, "timeGenerated" DESC
             LIMIT 1
         """)
 
@@ -283,21 +312,21 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             'model_name': model_name
         }
         stmt_find_latest_output = stmt_find_latest_output.bindparams(**bind_params)
-        tupleishResult = self.__dbSelection(stmt_find_latest_output).fetchall()
+        tupleishResult = self.__dbSelection(stmt_find_latest_output).fetchone()
 
-        if not tupleishResult:
+        if tupleishResult is None:
             return None
         
-        outputResult = self.__splice_output(tupleishResult)
+        # wrap the single row in a list for splice output
+        outputResult = self.__splice_output([tupleishResult])
 
         # Parse out model information from the output result
-        row = tupleishResult[0]
         description = SemaphoreSeriesDescription(
-            row[3],  # modelName
-            row[4],  # modelVersion
-            row[8],  # dataSeries
-            row[7],  # dataLocation
-            row[6]   # dataDatum
+            tupleishResult[3],  # modelName
+            tupleishResult[4],  # modelVersion
+            tupleishResult[8],  # dataSeries
+            tupleishResult[7],  # dataLocation
+            tupleishResult[9]   # dataDatum
         )
         series = Series(description)
         series.dataFrame = outputResult
@@ -391,27 +420,35 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         resultSeries.dataFrame = self.__splice_input(result) #Turn tuple objects into actual objects
         return resultSeries
     
-    def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict | None]:
+    def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, tuple | None]:
         """
-        This method inserts actual/predictions into the output table and model run information into the model run table
+        This method inserts actual/predictions into the output table and model run information into the model run table.
+        The output data for a model is a dataframe with 1 row per model run where the dataValue column of this dataframe contains
+        an ndarray with the expected shape for a given model. The shape of the ndarray is 3D with dimensions corresponding
+        to (members, inputs, outputs).
             
         :param output_series: Series - A series object with a time description,  semaphore series description, and outputdata
         :param dateTime: execution_time - A datetime object set to the time this instance of semaphore was ran
         :param int: return_code - A int code for the run
         
-        :returns tuple[Series, dict]: 
-            - A series object that contains the actually inserted data
-            - The results from inserting into the model_runs table
+        :returns tuple[Series, tuple | None]: 
+            Series - A series object with a semaphore series description, time description, and dataframe
+                where the dataframe has the data that was actually inserted into the outputs table.
+
+            tuple | None - A tuple representing the row inserted into the model run table or None if no row
+                was inserted due to a conflict with an existing row.
+                The tuple will have the order of (id, outputID, executionTime, returnCode)
+                where the id is the PK for the model run table and outputID is a FK to the row inserted into the outputs table for this model run.
         """
 
-        output_series, output_id = self.insert_output(output_series)
+        output_series, saved_output_id = self.insert_output(output_series)
 
-        if output_id is None:
+        if saved_output_id is None:
             log('WARNING:: Series Storage was told to insert to both the output and model run table. This failed because no outputs were inserted. This could be caused by the prediction already existing in the database!')
             return output_series, None
 
         model_run_row = {
-            "outputID": output_id,
+            "outputID": saved_output_id,
             "executionTime": execution_time,
             "returnCode": return_code
         }
@@ -439,8 +476,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(stmt)
-            model_run_result = cursor.fetchall()
+            model_run_result = cursor.fetchone()
             conn.commit()
+
+        """
+        TODO:: Change what is returned to a modelRun object instead of
+        returning a database result directly for model_run_result.
+        """
 
         return output_series, model_run_result
         
@@ -449,10 +491,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """
         This method inserts a single row for actual/predictions into the output table
 
-        :param series: Series - A series object with a time description, semaphore series description, and output data
+        :param series: Series - A series object with a time description, semaphore series description, and a
+            dataframe with exactly 1 row to insert. This row should have an ndarray in its dataValue column that
+            should be of the expected shape for this model run with dimensions corresponding to (members, inputs, outputs).
         
         :returns tuple[Series, int | None]: 
-            - A series object that contains the actually inserted data
+            - A series object that contains the dataframe that holds the data that was actually inserted
             - An integer representing the primary key ID the output took in the database
                 or None if no row was inserted due to a conflict with an existing row
         """
@@ -462,20 +506,18 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         if len(series.dataFrame) != 1: raise ValueError(f'Output series dataframe should only have one row, got {len(series.dataFrame)}')
 
         # pack the output data into a row
+        output_row = series.dataFrame.iloc[0]
         row_to_insert = {
-            "timeGenerated": series.dataFrame.iloc[0]['timeGenerated'],
-            "leadTime": series.dataFrame.iloc[0]['leadTime'],
+            "timeGenerated": output_row['timeGenerated'],
+            "leadTime": output_row['leadTime'],
             "modelName": series.description.modelName,
             "modelVersion": series.description.modelVersion,
-            "dataValue": series.dataFrame.iloc[0]['dataValue'],
-            "dataUnit": series.dataFrame.iloc[0]['dataUnit'],
+            "dataValue": self.__serialize_data(output_row['dataValue']),    # serialize the ndarray to bytes
+            "dataUnit": output_row['dataUnit'],
             "dataLocation": series.description.dataLocation,
             "dataSeries": series.description.dataSeries,
             "dataDatum": series.description.dataDatum,
         }
-
-        # serialize the dataValue into bytes for storage
-        row_to_insert["dataValue"] = self.__serialize_data(row_to_insert["dataValue"])
 
         stmt = text("""
         INSERT INTO outputs (
@@ -500,7 +542,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             :dataSeries,
             :dataDatum
         )
-        ON CONFLICT ON CONSTRAINT outputs_AK00 DO NOTHING
+        ON CONFLICT ON CONSTRAINT "outputs_AK00" DO NOTHING
         RETURNING *;
         """)
         bind_params = {
@@ -519,13 +561,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # insert the row into the outputs table returning what is inserted as a sanity check
         with self.__get_engine().connect() as conn:
             cursor = conn.execute(stmt)
-            result = cursor.fetchall()
+            result = cursor.fetchone()
             conn.commit()
 
         # Create a series object to return with the inserted data
         resultSeries = Series(series.description, series.timeDescription)
-        resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
-        id = result[0][0] if result else None
+        resultSeries.dataFrame = self.__splice_output([result]) #Turn tuple objects into actual objects
+        id = result[0] if result else None
         return resultSeries, id
 
     def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime | None:
@@ -759,11 +801,16 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             
             On output selections, there may be many rows returned from the DB with each row having the columns listed above.
 
-        :returns: DataFrame - a dataframe with the data formatted for use in a series
+        :returns: DataFrame - a dataframe with the data formatted for use in a series where each row
+            of this dataframe corresponds to a single row in the database aka a single model run.
+
             On model runs, the dataframe will have only 1 row with the columns
             [dataValue, dataUnit, timeGenerated, leadTime]
 
-            On output selections, the dataframe may have many rows but will still have the columns above
+            On output selections, the dataframe may have many rows but will still have the columns above.
+
+            In both cases, the returned dataValue column for each row is expected to be in serialized format
+            where we must deserialize the bytes back into an ndarray.
         """
 
         # Convert returned DB rows into a dataframe to make manipulation easier 
@@ -798,7 +845,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         return df_out
 
-    def __serialize_data(self, array: np.ndarray | None) -> bytes:
+    def __serialize_data(self, array: np.ndarray | None) -> bytes | None:
         """
         This method serializes an ndarray into bytes.
         
@@ -809,43 +856,34 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
                 (1, 100, 1) for MRE models
                 (10, 100, 100) for CRPS models
         
-        :returns bytes - The serialized array
-
-        NOTE:: If an array is None it is converted to nan then serialized.
-        This is to prevent errors when trying to serialize a None
-        but nan can be serialized without issue. The process for this
-        is None -> nan -> bytes. 
+        :returns bytes | None - The serialized array in bytes or None if the input array was None
         """
-        array_to_serialize = array.copy() if array is not None else np.array(np.nan)
-
+        if array is None:
+            return None
+        
         buffer = BytesIO()
-        np.save(buffer, array_to_serialize, allow_pickle=False)
+        np.save(buffer, array, allow_pickle=False)
         serialized_array = buffer.getvalue()
         buffer.close()
 
         return serialized_array
 
-    def __deserialize_data(self, serialized_data: bytes) -> np.ndarray | None:
+    def __deserialize_data(self, serialized_data: bytes | None) -> np.ndarray | None:
         """
         This method deserializes bytes into an ndarray.
 
-        :param serialized_data: bytes - The bytes to deserialize
+        :param serialized_data: bytes | None - The bytes to deserialize
+            or None if a null was returned from the db which means the original array was None before serialization.
 
-        :returns ndarray | None - An array with the original data values or None
-        if the original array was None
-
-        NOTE:: If an array is nan it can be deserialized back into a nan.
-        This deserialized nan will still have the NDarray data type, so
-        np.all() is used to check the nan value, then it is converted back
-        to None to allow for proper handling. The process for this is
-        bytes -> nan -> None.
+        :returns ndarray | None - The reconstructed ndarray before it was serialized and stored
+            or None if the original array was None before it was inserted.
         """
+        if serialized_data is None:
+            return None
+        
         buffer = BytesIO(serialized_data)
         array = np.load(buffer, allow_pickle=False)
         buffer.close()
-
-        # if nan is found, we convert to None after deserializing
-        array = None if np.all(np.isnan(array)) else array
 
         return array
     
