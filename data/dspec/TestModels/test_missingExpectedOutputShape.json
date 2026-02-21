@@ -17,12 +17,7 @@
         "location": "PortLavaca",
         "interval" : 3600, 
         "datum": "test_datum",
-        "unit" : "meter",
-        "expectedOutputShape" : {
-            "modelCount": 1,
-            "inputVectorCount" : 100,
-            "outputsPerVector" : 1
-        }
+        "unit" : "meter"
     },
     "dependentSeries": [
         { 

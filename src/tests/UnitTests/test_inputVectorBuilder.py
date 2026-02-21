@@ -16,7 +16,7 @@ sys.path.append('/app/src')
 import sys
 from unittest.mock import MagicMock
 from src.ModelExecution.InputVectorBuilder import InputVectorBuilder
-from src.ModelExecution.dspecParser import Dspec, VectorOrder
+from src.ModelExecution.dspecParser import Dspec, VectorOrder, ExpectedOutputShape
 from src.DataClasses import Series, get_input_dataFrame
 
 
@@ -48,8 +48,19 @@ def get_multi_value_series():
 
 
 def mock_dspec(vectorOrder):
-    dspec = MagicMock(spec=Dspec)
+    dspec = MagicMock(spec=Dspec)  
     dspec.configure_mock(orderedVector=vectorOrder)
+
+    # Add outputInfo + expectedOutputShape to satisfy InputVectorBuilder
+    eos = ExpectedOutputShape()
+    eos.modelCount = 1
+    eos.inputVectorCount = 1
+    eos.outputsPerVector = 1
+
+    outputInfo = MagicMock()
+    outputInfo.expectedOutputShape = eos
+
+    dspec.outputInfo = outputInfo
     return dspec
 
 
@@ -79,7 +90,6 @@ def test_build_batch_multi_value_input():
     vectorOrder.configure_mock(dTypes= ['float', 'float'])
     vectorOrder.configure_mock(indexes=[(None, None), (None, None)])
     vectorOrder.configure_mock(multipliedKeys=['Series2'])
-    vectorOrder.configure_mock(ensembleMemberCount=5)
     dspec = mock_dspec(vectorOrder)
 
     # Run test
@@ -110,7 +120,6 @@ def test_build_batch_single_value_input():
     vectorOrder.configure_mock(dTypes= ['float', 'float'])
     vectorOrder.configure_mock(indexes=[(None, None), (None, None)])
     vectorOrder.configure_mock(multipliedKeys=[])
-    vectorOrder.configure_mock(ensembleMemberCount=None)
     dspec = mock_dspec(vectorOrder)
 
     # Run test
@@ -142,7 +151,6 @@ def test_build_batch_indexing():
     vectorOrder.configure_mock(dTypes= ['float', 'float'])
     vectorOrder.configure_mock(indexes=[(None, None), (1, 4)]) # We index the second series
     vectorOrder.configure_mock(multipliedKeys=[])
-    vectorOrder.configure_mock(ensembleMemberCount=None)
     dspec = mock_dspec(vectorOrder)
 
     # Run test

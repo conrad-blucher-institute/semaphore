@@ -90,8 +90,17 @@ class dspec_sub_Parser_1_0:
         outputInfo.interval = outputJson.get("interval")
         outputInfo.unit = outputJson.get("unit")
         outputInfo.datum = outputJson.get("datum")
+        # DSPEC v1 models are always legacy (1,1,1)
+        if "expectedOutputShape" in outputJson:
+            raise ValueError(
+                "DSPEC v1.0 does not support 'expectedOutputShape'. "
+                "Legacy models default to (1,1,1)."
+            )
+        outputInfo.expectedOutputShape = ExpectedOutputShape()
+        outputInfo.expectedOutputShape.modelCount = 1
+        outputInfo.expectedOutputShape.inputVectorCount = 1
+        outputInfo.expectedOutputShape.outputsPerVector = 1
 
-        # Bind to dspec
         self.__dspec.outputInfo = outputInfo 
 
 
@@ -111,7 +120,6 @@ class dspec_sub_Parser_1_0:
             types = []
             indexes = []
             multipliedKeys = []
-            ensembleMemberCount = []
             
             for idx, inputJson in enumerate(inputsJson):
                 dseries = DependentSeries()
@@ -143,7 +151,6 @@ class dspec_sub_Parser_1_0:
             vOrder.dTypes = types
             vOrder.indexes = indexes
             vOrder.multipliedKeys = []
-            vOrder.ensembleMemberCount = 1
             self.__dspec.orderedVector = vOrder
 
 
@@ -193,7 +200,18 @@ class dspec_sub_Parser_2_0:
         outputInfo.interval = outputJson.get("interval")
         outputInfo.unit = outputJson.get("unit")
         outputInfo.datum = outputJson.get("datum")
-
+        expectedOutputShapeDict = outputJson.get("expectedOutputShape", None)
+        expectedOutputShape = ExpectedOutputShape()
+        if expectedOutputShapeDict is None:
+            expectedOutputShape.modelCount = 1
+            expectedOutputShape.inputVectorCount = 1
+            expectedOutputShape.outputsPerVector = 1
+        else:
+            expectedOutputShape.modelCount = expectedOutputShapeDict["modelCount"]
+            expectedOutputShape.inputVectorCount = expectedOutputShapeDict["inputVectorCount"]
+            expectedOutputShape.outputsPerVector = expectedOutputShapeDict["outputsPerVector"]
+        outputInfo.expectedOutputShape = expectedOutputShape
+    
         # Bind to dspec
         self.__dspec.outputInfo = outputInfo 
 
@@ -261,8 +279,7 @@ class dspec_sub_Parser_2_0:
         keys = []
         dTypes = []
         indexes = []
-        multipliedKeys = []
-        ensembleMemberCount = []             
+        multipliedKeys = []            
         
         for dict in vOrder:
             keys.append(dict['key'])
@@ -278,24 +295,19 @@ class dspec_sub_Parser_2_0:
             isMultipliedKey: bool = dict.get("isMultipliedKey", False) 
             if isMultipliedKey:
                 multipliedKeys.append(dict['key']) 
-                ensembleMember: int | None = dict.get("ensembleMemberCount", None) 
-                if ensembleMemberCount is not None: ensembleMemberCount.append(ensembleMember)  
+                 
 
-        # Throw parsing errors if the multiplied keys and ensemble member are not configured correctly
+        # Throw parsing errors if the multiplied keys are not configured correctly
         if len(multipliedKeys) > 1:                         raise ValueError("DSPEC Parsing Error: More than one key has been marked multiplied. This is not supported by the current implementation!")
-        if len(ensembleMemberCount) > 1:                    raise ValueError("DSPEC Parsing Error: More than one ensembleMemberCount has been detected. This is not supported by the current implementation!")
-        if len(multipliedKeys) != len(ensembleMemberCount): raise ValueError("DSPEC Parsing Error: If there is a multiplied key there should be 1 and only 1 ensembleMemberCount!")
-        
+
         vectorOrder = VectorOrder()
         vectorOrder.keys = keys
         vectorOrder.dTypes = dTypes
         vectorOrder.indexes = indexes
         vectorOrder.multipliedKeys = multipliedKeys
-        vectorOrder.ensembleMemberCount = 1 if len(ensembleMemberCount) <= 0 else ensembleMemberCount[0]
         self.__dspec.orderedVector = vectorOrder
-        
+                
 
-            
 class Dspec:
     '''Parent Dspec class, includes header and metadata. Should include anything
     not in inputs or ouput info'''
@@ -327,12 +339,13 @@ class OutputInfo:
         self.toDateTime = None
         self.datum = None
         self.unit = None
+        self.expectedOutputShape = None
 
     def __str__(self) -> str:
-        return f'\n[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, interval: {self.interval}, fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, datum: {self.datum}, unit: {self.unit}'
+        return f'\n[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, interval: {self.interval}, fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, datum: {self.datum}, unit: {self.unit}, expectedOutputShape: {self.expectedOutputShape}'
     
     def __repr__(self):
-        return f'\nOutputInfo({self.outputMethod}, {self.leadTime}, {self.series}, {self.location}, {self.interval}, {self.fromDateTime}, {self.toDateTime}, {self.datum}, {self.unit})'
+        return f'\nOutputInfo({self.outputMethod}, {self.leadTime}, {self.series}, {self.location}, {self.interval}, {self.fromDateTime}, {self.toDateTime}, {self.datum}, {self.unit}, {self.expectedOutputShape})'
 
 class DependentSeries:
     '''A dependant series is a described series to pull from Series provider.'''
@@ -380,6 +393,19 @@ class DataIntegrityCall:
     def __repr__(self):
         return f'\nDataIntegrityCall({self.call}, {self.args})'
     
+class ExpectedOutputShape:
+    def __init__(self) -> None:
+        self.modelCount = None
+        self.inputVectorCount = None
+        self.outputsPerVector = None
+
+    def __str__(self) -> str:
+        return f'\n[ExpectedOutputShape] -> modelCount: {self.modelCount}, inputVectorCount: {self.inputVectorCount}, outputsPerVector: {self.outputsPerVector}'
+    
+    def __repr__(self):
+        return f'\nExpectedOutputShape({self.modelCount}, {self.inputVectorCount}, {self.outputsPerVector})'
+    
+    
 class VectorOrder:
     '''An object that holds the order and datatypes that the input vector should actually be'''
     def __init__(self) -> None:
@@ -387,13 +413,12 @@ class VectorOrder:
         self.dTypes = []
         self.indexes = []
         self.multipliedKeys = []
-        self.ensembleMemberCount = None
 
     def __str__(self) -> str:
-        return f'\n[VectorOrder] -> keys: {self.keys}, dTypes: {self.dTypes}, indexes: {self.indexes}, multipliedKeys: {self.multipliedKeys}, ensembleMemberCount: {self.ensembleMemberCount}'
+        return f'\n[VectorOrder] -> keys: {self.keys}, dTypes: {self.dTypes}, indexes: {self.indexes}, multipliedKeys: {self.multipliedKeys}'
     
     def __repr__(self):
-        return f'\nVectorOrder({self.keys}, {self.dTypes}, {self.indexes}, {self.multipliedKeys}, {self.ensembleMemberCount})'
+        return f'\nVectorOrder({self.keys}, {self.dTypes}, {self.indexes}, {self.multipliedKeys})'
     
 
 class TimingInfo:

@@ -125,8 +125,7 @@
         {
             "key": "dXWnCmp000D_1hr",
             "dType": "float",
-            "isMultipliedKey": true,
-            "ensembleMemberCount": 10
+            "isMultipliedKey": true
         },
         {
             "key": "dYWnCmp000D_1hr",
