@@ -564,6 +564,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             result = cursor.fetchone()
             conn.commit()
 
+        """
+        TODO:: When we reach implementing CRPS, we may not want to return
+        the result series because of how much data will be a part of the
+        result data frame. 
+        """
+
         # Create a series object to return with the inserted data
         resultSeries = Series(series.description, series.timeDescription)
         resultSeries.dataFrame = self.__splice_output([result]) #Turn tuple objects into actual objects
@@ -830,6 +836,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         # A formatted dataframe to place the spliced data 
         df_out = get_output_dataFrame()
+
+        """
+        TODO:: This currently deserializes the dataValue for each row in the data frame one at a time.
+        For queries that return many rows like select_output, this could be a performance issue.
+        After implementing this, we should do some profiling on this and potentially deserialize 
+        in a vectorized way by deserializing many items at once.
+        """
 
         for idx, row in df_results.iterrows():
             # deserialize the data back into an ndarray
