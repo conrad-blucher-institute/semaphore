@@ -213,7 +213,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             WHERE o."modelName" IN :model_names
             GROUP BY o."modelName"
         )
-        SELECT o."id", o."generatedTime", o.leadTime, o."modelName", o."modelVersion", o."dataValue", o."dataUnit", o."dataLocation", o."dataSeries", o."dataDatum", o.ensembleMemberID
+        SELECT o."id", o."timeGenerated", o."leadTime", o."modelName", o."modelVersion", o."dataValue", o."dataUnit", o."dataLocation", o."dataSeries", o."dataDatum", o."ensembleMemberID"
         FROM outputs AS o
         INNER JOIN latest_time_per_model AS ltpm
             ON o."modelName" = ltpm."modelName"
