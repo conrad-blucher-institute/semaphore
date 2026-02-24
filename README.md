@@ -124,13 +124,7 @@ The CSV has the following columns:
 | `log_file` | The log filename the entry came from |
 | `line_number` | Line number in that file where the event was detected |
 `
-To get the output CSV from the dev server to your home machine run the following commands: 
-1. On sherlock-dev in the semaphore.svc `sudo cp /home/semaphore.svc/semaphore/tools/parsed_semaphore_logs/semaphore_dev_stats_[TIMESTAMP OF FILE].csv /home/[YOUR USERNAME].admin/`
-2. On local machine `scp [YOUR USERNAME].admin@sherlock-dev:/home/[YOUR USERNAME].admin/semaphore_dev_stats_[TIMESTAMP OF FILE].csv [WHERE YOU WANT FILE TO GO] (EX: C:\Users\steph\Downloads\)`
-
-To get the output CSV from the prod server to your home machine run the following commands: 
-1. on sherlock-prod in the semaphore.svc `sudo cp /home/semaphore.svc/semaphore/tools/parsed_semaphore_logs/semaphore_dev_stats_[TIMESTAMP OF FILE].csv /home/[YOUR USERNAME]].admin/`
-2. On local machine `scp [YOUR USERNAME].admin@sherlock-prod.tamucc.edu:/home/[YOUR USERNAME].admin/semaphore_dev_stats_[TIMESTAMP OF FILE].csv [WHERE YOU WANT FILE TO GO]`
+To get the output CSV from the dev server to your home machine please see the Private Wiki: https://github.com/conrad-blucher-institute/semaphore-private-wiki/wiki/Semaphore-Log-Parsing-Download-Instructions
 
 ## Authors
 * [@Matthew Kastl](https://github.com/matdenkas) - mkastl@islander.tamucc.edu
