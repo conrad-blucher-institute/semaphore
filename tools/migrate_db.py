@@ -51,6 +51,12 @@ class Version():
         if self.major == other.major:
             return self.minor > other.minor
         return self.major > other.major
+    
+    def __ge__(self, other):
+        return self.__gt__(other) or self.__eq__(other)
+    
+    def __le__(self, other):
+        return self.__lt__(other) or self.__eq__(other)
 
     def __eq__(self, other):
         return self.major == other.major and self.minor == other.minor
@@ -168,16 +174,16 @@ def create_version_lists() -> tuple[list[str], list[tuple[int]]]:
     return names, versions
 
 
-def reset_pg_stats(engine: Engine, current_version: Version) -> None:
+def reset_pg_stats(engine: Engine, target_version: Version) -> None:
     """ Version 3.5 of the database migration enables pg_stat_statements, which collects query performance statistics. 
     This function resets the collected statistics after migration to avoid confusion with pre-migration stats.
 
     NOTE:: This function only fires if the database is being migrated to version 3.5 or higher.
         :param engine: Engine - The engine to connect to the database with
-        :param current_version: Version - The version of the database before migration
+        :param target_version: Version - The version of the database after migration
     """
     pg_stats_enabled_version = Version.from_dot_separator('3.5')
-    if current_version == pg_stats_enabled_version or current_version > pg_stats_enabled_version:
+    if target_version >= pg_stats_enabled_version:
         pg_stats_reset_stmt = text('SELECT pg_stat_statements_reset()')
         with engine.begin() as connection:
             connection.execute(pg_stats_reset_stmt)
