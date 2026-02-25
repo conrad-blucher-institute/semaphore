@@ -26,7 +26,8 @@
             "unit": "meter",
             "interval": 3600,
             "range":  [43, 31],
-            "outKey": "MG_48_output_48"
+            "outKey": "MG_48_output_48",
+            "stalenessOffset": 45000
         },
         { 
             "_name": "Wind Direction Prediction",
@@ -37,7 +38,7 @@
             "interval": 3600,
             "range": [48, 1],
             "outKey": "PL_WNDIR_F48",
-            "stalenessOffset": 36000,
+            "stalenessOffset": 39600,
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
                 "args": {
@@ -56,7 +57,7 @@
             "interval": 3600,
             "range": [48, 1],
             "outKey": "PL_WNDSPD_F48",
-            "stalenessOffset": 36000,
+            "stalenessOffset": 39600,
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {

@@ -3,7 +3,7 @@
 # -------------------------------
 # Created By : Anointiyae Beasley
 # Created Date: 2025-09-11
-# version 1.0
+# version 2.0
 # -------------------------------
 """Tests for the SQLAlchemy storage layer.
 
@@ -16,6 +16,7 @@ High-level flow:
 5) Compare the returned DataFrame to an expected DataFrame.
 6) Cleanup: delete only the rows inserted by this test module.
 
+docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py
 """
 # -------------------------------
 
@@ -28,10 +29,13 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+import numpy as np
 from sqlalchemy import MetaData, create_engine, delete, insert, select
 from sqlalchemy.engine import Engine
 
 from SeriesProvider import SeriesProvider
+from SeriesStorage.SS_Classes.SQLAlchemyORM_Postgres import SQLAlchemyORM_Postgres
+from unittest.mock import patch
 from DataClasses import SeriesDescription, TimeDescription
 
 
@@ -198,7 +202,7 @@ def _ensure_ref_values(conn, md: MetaData, ref_table_name: str, values: set[str]
 # Seed + cleanup
 # -------------------------------
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="module")
 def seed_inputs_once(engine: Engine, metadata: MetaData, inputs_table):
     """
     Reads CSV, ensures referenced ref_* values exist (FK-safe),
@@ -293,7 +297,8 @@ def seed_inputs_once(engine: Engine, metadata: MetaData, inputs_table):
     ],
     ids=["NOAATANDC", "NDFD_EXP", "TWC", "NoneCase"],
 )
-def test_determine_staleness_with_mock_db(engine, series_kwargs, from_str, to_str, stalenessOffset, reference_time, expected_result):
+def test_determine_staleness_with_mock_db(
+    engine, seed_inputs_once, series_kwargs, from_str, to_str, stalenessOffset, reference_time, expected_result):
     """
     Verifies SeriesProvider.db_has_freshly_acquired_data(...) returns the expected bool
     given seeded inputs rows and a known reference_time.
@@ -311,3 +316,228 @@ def test_determine_staleness_with_mock_db(engine, series_kwargs, from_str, to_st
     actual_result = seriesProvider.db_has_freshly_acquired_data(series_desc, time_desc, reference_time)
 
     assert actual_result is expected_result
+
+
+@pytest.mark.parametrize(
+    "data_array",
+    [
+        # Test case 1: shape (3, 3, 3)
+        # basic test with a shaped array
+        np.array([
+            [
+                [1.0, 2.0, 3.0],
+                [4.0, 5.0, 6.0],
+                [7.0, 8.0, 9.0]
+            ],
+            [
+                [10.0, 11.0, 12.0],
+                [13.0, 14.0, 15.0],
+                [16.0, 17.0, 18.0]
+            ],
+            [
+                [19.0, 20.0, 21.0],
+                [22.0, 23.0, 24.0],
+                [25.0, 26.0, 27.0]
+            ]
+        ]),
+
+        # Test case 2: shape (1, 1, 1)
+        # to test single points
+        np.array([
+            [
+                [42.0]
+            ]
+        ]),
+
+        # Test case 3: shape (3, 5, 2)
+        # to test when dimensions are not all equal
+        np.array([
+            [
+                [1.0, 2.0],
+                [3.0, 4.0],
+                [5.0, 6.0],
+                [7.0, 8.0],
+                [9.0, 10.0]
+            ],
+            [
+                [11.0, 12.0],
+                [13.0, 14.0],
+                [15.0, 16.0],
+                [17.0, 18.0],
+                [19.0, 20.0]
+            ],
+            [
+                [21.0, 22.0],
+                [23.0, 24.0],
+                [25.0, 26.0],
+                [27.0, 28.0],
+                [29.0, 30.0]
+            ]
+        ]),
+
+        # Test case 4: None value
+        # to test how the serializer handles None values
+        None
+    ],
+    ids=["3x3x3", '1x1x1', '3x5x2', 'None']
+)
+def test_serialize(data_array):
+    """
+    This test checks that the __serialize_data method correctly converts an ndarray into bytes
+
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize -s
+    """
+
+    # skip the db connection by replacing the __init__ method
+    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
+        storage = SQLAlchemyORM_Postgres()
+
+        if data_array is None:
+            # the serializer should just return the None without serializing
+            serialized_array = storage._SQLAlchemyORM_Postgres__serialize_data(data_array)
+            assert serialized_array is None
+            return
+
+        # assert that the data array is an ndarray before serialization
+        assert isinstance(data_array, np.ndarray)
+
+        # call the serializer 
+        serialized_array = storage._SQLAlchemyORM_Postgres__serialize_data(data_array)
+
+        assert isinstance(serialized_array, bytes)
+
+
+@pytest.mark.parametrize(
+    "data_array",
+    [
+        # Test case 1: shape (3, 5, 2)
+        # basic test with a shaped array
+        np.array([
+            [
+                [1.0, 2.0],
+                [3.0, 4.0],
+                [5.0, 6.0],
+                [7.0, 8.0],
+                [9.0, 10.0]
+            ],
+            [
+                [11.0, 12.0],
+                [13.0, 14.0],
+                [15.0, 16.0],
+                [17.0, 18.0],
+                [19.0, 20.0]
+            ],
+            [
+                [21.0, 22.0],
+                [23.0, 24.0],
+                [25.0, 26.0],
+                [27.0, 28.0],
+                [29.0, 30.0]
+            ]
+        ]),
+
+        # Test case 2: None value
+        # to test how the deserializer handles None values
+        None,
+
+        # Test case 3: shape (1, 1, 1)
+        # to test deserializing a single point
+        np.array([
+            [
+                [42.0]
+            ]
+        ]),
+
+
+        # Test case 4: shape (3, 5, 4)
+        # to test deserializing when dimensions are not all equal
+        np.array([
+            [
+                [1.0, 2.0, 3.0, 4.0],
+                [5.0, 6.0, 7.0, 8.0],
+                [9.0, 10.0, 11.0, 12.0],
+                [13.0, 14.0, 15.0, 16.0],
+                [17.0, 18.0, 19.0, 20.0]
+            ],
+            [
+                [21.0, 22.0, 23.0, 24.0],
+                [25.0, 26.0, 27.0, 28.0],
+                [29.0, 30.0, 31.0, 32.0],
+                [33.0, 34.0, 35.0, 36.0],
+                [37.0, 38.0, 39.0, 40.0]
+            ],
+            [
+                [41.0, 42.0, 43.0, 44.0],
+                [45.0, 46.0, 47.0, 48.0],
+                [49.0, 50.0, 51.0, 52.0],
+                [53.0, 54.0, 55.0, 56.0],
+                [57.0, 58.0, 59.0, 60.0]
+            ]
+        ]),
+
+        # Test case 5: shape (2, 3, 1)
+        # another test for odd shapes
+        np.array([
+            [
+                [100.0],
+                [200.0],
+                [300.0]
+            ],
+            [
+                [400.0],
+                [500.0],
+                [600.0]
+            ]
+        ]),
+
+        # Test case 6: shape (0,0,0)
+        # to test how the deserializer handles empty arrays
+        np.array([[[]]]),
+
+        # Test case: 7: shape (1, 2, 3)
+        # to test when nans are present.
+        np.array([
+            [
+                [1.0, np.nan, 3.0],
+                [4.0, 5.0, np.nan]
+            ]
+        ])
+    ],
+    ids=["3x5x2", "None", "1x1x1", "3x5x4", "2x3x1", "0x0x0", "nans"]
+)
+def test_deserialize(data_array):
+    """
+    This test checks that the __deserialize_data method correctly converts bytes in a 
+    single data_array back to the original array
+
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_deserialize -s
+    """
+
+    # skip the db connection by replacing the __init__ method
+    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
+        storage = SQLAlchemyORM_Postgres()
+
+        if data_array is None:
+            # should return the None without serializing or deserializing
+            serialized_array = storage._SQLAlchemyORM_Postgres__serialize_data(data_array)
+            assert serialized_array is None
+
+            # should return None when deserializing None
+            deserialized_array = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_array)
+            assert deserialized_array is None
+            return
+
+        # assert that the data array is an ndarray before serialization
+        assert isinstance(data_array, np.ndarray)
+
+        # first serialize the data
+        serialized_array = storage._SQLAlchemyORM_Postgres__serialize_data(data_array)
+
+        # ensure the data was serialized to bytes
+        assert isinstance(serialized_array, bytes)
+
+        # deserialize the data
+        deserialized_array = storage._SQLAlchemyORM_Postgres__deserialize_data(serialized_array)
+
+        # assert that the deserialized array matches the original array
+        np.testing.assert_array_equal(deserialized_array, data_array)

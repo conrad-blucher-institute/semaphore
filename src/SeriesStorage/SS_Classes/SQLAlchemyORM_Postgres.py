@@ -3,10 +3,16 @@
 #-------------------------------
 # Created By : Matthew Kastl
 # Created Date: 3/26/2023
-# version 9.0
+# version 10.0
 #-------------------------------
-""" This file is an implementation of the SQLAlchemy ORM geared towards Semaphore and its schema. 
- """ 
+"""
+This file is an implementation of the SQLAlchemy ORM geared towards Semaphore and its schema.
+
+NOTE:: As of version 10.0, this storage class uses binary serialization for 
+ndarrays in the dataValue column of dataframes.
+Every model run will have their ndarray serialized to bytes before insertion into the database 
+and deserialized back to ndarrays after selection from the database.
+""" 
 #-------------------------------
 # 
 #
@@ -20,6 +26,9 @@ from os import getenv
 from datetime import timedelta, datetime, timezone
 import pandas as pd
 from pandas import DataFrame
+import numpy as np
+from io import BytesIO
+from numpy import ndarray
 
 from SeriesStorage.ISeriesStorage import ISeriesStorage
 
@@ -114,137 +123,211 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return series
     
     def select_specific_output(self, semaphoreSeriesDescription: SemaphoreSeriesDescription, timeDescription : TimeDescription) -> Series:
-        """Selects an output series given a SemaphoreSeriesDescription and TimeDescription
-           :param semaphoreSeriesDescription: SemaphoreSeriesDescription - A  semaphore series description object
-           :param timeDescription: TimeDescription - A hydrated time description object
+        """
+        Selects an output series given a SemaphoreSeriesDescription and TimeDescription.
+        This method first queries for the lead time for a model run that matches the model and data description
+        then it uses that lead time to adjust the from and to generated times in the time description to
+        make a second query for outputs that match a more specific description. This works because
+        each model corresponds to a specific lead time, so all rows for a given model name will have the same lead time.
+
+        This query can return many rows at once if there are many generated times that fall within the time window after lead time adjustment.
+
+        :param semaphoreSeriesDescription: SemaphoreSeriesDescription - A  semaphore series description object
+        :param timeDescription: TimeDescription - A hydrated time description object
         """
 
         series = Series(semaphoreSeriesDescription, timeDescription)
         
+        stmt = text("""
+            SELECT "leadTime" FROM outputs
+            WHERE "dataLocation" = :dataLocation
+            AND "dataSeries" = :dataSeries
+            AND "dataDatum" = :dataDatum
+            AND "modelName" = :modelName
+            AND "modelVersion" = :modelVersion
+            LIMIT 1
+        """)
 
-        outputTable = self.__metadata.tables['outputs']
-        #Get the lead time for time calculations
-        statement = (select(distinct(outputTable.c.leadTime))
-                    .where(outputTable.c.dataLocation == semaphoreSeriesDescription.dataLocation)
-                    .where(outputTable.c.dataSeries == semaphoreSeriesDescription.dataSeries)
-                    .where(outputTable.c.dataDatum == semaphoreSeriesDescription.dataDatum)
-                    .where(outputTable.c.modelName == semaphoreSeriesDescription.modelName)
-                    )
-        leadTimes = self.__dbSelection(statement).fetchall()
-        if len(self.__dbSelection(statement).fetchall()) == 0: #If no lead time is found for some reason return nothing and log this
-            log(f'SQLAlchemyORM | select_output | No leadtime found for SemaphoreSeriesDescription:{semaphoreSeriesDescription}')
+        bind_params = {
+            'dataLocation': semaphoreSeriesDescription.dataLocation,
+            'dataSeries': semaphoreSeriesDescription.dataSeries,
+            'dataDatum': semaphoreSeriesDescription.dataDatum,
+            'modelName': semaphoreSeriesDescription.modelName,
+            'modelVersion': semaphoreSeriesDescription.modelVersion
+        }
+
+        stmt = stmt.bindparams(**bind_params)
+        leadTime = self.__dbSelection(stmt).fetchone()
+
+        # if no lead time is found for some reason return nothing and log this
+        if leadTime is None:
+            log(f'SQLAlchemyORM | select_specific_output | No leadtime found for SemaphoreSeriesDescription:{semaphoreSeriesDescription}')
             return series
-            
-        leadTime = leadTimes[0]
+        
         fromGeneratedTime = timeDescription.fromDateTime - leadTime[0]
         toGeneratedTime = timeDescription.toDateTime - leadTime[0]
-         
-        statement = (select(outputTable)
-                    .where(outputTable.c.modelName == semaphoreSeriesDescription.modelName)
-                    .where(outputTable.c.dataLocation == semaphoreSeriesDescription.dataLocation)
-                    .where(outputTable.c.dataSeries == semaphoreSeriesDescription.dataSeries)
-                    .where(outputTable.c.dataDatum == semaphoreSeriesDescription.dataDatum)
-                    .where(outputTable.c.timeGenerated >= fromGeneratedTime)
-                    .where(outputTable.c.timeGenerated <= toGeneratedTime)
-                    )
-        tupleishResult = self.__dbSelection(statement).fetchall()
+
+        stmt = text("""
+            SELECT * FROM outputs
+            WHERE "modelName" = :modelName
+            AND "modelVersion" = :modelVersion
+            AND "dataLocation" = :dataLocation
+            AND "dataSeries" = :dataSeries
+            AND "dataDatum" = :dataDatum
+            AND "timeGenerated" >= :fromGeneratedTime
+            AND "timeGenerated" <= :toGeneratedTime
+        """)
+
+        bind_params = {
+            'modelName': semaphoreSeriesDescription.modelName,
+            'modelVersion': semaphoreSeriesDescription.modelVersion,
+            'dataLocation': semaphoreSeriesDescription.dataLocation,
+            'dataSeries': semaphoreSeriesDescription.dataSeries,
+            'dataDatum': semaphoreSeriesDescription.dataDatum,
+            'fromGeneratedTime': fromGeneratedTime,
+            'toGeneratedTime': toGeneratedTime
+        }
+
+        stmt = stmt.bindparams(**bind_params)
+        tupleishResult = self.__dbSelection(stmt).fetchall()
         series.dataFrame = self.__splice_output(tupleishResult)
         return series
     
 
     def select_output(self, model_name: str, from_time: datetime, to_time: datetime) -> Series | None: 
-        ''' This selects outputs based just on a model name and a time range, all other information is inferred
+        ''' This selects outputs based just on a model name and a time range, all other information is inferred.
+            The modelname will be used to select the lead time for the most recent model run with that model name,
+            then a second query is made to select all rows for that model name that have a generated time that falls within
+            the calculated time range. This works beacuse each model corresponds to a specific lead time,
+            so all rows for a given model name will have the same lead time.
+            
+            Many rows will be returned if there are many rows for that time range.
+
             :param model_name: str - The name of the model to query
             :param to_time: datetime - The latest time to include
             :param from_time: datetime - The earliest time to include
-        '''        
-
+        '''
 
         # Get the lead time for time calculations
         # Because we are inferring model information
         # We select the latest version of the model under that name
         # and the lead time from its latest prediction
-        outputTable = self.__metadata.tables['outputs']
-        statement = (select(outputTable.c.leadTime)
-                    .where(outputTable.c.modelName == model_name)
-                    .order_by(outputTable.c.modelVersion.desc())
-                    .order_by(outputTable.c.timeGenerated.desc())
-                    )
-        leadTimes = self.__dbSelection(statement).fetchall()
-        if len(self.__dbSelection(statement).fetchall()) == 0: #If no lead time is found for some reason return nothing and log this
-            log(f'SQLAlchemyORM | select_latest_output | No leadtime found for model_name:{model_name}')
+        stmt = text("""
+            SELECT "leadTime" FROM outputs
+            WHERE "modelName" = :model_name
+            ORDER BY "modelVersion" DESC, "timeGenerated" DESC
+            LIMIT 1
+        """)
+
+        bind_params = {
+            'model_name': model_name
+        }
+
+        stmt = stmt.bindparams(**bind_params)
+        leadTime = self.__dbSelection(stmt).fetchone()
+        
+        # if no lead time is found for some reason return nothing and log this
+        if leadTime is None: 
+            log(f'SQLAlchemyORM | select_output | No leadtime found for model_name:{model_name}')
             return None
-            
-        leadTime = leadTimes[0]
+        
         fromGeneratedTime = from_time - leadTime[0]
         toGeneratedTime = to_time - leadTime[0]
-         
-        statement = (select(outputTable)
-                    .where(outputTable.c.modelName == model_name)
-                    .where(outputTable.c.timeGenerated >= fromGeneratedTime)
-                    .where(outputTable.c.timeGenerated <= toGeneratedTime)
-                    )
-        tupleishResult = self.__dbSelection(statement).fetchall()
+        
+        stmt = text("""
+            SELECT
+            "id",
+            "timeGenerated",
+            "leadTime",
+            "modelName",
+            "modelVersion",
+            "dataValue",
+            "dataUnit",
+            "dataLocation",
+            "dataSeries",
+            "dataDatum"
+            FROM outputs
+            WHERE "modelName" = :model_name
+            AND "timeGenerated" >= :fromGeneratedTime
+            AND "timeGenerated" <= :toGeneratedTime
+        """)
 
-        if not tupleishResult: # If there are no results, no model information can be inferred 
+        bind_params = {
+            'model_name': model_name,
+            'fromGeneratedTime': fromGeneratedTime,
+            'toGeneratedTime': toGeneratedTime
+        }
+
+        stmt = stmt.bindparams(**bind_params)
+        tupleishResult = self.__dbSelection(stmt).fetchall()
+
+        if not tupleishResult:
             return None    
 
         outputResult = self.__splice_output(tupleishResult)
 
         # Parse out model information from first output result
-        description = SemaphoreSeriesDescription(tupleishResult[0][3], tupleishResult[0][4], tupleishResult[0][8], tupleishResult[0][7], tupleishResult[0][6])
+        # this is constant metadata across all the rows returned
+        row = tupleishResult[0]
+        description = SemaphoreSeriesDescription(
+            row[3],   # modelName
+            row[4],   # modelVersion
+            row[8],   # dataSeries
+            row[7],   # dataLocation
+            row[9]    # dataDatum
+        )
         series = Series(description)
         series.dataFrame = outputResult
         return series
     
 
     def select_latest_output(self, model_name: str) -> Series | None: 
-        ''' This selects *all* outputs based just on a model name and a time range, all other information is inferred
+        ''' This selects outputs based just on a model name, all other information is inferred.
+            Exactly 1 row is returned that is the latest generated time for that model name.
+
             :param model_name: str - The name of the model to query
 
             NOTE:: Things like model version and time will just be the latest in the DB
         '''   
 
-        stmt_find_latest_output = text(f"""
-            SELECT *
-            FROM outputs AS o
-            WHERE o."modelName" = :model_name
-            ORDER BY o."modelVersion" DESC, o."timeGenerated" DESC
-            LIMIT 1;
-        """)     
+        stmt_find_latest_output = text("""
+            SELECT
+            "id",
+            "timeGenerated",
+            "leadTime",
+            "modelName",
+            "modelVersion",
+            "dataValue",
+            "dataUnit",
+            "dataLocation",
+            "dataSeries",
+            "dataDatum"
+            FROM outputs
+            WHERE "modelName" = :model_name
+            ORDER BY "modelVersion" DESC, "timeGenerated" DESC
+            LIMIT 1
+        """)
+
         bind_params = {
             'model_name': model_name
         }
         stmt_find_latest_output = stmt_find_latest_output.bindparams(**bind_params)
-        tupleishResult = self.__dbSelection(stmt_find_latest_output).first() # because of order this should be latest
+        tupleishResult = self.__dbSelection(stmt_find_latest_output).fetchone()
 
-        if not tupleishResult: # If there are no results, no model information can't be inferred 
-            return None    
-
-        latest_time = tupleishResult[1]
-
-        # STEP 2: Get ALL outputs with the same timeGenerated
-        stmt_collect_all_latest_outputs = text(f"""
-            SELECT *
-            FROM outputs AS o
-            WHERE o."modelName" = :model_name
-            AND o."timeGenerated" = :latest_time;
-        """)     
-        bind_params = {
-            'model_name': model_name,
-            'latest_time': latest_time
-        }
-        stmt_collect_all_latest_outputs = stmt_collect_all_latest_outputs.bindparams(**bind_params)
-        result = self.__dbSelection(stmt_collect_all_latest_outputs).fetchall()
-
-        if not result:
+        if tupleishResult is None:
             return None
         
-        outputResult = self.__splice_output(result)  # Use all fetched outputs, not just the first one 
+        # wrap the single row in a list for splice output
+        outputResult = self.__splice_output([tupleishResult])
 
-        # Parse out model information from first output result
-        first = result[0]
-        description = SemaphoreSeriesDescription(first[3], first[4], first[8], first[7], first[6]) # Hydrate metadata from first row info
+        # Parse out model information from the output result
+        description = SemaphoreSeriesDescription(
+            tupleishResult[3],  # modelName
+            tupleishResult[4],  # modelVersion
+            tupleishResult[8],  # dataSeries
+            tupleishResult[7],  # dataLocation
+            tupleishResult[9]   # dataDatum
+        )
         series = Series(description)
         series.dataFrame = outputResult
         return series
@@ -337,96 +420,161 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         resultSeries.dataFrame = self.__splice_input(result) #Turn tuple objects into actual objects
         return resultSeries
     
-    def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, dict | None]:
-        """This method inserts actual/predictions into the output table and model run information into the model run table
-            :param series: Series - A series object with a time description,  semaphore series description, and outputdata
-            :param dateTime: execution_time - A datetime object set to the time this instance of semaphore was ran
-            :param int: return_code - A int code for the run
-            :return tuple[Series, dict]: 
-                - A series object that contains the actually inserted data
-                - The results from inserting into the model_runs table
+    def insert_output_and_model_run(self, output_series: Series, execution_time: datetime, return_code: int) -> tuple[Series, tuple | None]:
+        """
+        This method inserts actual/predictions into the output table and model run information into the model run table.
+        The output data for a model is a dataframe with 1 row per model run where the dataValue column of this dataframe contains
+        an ndarray with the expected shape for a given model. The shape of the ndarray is 3D with dimensions corresponding
+        to (members, inputs, outputs).
+            
+        :param output_series: Series - A series object with a time description,  semaphore series description, and outputdata
+        :param dateTime: execution_time - A datetime object set to the time this instance of semaphore was ran
+        :param int: return_code - A int code for the run
+        
+        :returns tuple[Series, tuple | None]: 
+            Series - A series object with a semaphore series description, time description, and dataframe
+                where the dataframe has the data that was actually inserted into the outputs table.
+
+            tuple | None - A tuple representing the row inserted into the model run table or None if no row
+                was inserted due to a conflict with an existing row.
+                The tuple will have the order of (id, outputID, executionTime, returnCode)
+                where the id is the PK for the model run table and outputID is a FK to the row inserted into the outputs table for this model run.
         """
 
-        output_series, output_ids = self.insert_output(output_series)
+        output_series, saved_output_id = self.insert_output(output_series)
 
-
-        if len(output_ids) == 0:
+        if saved_output_id is None:
             log('WARNING:: Series Storage was told to insert to both the output and model run table. This failed because no outputs were inserted. This could be caused by the prediction already existing in the database!')
             return output_series, None
 
-        model_run_rows = []
-        for id in output_ids:
-            model_run_row = {"outputID": None, "executionTime": None, "returnCode": None}
-            model_run_row["outputID"] = id
-            model_run_row["executionTime"] = execution_time
-            model_run_row["returnCode"] = return_code
-            model_run_rows.append(model_run_row)
+        model_run_row = {
+            "outputID": saved_output_id,
+            "executionTime": execution_time,
+            "returnCode": return_code
+        }
 
-        model_runs = self.__metadata.tables['model_runs']
+        stmt = text("""
+        INSERT INTO model_runs (
+            "outputID",
+            "executionTime",
+            "returnCode"
+        )
+        VALUES (
+            :outputID,
+            :executionTime,
+            :returnCode
+        )
+        RETURNING *;
+        """)
+
+        bind_params = {
+            'outputID': model_run_row["outputID"],
+            'executionTime': model_run_row["executionTime"],
+            'returnCode': model_run_row["returnCode"]
+        }
+        stmt = stmt.bindparams(**bind_params)
+
         with self.__get_engine().connect() as conn:
-            cursor = conn.execute(insert(model_runs)
-                                  .returning(model_runs)
-                                  .values(model_run_rows)
-                                  )
-            model_run_result = cursor.fetchall()
+            cursor = conn.execute(stmt)
+            model_run_result = cursor.fetchone()
             conn.commit()
 
+        """
+        TODO:: Change what is returned to a modelRun object instead of
+        returning a database result directly for model_run_result.
+        """
 
         return output_series, model_run_result
         
 
-    def insert_output(self, series: Series) -> tuple[Series, list[int]]:
-        """This method inserts actual/predictions into the output table
-            :param series: Series - A series object with a time description,  semaphore series description, and outputdata
-            :return tuple[Series, list[int]]: 
-                - A series object that contains the actually inserted data
-                - A list of the pK ids the rows took
+    def insert_output(self, series: Series) -> tuple[Series, int | None]:
+        """
+        This method inserts a single row for actual/predictions into the output table
+
+        :param series: Series - A series object with a time description, semaphore series description, and a
+            dataframe with exactly 1 row to insert. This row should have an ndarray in its dataValue column that
+            should be of the expected shape for this model run with dimensions corresponding to (members, inputs, outputs).
+        
+        :returns tuple[Series, int | None]: 
+            - A series object that contains the dataframe that holds the data that was actually inserted
+            - An integer representing the primary key ID the output took in the database
+                or None if no row was inserted due to a conflict with an existing row
         """
 
         if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
 
-        # If dataValue is a list its an ensemble
-        isEnsemble = isinstance(series.dataFrame['dataValue'].iloc[0], list) 
+        if len(series.dataFrame) != 1: raise ValueError(f'Output series dataframe should only have one row, got {len(series.dataFrame)}')
 
-        insertionRows = []
-        for df_index, row in series.dataFrame.iterrows():
+        # pack the output data into a row
+        output_row = series.dataFrame.iloc[0]
+        row_to_insert = {
+            "timeGenerated": output_row['timeGenerated'],
+            "leadTime": output_row['leadTime'],
+            "modelName": series.description.modelName,
+            "modelVersion": series.description.modelVersion,
+            "dataValue": self.__serialize_data(output_row['dataValue']),    # serialize the ndarray to bytes
+            "dataUnit": output_row['dataUnit'],
+            "dataLocation": series.description.dataLocation,
+            "dataSeries": series.description.dataSeries,
+            "dataDatum": series.description.dataDatum,
+        }
 
-            # We need to iterate over every value in dataValue if it is an ensemble
-            # but non ensemble inputs are just a single value so we convert them
-            # temporarily to a list to make the iteration easier
-            dataValues = row["dataValue"] if isEnsemble else [ row["dataValue"] ] 
+        stmt = text("""
+        INSERT INTO outputs (
+            "timeGenerated",
+            "leadTime",
+            "modelName",
+            "modelVersion",
+            "dataValue",
+            "dataUnit",
+            "dataLocation",
+            "dataSeries",
+            "dataDatum"
+            )
+        VALUES (
+            :timeGenerated,
+            :leadTime,
+            :modelName,
+            :modelVersion,
+            :dataValue,
+            :dataUnit,
+            :dataLocation,
+            :dataSeries,
+            :dataDatum
+        )
+        ON CONFLICT ON CONSTRAINT "outputs_AK00" DO NOTHING
+        RETURNING *;
+        """)
+        bind_params = {
+            'timeGenerated': row_to_insert["timeGenerated"],
+            'leadTime': row_to_insert["leadTime"],
+            'modelName': row_to_insert["modelName"],
+            'modelVersion': row_to_insert["modelVersion"],
+            'dataValue': row_to_insert["dataValue"],
+            'dataUnit': row_to_insert["dataUnit"],
+            'dataLocation': row_to_insert["dataLocation"],
+            'dataSeries': row_to_insert["dataSeries"],
+            'dataDatum': row_to_insert["dataDatum"]
+        }
+        stmt = stmt.bindparams(**bind_params)
 
-            for value_index, value in enumerate(dataValues):
-                insertionValueRow = {
-                    "timeGenerated": series.dataFrame.iloc[df_index]['timeGenerated'], 
-                    "leadTime": series.dataFrame.iloc[df_index]['leadTime'], 
-                    "modelName": series.description.modelName, 
-                    "modelVersion": series.description.modelVersion, 
-                    "dataValue": value, 
-                    "dataUnit": series.dataFrame.iloc[df_index]['dataUnit'], 
-                    "dataLocation": series.description.dataLocation,
-                    "dataSeries": series.description.dataSeries, 
-                    "dataDatum": series.description.dataDatum, 
-                    "ensembleMemberID": value_index if isEnsemble else None # Only set for ensemble inputs
-                }
-                insertionRows.append(insertionValueRow)  
-
-        # Insert the rows into the outputs table returning what is inserted as a sanity check
-        outputTable = self.__metadata.tables['outputs']
+        # insert the row into the outputs table returning what is inserted as a sanity check
         with self.__get_engine().connect() as conn:
-            cursor = conn.execute(insert(outputTable)
-                                  .on_conflict_do_nothing('outputs_AK00')
-                                  .returning(outputTable)
-                                  .values(insertionRows)
-                                  )
-            result = cursor.fetchall()
+            cursor = conn.execute(stmt)
+            result = cursor.fetchone()
             conn.commit()
+
+        """
+        TODO:: When we reach implementing CRPS, we may not want to return
+        the result series because of how much data will be a part of the
+        result data frame. 
+        """
 
         # Create a series object to return with the inserted data
         resultSeries = Series(series.description, series.timeDescription)
-        resultSeries.dataFrame = self.__splice_output(result) #Turn tuple objects into actual objects
-        ids = [row[0] for row in result]
-        return resultSeries, ids
+        resultSeries.dataFrame = self.__splice_output([result]) #Turn tuple objects into actual objects
+        id = result[0] if result else None
+        return resultSeries, id
 
     def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime | None:
         """
@@ -650,9 +798,25 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return df_out
 
     def __splice_output(self, results: list[tuple]) -> DataFrame:
-        """Converts DB row results into a proper output dataframe to be packed into a series.
-        param: list[tupleish] - a list of selections from the table formatted in tupleish
-        returns: DataFrame - a dataframe with the data formatted for use in a series
+        """
+        Converts DB row results into a proper output dataframe to be packed into a series.
+
+        :param results - list[tupleish] - a list of selected rows from the table formatted in tupleish.
+            On model runs, there should only be one row in the list such as 
+            [(ID, timeGenerated, leadTime, modelName, modelVersion, dataValue, dataUnit, dataLocation, dataSeries, dataDatum)]
+            
+            On output selections, there may be many rows returned from the DB with each row having the columns listed above.
+
+        :returns: DataFrame - a dataframe with the data formatted for use in a series where each row
+            of this dataframe corresponds to a single row in the database aka a single model run.
+
+            On model runs, the dataframe will have only 1 row with the columns
+            [dataValue, dataUnit, timeGenerated, leadTime]
+
+            On output selections, the dataframe may have many rows but will still have the columns above.
+
+            In both cases, the returned dataValue column for each row is expected to be in serialized format
+            where we must deserialize the bytes back into an ndarray.
         """
 
         # Convert returned DB rows into a dataframe to make manipulation easier 
@@ -660,7 +824,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             data=results, 
             columns=[
                 "ID", "timeGenerated", "leadTime", "modelName", "modelVersion", "dataValue", 
-                "dataUnit", "dataLocation", "dataSeries", "dataDatum", "ensembleMemberID"
+                "dataUnit", "dataLocation", "dataSeries", "dataDatum"
             ]
         )
 
@@ -673,32 +837,69 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # A formatted dataframe to place the spliced data 
         df_out = get_output_dataFrame()
 
-        # We have to post process the results as this could be ensemble data or not
-        # we group data with identical temporal information    
-        for _, group in df_results.groupby(["timeGenerated", "leadTime"]):
-    
-            firstRow = group.iloc[0]
-            isEnsemble = firstRow["ensembleMemberID"] is not None
-            
-            # If its an ensemble the dataValue is all the values sorted by there ID (to ensure correct order)
-            # If not an ensemble we just take the solitary dataValue
-            if isEnsemble:
-                group = group.sort_values(by=("modelName"))
-                dataValues = group["dataValue"].to_list()
-            else:
-                dataValues = group["dataValue"].iloc[0]
+        """
+        TODO:: This currently deserializes the dataValue for each row in the data frame one at a time.
+        For queries that return many rows like select_output, this could be a performance issue.
+        After implementing this, we should do some profiling on this and potentially deserialize 
+        in a vectorized way by deserializing many items at once.
+        """
+
+        for idx, row in df_results.iterrows():
+            # deserialize the data back into an ndarray
+            deserialized_data = self.__deserialize_data(row["dataValue"])
             
             # Pack the data into the out dataframe
             df_out.loc[len(df_out)] = [
-                dataValues,                 # dataValue    
-                firstRow["dataUnit"],       # dataUnit
-                firstRow["timeGenerated"],  # timeGenerated
-                firstRow["leadTime"]        # leadTime
+                deserialized_data,     # dataValue    
+                row["dataUnit"],       # dataUnit
+                row["timeGenerated"],  # timeGenerated
+                row["leadTime"]        # leadTime
             ]
 
         return df_out
 
+    def __serialize_data(self, array: np.ndarray | None) -> bytes | None:
+        """
+        This method serializes an ndarray into bytes.
+        
+        :param array: np.ndarray | None - The array to serialize or None on run fails
+            The array is expected to have three dimensions of (members, inputs, outputs) and have 
+            one of the following shapes depending on the type of model:
+                (1, 1, 1) for single point models
+                (1, 100, 1) for MRE models
+                (10, 100, 100) for CRPS models
+        
+        :returns bytes | None - The serialized array in bytes or None if the input array was None
+        """
+        if array is None:
+            return None
+        
+        buffer = BytesIO()
+        np.save(buffer, array, allow_pickle=False)
+        serialized_array = buffer.getvalue()
+        buffer.close()
 
+        return serialized_array
+
+    def __deserialize_data(self, serialized_data: bytes | None) -> np.ndarray | None:
+        """
+        This method deserializes bytes into an ndarray.
+
+        :param serialized_data: bytes | None - The bytes to deserialize
+            or None if a null was returned from the db which means the original array was None before serialization.
+
+        :returns ndarray | None - The reconstructed ndarray before it was serialized and stored
+            or None if the original array was None before it was inserted.
+        """
+        if serialized_data is None:
+            return None
+        
+        buffer = BytesIO(serialized_data)
+        array = np.load(buffer, allow_pickle=False)
+        buffer.close()
+
+        return array
+    
     def insert_lat_lon_test(self, code: str, displayName: str, notes: str, latitude: str, longitude: str):
         """This method inserts lat and lon information
         """
