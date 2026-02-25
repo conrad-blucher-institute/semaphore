@@ -25,7 +25,7 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
     
     @abstractmethod
-    def select_latest_output(self, model_name: str) -> Series | None: 
+    def select_latest_output(self, model_names: list[str]) -> list[Series] | None: 
         raise NotImplementedError()
     
     @abstractmethod

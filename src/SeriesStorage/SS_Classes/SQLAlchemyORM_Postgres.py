@@ -11,8 +11,9 @@
 # 
 #
 #Imports
+from itertools import groupby
 from sqlalchemy import create_engine as sqlalchemy_create_engine
-from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, CursorResult, Select, select, distinct, Boolean, Interval, text
+from sqlalchemy import String, MetaData, Engine, CursorResult, Select, select, distinct, text, bindparam
 from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.dialects import postgresql
@@ -198,56 +199,46 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return series
     
 
-    def select_latest_output(self, model_name: str) -> Series | None: 
-        ''' This selects *all* outputs based just on a model name and a time range, all other information is inferred
-            :param model_name: str - The name of the model to query
-
-            NOTE:: Things like model version and time will just be the latest in the DB
+    def select_latest_output(self, model_names: list[str]) -> list[Series] | None: 
+        ''' This selects the latest output for each model in the list of model names, all other information is inferred.
+            NOTE:: This will return the latest prediction, per model, that was generated regardless of version.
         '''   
 
-        stmt_find_latest_output = text(f"""
-            SELECT *
-            FROM outputs AS o
-            WHERE o."modelName" = :model_name
-            ORDER BY o."modelVersion" DESC, o."timeGenerated" DESC
-            LIMIT 1;
-        """)     
-        bind_params = {
-            'model_name': model_name
-        }
-        stmt_find_latest_output = stmt_find_latest_output.bindparams(**bind_params)
-        tupleishResult = self.__dbSelection(stmt_find_latest_output).first() # because of order this should be latest
-
-        if not tupleishResult: # If there are no results, no model information can't be inferred 
-            return None    
-
-        latest_time = tupleishResult[1]
-
-        # STEP 2: Get ALL outputs with the same timeGenerated
         stmt_collect_all_latest_outputs = text(f"""
-            SELECT *
+        WITH latest_time_per_model AS (
+            SELECT 
+                o."modelName",
+                MAX(o."timeGenerated") AS latest_time
             FROM outputs AS o
-            WHERE o."modelName" = :model_name
-            AND o."timeGenerated" = :latest_time;
+            WHERE o."modelName" IN :model_names
+            GROUP BY o."modelName"
+        )
+        SELECT o."id", o."timeGenerated", o."leadTime", o."modelName", o."modelVersion", o."dataValue", o."dataUnit", o."dataLocation", o."dataSeries", o."dataDatum", o."ensembleMemberID"
+        FROM outputs AS o
+        INNER JOIN latest_time_per_model AS ltpm
+            ON o."modelName" = ltpm."modelName"
+            AND o."timeGenerated" = ltpm.latest_time
+        ORDER BY
+            o."modelName",
+            o."ensembleMemberID";
         """)     
-        bind_params = {
-            'model_name': model_name,
-            'latest_time': latest_time
-        }
-        stmt_collect_all_latest_outputs = stmt_collect_all_latest_outputs.bindparams(**bind_params)
+        stmt_collect_all_latest_outputs = stmt_collect_all_latest_outputs.bindparams(bindparam("model_names", value=tuple(model_names), expanding=True, type_=String))
         result = self.__dbSelection(stmt_collect_all_latest_outputs).fetchall()
-
         if not result:
             return None
         
-        outputResult = self.__splice_output(result)  # Use all fetched outputs, not just the first one 
+        # Each model will be processed into a Series individually 
+        results = []
+        for _, model_data in groupby(result, key=lambda x: x[3]): # group by model name
+            model_data_list = list(model_data)
+            df_parsed_data = self.__splice_output(model_data_list) 
 
-        # Parse out model information from first output result
-        first = result[0]
-        description = SemaphoreSeriesDescription(first[3], first[4], first[8], first[7], first[6]) # Hydrate metadata from first row info
-        series = Series(description)
-        series.dataFrame = outputResult
-        return series
+            # Fill metadata from first row of the group (they all have the same metadata because they are from the same model run)
+            series = Series(SemaphoreSeriesDescription(model_data_list[0][3], model_data_list[0][4], model_data_list[0][8], model_data_list[0][7], model_data_list[0][6]), None)
+            series.dataFrame = df_parsed_data
+            results.append(series)
+        return results
+
     
     def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
         """Returns a data source location code based off of passed parameters

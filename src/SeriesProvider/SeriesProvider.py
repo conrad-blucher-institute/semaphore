@@ -81,15 +81,15 @@ class SeriesProvider():
         return self.__data_base_query(seriesDescription, timeDescription)
     
 
-    def request_output(self, method: str, **kwargs) -> Series | None:
+    def request_output(self, method: str, **kwargs) -> Series | list[Series] | None:
         ''' Selects the correct method from the ORM, calling it, and passing it the correct args
             :param method: str - This is a string value to select which style of request you are trying to make
             :param **kwargs - This is python kwargs formatted depending on method, see below
             :return series | None
 
-            NOTE:: Latest assumes model version and time by just selecting the very last made prediction, will only return one value
+            NOTE:: Latest is the very last made prediction regardless of version.
             method= 'LATEST'
-            request_output('LATEST', model_name=REQUESTED_MODEL_NAME)
+            request_output('LATEST', model_names=REQUESTED_MODEL_NAMES)
 
             NOTE:: Time span returns all the predictions for a model in a given time span, assumes model details from the last prediction
             made from that model. 
@@ -106,7 +106,7 @@ class SeriesProvider():
                 try:
                     return self.seriesStorage.select_latest_output(**kwargs)
                 except TypeError:
-                    raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("LATEST", model_name=REQUESTED_MODEL_NAME)')
+                    raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("LATEST", model_names=REQUESTED_MODEL_NAMES)')
             case 'TIME_SPAN':
                 try:
                     return self.seriesStorage.select_output(**kwargs)

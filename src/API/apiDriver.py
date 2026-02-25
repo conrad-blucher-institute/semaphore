@@ -122,10 +122,25 @@ async def get_outputs_latest(modelNames: list[str] = Query(None)):
         raise HTTPException(status_code=422, detail='No model names were provided')
     
     provider = SeriesProvider()
-    results = {}
-    for modelName in modelNames: 
-        results[modelName] = serialize_series(provider.request_output('LATEST', model_name= modelName))
-    return results
+    resultSeries = provider.request_output('LATEST', model_names=modelNames)
+
+    # Build a lookup of modelName -> Series for the models that have outputs
+    series_by_model: dict[str, Series] = {}
+    if resultSeries:
+        for series in resultSeries:
+            series_by_model[series.description.modelName] = series
+
+    # Always return an entry for each requested model name.
+    # For models with no data, serialize a null/empty representation.
+    serializedResults = {}
+    for modelName in modelNames:
+        series = series_by_model.get(modelName)
+        if series is not None:
+            serializedResults[modelName] = serialize_series(series)
+        else:
+            serializedResults[modelName] = serialize_series(None)
+    
+    return serializedResults
 
 
 @app.get('/output_time_span/')
