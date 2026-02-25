@@ -205,12 +205,12 @@ def main():
     if args.version:
         try:
             target_version = Version.from_dot_separator(args.version)
-            target_desc = args.description if args.description else ''
         except ValueError:
-            raise ValueError(f'Invalid version string: {args.version}, aborting!')    
-        
+            parser.error(f'Invalid version string: {args.version}. Expected format X.X (e.g., 2.1).')
+
+        target_desc = args.description if args.description else ''
         if len(target_desc) > 255:
-            raise ValueError('Description must be 255 characters or less, aborting!')
+            parser.error('Description must be 255 characters or less.')
         
     else:  
         # Read the target version of the database from the static file
