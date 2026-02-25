@@ -20,7 +20,6 @@
             "inputVectorCount": 100,
             "outputsPerVector": 1
         }
-
     },
     "dependentSeries": [
         {

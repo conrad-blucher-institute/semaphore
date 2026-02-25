@@ -24,7 +24,7 @@ class ReshapeTo3D(IOutputHandler):
         """ Stores model predictions as a single structured prediction tensor. 
 
             Ensures predictions are represented as a 3D ndarray in the form
-            (members, input_vectors, outputs), reshaping 2D outputs when necessary,
+            (modelCount, inputVectorsCount, outputsPerVector), reshaping 2D outputs when necessary,
             and stores the resulting tensor directly in dataValue.
             
             Examples of predictions (InputVectors, Outputs):
@@ -32,8 +32,8 @@ class ReshapeTo3D(IOutputHandler):
              - Ensemble: (100,1) - [[0.10029486]
                                     [0.10029484]                
                                     [0.10029482]]
-             - Multi-model: (Model number x inputvectors, outputs) 
-            :param predictions: list[any] - The predictions from the model runs
+             - Multi-model: (modelcount, inputVectorsCount, outputoutputsPerVectors) 
+            :param predictions: np.ndarray - The predictions from the model runs
             :param dspec: Dspec - The dspec to reference.
             :param referenceTime: datetime - the reference time of this run
             :returns DataFrame - The output DF
