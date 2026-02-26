@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-#test_ReshapeTo3d.py
+#test_DefaultOutputHandler.py
 #-------------------------------
 # Created By: Anointiyae Beasley
 # version 1.0
 #----------------------------------
-""" This tests the ReshapeTo3D output handler class by verifying that it correctly reshapes
+""" This tests the DefaultOutputHandler output handler class by verifying that it correctly reshapes
  2D model predictions into a 3D tensor format (models, input_vectors, outputs), preserves prediction values, 
  and returns a properly structured output DataFrame with the expected metadata fields.
 
-run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_ReshapeTo3d.py
+run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_DefaultOutputHandler.py
  """
 #----------------------------------
 #
@@ -35,7 +35,7 @@ def make_dspec(inputVectorCount: int) -> Dspec:
     d = Dspec()
 
     oi = OutputInfo()
-    oi.outputMethod = "ReshapeTo3D"   
+    oi.outputMethod = "DefaultOutputHandler"   
     oi.leadTime = 3600
     oi.unit = "testUnit"
 

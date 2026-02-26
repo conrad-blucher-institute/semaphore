@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 from pandas import DataFrame
 import numpy as np
 
-class ReshapeTo3D(IOutputHandler):
+class DefaultOutputHandler(IOutputHandler):
 
     def post_process_prediction(self, predictions: np.ndarray, dspec: Dspec, referenceTime: datetime) -> DataFrame:
         """ Stores model predictions as a single structured prediction tensor. 
