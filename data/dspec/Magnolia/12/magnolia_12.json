@@ -29,11 +29,7 @@
             "outKey": "PL_PWL_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": {
-                    "limit": "3600",
-                    "method": "linear",
-                    "limit_area": "inside"
-                }
+                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
             }
         },
         {
@@ -47,11 +43,7 @@
             "outKey": "PL_Surge_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": {
-                    "limit": "3600",
-                    "method": "linear",
-                    "limit_area": "inside"
-                }
+                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
             }
         },
         {
@@ -66,11 +58,7 @@
             "outKey": "POC_PWL_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": {
-                    "limit": "3600",
-                    "method": "linear",
-                    "limit_area": "inside"
-                }
+                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
             }
         },
         {
@@ -84,11 +72,7 @@
             "outKey": "POC_Surge_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": {
-                    "limit": "3600",
-                    "method": "linear",
-                    "limit_area": "inside"
-                }
+                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
             }
         },
         {
@@ -102,11 +86,7 @@
             "outKey": "PL_WNDIR_25",
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
-                "args": {
-                    "limit": "3600",
-                    "method": "linear",
-                    "limit_area": "inside"
-                }
+                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
             }
         },
         {
@@ -120,11 +100,7 @@
             "outKey": "PL_WNSPD_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": {
-                    "limit": "3600",
-                    "method": "linear",
-                    "limit_area": "inside"
-                }
+                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
             }
         },
         {
@@ -139,11 +115,7 @@
             "stalenessOffset": 39600,
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
-                "args": {
-                    "limit": "3600",
-                    "method": "linear",
-                    "limit_area": "inside"
-                }
+                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
             }
         },
         {
@@ -158,11 +130,7 @@
             "stalenessOffset": 39600,
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": {
-                    "limit": "3600",
-                    "method": "linear",
-                    "limit_area": "inside"
-                }
+                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
             }
         }
     ],
