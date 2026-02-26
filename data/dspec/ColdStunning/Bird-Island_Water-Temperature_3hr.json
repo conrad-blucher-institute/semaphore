@@ -10,7 +10,7 @@
         "interval": 3600
     },
     "outputInfo": {
-        "outputMethod": "OnePackedFloat",
+        "outputMethod": "DefaultOutputHandler",
         "leadTime": 10800,
         "series": "pWaterTmp",
         "location": "SouthBirdIsland",

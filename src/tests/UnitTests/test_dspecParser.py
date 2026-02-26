@@ -63,7 +63,7 @@ def test_invalid_vector_order():
                 "interval": 3600
             },
             "outputInfo": {
-                "outputMethod": "OnePackedFloat",
+                "outputMethod": "DefaultOutputHandler",
                 "leadTime": 86400,
                 "series": "testSeries",
                 "location": "PortLavaca",
