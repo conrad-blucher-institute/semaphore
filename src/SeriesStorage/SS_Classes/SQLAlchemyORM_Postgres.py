@@ -504,15 +504,18 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         if(type(series.description).__name__ != 'SemaphoreSeriesDescription'): raise ValueError('Description should be type SemaphoreSeriesDescription')
 
         if len(series.dataFrame) != 1: raise ValueError(f'Output series dataframe should only have one row, got {len(series.dataFrame)}')
-
+    
         # pack the output data into a row
         output_row = series.dataFrame.iloc[0]
+        serialized_data_results = self.__serialize_data(output_row['dataValue'])
+        if serialized_data_results is None:
+            serialized_data_results = b""
         row_to_insert = {
             "timeGenerated": output_row['timeGenerated'],
             "leadTime": output_row['leadTime'],
             "modelName": series.description.modelName,
             "modelVersion": series.description.modelVersion,
-            "dataValue": self.__serialize_data(output_row['dataValue']),    # serialize the ndarray to bytes
+            "dataValue": serialized_data_results,    # serialize the ndarray to bytes
             "dataUnit": output_row['dataUnit'],
             "dataLocation": series.description.dataLocation,
             "dataSeries": series.description.dataSeries,
