@@ -35,7 +35,7 @@ class Migrator(IDatabaseMigration):
             - Create the new outputs table
                 - Removes enemble member id
                 - dataValue uses BYTEA
-                - Add AK00 constraints 
+                - Add constraints 
             - Create the new model_run table
 
             Rollback:
