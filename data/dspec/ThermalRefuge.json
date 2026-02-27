@@ -1,13 +1,13 @@
 {
+    "dspecVersion": "2.0",
     "modelName": "ThermalRefuge",
     "modelVersion": "1.0.0",
     "author": "Andrew DeSimone",
     "modelFileName": "thermalrefugemodel",
-    "timingInfo":{
+    "timingInfo": {
         "active": true,
         "offset": 0,
         "interval": 3600
-
     },
     "outputInfo": {
         "outputMethod": "OnePackedFloat",
@@ -15,87 +15,55 @@
         "interval": 3600,
         "series": "pWaterTmp",
         "location": "SouthBirdIsland",
-        "unit" : "celsius"
+        "unit": "celsius"
     },
-    "inputs": [
-        { 
+    "dependentSeries": [
+        {
             "_name": "Water Temp",
             "location": "SouthBirdIsland",
             "source": "LIGHTHOUSE",
             "series": "dWaterTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [-1, -1]
+            "range": [0, -7],
+            "outKey": "bird-island_water-temp",
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit": "3600",
+                    "method": "linear",
+                    "limit_area": "inside"
+                }
+            }
         },
-        { 
+        {
             "_name": "Air Temp",
             "location": "SouthBirdIsland",
             "source": "LIGHTHOUSE",
             "series": "dAirTmp",
             "unit": "celsius",
-            "type": "float",
             "interval": 3600,
-            "range": [-1, -1]
-        },
-        { 
-            "_name": "Water Temp",
-            "location": "SouthBirdIsland",
-            "source": "LIGHTHOUSE",
-            "series": "dWaterTmp",
-            "unit": "celsius",
-            "type": "float",
-            "interval": 3600,
-            "range": [-2, -2]
-        },
-        { 
-            "_name": "Air Temp",
-            "location": "SouthBirdIsland",
-            "source": "LIGHTHOUSE",
-            "series": "dAirTmp",
-            "unit": "celsius",
-            "type": "float",
-            "interval": 3600,
-            "range": [-2, -2]
-        },
-        { 
-            "_name": "Water Temp",
-            "location": "SouthBirdIsland",
-            "source": "LIGHTHOUSE",
-            "series": "dWaterTmp",
-            "unit": "celsius",
-            "type": "float",
-            "interval": 3600,
-            "range": [-3, -3]
-        },
-        { 
-            "_name": "Air Temp",
-            "location": "SouthBirdIsland",
-            "source": "LIGHTHOUSE",
-            "series": "dAirTmp",
-            "unit": "celsius",
-            "type": "float",
-            "interval": 3600,
-            "range": [-3, -3]
-        },
-        { 
-            "_name": "Water Temp",
-            "location": "SouthBirdIsland",
-            "source": "LIGHTHOUSE",
-            "series": "dWaterTmp",
-            "unit": "celsius",
-            "type": "float",
-            "interval": 3600,
-            "range": [-4, -4]
-        },
-        { 
-            "_name": "Air Temp",
-            "location": "SouthBirdIsland",
-            "source": "LIGHTHOUSE",
-            "series": "dAirTmp",
-            "unit": "celsius",
-            "type": "float",
-            "interval": 3600,
-            "range": [-5, -5]
+            "range": [0, -7],
+            "outKey": "bird-island_air-temp",
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit": "3600",
+                    "method": "linear",
+                    "limit_area": "inside"
+                }
+            }
         }
-]}
+    ],
+    "postProcessCall": [],
+    "vectorOrder": [
+        { "key": "bird-island_water-temp", "dType": "float", "indexes": [1, 2] },
+        { "key": "bird-island_air-temp",   "dType": "float", "indexes": [1, 2] },
+        { "key": "bird-island_water-temp", "dType": "float", "indexes": [2, 3] },
+        { "key": "bird-island_air-temp",   "dType": "float", "indexes": [2, 3] },
+        { "key": "bird-island_water-temp", "dType": "float", "indexes": [3, 4] },
+        { "key": "bird-island_air-temp",   "dType": "float", "indexes": [3, 4] },
+        { "key": "bird-island_water-temp", "dType": "float", "indexes": [4, 5] },
+        { "key": "bird-island_air-temp",   "dType": "float", "indexes": [5, 6] }
+    ]
+}
