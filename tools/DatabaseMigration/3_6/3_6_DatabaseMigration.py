@@ -50,13 +50,28 @@ class Migrator(IDatabaseMigration):
             # Rename outputs -> retired_outputs
             connection.execute(text('ALTER TABLE public."outputs" RENAME TO "retired_outputs";'))
 
-            # Rename constraints on retired_outputs 
-            connection.execute(text('ALTER TABLE public."retired_outputs" RENAME CONSTRAINT "outputs_pkey" TO "retired_outputs_pkey";'))
-            connection.execute(text('ALTER TABLE public."retired_outputs" RENAME CONSTRAINT "outputs_AK00" TO "retired_outputs_AK00";'))
-            connection.execute(text('ALTER TABLE public."retired_outputs" RENAME CONSTRAINT "outputs_dataDatum_fkey" TO "retired_outputs_dataDatum_fkey";'))
-            connection.execute(text('ALTER TABLE public."retired_outputs" RENAME CONSTRAINT "outputs_dataLocation_fkey" TO "retired_outputs_dataLocation_fkey";'))
-            connection.execute(text('ALTER TABLE public."retired_outputs" RENAME CONSTRAINT "outputs_dataSeries_fkey" TO "retired_outputs_dataSeries_fkey";'))
-            connection.execute(text('ALTER TABLE public."retired_outputs" RENAME CONSTRAINT "outputs_dataUnit_fkey" TO "retired_outputs_dataUnit_fkey";'))
+            # Rename constraints on retired_outputs
+            connection.execute(text("""
+                DO $$
+                DECLARE
+                    r RECORD;
+                BEGIN
+                    FOR r IN
+                        SELECT conname
+                        FROM pg_constraint
+                        WHERE conrelid = 'public."retired_outputs"'::regclass
+                    LOOP
+                        -- only rename if it doesn't already start with retired_
+                        IF r.conname NOT LIKE 'retired\\_%' ESCAPE '\\' THEN
+                            EXECUTE format(
+                                'ALTER TABLE public."retired_outputs" RENAME CONSTRAINT %I TO %I;',
+                                r.conname,
+                                'retired_' || r.conname
+                            );
+                        END IF;
+                    END LOOP;
+                END $$;
+            """))
 
             # Rename outputs_id_seq -> retired_outputs_id_seq and reattach
             connection.execute(text("""
@@ -74,16 +89,31 @@ class Migrator(IDatabaseMigration):
             """))
 
             # Rename model_runs to retired_model_runs.
-            
             connection.execute(text("""
                 ALTER TABLE public."model_runs"
                 RENAME TO "retired_model_runs";
             """))
             # Retire model runs constraints
-            connection.execute(text('ALTER TABLE public."retired_model_runs" RENAME CONSTRAINT "model_runs_pkey" TO "retired_model_runs_pkey";'))
-            connection.execute(text('ALTER TABLE public."retired_model_runs" RENAME CONSTRAINT "model_runs_AK00" TO "retired_model_runs_AK00";'))
-            connection.execute(text('ALTER TABLE public."retired_model_runs" RENAME CONSTRAINT "model_runs_outputID_fkey" TO "retired_model_runs_outputID_fkey";'))
-
+            connection.execute(text("""
+                DO $$
+                DECLARE
+                    r RECORD;
+                BEGIN
+                    FOR r IN
+                        SELECT conname
+                        FROM pg_constraint
+                        WHERE conrelid = 'public."retired_model_runs"'::regclass
+                    LOOP
+                        IF r.conname NOT LIKE 'retired\\_%' ESCAPE '\\' THEN
+                            EXECUTE format(
+                                'ALTER TABLE public."retired_model_runs" RENAME CONSTRAINT %I TO %I;',
+                                r.conname,
+                                'retired_' || r.conname
+                            );
+                        END IF;
+                    END LOOP;
+                END $$;
+            """))
             #Retire model runs sequence
             connection.execute(text("""
                 DO $$
@@ -137,7 +167,7 @@ class Migrator(IDatabaseMigration):
                     CONSTRAINT "outputs_dataDatum_fkey"
                         FOREIGN KEY ("dataDatum") REFERENCES public."ref_dataDatum" ("code")
                 );
-        """))
+            """))
             
             # Create new model runs table
             connection.execute(text("""
@@ -180,13 +210,27 @@ class Migrator(IDatabaseMigration):
             connection.execute(text('ALTER TABLE public."retired_outputs" RENAME TO "outputs";'))
 
             # Restore constraint names
-            connection.execute(text('ALTER TABLE public."outputs" RENAME CONSTRAINT "retired_outputs_pkey" TO "outputs_pkey";'))
-            connection.execute(text('ALTER TABLE public."outputs" RENAME CONSTRAINT "retired_outputs_AK00" TO "outputs_AK00";'))
-            connection.execute(text('ALTER TABLE public."outputs" RENAME CONSTRAINT "retired_outputs_dataDatum_fkey" TO "outputs_dataDatum_fkey";'))
-            connection.execute(text('ALTER TABLE public."outputs" RENAME CONSTRAINT "retired_outputs_dataLocation_fkey" TO "outputs_dataLocation_fkey";'))
-            connection.execute(text('ALTER TABLE public."outputs" RENAME CONSTRAINT "retired_outputs_dataSeries_fkey" TO "outputs_dataSeries_fkey";'))
-            connection.execute(text('ALTER TABLE public."outputs" RENAME CONSTRAINT "retired_outputs_dataUnit_fkey" TO "outputs_dataUnit_fkey";'))
-
+            connection.execute(text("""
+                DO $$
+                DECLARE
+                    r RECORD;
+                    new_name TEXT;
+                BEGIN
+                    FOR r IN
+                        SELECT conname
+                        FROM pg_constraint
+                        WHERE conrelid = 'public."outputs"'::regclass
+                        AND conname LIKE 'retired\\_%' ESCAPE '\\'
+                    LOOP
+                        new_name := substring(r.conname from 9); -- remove 'retired_'
+                        EXECUTE format(
+                            'ALTER TABLE public."outputs" RENAME CONSTRAINT %I TO %I;',
+                            r.conname,
+                            new_name
+                        );
+                    END LOOP;
+                END $$;
+            """))
             # Restore sequence name outputs_id_seq and reattach 
             connection.execute(text("""
             DO $$

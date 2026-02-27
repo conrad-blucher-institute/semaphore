@@ -894,7 +894,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         :returns ndarray | None - The reconstructed ndarray before it was serialized and stored
             or None if the original array was None before it was inserted.
         """
-        if serialized_data is None:
+        if serialized_data is None or serialized_data == b"":
             return None
         
         buffer = BytesIO(serialized_data)
