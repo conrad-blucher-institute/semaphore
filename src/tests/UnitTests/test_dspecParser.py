@@ -56,7 +56,7 @@ def test_expected_output_shape_defaults_from_file():
     # Parse and verify defaults
     dspec = DSPEC_Parser().parse_dspec(dspecFilePath)
     eos = dspec.outputInfo.expectedOutputShape
-    assert eos.modelCount == 1
+    assert eos.memberCount == 1
     assert eos.inputVectorCount == 1
     assert eos.outputsPerVector == 1
 
@@ -98,11 +98,11 @@ def sub_test_dspec_1_0(dspecFilePath: str):
         expected = outputJson.get("expectedOutputShape", None)
         eos = outputInfo.expectedOutputShape
         if expected == None:
-            assert eos.modelCount == 1
+            assert eos.memberCount == 1
             assert eos.inputVectorCount == 1
             assert eos.outputsPerVector == 1
         else:
-            assert eos.modelCount == expected["modelCount"]
+            assert eos.memberCount == expected["memberCount"]
             assert eos.inputVectorCount == expected["inputVectorCount"]
             assert eos.outputsPerVector == expected["outputsPerVector"]
         
@@ -157,11 +157,11 @@ def sub_test_dspec_2_0(dspecFilePath: str):
         expected = outputJson.get("expectedOutputShape", None)
         eos = outputInfo.expectedOutputShape
         if expected == None:
-            assert eos.modelCount == 1
+            assert eos.memberCount == 1
             assert eos.inputVectorCount == 1
             assert eos.outputsPerVector == 1
         else:
-            assert eos.modelCount == expected["modelCount"]
+            assert eos.memberCount == expected["memberCount"]
             assert eos.inputVectorCount == expected["inputVectorCount"]
             assert eos.outputsPerVector == expected["outputsPerVector"]
         

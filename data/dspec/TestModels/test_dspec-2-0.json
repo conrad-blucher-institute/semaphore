@@ -19,7 +19,7 @@
         "datum": "test_datum",
         "unit" : "meter",
         "expectedOutputShape" : {
-            "modelCount": 1,
+            "memberCount": 1,
             "inputVectorCount" : 100,
             "outputsPerVector" : 1
         }

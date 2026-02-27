@@ -97,7 +97,7 @@ class dspec_sub_Parser_1_0:
                 "Legacy models default to (1,1,1)."
             )
         outputInfo.expectedOutputShape = ExpectedOutputShape()
-        outputInfo.expectedOutputShape.modelCount = 1
+        outputInfo.expectedOutputShape.memberCount = 1
         outputInfo.expectedOutputShape.inputVectorCount = 1
         outputInfo.expectedOutputShape.outputsPerVector = 1
 
@@ -203,11 +203,11 @@ class dspec_sub_Parser_2_0:
         expectedOutputShapeDict = outputJson.get("expectedOutputShape", None)
         expectedOutputShape = ExpectedOutputShape()
         if expectedOutputShapeDict is None:
-            expectedOutputShape.modelCount = 1
+            expectedOutputShape.memberCount = 1
             expectedOutputShape.inputVectorCount = 1
             expectedOutputShape.outputsPerVector = 1
         else:
-            expectedOutputShape.modelCount = expectedOutputShapeDict["modelCount"]
+            expectedOutputShape.memberCount = expectedOutputShapeDict["memberCount"]
             expectedOutputShape.inputVectorCount = expectedOutputShapeDict["inputVectorCount"]
             expectedOutputShape.outputsPerVector = expectedOutputShapeDict["outputsPerVector"]
         outputInfo.expectedOutputShape = expectedOutputShape
@@ -395,15 +395,15 @@ class DataIntegrityCall:
     
 class ExpectedOutputShape:
     def __init__(self) -> None:
-        self.modelCount = None
+        self.memberCount = None
         self.inputVectorCount = None
         self.outputsPerVector = None
 
     def __str__(self) -> str:
-        return f'\n[ExpectedOutputShape] -> modelCount: {self.modelCount}, inputVectorCount: {self.inputVectorCount}, outputsPerVector: {self.outputsPerVector}'
+        return f'\n[ExpectedOutputShape] -> memberCount: {self.memberCount}, inputVectorCount: {self.inputVectorCount}, outputsPerVector: {self.outputsPerVector}'
     
     def __repr__(self):
-        return f'\nExpectedOutputShape({self.modelCount}, {self.inputVectorCount}, {self.outputsPerVector})'
+        return f'\nExpectedOutputShape({self.memberCount}, {self.inputVectorCount}, {self.outputsPerVector})'
     
     
 class VectorOrder:

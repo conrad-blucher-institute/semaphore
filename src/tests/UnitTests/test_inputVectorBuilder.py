@@ -53,7 +53,7 @@ def mock_dspec(vectorOrder):
 
     # Add outputInfo + expectedOutputShape to satisfy InputVectorBuilder
     eos = ExpectedOutputShape()
-    eos.modelCount = 1
+    eos.memberCount = 1
     eos.inputVectorCount = 1
     eos.outputsPerVector = 1
 

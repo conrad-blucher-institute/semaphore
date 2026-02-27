@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#  PackedPredictionTensor.py
+#  DefaultOutputHandler.py
 #----------------------------------
 # Created By: Anointiyae Beasley
 # version 1.0
@@ -21,10 +21,10 @@ import numpy as np
 class DefaultOutputHandler(IOutputHandler):
 
     def post_process_prediction(self, predictions: np.ndarray, dspec: Dspec, referenceTime: datetime) -> DataFrame:
-        """ Stores model predictions as a single structured prediction tensor. 
+        """ Stores member predictions as a single structured prediction tensor. 
 
             Ensures predictions are represented as a 3D ndarray in the form
-            (modelCount, inputVectorsCount, outputsPerVector), reshaping 2D outputs when necessary,
+            (memberCount, inputVectorsCount, outputsPerVector), reshaping 2D outputs when necessary,
             and stores the resulting tensor directly in dataValue.
             
             Examples of predictions (InputVectors, Outputs):
@@ -32,30 +32,30 @@ class DefaultOutputHandler(IOutputHandler):
              - Ensemble: (100,1) - [[0.10029486]
                                     [0.10029484]                
                                     [0.10029482]]
-             - Multi-model: (modelcount, inputVectorsCount, outputoutputsPerVectors) 
-            :param predictions: np.ndarray - The predictions from the model runs
+             - Multi-member: (memberCount, inputVectorsCount, outputsPerVectors) 
+            :param predictions: np.ndarray - The predictions from the member runs
             :param dspec: Dspec - The dspec to reference.
             :param referenceTime: datetime - the reference time of this run
             :returns DataFrame - The output DF
             """
         expectedOutputShape: ExpectedOutputShape = dspec.outputInfo.expectedOutputShape
 
-        expectedModels = expectedOutputShape.modelCount
+        expectedMembers = expectedOutputShape.memberCount
         expectedInputVectors = expectedOutputShape.inputVectorCount
         expectedOutputsPerVector = expectedOutputShape.outputsPerVector
 
         # Raising an exception here because the current data flow is only supposed to pass 2D array's
-        # This exception will be removed once we implement CRPS models.
+        # This exception will be removed once we implement CRPS members.
         if predictions.ndim != 2:
             raise Exception(f"Expected a 2D predictions array, got ndim={predictions.ndim} with shape={predictions.shape}")
 
         inputVectors, outputs = predictions.shape  # (input_vectors, outputs)
 
-        # Reshape into (models, input_vectors, outputs)
-        pred = predictions.reshape(expectedModels, inputVectors, outputs)
+        # Reshape into (members, input_vectors, outputs)
+        pred = predictions.reshape(expectedMembers, inputVectors, outputs)
 
         # Build expected shape as a tuple
-        expectedShape = (expectedModels, expectedInputVectors, expectedOutputsPerVector)
+        expectedShape = (expectedMembers, expectedInputVectors, expectedOutputsPerVector)
 
         # Compare shape tuples
         comparisonResult: bool = (pred.shape == expectedShape)

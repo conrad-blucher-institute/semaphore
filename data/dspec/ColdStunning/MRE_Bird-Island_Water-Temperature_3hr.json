@@ -14,7 +14,12 @@
         "leadTime": 10800,
         "series": "pWaterTmp",
         "location": "SouthBirdIsland",
-        "unit": "celsius"
+        "unit": "celsius",
+        "expectedOutputShape": {
+            "memberCount": 1,
+            "inputVectorCount": 100,
+            "outputsPerVector": 1
+        }
     },
     "dependentSeries": [
         {

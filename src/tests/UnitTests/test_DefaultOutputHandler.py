@@ -40,7 +40,7 @@ def make_dspec(inputVectorCount: int) -> Dspec:
     oi.unit = "testUnit"
 
     eos = ExpectedOutputShape()
-    eos.modelCount = 1
+    eos.memberCount = 1
     eos.inputVectorCount = inputVectorCount
     eos.outputsPerVector = 1
 
