@@ -344,9 +344,9 @@ def serialize_output_series(series: Series) -> dict[any]:
         row_dict = {}
         for k, v in row.items():
             if isinstance(v, list):
-                    row_dict[k] = None if pd.isna(v).any() else v
+                row_dict[k] = None if pd.isna(v).any() else v
             elif isinstance(v, np.ndarray):
-                    row_dict[k] = None if v is None else v.tolist()
+                row_dict[k] = None if pd.isna(v).any() else v.tolist()
             else:
                 row_dict[k] = None if pd.isna(v) else v
 
