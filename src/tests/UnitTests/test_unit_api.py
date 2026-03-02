@@ -7,6 +7,8 @@
 # -------------------------------
 """
 This file tests that the api can correctly serialize ndarrays in the dataValue column of a data frame correctly
+
+docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_api.py
 """
 import numpy as np
 import pandas as pd
@@ -92,10 +94,14 @@ from src.API.apiDriver import serialize_output_series
             ]
         ]),
 
-        # Test case 6: shape (0,0,0)
-        np.array([[[]]]),
+        # Test case 6: shape (1, 1, 0)
+        np.array([
+            [
+                []
+            ]
+        ]),
 
-        # Test case: 7: shape (1, 2, 3)
+        # Test case 7: shape (1, 2, 3)
         np.array([
             [
                 [1.0, np.nan, 3.0],
@@ -103,7 +109,7 @@ from src.API.apiDriver import serialize_output_series
             ]
         ])
     ],
-    ids=["3x5x2", "None", "1x1x1", "3x5x4", "2x3x1", "0x0x0", "nans"]
+    ids=["3x5x2", "None", "1x1x1", "3x5x4", "2x3x1", "1x1x0", "nans"]
 )
 def test_serialize_output(data_array):
     """
@@ -131,7 +137,7 @@ def test_serialize_output(data_array):
     result = serialize_output_series(series)
 
     # ensure the cases for None and an array with any nans are handled correctly
-    if data_array is None or np.isnan(data_array).any():
+    if data_array is None or pd.isna(data_array).any():
         assert result['_Series__data'][0]['dataValue'] is None
     # ensure in normal cases that the ndarray in dataValue is converted to a list and serialized correctly
     else:
@@ -184,8 +190,14 @@ def test_serialize_output_multiple_rows():
         ]
     ])
 
-    # (0, 0, 0)
-    arr4 = np.array([[[]]])
+    # (1, 1, 0)
+    arr4 = np.array([
+        [
+            [
+                
+            ]
+        ]
+    ])
 
     arr5 = np.array([
         [
@@ -240,7 +252,7 @@ def test_serialize_output_multiple_rows():
 
     for idx, row in df.iterrows():
         # ensure the cases for None and an array with any nans are handled correctly
-        if row['dataValue'] is None or np.isnan(row['dataValue']).any():
+        if row['dataValue'] is None or pd.isna(row['dataValue']).any():
             assert result['_Series__data'][idx]['dataValue'] is None
         # ensure in normal cases that the ndarray in dataValue is converted to a list and serialized correctly
         else:

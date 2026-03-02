@@ -343,7 +343,7 @@ def serialize_output_series(series: Series) -> dict[any]:
             if isinstance(v, list):
                 row_dict[k] = None if pd.isna(v).any() else v
             elif isinstance(v, np.ndarray):
-                row_dict[k] = None if np.isnan(v).any() else v.tolist()
+                row_dict[k] = None if pd.isna(v).any() else v.tolist()
             else:
                 row_dict[k] = None if pd.isna(v) else v
 
