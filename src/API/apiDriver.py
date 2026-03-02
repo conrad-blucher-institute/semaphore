@@ -328,11 +328,8 @@ def serialize_output_series(series: Series) -> dict[any]:
     }
     """
 
-    # Serialize the series object
-    serialized: dict[any] = jsonable_encoder(series)
-
-    # Remove the automatically serialized dataFrame
-    del serialized['_Series__dataFrame']
+    # Serialize the series object while ignoring the dataFrame since we will serialize it ourselves
+    serialized: dict[any] = jsonable_encoder(series, exclude={'_Series__dataFrame'})
 
     # Always include isComplete for backward compatibility
     serialized['isComplete'] = True
@@ -346,7 +343,7 @@ def serialize_output_series(series: Series) -> dict[any]:
             if isinstance(v, list):
                 row_dict[k] = None if pd.isna(v).any() else v
             elif isinstance(v, np.ndarray):
-                row_dict[k] = None if pd.isna(v).any() else v.tolist()
+                row_dict[k] = None if np.isnan(v).any() else v.tolist()
             else:
                 row_dict[k] = None if pd.isna(v) else v
 
