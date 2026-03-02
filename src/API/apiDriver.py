@@ -17,6 +17,7 @@ from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescr
 from SeriesProvider.SeriesProvider import SeriesProvider
 from fastapi.encoders import jsonable_encoder
 import pandas as pd
+import numpy as np
 from contextvars import ContextVar
 import logging
 
@@ -342,8 +343,10 @@ def serialize_output_series(series: Series) -> dict[any]:
         # Replace NaNs with None and ensure JSON safe types
         row_dict = {}
         for k, v in row.items():
-            if type(v) == list:
+            if isinstance(v, list):
                     row_dict[k] = None if pd.isna(v).any() else v
+            elif isinstance(v, np.ndarray):
+                    row_dict[k] = None if v is None else v.tolist()
             else:
                 row_dict[k] = None if pd.isna(v) else v
 
