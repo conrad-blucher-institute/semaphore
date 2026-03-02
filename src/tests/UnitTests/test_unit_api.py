@@ -255,8 +255,9 @@ def test_serialize_output_multiple_rows():
         if row['dataValue'] is None or pd.isna(row['dataValue']).any():
             assert result['_Series__data'][idx]['dataValue'] is None
         # ensure in normal cases that the ndarray in dataValue is converted to a list and serialized correctly
+        # and that it matches the original dataValue in the data frame
         else:
-            assert result['_Series__data'][idx]['dataValue'] == row['dataValue'].tolist()
+            assert result['_Series__data'][idx]['dataValue'] == df.iloc[idx]['dataValue'].tolist()
 
         assert result['_Series__data'][idx]['dataUnit'] == "celsius"
         assert result['_Series__data'][idx]['leadTime'] == 367200
