@@ -507,15 +507,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
     
         # pack the output data into a row
         output_row = series.dataFrame.iloc[0]
-        serialized_data_results = self.__serialize_data(output_row['dataValue'])
-        if serialized_data_results is None:
-            serialized_data_results = b""
+        serialized_data_results = self.__serialize_data(output_row['dataValue'])# serialize the ndarray to bytes
         row_to_insert = {
             "timeGenerated": output_row['timeGenerated'],
             "leadTime": output_row['leadTime'],
             "modelName": series.description.modelName,
             "modelVersion": series.description.modelVersion,
-            "dataValue": serialized_data_results,    # serialize the ndarray to bytes
+            "dataValue": serialized_data_results,    
             "dataUnit": output_row['dataUnit'],
             "dataLocation": series.description.dataLocation,
             "dataSeries": series.description.dataSeries,
@@ -894,7 +892,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         :returns ndarray | None - The reconstructed ndarray before it was serialized and stored
             or None if the original array was None before it was inserted.
         """
-        if serialized_data is None or serialized_data == b"":
+        if serialized_data is None:
             return None
         
         buffer = BytesIO(serialized_data)

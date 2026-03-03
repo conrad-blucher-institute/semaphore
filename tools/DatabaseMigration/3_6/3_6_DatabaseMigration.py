@@ -141,7 +141,7 @@ class Migrator(IDatabaseMigration):
                     "leadTime" INTERVAL NOT NULL,
                     "modelName" VARCHAR(50) NOT NULL,
                     "modelVersion" VARCHAR(10) NOT NULL,
-                    "dataValue" BYTEA NOT NULL,
+                    "dataValue" BYTEA,
                     "dataUnit" VARCHAR(10) NOT NULL,
                     "dataLocation" VARCHAR(25) NOT NULL,
                     "dataSeries" VARCHAR(25) NOT NULL,
