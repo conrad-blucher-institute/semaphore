@@ -26,7 +26,7 @@
             "interval": 3600,
             "range": [
                 0,
-                -24
+                -26
             ],
             "outKey": "south-bird-island_water-temp_25",
             "dataIntegrityCall": {
@@ -47,7 +47,7 @@
             "interval": 3600,
             "range": [
                 0,
-                -24
+                -26
             ],
             "outKey": "south-bird-island_air-temp_25",
             "dataIntegrityCall": {
@@ -86,11 +86,19 @@
     "vectorOrder": [
         {
             "key": "south-bird-island_water-temp_25",
-            "dType": "float"
+            "dType": "float",
+            "indexes": [
+                0,
+                25
+            ]
         },
         {
             "key": "south-bird-island_air-temp_25",
-            "dType": "float"
+            "dType": "float",
+            "indexes": [
+                0,
+                25
+            ]
         },
         {
             "key": "south-bird-island_predicted_air-temp_30",

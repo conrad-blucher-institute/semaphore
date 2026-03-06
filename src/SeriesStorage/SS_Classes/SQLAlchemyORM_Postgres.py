@@ -17,8 +17,9 @@ and deserialized back to ndarrays after selection from the database.
 # 
 #
 #Imports
+from itertools import groupby
 from sqlalchemy import create_engine as sqlalchemy_create_engine
-from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData, UniqueConstraint, Engine, ForeignKey, CursorResult, Select, select, distinct, Boolean, Interval, text
+from sqlalchemy import String, MetaData, Engine, CursorResult, Select, select, distinct, text, bindparam
 from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.dialects import postgresql

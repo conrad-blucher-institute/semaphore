@@ -46,26 +46,34 @@ class SeriesProvider():
         return returningSeries
           
     
-    def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> Series:
+    def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime, skipIngestionLogic: bool = False) -> Series:
         """This method attempts to return a series matching a series description and a time description.
+
+        NOTE::if the data source in the series description is "SEMAPHORE", we skip all freshness and verified time checks and directly query for new data, 
+            as this is a special case used to ingest outputs as inputs for other models.
+
             :param seriesDescription - A description of the wanted series.
             :param timeDescription - A description of the temporal information of the wanted series. 
-            :param refrenceTime - The time of execution 
+            :param referenceTime - The time of execution 
+            :param skipIngestionLogic - A flag to determine whether to skip the ingestion logic and directly query the database for the requested series. Default is False.
             :returns series - The series containing as much data as could be found.
         """
         log(f'\nInit input request from \t{seriesDescription}\t{timeDescription}')
-
-        # assume we have not ingested data yet
-        already_ingested_data = False
 
         # If the data source is from the semaphore ingestion class, we ignore the default behavior and always request new data.
         if seriesDescription.dataSource.upper() == 'SEMAPHORE':
             return self.__data_ingestion_query(seriesDescription, timeDescription)
         
+        if skipIngestionLogic:
+            log(f'Init DB Query...')
+            return self.seriesStorage.select_input(seriesDescription, timeDescription)
+        
+        # assume we have not ingested data yet
+        already_ingested_data = False
+
         # We request new data if:
         #   - The data in the db is stale.
         #   - We can get more verified times for the requested range.
-
         # always call the db freshness check to ensure we aren't using old data
         db_is_fresh = self.db_has_freshly_acquired_data(seriesDescription, timeDescription, referenceTime)
         if not db_is_fresh:
@@ -78,18 +86,19 @@ class SeriesProvider():
             if should_ingest_for_verified_time:
                 self.__data_ingestion_query(seriesDescription, timeDescription)
 
-        return self.__data_base_query(seriesDescription, timeDescription)
+        log(f'Init DB Query...')
+        return self.seriesStorage.select_input(seriesDescription, timeDescription)
     
 
-    def request_output(self, method: str, **kwargs) -> Series | None:
+    def request_output(self, method: str, **kwargs) -> Series | list[Series] | None:
         ''' Selects the correct method from the ORM, calling it, and passing it the correct args
             :param method: str - This is a string value to select which style of request you are trying to make
             :param **kwargs - This is python kwargs formatted depending on method, see below
             :return series | None
 
-            NOTE:: Latest assumes model version and time by just selecting the very last made prediction, will only return one value
+            NOTE:: Latest is the very last made prediction regardless of version.
             method= 'LATEST'
-            request_output('LATEST', model_name=REQUESTED_MODEL_NAME)
+            request_output('LATEST', model_names=REQUESTED_MODEL_NAMES)
 
             NOTE:: Time span returns all the predictions for a model in a given time span, assumes model details from the last prediction
             made from that model. 
@@ -106,7 +115,7 @@ class SeriesProvider():
                 try:
                     return self.seriesStorage.select_latest_output(**kwargs)
                 except TypeError:
-                    raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("LATEST", model_name=REQUESTED_MODEL_NAME)')
+                    raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("LATEST", model_names=REQUESTED_MODEL_NAMES)')
             case 'TIME_SPAN':
                 try:
                     return self.seriesStorage.select_output(**kwargs)
@@ -119,6 +128,8 @@ class SeriesProvider():
                     raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("SPECIFIC", semaphoreSeriesDescription= DESCRIPTION, timeDescription= DESCRIPTION)')
             case _:
                 raise NotImplementedError(f'Method {method} has not been implemented in SeriesProvider.request_output')
+            
+            
     def db_has_freshly_acquired_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> bool:
         """
         Checks whether the database contains fresh data for the requested series. 
@@ -148,18 +159,6 @@ class SeriesProvider():
   
         return is_fresh
     
-
-    def __data_base_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) ->Series:
-        """ Handles the process of getting requested data from series storage.
-        :param seriesDescription: SeriesDescription - The semantic description of request
-        :param timeDescription: TimeDescription - The temporal description of the request
-        :returns Series
-            - Validated results: Series - The results from the DB that have gone through validation.
-            - Raw results: Series - The raw results from the database.
-        """
-
-        log(f'Init DB Query...')
-        return  self.seriesStorage.select_input(seriesDescription, timeDescription)
         
     def __data_ingestion_query(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
         """ Handles the process of getting requested data from series storage.

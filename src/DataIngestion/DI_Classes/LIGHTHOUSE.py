@@ -114,6 +114,12 @@ class LIGHTHOUSE(IDataIngestion):
         dataValueIndex = 1
         dataTimestampIndex = 0
         df = get_input_dataFrame()
+        
+        # Check if this is a prediction like the pHarm series and if so use the current time for timeGenerated.
+        # This is a prediction rather than a measurement so we'll use the time we grabbed it.
+        is_prediction = seriesDescription.dataSeries[0] == 'p'
+        now_time = datetime.now(timezone.utc) if is_prediction else None
+        
         for dataPoint in data:
          # Lighthouse returns epoch time in milliseconds
             epochTimeStamp = dataPoint[dataTimestampIndex]/1000            # Lighthouse over returns data, so we just clip any data that is before or after our requested date range
@@ -125,11 +131,14 @@ class LIGHTHOUSE(IDataIngestion):
             if dataPoint[dataValueIndex] == None: # If lighthouse does not have a requested value, it will return None
                 continue
 
+            # Use now_time for prediction series, otherwise use dt
+            time_generated = now_time if is_prediction else dt
+            
             df.loc[len(df)] = [
                 dataPoint[dataValueIndex],          # dataValue
                 seriesInfoMap[SIMSeriesUnitIndex],  # dataUnit
                 dt,                                 # timeVerified
-                dt,                                 # timeGenerated
+                time_generated,                     # timeGenerated
                 lon,                                # longitude
                 lat                                 # latitude
             ]
