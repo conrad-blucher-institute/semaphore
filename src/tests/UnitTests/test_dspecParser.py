@@ -186,7 +186,7 @@ def sub_test_dspec_2_0(dspecFilePath: str):
         # Iterate through vectorOrderJson to ensure all values match
         for i, entry in enumerate(vectorOrderJson): 
             key = entry.get("key", [])  
-            if entry.get("isMultipliedKeys", False):
+            if entry.get("isMultipliedKey", False):
                 assert vectorOrder.multipliedKeys[i] == key # Default to empty list
    
         
