@@ -139,11 +139,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
 
         series = Series(semaphoreSeriesDescription, timeDescription)
         
-        stmt = text("""
+        stmt = text(f"""
             SELECT "leadTime" FROM outputs
             WHERE "dataLocation" = :dataLocation
             AND "dataSeries" = :dataSeries
-            AND "dataDatum" = :dataDatum
+            AND {'"dataDatum" = :dataDatum' if semaphoreSeriesDescription.dataDatum is not None else '"dataDatum" IS NULL'}
             AND "modelName" = :modelName
             AND "modelVersion" = :modelVersion
             LIMIT 1
@@ -152,10 +152,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         bind_params = {
             'dataLocation': semaphoreSeriesDescription.dataLocation,
             'dataSeries': semaphoreSeriesDescription.dataSeries,
-            'dataDatum': semaphoreSeriesDescription.dataDatum,
             'modelName': semaphoreSeriesDescription.modelName,
             'modelVersion': semaphoreSeriesDescription.modelVersion
         }
+
+        if semaphoreSeriesDescription.dataDatum is not None:
+            bind_params['dataDatum'] = semaphoreSeriesDescription.dataDatum
 
         stmt = stmt.bindparams(**bind_params)
         leadTime = self.__dbSelection(stmt).fetchone()
@@ -168,13 +170,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         fromGeneratedTime = timeDescription.fromDateTime - leadTime[0]
         toGeneratedTime = timeDescription.toDateTime - leadTime[0]
 
-        stmt = text("""
+        stmt = text(f"""
             SELECT * FROM outputs
             WHERE "modelName" = :modelName
             AND "modelVersion" = :modelVersion
             AND "dataLocation" = :dataLocation
             AND "dataSeries" = :dataSeries
-            AND "dataDatum" = :dataDatum
+            AND {'"dataDatum" = :dataDatum' if semaphoreSeriesDescription.dataDatum is not None else '"dataDatum" IS NULL'}
             AND "timeGenerated" >= :fromGeneratedTime
             AND "timeGenerated" <= :toGeneratedTime
         """)
@@ -184,10 +186,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             'modelVersion': semaphoreSeriesDescription.modelVersion,
             'dataLocation': semaphoreSeriesDescription.dataLocation,
             'dataSeries': semaphoreSeriesDescription.dataSeries,
-            'dataDatum': semaphoreSeriesDescription.dataDatum,
             'fromGeneratedTime': fromGeneratedTime,
             'toGeneratedTime': toGeneratedTime
         }
+
+        if semaphoreSeriesDescription.dataDatum is not None:
+            bind_params['dataDatum'] = semaphoreSeriesDescription.dataDatum
 
         stmt = stmt.bindparams(**bind_params)
         tupleishResult = self.__dbSelection(stmt).fetchall()
@@ -282,56 +286,65 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return series
     
 
-    def select_latest_output(self, model_name: str) -> Series | None: 
-        ''' This selects outputs based just on a model name, all other information is inferred.
-            Exactly 1 row is returned that is the latest generated time for that model name.
-
-            :param model_name: str - The name of the model to query
-
-            NOTE:: Things like model version and time will just be the latest in the DB
+    def select_latest_output(self, model_names: list[str]) -> list[Series] | None: 
+        ''' 
+        This selects the latest output for each model in the list of model names, all other information is inferred.
+        NOTE:: This will return the latest prediction, per model, that was generated regardless of version.
         '''   
 
-        stmt_find_latest_output = text("""
-            SELECT
-            "id",
-            "timeGenerated",
-            "leadTime",
-            "modelName",
-            "modelVersion",
-            "dataValue",
-            "dataUnit",
-            "dataLocation",
-            "dataSeries",
-            "dataDatum"
-            FROM outputs
-            WHERE "modelName" = :model_name
-            ORDER BY "modelVersion" DESC, "timeGenerated" DESC
-            LIMIT 1
-        """)
-
-        bind_params = {
-            'model_name': model_name
-        }
-        stmt_find_latest_output = stmt_find_latest_output.bindparams(**bind_params)
-        tupleishResult = self.__dbSelection(stmt_find_latest_output).fetchone()
-
-        if tupleishResult is None:
+        stmt_collect_all_latest_outputs = text("""
+        WITH latest_time_per_model AS (
+            SELECT 
+                o."modelName",
+                MAX(o."timeGenerated") AS latest_time
+            FROM outputs AS o
+            WHERE o."modelName" IN :model_names
+            GROUP BY o."modelName"
+        )
+        SELECT 
+            o."id",
+            o."timeGenerated",
+            o."leadTime",
+            o."modelName",
+            o."modelVersion",
+            o."dataValue",
+            o."dataUnit",
+            o."dataLocation",
+            o."dataSeries",
+            o."dataDatum"
+        FROM outputs AS o
+        INNER JOIN latest_time_per_model AS ltpm
+            ON o."modelName" = ltpm."modelName"
+            AND o."timeGenerated" = ltpm.latest_time
+        ORDER BY
+            o."modelName"
+        """)     
+        stmt_collect_all_latest_outputs = stmt_collect_all_latest_outputs.bindparams(bindparam("model_names", value=tuple(model_names), expanding=True, type_=String))
+        result = self.__dbSelection(stmt_collect_all_latest_outputs).fetchall()
+        print(result)
+        
+        if not result:
             return None
         
-        # wrap the single row in a list for splice output
-        outputResult = self.__splice_output([tupleishResult])
+        # Each model will be processed into a Series individually 
+        results = []
+        for row in result:
+            # wrap the single row in a list for splice output
+            print(row)
+            df_parsed_data = self.__splice_output([row]) 
 
-        # Parse out model information from the output result
-        description = SemaphoreSeriesDescription(
-            tupleishResult[3],  # modelName
-            tupleishResult[4],  # modelVersion
-            tupleishResult[8],  # dataSeries
-            tupleishResult[7],  # dataLocation
-            tupleishResult[9]   # dataDatum
-        )
-        series = Series(description)
-        series.dataFrame = outputResult
-        return series
+            # create the series object for this model
+            series = Series(SemaphoreSeriesDescription(
+                row[3],      # modelName
+                row[4],      # modelVersion
+                row[8],      # dataSeries
+                row[7],      # dataLocation
+                row[9]),     # dataDatum
+                None         # time description isn't needed since this will be the most recent prediction for the model
+            )
+            series.dataFrame = df_parsed_data
+            results.append(series)
+        return results
     
     def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
         """Returns a data source location code based off of passed parameters
@@ -565,17 +578,23 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             cursor = conn.execute(stmt)
             result = cursor.fetchone()
             conn.commit()
-
+        
         """
         TODO:: When we reach implementing CRPS, we may not want to return
         the result series because of how much data will be a part of the
         result data frame. 
         """
 
-        # Create a series object to return with the inserted data
+        # create a series object to return with the inserted data
+        # or an empty data frame if nothing was inserted due to a conflict with an existing row
         resultSeries = Series(series.description, series.timeDescription)
-        resultSeries.dataFrame = self.__splice_output([result]) #Turn tuple objects into actual objects
-        id = result[0] if result else None
+        if result is None:
+            id = None
+            resultSeries.dataFrame = get_output_dataFrame()
+        else:
+            # turn tuple objects into actual objects
+            resultSeries.dataFrame = self.__splice_output([result])
+            id = result[0]
         return resultSeries, id
 
     def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime | None:

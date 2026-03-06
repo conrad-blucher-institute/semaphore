@@ -490,7 +490,7 @@ def test_serialize(data_array):
             ]
         ]),
 
-        # Test case 6: shape (0,0,0)
+        # Test case 6: shape (1, 1, 0)
         # to test how the deserializer handles empty arrays
         np.array([[[]]]),
 
