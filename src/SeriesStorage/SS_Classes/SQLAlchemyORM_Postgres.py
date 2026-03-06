@@ -321,7 +321,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         """)     
         stmt_collect_all_latest_outputs = stmt_collect_all_latest_outputs.bindparams(bindparam("model_names", value=tuple(model_names), expanding=True, type_=String))
         result = self.__dbSelection(stmt_collect_all_latest_outputs).fetchall()
-        print(result)
         
         if not result:
             return None
@@ -330,7 +329,6 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         results = []
         for row in result:
             # wrap the single row in a list for splice output
-            print(row)
             df_parsed_data = self.__splice_output([row]) 
 
             # create the series object for this model
