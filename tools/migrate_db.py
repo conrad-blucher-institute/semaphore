@@ -1,21 +1,31 @@
 # -*- coding: utf-8 -*-
-#init_db.py
 #----------------------------------
 # Created By: Team
 # Created Date: 2/07/2023
 # version 2.0
 #----------------------------------
-"""This file instantiates a db schema over a db connection.
+"""
+Database Migration Tool
+This module provides functionality to manage database schema migrations for the Semaphore project.
+It handles version tracking, migration execution, and rollback operations.
+Command Line Arguments:
+    -v, --version (optional)
+        Target version for migration in format X.X (e.g., 2.1).
+        Used primarily for testing purposes. If not provided, reads from target_version.json.
+    -d, --description (optional)
+        Description for the migration (max 255 characters).
+        Only used when --version flag is specified.
  """ 
 #----------------------------------
 # 
 from os import path
 from os import listdir, getcwd, getenv
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Engine, inspect, Table, MetaData, select, update
+from sqlalchemy import create_engine, Engine, inspect, Table, MetaData, select, text, update
 from importlib import import_module
 from datetime import datetime, timezone
 from json import load
+import argparse
 
 load_dotenv()
 TARGET_VERSION_FILEPATH = './tools/DatabaseMigration/target_version.json'
@@ -41,6 +51,12 @@ class Version():
         if self.major == other.major:
             return self.minor > other.minor
         return self.major > other.major
+    
+    def __ge__(self, other):
+        return self.__gt__(other) or self.__eq__(other)
+    
+    def __le__(self, other):
+        return self.__lt__(other) or self.__eq__(other)
 
     def __eq__(self, other):
         return self.major == other.major and self.minor == other.minor
@@ -158,11 +174,47 @@ def create_version_lists() -> tuple[list[str], list[tuple[int]]]:
     return names, versions
 
 
+def reset_pg_stats(engine: Engine, target_version: Version) -> None:
+    """ Version 3.5 of the database migration enables pg_stat_statements, which collects query performance statistics. 
+    This function resets the collected statistics after migration to avoid confusion with pre-migration stats.
+
+    NOTE:: This function only fires if the database is being migrated to version 3.5 or higher.
+        :param engine: Engine - The engine to connect to the database with
+        :param target_version: Version - The version of the database after migration
+    """
+    pg_stats_enabled_version = Version.from_dot_separator('3.5')
+    if target_version >= pg_stats_enabled_version:
+        pg_stats_reset_stmt = text('SELECT pg_stat_statements_reset()')
+        with engine.begin() as connection:
+            connection.execute(pg_stats_reset_stmt)
+            connection.commit()
+
+
 def main():
     """The main function of migrate_db.py creates the database engine and passes
        it through the logic to update or rollback the database. 
     """
     print('Beginning Database Migration')
+
+    parser = argparse.ArgumentParser(description='Database migration tool')
+    parser.add_argument('-v', '--version', type=str, required=False, help='Optional target version for the migration, this should only be used for testing purposes. (e.g., 2.1) If not provided, the script will read the target version from the static file.')
+    parser.add_argument('-d', '--description', type=str, required=False, help='Optional description for the migration to be used if the --version flag is used.')
+    args = parser.parse_args()
+
+    # Find the target version to migrate to, either from the command line or from the static file
+    if args.version:
+        try:
+            target_version = Version.from_dot_separator(args.version)
+        except ValueError:
+            parser.error(f'Invalid version string: {args.version}. Expected format X.X (e.g., 2.1).')
+
+        target_desc = args.description if args.description else ''
+        if len(target_desc) > 255:
+            parser.error('Description must be 255 characters or less.')
+        
+    else:  
+        # Read the target version of the database from the static file
+        target_version, target_desc = get_target_version_info() 
 
     # Load database location string
     DB_LOCATION_STRING = getenv('DB_LOCATION_STRING')
@@ -172,9 +224,6 @@ def main():
 
     current_version = get_current_database_version(engine)
     
-    # Read the target version of the database from the static file
-    target_version, target_desc = get_target_version_info()
-
     # Create list of version folders inside of DatabaseMigration folder
     version_names, version_values = create_version_lists()
     
@@ -212,6 +261,9 @@ def main():
 
     # Update last time with description of database
     set_current_database_version(engine, target_version, target_desc)  
+
+    # Reset pg_stat_statements stats if pg_stat_statements was enabled in this migration or a past migration
+    reset_pg_stats(engine, current_version)
 
     # Log that migration has finished
     print(f'Fin!')     
