@@ -100,7 +100,7 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
 
     provider = SeriesProvider()
     
-    responseSeries = provider.request_input(requestDescription, timeDescription, nowTime, skipIngestionLogic= True)
+    responseSeries = provider.request_input(requestDescription, timeDescription, nowTime)
 
     # Protect the API's JSON ENCODER from freaking out about floats sneaking from the ingestion class
     responseSeries.dataFrame['dataValue'] = responseSeries.dataFrame['dataValue'].astype(str)
