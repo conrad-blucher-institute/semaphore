@@ -16,7 +16,7 @@ This file is responsible for generating batches of input vectors. It is responsi
 #
 #Imports
 from DataClasses import Series
-from .dspecParser import VectorOrder, Dspec
+from .dspecParser import VectorOrder, Dspec, ExpectedOutputShape
 from utility import log
 from exceptions import Semaphore_Exception
 from typing import Generator
@@ -44,11 +44,8 @@ class InputVectorBuilder:
 
         # Parse VO
         vo: VectorOrder = dspec.orderedVector
-        amntExpectedVectors = vo.ensembleMemberCount
-
-        # If no amntExpectedVectors assume 1
-        if amntExpectedVectors is None:
-            amntExpectedVectors = 1
+        expectedOutputShape: ExpectedOutputShape = dspec.outputInfo.expectedOutputShape
+        amntExpectedVectors = expectedOutputShape.inputVectorCount
 
         # Build the batch
         batch = []

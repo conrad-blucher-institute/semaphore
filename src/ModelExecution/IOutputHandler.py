@@ -19,11 +19,12 @@ from abc import ABC, abstractmethod
 from importlib import import_module
 from datetime import datetime
 from pandas import DataFrame
+import numpy as np
 
 class IOutputHandler(ABC):
    
     @abstractmethod
-    def post_process_prediction(self, prediction: list[any], dspec: Dspec, referenceTime: datetime) -> DataFrame:
+    def post_process_prediction(self, prediction: np.ndarray, dspec: Dspec, referenceTime: datetime) -> DataFrame:
         raise NotImplementedError()       
 
 def output_handler_factory(method: str) -> IOutputHandler:

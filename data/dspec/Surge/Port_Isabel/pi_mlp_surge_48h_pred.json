@@ -10,7 +10,7 @@
         "interval": 3600
     },
     "outputInfo": {
-        "outputMethod": "OnePackedFloat",
+        "outputMethod": "DefaultOutputHandler",
         "leadTime": 172800,
         "series": "pSurge",
         "location": "PortIsabel",
