@@ -33,7 +33,7 @@ class Migrator(IDatabaseMigration):
                 - Rename all constraints
                 - Rename id sequence
             - Create the new outputs table
-                - Removes enemble member id
+                - Removes ensemble member id
                 - dataValue uses BYTEA
                 - Add constraints 
             - Create the new model_run table
