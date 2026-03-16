@@ -332,12 +332,14 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             df_parsed_data = self.__splice_output([row]) 
 
             # create the series object for this model
-            series = Series(SemaphoreSeriesDescription(
-                row[3],      # modelName
-                row[4],      # modelVersion
-                row[8],      # dataSeries
-                row[7],      # dataLocation
-                row[9]),     # dataDatum
+            series = Series(
+                SemaphoreSeriesDescription(
+                    row[3],      # modelName
+                    row[4],      # modelVersion
+                    row[8],      # dataSeries
+                    row[7],      # dataLocation
+                    row[9]       # dataDatum
+                ),     
                 None         # time description isn't needed since this will be the most recent prediction for the model
             )
             series.dataFrame = df_parsed_data
