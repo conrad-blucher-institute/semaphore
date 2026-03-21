@@ -1,6 +1,6 @@
 {
     "dspecVersion": "2.0",
-    "modelName": "test_multiVector",
+    "modelName": "test_AI_2.0",
     "modelVersion": "1.0.0",
     "author": "John Doe",
     "modelFileName": "test_AI",
@@ -11,7 +11,7 @@
 
     },
     "outputInfo": {
-        "outputMethod": "DefaultOutputHandler",
+        "outputMethod": "OnePackedFloat",
         "leadTime": 86400,
         "series": "testSeries",
         "location": "PortLavaca",
@@ -124,8 +124,7 @@
     "vectorOrder": [
         {
             "key": "dXWnCmp000D_1hr",
-            "dType": "float",
-            "isMultipliedKey": true
+            "dType": "float"
         },
         {
             "key": "dYWnCmp000D_1hr",

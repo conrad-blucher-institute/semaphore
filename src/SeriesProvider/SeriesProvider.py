@@ -31,20 +31,6 @@ class SeriesProvider():
     def __init__(self) -> None:
         self.seriesStorage = series_storage_factory()
     
-    def save_output_series(self, series: Series) -> Series:
-        """Passes a series to Series Storage to be stored.
-            :param series - The series to store.
-            :returns series - A series containing only the stored values.
-        """
-        returningSeries = Series(series.description)
-
-        if not (type(series.description) == SemaphoreSeriesDescription): #Check and make sure this is actually something with the proper description to be inserted
-            log('WARNING:: Attempting to insert a series without a SemaphoreSeriesDescription, this is not allowed!')
-        else:
-            returningSeries = self.seriesStorage.insert_output(series)
-
-        return returningSeries
-          
     
     def request_input(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> Series:
         """This method attempts to return a series matching a series description and a time description.
