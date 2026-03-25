@@ -44,7 +44,16 @@ class ModelRunner:
         log('Init load model(s)....')
 
         models = self.__load_models(DSPEC)
+        expectedMemberCount = DSPEC.outputInfo.expectedOutputShape.memberCount
+        # Validate model count matches expected member count
 
+        log(f"Loaded {len(models)} models, expected {expectedMemberCount}")
+
+        if len(models) != expectedMemberCount:
+            raise Semaphore_Exception(
+                f"Expected {expectedMemberCount} model(s) based on DSPEC, but found {len(models)}"
+            )
+        
         log('Init shape inputs....')
 
         # Use first model for shape (all models should match)
