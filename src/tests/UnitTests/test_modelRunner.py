@@ -22,7 +22,7 @@ from numpy import float32
 import types
 
 from src.ModelExecution.modelRunner import ModelRunner
-from src.ModelExecution.dspecParser import Dspec, OutputInfo
+from src.ModelExecution.dspecParser import Dspec, OutputInfo, ExpectedOutputShape
 from src.DataClasses import Series, SemaphoreSeriesDescription
 from exceptions import Semaphore_Exception
 
@@ -46,6 +46,10 @@ def mock_dspec(multi=False):
     outputInfo.interval = 3600
     outputInfo.datum = 'testDatum'
     outputInfo.unit = 'testUnit'
+    eos = ExpectedOutputShape()
+    eos.memberCount = 3 if multi else 1
+    outputInfo.expectedOutputShape = eos
+
 
     dspec = Dspec()
     dspec.outputInfo = outputInfo

@@ -58,10 +58,9 @@ class ModelRunner:
 
         # Use first model for shape (all models should match)
         expectedShape = models[0].input_shape
-        first_shape = models[0].input_shape
         
         for m in models:
-            if m.input_shape != first_shape:
+            if m.input_shape != expectedShape:
                 raise Semaphore_Exception("Model input shapes do not match")
             
         expectedShape = (len(input_vectors),) + expectedShape[1:]
