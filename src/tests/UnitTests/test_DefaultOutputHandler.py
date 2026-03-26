@@ -80,6 +80,15 @@ MULTI_MEMBER_PREDICTION = np.array(
         ]
     ]
 )
+# shape of (2, 3) - ensure bad shapes are properly rejected
+BAD_SHAPE_2D = np.array(
+    [
+        [1.0, 2.0, 3.0],
+        [4.0, 5.0, 6.0]
+    ]
+)
+# shape of (1) - ensure bad shapes are properly rejected
+BAD_SHAPE_1D = np.array([1.0, 2.0, 3.0])
 
 def make_dspec(memberCount: int = None, inputVectorCount: int = None, outputCount: int = None) -> Dspec:
     d = Dspec()
@@ -105,10 +114,19 @@ def make_dspec(memberCount: int = None, inputVectorCount: int = None, outputCoun
         (SCALAR_PREDICTION, make_dspec(1,1,1),   (1, 1, 1)),
         (ENSEMBLE_PREDICTION,  make_dspec(1,100,1), (1, 100, 1)),
         (MULTI_MEMBER_PREDICTION, make_dspec(3,5,8), (3, 5, 8)),
+        (BAD_SHAPE_2D, make_dspec(0, 2, 3), None),
+        (BAD_SHAPE_1D, make_dspec(0, 1, 3), None)
     ],
 )
 def test_post_process_prediction(predictions: np.ndarray, dspec: Dspec, expected_shape: tuple):
     oh_class = output_handler_factory(dspec.outputInfo.outputMethod)
+
+    if expected_shape is None:
+        with pytest.raises(Exception) as exc_info:
+            oh_class.post_process_prediction(predictions, dspec, TEST_REF_TIME)
+        assert "Expected a 3D predictions array, got ndim=" in str(exc_info.value)
+        return
+    
     result: DataFrame = oh_class.post_process_prediction(predictions, dspec, TEST_REF_TIME)
 
     # --- basic dataframe structure checks ---

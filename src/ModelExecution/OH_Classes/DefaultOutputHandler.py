@@ -30,7 +30,7 @@ class DefaultOutputHandler(IOutputHandler):
             
             Examples of predictions (Members, InputVectors, Outputs):
              - Scalar: (1,1,1) - [[[0.10029483]]]
-             - Ensemble: (1.100,1)
+             - Ensemble: (1,100,1)
                 [
                     [
                         [0.10029486]
