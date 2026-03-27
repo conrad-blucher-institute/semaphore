@@ -18,6 +18,7 @@ from ..dspecParser import Dspec,ExpectedOutputShape
 
 from datetime import datetime, timedelta
 from pandas import DataFrame
+from exceptions import Semaphore_Exception
 import numpy as np
 
 class DefaultOutputHandler(IOutputHandler):
@@ -54,7 +55,7 @@ class DefaultOutputHandler(IOutputHandler):
         expectedOutputsPerVector = expectedOutputShape.outputsPerVector
 
         if predictions.ndim != 3:
-            raise Exception(f"Expected a 3D predictions array, got ndim={predictions.ndim} with shape={predictions.shape}")
+            raise Semaphore_Exception(f"Expected a 3D predictions array, got ndim={predictions.ndim} with shape={predictions.shape}")
 
         # Build expected shape as a tuple
         expectedShape = (expectedMembers, expectedInputVectors, expectedOutputsPerVector)
@@ -63,7 +64,7 @@ class DefaultOutputHandler(IOutputHandler):
         comparisonResult: bool = (predictions.shape == expectedShape)
 
         if not comparisonResult:
-            raise Exception(f"Prediction shape mismatch. Expected {expectedShape}, got {predictions.shape}.")
+            raise Semaphore_Exception(f"Prediction shape mismatch. Expected {expectedShape}, got {predictions.shape}.")
         
         df = get_output_dataFrame()
         df.loc[0] = [

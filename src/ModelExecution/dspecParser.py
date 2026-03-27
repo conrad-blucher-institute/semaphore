@@ -18,6 +18,7 @@ for any version of despec. The dspec gets converted into objects found in this f
 from os.path import exists
 from json import load
 from datetime import timedelta
+from exceptions import Semaphore_Exception
 
 
 class DSPEC_Parser:
@@ -179,14 +180,14 @@ class dspec_sub_Parser_2_0:
 
         # These are needed to load the models
         if not has_single and not has_pattern:
-            raise ValueError(
+            raise Semaphore_Exception(
                 f"{self.__dspec.modelName}: must define either 'modelFileName' or 'modelFileNamePattern'"
             )
         
         # modelFileName is used for single model dspecs and modelFileNamePattern is used for multi model dspecs.
         # We can't use both.
         if has_single and has_pattern:
-            raise ValueError(
+            raise Semaphore_Exception(
                 f"{self.__dspec.modelName}: cannot define both 'modelFileName' and 'modelFileNamePattern'"
             )
 

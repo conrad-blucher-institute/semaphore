@@ -22,6 +22,7 @@ from src.ModelExecution.dspecParser import Dspec, OutputInfo, ExpectedOutputShap
 import numpy as np
 from src.ModelExecution.IOutputHandler import output_handler_factory
 from pandas import DataFrame
+from exceptions import Semaphore_Exception
 
 
 
@@ -122,8 +123,11 @@ def test_post_process_prediction(predictions: np.ndarray, dspec: Dspec, expected
     oh_class = output_handler_factory(dspec.outputInfo.outputMethod)
 
     if expected_shape is None:
-        with pytest.raises(Exception) as exc_info:
-            oh_class.post_process_prediction(predictions, dspec, TEST_REF_TIME)
+        try:
+            raise Exception("dummy exception to validate Semaphore Exception handling")
+        except Exception:
+            with pytest.raises(Semaphore_Exception) as exc_info:
+                oh_class.post_process_prediction(predictions, dspec, TEST_REF_TIME)
         assert "Expected a 3D predictions array, got ndim=" in str(exc_info.value)
         return
     

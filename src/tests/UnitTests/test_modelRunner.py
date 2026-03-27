@@ -19,12 +19,10 @@ import pytest
 from unittest.mock import MagicMock, patch
 import numpy as np
 from numpy import float32
-import types
 
 from src.ModelExecution.modelRunner import ModelRunner
 from src.ModelExecution.dspecParser import Dspec, OutputInfo, ExpectedOutputShape
 from src.DataClasses import Series, SemaphoreSeriesDescription
-from exceptions import Semaphore_Exception
 
 
 # -------------------------------
@@ -158,9 +156,6 @@ def test_make_predictions(multi, input_vectors, expected_shape):
 
     predictions = OH_MOCK.post_process_prediction.call_args.args[0]
 
-    print("TEST SHAPE:", predictions.shape)
-    print("PREDICTIONS:", predictions)
-
     # -------------------------------
     # Shape checks
     # -------------------------------
@@ -219,12 +214,12 @@ def test_model_loading_order():
 @patch('src.ModelExecution.modelRunner.load_model')
 def test_load_models_sorted(mock_load_model, mock_glob):
 
-    mock_glob.return_value = ['model_3.h5', 'model_1.h5', 'model_2.h5']
+    mock_glob.return_value = ['model_member3.h5', 'model_member1.h5', 'model_member2.h5']
     mock_load_model.side_effect = lambda f, compile=False: f
 
     models = ModelRunner()._ModelRunner__load_models(mock_dspec(multi=True))
 
-    assert models == ['model_1.h5', 'model_2.h5', 'model_3.h5']
+    assert models == ['model_member1.h5', 'model_member2.h5', 'model_member3.h5']
 
 
 @patch('src.ModelExecution.modelRunner.load_model')
@@ -232,9 +227,9 @@ def test_load_models_sorted(mock_load_model, mock_glob):
 def test_load_models_from_pattern(mock_glob, mock_load_model):
 
     mock_glob.return_value = [
-        '/models/model_2.h5',
-        '/models/model_1.h5',
-        '/models/model_3.h5'
+        '/models/model_member2.h5',
+        '/models/model_member1.h5',
+        '/models/model_member3.h5'
     ]
 
     mock_load_model.side_effect = lambda f, compile=False: f"LOADED::{f}"
@@ -242,8 +237,8 @@ def test_load_models_from_pattern(mock_glob, mock_load_model):
     models = ModelRunner()._ModelRunner__load_models(mock_dspec(multi=True))
 
     assert models == [
-        'LOADED::/models/model_1.h5',
-        'LOADED::/models/model_2.h5',
-        'LOADED::/models/model_3.h5'
+        'LOADED::/models/model_member1.h5',
+        'LOADED::/models/model_member2.h5',
+        'LOADED::/models/model_member3.h5'
     ]
 

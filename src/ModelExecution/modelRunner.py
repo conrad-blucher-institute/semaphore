@@ -139,6 +139,19 @@ class ModelRunner:
             )
     
     def extract_number(self, filename):
-        match = re.search(r'\d+', filename)
-        return int(match.group()) if match else float('inf')
+        """
+        This function extracts the member index from a filename for consistent model loading order.
+        It matches the pattern 'member<N>' so 'model_120hr_member3' -> 3.
+        If no member pattern is found, infintiy is returned to sort those files at the end.
+
+        This is used by files.sort() to ensure model members are loaded in the correct order
+        (member1, member2, ...)
+
+        :param filename: str - The filename to extract the member number from.
+
+        :returns int - The extracted member number on successful matches
+        :returns float('inf') - If no member pattern is found, returns infinity to sort that file at the end
+        """
+        match = re.search(r'member(\d+)', filename, re.IGNORECASE)
+        return int(match.group(1)) if match else float('inf')
 
