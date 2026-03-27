@@ -4,8 +4,10 @@
 # Created By: Anointiyae Beasley
 # version 1.0
 #----------------------------------
-"""This OH class is to handle reshaping the 2D array predictions to a 3D array in this format: (members, input_vectors, outputs).
- """ 
+"""
+This OH class is to handle validating the 3D array predictions with their expected shape 
+of (members, input_vectors, outputs) and store the predictions in an output dataframe.
+""" 
 #----------------------------------
 # 
 #
@@ -21,54 +23,51 @@ import numpy as np
 class DefaultOutputHandler(IOutputHandler):
 
     def post_process_prediction(self, predictions: np.ndarray, dspec: Dspec, referenceTime: datetime) -> DataFrame:
-        """ Stores member predictions as a single structured prediction tensor. 
-
-            Ensures predictions are represented as a 3D ndarray in the form
-            (memberCount, inputVectorsCount, outputsPerVector), reshaping 2D outputs when necessary,
-            and stores the resulting tensor directly in dataValue.
+        """ This function validates the prediction shape matches the expected shape from the DSPEC
+            and then constructs a DataFrame with the predictions and associated metadata.
+            Predictions are already expected to be shaped in modelRunner as (Members, InputVectors, Outputs)
+            before they arrive at this function.
             
-            Examples of predictions (InputVectors, Outputs):
-             - Scalar: (1,1) - [[0.10029483]]
-             - Ensemble: (100,1) - [[0.10029486]
-                                    [0.10029484]                
-                                    [0.10029482]]
+            Examples of predictions (Members, InputVectors, Outputs):
+             - Scalar: (1,1,1) - [[[0.10029483]]]
+             - Ensemble: (1,100,1)
+                [
+                    [
+                        [0.10029486]
+                        [0.10029484]              
+                        [0.10029482]
+                        ...
+                    ]
+                ]
              - Multi-member: (memberCount, inputVectorsCount, outputsPerVectors) 
-            :param predictions: np.ndarray - The predictions from the member runs
+
+            :param predictions: np.ndarray - A 3D ndarray containing all predictions from all members in the form of (Members, InputVectors, Outputs)
             :param dspec: Dspec - The dspec to reference.
             :param referenceTime: datetime - the reference time of this run
+
             :returns DataFrame - The output DF
-            """
+        """
         expectedOutputShape: ExpectedOutputShape = dspec.outputInfo.expectedOutputShape
 
         expectedMembers = expectedOutputShape.memberCount
         expectedInputVectors = expectedOutputShape.inputVectorCount
         expectedOutputsPerVector = expectedOutputShape.outputsPerVector
 
-        # Raising an exception here because the current data flow is only supposed to pass 2D array's
-        # This exception will be removed once we implement CRPS members.
-        if predictions.ndim != 2:
-            raise Exception(f"Expected a 2D predictions array, got ndim={predictions.ndim} with shape={predictions.shape}")
-
-        inputVectors, outputs = predictions.shape  # (input_vectors, outputs)
-
-        # Reshape into (members, input_vectors, outputs)
-        pred = predictions.reshape(expectedMembers, inputVectors, outputs)
+        if predictions.ndim != 3:
+            raise Exception(f"Expected a 3D predictions array, got ndim={predictions.ndim} with shape={predictions.shape}")
 
         # Build expected shape as a tuple
         expectedShape = (expectedMembers, expectedInputVectors, expectedOutputsPerVector)
 
         # Compare shape tuples
-        comparisonResult: bool = (pred.shape == expectedShape)
+        comparisonResult: bool = (predictions.shape == expectedShape)
 
         if not comparisonResult:
-            raise Exception(
-                f"Prediction shape mismatch. Expected {expectedShape}, got {pred.shape}. "
-                f"Original predictions.shape={predictions.shape}"
-            )
+            raise Exception(f"Prediction shape mismatch. Expected {expectedShape}, got {predictions.shape}.")
         
         df = get_output_dataFrame()
         df.loc[0] = [
-            pred,            # dataValue
+            predictions,                                    # dataValue
             dspec.outputInfo.unit,                          # dataUnit
             referenceTime,                                  # timeGenerated
             timedelta(seconds=dspec.outputInfo.leadTime)    # leadtime
