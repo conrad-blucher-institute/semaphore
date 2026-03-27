@@ -173,7 +173,26 @@ class dspec_sub_Parser_2_0:
         self.__dspec.modelName = self.__dspec_json["modelName"]
         self.__dspec.modelVersion = self.__dspec_json["modelVersion"]
         self.__dspec.author = self.__dspec_json["author"]
-        self.__dspec.modelFileName = self.__dspec_json["modelFileName"]
+
+        has_single = bool(self.__dspec_json.get("modelFileName", "").strip())
+        has_pattern = bool(self.__dspec_json.get("modelFileNamePattern", "").strip())
+
+        # These are needed to load the models
+        if not has_single and not has_pattern:
+            raise ValueError(
+                f"{self.__dspec.modelName}: must define either 'modelFileName' or 'modelFileNamePattern'"
+            )
+        
+        # modelFileName is used for single model dspecs and modelFileNamePattern is used for multi model dspecs.
+        # We can't use both.
+        if has_single and has_pattern:
+            raise ValueError(
+                f"{self.__dspec.modelName}: cannot define both 'modelFileName' and 'modelFileNamePattern'"
+            )
+
+        self.__dspec.modelFileName = self.__dspec_json.get("modelFileName")
+        self.__dspec.modelFileNamePattern = self.__dspec_json.get("modelFileNamePattern")
+
 
     def __parse_timing(self):
         # Grab timing info from dict
@@ -316,6 +335,7 @@ class Dspec:
         self.modelVersion = None
         self.author = None
         self.modelFileName = None
+        self.modelFileNamePattern = None
         
         self.outputInfo = None
         self.dependentSeries = []
@@ -324,7 +344,7 @@ class Dspec:
         self.timingInfo = None
 
     def __str__(self) -> str:
-        return f'[Dspec] -> modelName: {self.modelName}, modelVersion: {self.modelVersion}, author: {self.author}, modelFileName: {self.modelFileName}'
+        return f'[Dspec] -> modelName: {self.modelName}, modelVersion: {self.modelVersion}, author: {self.author}, modelFileName: {self.modelFileName}, modelFileNamePattern: {self.modelFileNamePattern}'
 
 class OutputInfo:
     '''OuputInfo object should contain everything that could be contained
