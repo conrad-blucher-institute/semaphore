@@ -152,6 +152,7 @@ class dspec_sub_Parser_1_0:
             vOrder.dTypes = types
             vOrder.indexes = indexes
             vOrder.multipliedKeys = []
+            vOrder.descendingFlags = []
             self.__dspec.orderedVector = vOrder
 
 
@@ -299,11 +300,13 @@ class dspec_sub_Parser_2_0:
         keys = []
         dTypes = []
         indexes = []
-        multipliedKeys = []            
+        multipliedKeys = []   
+        descendingFlags = []         
         
         for dict in vOrder:
             keys.append(dict['key'])
             dTypes.append(dict['dType'])
+            descendingFlags.append(dict.get('descending', False))
             
             index: list[int] | None  = dict.get('indexes')
 
@@ -325,6 +328,7 @@ class dspec_sub_Parser_2_0:
         vectorOrder.dTypes = dTypes
         vectorOrder.indexes = indexes
         vectorOrder.multipliedKeys = multipliedKeys
+        vectorOrder.descendingFlags = descendingFlags
         self.__dspec.orderedVector = vectorOrder
                 
 
@@ -434,12 +438,13 @@ class VectorOrder:
         self.dTypes = []
         self.indexes = []
         self.multipliedKeys = []
+        self.descendingFlags = []
 
     def __str__(self) -> str:
-        return f'\n[VectorOrder] -> keys: {self.keys}, dTypes: {self.dTypes}, indexes: {self.indexes}, multipliedKeys: {self.multipliedKeys}'
+        return f'\n[VectorOrder] -> keys: {self.keys}, dTypes: {self.dTypes}, indexes: {self.indexes}, multipliedKeys: {self.multipliedKeys}, descending: {self.descendingFlags}'
     
     def __repr__(self):
-        return f'\nVectorOrder({self.keys}, {self.dTypes}, {self.indexes}, {self.multipliedKeys})'
+        return f'\nVectorOrder({self.keys}, {self.dTypes}, {self.indexes}, {self.multipliedKeys}, {self.descendingFlags})'
     
 
 class TimingInfo:

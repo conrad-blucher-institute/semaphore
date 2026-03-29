@@ -80,6 +80,7 @@ class InputVectorBuilder:
         ordered_dtypes = vectorOrder.dTypes
         ordered_indexes = vectorOrder.indexes
         multipliedKeys = vectorOrder.multipliedKeys
+        descendingFlags = vectorOrder.descendingFlags
         
         
         isFinished = False
@@ -91,7 +92,7 @@ class InputVectorBuilder:
             
             input_vector = []
             # We iterate over every series the input vector has in order
-            for key, dtype, index in zip(ordered_keys, ordered_dtypes, ordered_indexes):            
+            for key, dtype, index, isDesc in zip(ordered_keys, ordered_dtypes, ordered_indexes, descendingFlags):            
 
                 # Check to see if this series is marked as a multi input series
                 keyIsMulti = key in multipliedKeys 
@@ -101,6 +102,7 @@ class InputVectorBuilder:
                 if series is None:
                     raise Semaphore_Exception(f'ERROR: There was a problem with input gatherer finding outKey {key} in {dataRepository}')
                 
+
                 # Grab all data, this changes if its a multi series or not
                 data = None
                 isFinished = True # Assume we are finished unless we find a multi series that has more data
@@ -121,10 +123,15 @@ class InputVectorBuilder:
 
                     # Select only the wanted data
                     indexed_data = casted_data[index[0] : index[1]]
+
+                    if isDesc:
+                        final_data = indexed_data[::-1]
+                    else:
+                        final_data = indexed_data
                     
-                    log(f'\t\t{key}: - amnt_found: {len(casted_data)}, indexed_len: {len(indexed_data)}')
+                    log(f'\t\t{key}: - amnt_found: {len(casted_data)}, indexed_len: {len(final_data)}')
                     # Concatenate the designated slice of casted data into the input vector
-                    input_vector += indexed_data
+                    input_vector += final_data
 
             batchIndex += 1   
             yield input_vector
