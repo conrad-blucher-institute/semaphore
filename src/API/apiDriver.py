@@ -234,6 +234,13 @@ def serialize_series(series: Series) -> dict[any]:
 
     if series is None:
         return dict()
+    
+    if series.dataFrame is None:
+        # In this case we have no data to serialize but we still want to return the description and time description
+        serialized = jsonable_encoder(series, exclude={'_Series__dataFrame'})
+        serialized['isComplete'] = True # Ensure isComplete always exists for backward compatibility
+        serialized['_Series__data'] = [] # Ensure data always exists for backward compatibility
+        return serialized
 
     if isinstance(series.description, SemaphoreSeriesDescription):
         return serialize_output_series(series)
