@@ -142,7 +142,7 @@ class ModelRunner:
         """
         This function extracts the member index from a filename for consistent model loading order.
         It matches the pattern 'member<N>' so 'model_120hr_member3' -> 3.
-        If no member pattern is found, infintiy is returned to sort those files at the end.
+        If no member pattern is found, infinity is returned to sort those files at the end.
 
         This is used by files.sort() to ensure model members are loaded in the correct order
         (member1, member2, ...)
