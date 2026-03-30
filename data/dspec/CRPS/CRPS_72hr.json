@@ -3,7 +3,7 @@
     "modelName": "CRPS_72hr",
     "modelVersion": "1.0.0",
     "author": "Miranda White",
-    "modelFileName": "./CRPS/CRPS_72hr/CRPS_72hr_member*.keras",
+    "modelFileNamePattern": "./CRPS/CRPS_72hr/CRPS_72hr_member*.keras",
     "timingInfo": {
         "active": false,
         "offset": 1200,
