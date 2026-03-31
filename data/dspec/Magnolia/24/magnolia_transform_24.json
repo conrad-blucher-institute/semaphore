@@ -27,7 +27,15 @@
             "interval": 3600,
             "range":  [19, 7],
             "outKey": "MG_24_output_12",
-            "stalenessOffset": 45000
+            "stalenessOffset": 45000,
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit": "3600",
+                    "method": "linear",
+                    "limit_area": "inside"
+                }
+            }
         },
         { 
             "_name": "Wind Direction Prediction",
