@@ -55,7 +55,7 @@ def mock_dspec(multi=False):
     dspec.modelVersion = '0.0.0'
 
     if multi:
-        dspec.modelFileNamePattern = 'mock_pattern'
+        dspec.modelFileName = 'mock_pattern'
     else:
         dspec.modelFileName = 'test_AI'
 
