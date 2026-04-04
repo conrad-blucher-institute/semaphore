@@ -47,8 +47,6 @@ class ModelRunner:
         expectedMemberCount = DSPEC.outputInfo.expectedOutputShape.memberCount
         # Validate model count matches expected member count
 
-        log(f"Loaded {len(models)} models, expected {expectedMemberCount}")
-
         if len(models) != expectedMemberCount:
             raise Semaphore_Exception(
                 f"Expected {expectedMemberCount} model(s) based on DSPEC, but found {len(models)}"
@@ -98,51 +96,45 @@ class ModelRunner:
         return series
     
 
-    def __load_models(self, DSPEC: Dspec):
-        """Loads either a single model or multiple models based on the Dspec"""
+    def __load_models(self, DSPEC: Dspec) -> list:
+        """
+        This function will construct the model path based on the dspec and will 
+        to load all models that match the path.
+
+        :param DSPEC: Dspec - The Dspec file with the model loading information
+
+        :returns list - A list of loaded models.
+            for single member models the list will have 1 model, [model]
+            for multi member models the list will have multiple models sorted by member index [member1, member2, ...]
+        """
         
         base_path = construct_true_path(getenv('MODEL_FOLDER_PATH'))
+        model_path = base_path + DSPEC.modelFileName
 
-        # Multi-model (CRPS)
-        if DSPEC.modelFileNamePattern:
-            pattern = base_path + DSPEC.modelFileNamePattern
-            files = glob.glob(pattern)
-            files.sort(key=self.extract_number)  # Ensure consistent ordering
+        # if the model path doesn't end with .h5 or .keras, we assume .h5 and append it
+        if not (model_path.endswith('.h5') or model_path.endswith('.keras')):
+            model_path = model_path + '.h5'
 
-            if not files:
-                raise Semaphore_Exception(f"No models found for pattern: {pattern}")
+        # use glob to find all matching files
+        # this will return a list of all found models
+        # or an empty list if no models are found
+        model_files = glob.glob(model_path)
 
-            models = [load_model(f, compile=False) for f in files]
-            return models
+        if not model_files:
+            raise Semaphore_Exception(f"No model file(s) found for path: {model_path}")
+        
+        # if multiple models are found, sort to ensure consistent loading order (member1, member2, ...)
+        if len(model_files) > 1:
+            model_files.sort(key=self.extract_number)
 
-        # Single model
-        elif DSPEC.modelFileName:
-            model_path = DSPEC.modelFileName
-
-            # Ensure .h5 extension
-            if not model_path.endswith('.h5'):
-                model_path += '.h5'
-
-            full_path = base_path + model_path
-
-            if not path.exists(full_path):
-                raise Semaphore_Exception(
-                    f'H5 file for {model_path} not found at {full_path}!'
-                )
-
-            model = load_model(full_path, compile=False)
-            return [model]
-
-        else:
-            raise Semaphore_Exception(
-                "No modelFileName or modelFileNamePattern provided"
-            )
+        loaded_models = [load_model(file, compile=False) for file in model_files]
+        return loaded_models
     
     def extract_number(self, filename):
         """
         This function extracts the member index from a filename for consistent model loading order.
         It matches the pattern 'member<N>' so 'model_120hr_member3' -> 3.
-        If no member pattern is found, infintiy is returned to sort those files at the end.
+        If no member pattern is found, infinity is returned to sort those files at the end.
 
         This is used by files.sort() to ensure model members are loaded in the correct order
         (member1, member2, ...)

@@ -42,6 +42,10 @@ class DefaultOutputHandler(IOutputHandler):
                 ]
              - Multi-member: (memberCount, inputVectorsCount, outputsPerVectors) 
 
+            The data frame arriving will have 1 row and 4 columns: dataValue, dataUnit, timeGenerated, leadtime
+            Ex)     row   dataValue     dataUnit    timeGenerated           leadtime
+                    0  [[[20.841099]]]  celsius 2026-04-01 19:00:00+00:00   5 days
+
             :param predictions: np.ndarray - A 3D ndarray containing all predictions from all members in the form of (Members, InputVectors, Outputs)
             :param dspec: Dspec - The dspec to reference.
             :param referenceTime: datetime - the reference time of this run
