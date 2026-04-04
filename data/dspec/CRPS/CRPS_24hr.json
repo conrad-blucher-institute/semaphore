@@ -3,7 +3,7 @@
     "modelName": "CRPS_24hr",
     "modelVersion": "1.0.0",
     "author": "Miranda White",
-    "modelFileNamePattern": "./CRPS/CRPS_24hr/CRPS_24hr_member*.keras",
+    "modelFileName": "./CRPS/CRPS_24hr/CRPS_24hr_member*.keras",
     "timingInfo": {
         "active": false,
         "offset": 1200,
@@ -16,7 +16,7 @@
         "location": "SouthBirdIsland",
         "unit": "celsius",
         "expectedOutputShape": {
-            "memberCount": 12,
+            "memberCount": 10,
             "inputVectorCount": 100,
             "outputsPerVector": 100
         }
