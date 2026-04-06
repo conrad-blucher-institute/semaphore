@@ -23,6 +23,7 @@ from numpy import float32
 from src.ModelExecution.modelRunner import ModelRunner
 from src.ModelExecution.dspecParser import Dspec, OutputInfo, ExpectedOutputShape
 from src.DataClasses import Series, SemaphoreSeriesDescription
+from types import SimpleNamespace
 
 
 # -------------------------------
@@ -44,26 +45,22 @@ def mock_dspec(multi=False):
     outputInfo.interval = 3600
     outputInfo.datum = 'testDatum'
     outputInfo.unit = 'testUnit'
+
     eos = ExpectedOutputShape()
     eos.memberCount = 3 if multi else 1
     outputInfo.expectedOutputShape = eos
-
 
     dspec = Dspec()
     dspec.outputInfo = outputInfo
     dspec.modelName = 'testModelName'
     dspec.modelVersion = '0.0.0'
 
-    if multi:
-        dspec.modelFileName = 'mock_pattern'
-    else:
-        dspec.modelFileName = 'test_AI'
+    dspec.modelFileName = 'mock_pattern' if multi else 'test_AI'
 
     return dspec
 
 
 def mock_models_with_order(num_models, num_outputs=5):
-    """Models return DISTINCT outputs with multiple outputs"""
     models = []
 
     for i in range(num_models):
@@ -113,7 +110,6 @@ TEST_SERIES.dataFrame = RESULT_DATA
 
 SINGLE_VECTOR = [[i for i in range(87)]]
 
-# MUST BE 3 for (3,3,5)
 MULTI_VECTOR = [
     [i for i in range(87)],
     [i for i in range(87)],
@@ -131,7 +127,7 @@ MULTI_VECTOR = [
         (False, SINGLE_VECTOR, (1, 1, 5)),
         (False, MULTI_VECTOR, (1, 3, 5)),
         (True, SINGLE_VECTOR, (3, 1, 5)),
-        (True, MULTI_VECTOR, (3, 3, 5)),  
+        (True, MULTI_VECTOR, (3, 3, 5)),
     ]
 )
 def test_make_predictions(multi, input_vectors, expected_shape):
@@ -214,12 +210,24 @@ def test_model_loading_order():
 @patch('src.ModelExecution.modelRunner.load_model')
 def test_load_models_sorted(mock_load_model, mock_glob):
 
-    mock_glob.return_value = ['model_member3.h5', 'model_member1.h5', 'model_member2.h5']
-    mock_load_model.side_effect = lambda f, compile=False: f
+    mock_glob.return_value = [
+        'model_member3.h5',
+        'model_member1.h5',
+        'model_member2.h5'
+    ]
+
+    mock_load_model.side_effect = lambda f, compile=False: SimpleNamespace(
+        input_shape=(None, 10),
+        file=f
+    )
 
     models = ModelRunner()._ModelRunner__load_models(mock_dspec(multi=True))
 
-    assert models == ['model_member1.h5', 'model_member2.h5', 'model_member3.h5']
+    assert [m.file for m in models] == [
+        'model_member1.h5',
+        'model_member2.h5',
+        'model_member3.h5'
+    ]
 
 
 @patch('src.ModelExecution.modelRunner.load_model')
@@ -232,13 +240,15 @@ def test_load_models_from_pattern(mock_glob, mock_load_model):
         '/models/model_member3.h5'
     ]
 
-    mock_load_model.side_effect = lambda f, compile=False: f"LOADED::{f}"
+    mock_load_model.side_effect = lambda f, compile=False: SimpleNamespace(
+        input_shape=(None, 10),
+        file=f
+    )
 
     models = ModelRunner()._ModelRunner__load_models(mock_dspec(multi=True))
 
-    assert models == [
-        'LOADED::/models/model_member1.h5',
-        'LOADED::/models/model_member2.h5',
-        'LOADED::/models/model_member3.h5'
+    assert [m.file for m in models] == [
+        '/models/model_member1.h5',
+        '/models/model_member2.h5',
+        '/models/model_member3.h5'
     ]
-
