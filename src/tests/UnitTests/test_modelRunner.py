@@ -15,112 +15,240 @@ import sys
 sys.path.append('/app/src')
 
 from datetime import datetime, timezone
-import sys
 import pytest
 from unittest.mock import MagicMock, patch
+import numpy as np
+from numpy import float32
+
 from src.ModelExecution.modelRunner import ModelRunner
-from src.ModelExecution.dspecParser import Dspec, OutputInfo
+from src.ModelExecution.dspecParser import Dspec, OutputInfo, ExpectedOutputShape
 from src.DataClasses import Series, SemaphoreSeriesDescription
-from numpy import array, float32
+from types import SimpleNamespace
+
+
+# -------------------------------
+# Helpers
+# -------------------------------
 
 def mock_outputHandlerFactory(mocked_returnClass: MagicMock):
-    # The mock factory should return a mock class
     mock_factory = MagicMock()
     mock_factory.return_value = mocked_returnClass
     return mock_factory
 
-def mock_dspec():
-    """ This fixture returns a mock dspec object with a single dependent series and a single post process call
-    """
+
+def mock_dspec(multi=False):
     outputInfo = OutputInfo()
     outputInfo.outputMethod = 'TestOutputMethod'
     outputInfo.leadTime = 3600
     outputInfo.series = 'testSeries'
     outputInfo.location = 'testLocation'
     outputInfo.interval = 3600
-    outputInfo.fromDateTime = None
-    outputInfo.toDateTime = None
     outputInfo.datum = 'testDatum'
     outputInfo.unit = 'testUnit'
 
+    eos = ExpectedOutputShape()
+    eos.memberCount = 3 if multi else 1
+    outputInfo.expectedOutputShape = eos
 
     dspec = Dspec()
     dspec.outputInfo = outputInfo
-    dspec.modelFileName = 'test_AI'
     dspec.modelName = 'testModelName'
     dspec.modelVersion = '0.0.0'
+
+    dspec.modelFileName = 'mock_pattern' if multi else 'test_AI'
 
     return dspec
 
 
+def mock_models_with_order(num_models, num_outputs=5):
+    models = []
+
+    for i in range(num_models):
+        mock_model = MagicMock()
+        mock_model.input_shape = (None, 87)
+
+        def make_predict(val):
+            def predict(inputs):
+                batch_size = len(inputs)
+                row = [val + j for j in range(num_outputs)]
+                return np.array([row] * batch_size, dtype=float32)
+            return predict
+
+        mock_model.predict.side_effect = make_predict(i + 1)
+        models.append(mock_model)
+
+    return models
+
+
 def equate_series(left: Series, right: Series):
-    """Compares two series objects against one another"""
+    assert left.dataFrame == right.dataFrame
 
-    assert left.dataFrame == right.dataFrame, "Series data does not match"
-    
-    leftD = left.description
-    rightD = right.description
-    assert leftD.dataSeries == rightD.dataSeries, "Series descriptions do not match"
-    assert leftD.modelName == rightD.modelName, "Model names do not match"
-    assert leftD.modelVersion == rightD.modelVersion, "Model versions do not match"
-    assert leftD.dataSeries == rightD.dataSeries, "Series names do not match"
-    assert leftD.dataLocation == rightD.dataLocation, "Locations do not match"
-    assert leftD.dataDatum == rightD.dataDatum, "Datums do not match"
+    assert left.description.modelName == right.description.modelName
+    assert left.description.modelVersion == right.description.modelVersion
+    assert left.description.dataSeries == right.description.dataSeries
+    assert left.description.dataLocation == right.description.dataLocation
+    assert left.description.dataDatum == right.description.dataDatum
 
 
+# -------------------------------
+# Test Data
+# -------------------------------
 
-TEST_DSPEC = mock_dspec()
 TEST_REF_TIME = datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-TEST_DESCRIPTION = SemaphoreSeriesDescription(
-    'testModelName',
-    '0.0.0',
-    'testSeries',
-    'testLocation',
-    'testDatum'
+
+TEST_SERIES = Series(
+    SemaphoreSeriesDescription(
+        'testModelName',
+        '0.0.0',
+        'testSeries',
+        'testLocation',
+        'testDatum'
+    )
 )
-TEST_SERIES = Series(TEST_DESCRIPTION)
 RESULT_DATA = 0
 TEST_SERIES.dataFrame = RESULT_DATA
 
-SINGLE_VECTOR = [[num for num in range(87)]]
-SINGLE_VECTOR_EXPECTED_OUTPUT = array([[[0.7075105]]], dtype=float32)
-MULTI_VECTOR = [[num for num in range(87)], [num for num in range(87)]]
-MULTI_VECTOR_EXPECTED_OUTPUT = array([[[0.7075105], [0.7075105]]], dtype=float32)
+SINGLE_VECTOR = [[i for i in range(87)]]
+
+MULTI_VECTOR = [
+    [i for i in range(87)],
+    [i for i in range(87)],
+    [i for i in range(87)]
+]
 
 
-# docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_modelRunner.py
-@pytest.mark.parametrize("dspec , input_vectors, reference_time, expected_outputHandlerCall, expected_series", [
-    (TEST_DSPEC, SINGLE_VECTOR, TEST_REF_TIME, (SINGLE_VECTOR_EXPECTED_OUTPUT, TEST_DSPEC, TEST_REF_TIME), TEST_SERIES), # Tests running a single model
-    (TEST_DSPEC, MULTI_VECTOR, TEST_REF_TIME, (MULTI_VECTOR_EXPECTED_OUTPUT, TEST_DSPEC, TEST_REF_TIME), TEST_SERIES), # Tests running an ensemble 
-])
-def test_make_predictions(dspec: Dspec, input_vectors:list[any], reference_time: datetime, expected_outputHandlerCall, expected_series):
-    """ This tests the make_predictions method of the modelRunner class.
+# -------------------------------
+# Main Test
+# -------------------------------
 
-    :param dspec: Dspec - The dspec to reference.
-    :param input_vectors: list[any] - The input vectors to be used for predictions.
-    :param reference_time: datetime - The reference time for the predictions.
-    :param expected_outputHandlerCall: The expected arguments to be passed to the output handler's post_process_prediction method.
-    :param expected_series: The expected series to be returned by the make_predictions method.
-    """
+@pytest.mark.parametrize(
+    "multi, input_vectors, expected_shape",
+    [
+        (False, SINGLE_VECTOR, (1, 1, 5)),
+        (False, MULTI_VECTOR, (1, 3, 5)),
+        (True, SINGLE_VECTOR, (3, 1, 5)),
+        (True, MULTI_VECTOR, (3, 3, 5)),
+    ]
+)
+def test_make_predictions(multi, input_vectors, expected_shape):
 
-    # We create an output handler mock so we can read what gets passed to it
     OH_MOCK = MagicMock()
-    OH_MOCK.post_process_prediction.return_value = RESULT_DATA # We don't care what it returns as its out of scope for this unit
+    OH_MOCK.post_process_prediction.return_value = RESULT_DATA
 
-    # Patch out the output handler factory forcing it to return our mocked output handler class
-    with patch('src.ModelExecution.modelRunner.output_handler_factory', mock_outputHandlerFactory(OH_MOCK)):
+    with patch('src.ModelExecution.modelRunner.output_handler_factory',
+               mock_outputHandlerFactory(OH_MOCK)):
 
-        modelRunner = ModelRunner()
-        result_series = modelRunner.make_predictions(dspec, input_vectors, reference_time)
+        with patch.object(ModelRunner, "_ModelRunner__load_models") as mock_loader:
 
-    # Checking the call to the mocked OH class. There is a method does this for us:
-    # --> OH_MOCK.post_process_prediction.assert_called_once_with(*expected_outputHandlerCall)
-    # However this method throws up due to the call containing multi value numpy arrays
-    # so I wrote out the logic below.  
-    assert OH_MOCK.post_process_prediction.call_count == 1, 'Call to OutputHandler.post_process_prediction called more than once!'
-    actual_args = OH_MOCK.post_process_prediction.call_args.args
-    assert (abs(expected_outputHandlerCall[0] - actual_args[0]) < 1e-6).all(), 'Call to OutputHandler.post_process_prediction had incorrect predictions!'
-    assert expected_outputHandlerCall[1:] == actual_args[1:],  'Call to OutputHandler.post_process_prediction had incorrect arguments!'
+            num_models = 3 if multi else 1
+            mock_loader.return_value = mock_models_with_order(num_models)
 
-    # Check the series returned is correct
-    equate_series(result_series, expected_series)
+            runner = ModelRunner()
+            result_series = runner.make_predictions(
+                mock_dspec(multi),
+                input_vectors,
+                TEST_REF_TIME
+            )
+
+    predictions = OH_MOCK.post_process_prediction.call_args.args[0]
+
+    # -------------------------------
+    # Shape checks
+    # -------------------------------
+    assert predictions.shape == expected_shape
+    assert predictions.shape[2] == 5
+
+    # -------------------------------
+    # Value checks (critical)
+    # -------------------------------
+    if multi:
+        for m in range(num_models):
+            expected = [m + 1 + j for j in range(5)]
+            for i in range(len(input_vectors)):
+                assert list(predictions[m, i]) == expected
+    else:
+        expected = [1 + j for j in range(5)]
+        for i in range(len(input_vectors)):
+            assert list(predictions[0, i]) == expected
+
+    equate_series(result_series, TEST_SERIES)
+
+
+# -------------------------------
+# Order Test
+# -------------------------------
+
+def test_model_loading_order():
+
+    OH_MOCK = MagicMock()
+    OH_MOCK.post_process_prediction.return_value = RESULT_DATA
+
+    with patch('src.ModelExecution.modelRunner.output_handler_factory',
+               mock_outputHandlerFactory(OH_MOCK)):
+
+        with patch.object(ModelRunner, "_ModelRunner__load_models") as mock_loader:
+
+            mock_loader.return_value = mock_models_with_order(3)
+
+            runner = ModelRunner()
+            runner.make_predictions(
+                mock_dspec(multi=True),
+                SINGLE_VECTOR,
+                TEST_REF_TIME
+            )
+
+    predictions = OH_MOCK.post_process_prediction.call_args.args[0]
+
+    assert list(predictions[:, 0, 0]) == [1, 2, 3]
+
+
+# -------------------------------
+# __load_models Tests
+# -------------------------------
+
+@patch('src.ModelExecution.modelRunner.glob.glob')
+@patch('src.ModelExecution.modelRunner.load_model')
+def test_load_models_sorted(mock_load_model, mock_glob):
+
+    mock_glob.return_value = [
+        'model_member3.h5',
+        'model_member1.h5',
+        'model_member2.h5'
+    ]
+
+    mock_load_model.side_effect = lambda f, compile=False: SimpleNamespace(
+        input_shape=(None, 10),
+        file=f
+    )
+
+    models = ModelRunner()._ModelRunner__load_models(mock_dspec(multi=True))
+
+    assert [m.file for m in models] == [
+        'model_member1.h5',
+        'model_member2.h5',
+        'model_member3.h5'
+    ]
+
+
+@patch('src.ModelExecution.modelRunner.load_model')
+@patch('src.ModelExecution.modelRunner.glob.glob')
+def test_load_models_from_pattern(mock_glob, mock_load_model):
+
+    mock_glob.return_value = [
+        '/models/model_member2.h5',
+        '/models/model_member1.h5',
+        '/models/model_member3.h5'
+    ]
+
+    mock_load_model.side_effect = lambda f, compile=False: SimpleNamespace(
+        input_shape=(None, 10),
+        file=f
+    )
+
+    models = ModelRunner()._ModelRunner__load_models(mock_dspec(multi=True))
+
+    assert [m.file for m in models] == [
+        '/models/model_member1.h5',
+        '/models/model_member2.h5',
+        '/models/model_member3.h5'
+    ]
