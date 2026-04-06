@@ -56,8 +56,18 @@ class DataGatherer:
         dependentSeries: list[DependentSeries] = dspec.dependentSeries
         postProcessCalls: list[PostProcessCall] = dspec.postProcessCall
 
+        # Build a lookup from outKey → indexes using orderedVector
+        vector_index_lookup: dict[str, tuple[int, int]] = {}
+        ordered_vector = getattr(dspec, 'orderedVector', None)
+        if ordered_vector is not None:
+            vector_index_lookup = {
+                key: indexes
+                for key, indexes in zip(ordered_vector.keys, ordered_vector.indexes)
+                if indexes != (None, None)  # (None, None) means no buffer info, skip
+            }
+
         # Get Dependent Data
-        dependent_data_repository = self.__request_dependent_data(dependentSeries, referenceTime)
+        dependent_data_repository = self.__request_dependent_data(dependentSeries, referenceTime, vector_index_lookup)
 
         # Call post processing 
         post_processed_series_repository = self.__post_process_data(dependent_data_repository, postProcessCalls)
@@ -65,7 +75,7 @@ class DataGatherer:
         return post_processed_series_repository
     
 
-    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime) -> dict[str, Series]:
+    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime, vector_index_lookup: dict[str, tuple[int, int]] = {}) -> dict[str, Series]:
         """This method handles the process of requesting the dependant series from the DSPEC. Its requests will be temporally
         referenced from the passed reference time. It will:
             - Build the series description
@@ -119,8 +129,12 @@ class DataGatherer:
             # Reset the index
             series.dataFrame.reset_index(inplace=True)
 
+            # Look up the vectorOrder indexes for this series by outKey.
+            # None means this series has no vectorOrder entry — validate the full window.
+            indexes = vector_index_lookup.get(key, None)
+
             # Validate the data
-            self.__validate_series(series, referenceTime)
+            self.__validate_series(series, referenceTime, indexes)
             
             # Store the series in the repository
             series_repository[key] = series
@@ -210,13 +224,15 @@ class DataGatherer:
                             dependentSeries.dataIntegrityCall.args
                     )
     
-    def __validate_series(self, series: Series, referenceTime: datetime):
+    def __validate_series(self, series: Series, referenceTime: datetime, indexes: tuple[int, int] = None):
         """ This method checks if the series description has a verification override.
             If it does, it uses the override to validate the series.
             If it doesn't, it uses the date range validation to validate the series.
 
             :param series: Series - The series to validate
             :param referenceTime: datetime - The reference time for this model
+            :param indexes: tuple[int, int] - Optional (min, max) vectorOrder indexes; 
+                        if provided, validation is clipped to only what the model reads
         """
 
         if series.description.verificationOverride is not None:
@@ -227,7 +243,7 @@ class DataGatherer:
                 raise Semaphore_Data_Exception(f'OverrideValidation Failed in Data Gatherer! \n[Series] -> {series}')
         else:
             # if no verification override, default to validate the date range
-            is_valid = data_validation_factory('DateRangeValidation', referenceTime = referenceTime).validate(series)
+            is_valid = data_validation_factory('DateRangeValidation', referenceTime = referenceTime, indexes=indexes).validate(series)
 
             if not is_valid:
                 raise Semaphore_Data_Exception(f'DateRangeValidation Failed in Data Gatherer! \n[Series] -> {series}')
