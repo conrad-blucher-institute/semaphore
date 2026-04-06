@@ -23,7 +23,7 @@ from os import path, getenv
 from numpy import reshape
 import numpy as np
 import glob
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model, Model
 
 
 class ModelRunner:
@@ -55,13 +55,8 @@ class ModelRunner:
         log('Init shape inputs....')
 
         # Use first model for shape (all models should match)
-        expectedShape = models[0].input_shape
-        
-        for m in models:
-            if m.input_shape != expectedShape:
-                raise Semaphore_Exception("Model input shapes do not match")
-            
-        expectedShape = (len(input_vectors),) + expectedShape[1:]
+        model_input_shape = models[0].input_shape
+        expectedShape = (len(input_vectors),) + model_input_shape[1:]
         shapedInputs = reshape(input_vectors, expectedShape)
 
         log('Init compute predictions for all models....')
@@ -96,7 +91,7 @@ class ModelRunner:
         return series
     
 
-    def __load_models(self, DSPEC: Dspec) -> list:
+    def __load_models(self, DSPEC: Dspec) -> list[Model]:
         """
         This function will construct the model path based on the dspec and will 
         to load all models that match the path.
@@ -126,8 +121,27 @@ class ModelRunner:
         # if multiple models are found, sort to ensure consistent loading order (member1, member2, ...)
         if len(model_files) > 1:
             model_files.sort(key=self.extract_number)
+        
 
-        loaded_models = [load_model(file, compile=False) for file in model_files]
+        first_model = load_model(model_files[0], compile=False)
+        
+        expected_shape = first_model.input_shape
+
+        loaded_models = [first_model]
+        
+        for file in model_files[1:]:
+            model = load_model(file, compile=False)
+
+            
+            if model.input_shape != expected_shape:
+                raise Semaphore_Exception(
+                    f"Model input shape mismatch for file {file}: "
+                    f"expected {expected_shape}, got {model.input_shape}"
+                )
+            
+            
+            loaded_models.append(model)
+
         return loaded_models
     
     def extract_number(self, filename):

@@ -6,7 +6,7 @@
     "modelFileName": "thermalrefugemodel",
     "timingInfo": {
         "active": true,
-        "offset": 0,
+        "offset": 1620,
         "interval": 3600
     },
     "outputInfo": {
