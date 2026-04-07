@@ -73,16 +73,22 @@ class DateRangeValidation(IDataValidation):
         df_to_validate.set_index('timeVerified', inplace=True)
         
         # --- Expected index ---
-        # IMPORTANT: bounds must come from the clipped dataframe's actual timestamps,
-        # NOT from series.timeDescription.fromDateTime/toDateTime.
-        # timeDescription reflects the full over-requested window including buffer slots.
-        # Using it here would re-expand the index back to the full window, reintroducing
-        # NaNs for the buffer slots we just clipped — defeating the entire purpose.
-        expected_index = date_range(
-            start=df_to_validate.index[0],   # first timestamp in the clipped window
-            end=df_to_validate.index[-1],    # last timestamp in the clipped window
-            freq=timedelta(seconds=series.timeDescription.interval.total_seconds())
-        )
+        # When indexes are provided, bounds come from the clipped dataframe's actual
+        # timestamps — using timeDescription here would re-expand back to the full window.
+        # When indexes is None, use timeDescription bounds (original behavior) so that
+        # dataframes missing values at the edges relative to timeDescription still fail.
+        if self.indexes is not None:
+            expected_index = date_range(
+                start=df_to_validate.index[0],
+                end=df_to_validate.index[-1],
+                freq=timedelta(seconds=series.timeDescription.interval.total_seconds())
+            )
+        else:
+            expected_index = date_range(
+                start=series.timeDescription.fromDateTime,
+                end=series.timeDescription.toDateTime,
+                freq=timedelta(seconds=series.timeDescription.interval.total_seconds())
+            )
 
         # Reindex to the expected range — any genuinely missing interior timestamps
         # will become NaN rows, which we catch below.

@@ -59,7 +59,7 @@ class DataGatherer:
         # Build a lookup from outKey → indexes using orderedVector
         vector_index_lookup: dict[str, tuple[int, int]] = {}
         ordered_vector = getattr(dspec, 'orderedVector', None)
-        if ordered_vector is not None:
+        if ordered_vector is not None and hasattr(ordered_vector, 'keys'):
             vector_index_lookup = {
                 key: indexes
                 for key, indexes in zip(ordered_vector.keys, ordered_vector.indexes)
