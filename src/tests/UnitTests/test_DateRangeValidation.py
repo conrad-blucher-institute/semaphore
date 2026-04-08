@@ -325,7 +325,62 @@ class TestDateRangeValidation(unittest.TestCase):
 
         validator = data_validation_factory('DateRangeValidation', referenceTime=reference_time)
 
-        self.assertTrue(validator.validate(series_mock))   
+        self.assertTrue(validator.validate(series_mock)) 
+
+    def test_validate_indexes_missing_value_outside_window_passes(self):
+        """Asserts validate returns True when a missing value falls outside the indexed window.
+
+        The indexed window defines which rows the model actually reads. Any missing values
+        outside that window are buffer slots and should be ignored by validation.
+
+        Setup: 10 rows, indexes=(2, 8) → model reads rows 2-7.
+        Rows 0, 1 (left buffer) and rows 8, 9 (right buffer) are outside the window.
+        Missing values in those buffer slots should not cause validation to fail.
+        """
+        times = pd.date_range(start='2023-01-01 00:00', periods=10, freq='1h', tz='UTC')
+
+        # Put missing values in both buffer zones — rows 0, 1 and rows 8, 9
+        # Rows 2-7 (the model window) are all present
+        values = [None, None] + [float(i) for i in range(2, 8)] + [None, None]
+        df = pd.DataFrame({'timeVerified': times, 'dataValue': values})
+
+        series_mock = MagicMock()
+        series_mock.dataFrame = df
+        series_mock.timeDescription = MagicMock()
+        series_mock.timeDescription.fromDateTime = times[0]
+        series_mock.timeDescription.toDateTime = times[-1]
+        series_mock.timeDescription.interval = timedelta(hours=1)
+        series_mock.timeDescription.stalenessOffset = None
+
+        validator = DateRangeValidation(indexes=(2, 8))
+        self.assertTrue(validator.validate(series_mock))
+
+    def test_validate_indexes_missing_value_inside_window_fails(self):
+        """Asserts validate returns False when a missing value falls inside the indexed window.
+
+        A missing value inside the model window means the model would receive a NaN —
+        validation must catch this regardless of whether buffer slots are present or not.
+
+        Setup: 10 rows, indexes=(2, 8) → model reads rows 2-7.
+        Row 5 (interior to the model window) is missing — validation should fail.
+        """
+        times = pd.date_range(start='2023-01-01 00:00', periods=10, freq='1h', tz='UTC')
+
+        # All buffer slots present, but row 5 is missing inside the model window
+        values = [float(i) for i in range(10)]
+        values[5] = None
+        df = pd.DataFrame({'timeVerified': times, 'dataValue': values})
+
+        series_mock = MagicMock()
+        series_mock.dataFrame = df
+        series_mock.timeDescription = MagicMock()
+        series_mock.timeDescription.fromDateTime = times[0]
+        series_mock.timeDescription.toDateTime = times[-1]
+        series_mock.timeDescription.interval = timedelta(hours=1)
+        series_mock.timeDescription.stalenessOffset = None
+
+        validator = DateRangeValidation(indexes=(2, 8))
+        self.assertFalse(validator.validate(series_mock))
 
 if __name__ == '__main__':
     unittest.main()
