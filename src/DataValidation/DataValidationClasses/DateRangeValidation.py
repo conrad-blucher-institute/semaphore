@@ -46,36 +46,20 @@ class DateRangeValidation(IDataValidation):
         # The original must stay intact — buffer slots outside the indexed window
         # are still valid data we want to store.
         df_to_validate = series.dataFrame.copy()
-
-        # --- Clipping ---
-        # If vectorOrder indexes were provided, clip the dataframe to only the rows
-        # the model actually reads. Buffer slots outside this window are intentionally
-        # excluded — their absence should not cause validation to fail.
+        
         if self.indexes is not None:
-            # Unpack: min_index is the closest-to-now slot (right/future side),
-            # max_index is the furthest-from-now slot (left/past side).
             min_index, max_index = self.indexes
+            df_to_validate = df_to_validate.iloc[min_index:max_index]
 
-            # The dataframe is ordered oldest → newest after the reindex in DataGatherer.
-            # -(max_index + 1) counts back from the end to include the furthest past slot.
-            # e.g. max_index=25 → iloc[-26:] keeps the 26 model-read rows from the left.
-            clip_start = -(max_index + 1)
-
-            # len(df) - min_index trims future buffer rows from the right.
-            # When min_index=0 this evaluates to len(df), i.e. no right-side trim.
-            # `or None` converts 0 → None so iloc doesn't produce an empty slice
-            # (iloc[x:0] is empty, iloc[x:None] goes to the end — which is what we want).
-            clip_end = len(df_to_validate) - min_index or None
-
-            df_to_validate = df_to_validate.iloc[clip_start:clip_end]
+            if len(df_to_validate) == 0:
+                log_error(f'DateRangeValidation: indexes={self.indexes} produced an empty clipped window for a dataframe of length {len(series.dataFrame)}')
+                return False
 
         # Set timeVerified as the index so we can reindex against an expected date range.
         df_to_validate.set_index('timeVerified', inplace=True)
-        
-        # --- Expected index ---
-        # When indexes are provided, bounds come from the clipped dataframe's actual
-        # timestamps — using timeDescription here would re-expand back to the full window.
-        # When indexes is None, use timeDescription bounds (original behavior) so that
+
+        # When indexes are provided use the clipped frame's actual bounds.
+        # When indexes is None use timeDescription bounds (original behavior) so
         # dataframes missing values at the edges relative to timeDescription still fail.
         if self.indexes is not None:
             expected_index = date_range(
@@ -89,7 +73,7 @@ class DateRangeValidation(IDataValidation):
                 end=series.timeDescription.toDateTime,
                 freq=timedelta(seconds=series.timeDescription.interval.total_seconds())
             )
-
+            
         # Reindex to the expected range — any genuinely missing interior timestamps
         # will become NaN rows, which we catch below.
         df_to_validate = df_to_validate.reindex(expected_index)
