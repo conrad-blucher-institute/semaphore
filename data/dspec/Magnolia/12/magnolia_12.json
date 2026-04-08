@@ -173,14 +173,14 @@
         }
     ],
     "vectorOrder": [
-        { "key": "PL_PWL_25",       "dType": "float", "indexes": [0, 25] },
-        { "key": "PL_Surge_25",      "dType": "float", "indexes": [0, 25] },
-        { "key": "POC_PWL_25",       "dType": "float", "indexes": [0, 25] },
-        { "key": "POC_Surge_25",     "dType": "float", "indexes": [0, 25] },
-        { "key": "AVG_PWL_25",       "dType": "float", "indexes": [0, 25] },
-        { "key": "AVG_Surge_25",     "dType": "float", "indexes": [0, 25] },
-        { "key": "x_PL_PWNDCMP_25", "dType": "float", "indexes": [0, 25] },
-        { "key": "y_PL_PWNDCMP_25", "dType": "float", "indexes": [0, 25] },
+        { "key": "PL_PWL_25",       "dType": "float", "indexes": [2, 27] },
+        { "key": "PL_Surge_25",      "dType": "float", "indexes": [2, 27] },
+        { "key": "POC_PWL_25",       "dType": "float", "indexes": [2, 27] },
+        { "key": "POC_Surge_25",     "dType": "float", "indexes": [2, 27] },
+        { "key": "AVG_PWL_25",       "dType": "float", "indexes": [2, 27] },
+        { "key": "AVG_Surge_25",     "dType": "float", "indexes": [2, 27] },
+        { "key": "x_PL_PWNDCMP_25", "dType": "float", "indexes": [2, 27] },
+        { "key": "y_PL_PWNDCMP_25", "dType": "float", "indexes": [2, 27] },
         { "key": "x_PL_PWNDCMP_F7", "dType": "float" },
         { "key": "y_PL_PWNDCMP_F7", "dType": "float" }
     ]
