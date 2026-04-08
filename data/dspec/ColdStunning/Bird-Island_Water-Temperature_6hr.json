@@ -88,16 +88,16 @@
             "key": "south-bird-island_water-temp_25",
             "dType": "float",
             "indexes": [
-                0,
-                25
+                2,
+                27
             ]
         },
         {
             "key": "south-bird-island_air-temp_25",
             "dType": "float", 
             "indexes": [
-                0,
-                25
+                2,
+                27
             ]
         },
         {
