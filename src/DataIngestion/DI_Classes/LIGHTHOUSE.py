@@ -16,7 +16,7 @@ from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDesc
 from DataIngestion.IDataIngestion import IDataIngestion
 from utility import log
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from urllib.error import HTTPError
 from urllib.request import urlopen
 import json
@@ -75,6 +75,12 @@ class LIGHTHOUSE(IDataIngestion):
         
         # Reformat and sterilize datetimes
         fromString = timeDescription.fromDateTime.strftime('%m/%d/%y').replace('/', '%2F')
+        
+        # Extend the fetch window 1 hour past toDateTime to capture any 6-minute
+        # readings Lighthouse has published since the last hourly aggregate.
+        # These are only used to estimate the now-point if it's missing — they
+        # never enter the series directly.
+        extendedToDateTime = timeDescription.toDateTime + timedelta(hours=1)
         toString = timeDescription.toDateTime.strftime('%m/%d/%y').replace('/', '%2F')
         
         ### Find what LIGHTHOUSE calls the series we want
@@ -120,27 +126,52 @@ class LIGHTHOUSE(IDataIngestion):
         is_prediction = seriesDescription.dataSeries[0] == 'p'
         now_time = datetime.now(timezone.utc) if is_prediction else None
         
+        # Collect any sub-hourly readings past toDateTime separately.
+        # These are candidates for estimating the now-point if it's missing.
+        sub_hourly_values = []
+
         for dataPoint in data:
-         # Lighthouse returns epoch time in milliseconds
-            epochTimeStamp = dataPoint[dataTimestampIndex]/1000            # Lighthouse over returns data, so we just clip any data that is before or after our requested date range
-            if epochTimeStamp > timeDescription.toDateTime.timestamp() or epochTimeStamp < timeDescription.fromDateTime.timestamp():
+            epochTimeStamp = dataPoint[dataTimestampIndex] / 1000
+
+            if dataPoint[dataValueIndex] is None:
                 continue
 
             dt = datetime.fromtimestamp(epochTimeStamp, tz=timezone.utc)
 
-            if dataPoint[dataValueIndex] == None: # If lighthouse does not have a requested value, it will return None
+            # Readings past toDateTime go into the sub-hourly bucket, not the series
+            if epochTimeStamp > timeDescription.toDateTime.timestamp():
+                sub_hourly_values.append(dataPoint[dataValueIndex])
                 continue
 
-            # Use now_time for prediction series, otherwise use dt
+            # Clip anything before fromDateTime as before
+            if epochTimeStamp < timeDescription.fromDateTime.timestamp():
+                continue
+
             time_generated = now_time if is_prediction else dt
-            
             df.loc[len(df)] = [
-                dataPoint[dataValueIndex],          # dataValue
-                seriesInfoMap[SIMSeriesUnitIndex],  # dataUnit
-                dt,                                 # timeVerified
-                time_generated,                     # timeGenerated
-                lon,                                # longitude
-                lat                                 # latitude
+                dataPoint[dataValueIndex],
+                seriesInfoMap[SIMSeriesUnitIndex],
+                dt,
+                time_generated,
+                lon,
+                lat
+            ]
+
+        # --- Now-point estimation ---
+        # If the now-point (toDateTime) is missing from the series but we have
+        # sub-hourly readings from the extended window, average them as an estimate.
+        # timeGenerated is set to now so downstream staleness checks know when this was derived.
+        now_point_present = not df.empty and (df['timeVerified'] == timeDescription.toDateTime).any()
+        if not now_point_present and len(sub_hourly_values) >= 1:
+            estimated_value = sum(sub_hourly_values) / len(sub_hourly_values)
+            log(f'LIGHTHOUSE | now-point missing, estimating from {len(sub_hourly_values)} sub-hourly reading(s): {estimated_value:.4f}')
+            df.loc[len(df)] = [
+                estimated_value,
+                seriesInfoMap[SIMSeriesUnitIndex],
+                timeDescription.toDateTime,         # timeVerified = the now-point slot
+                datetime.now(timezone.utc),         # timeGenerated = when we derived it
+                lon,
+                lat
             ]
 
         if(len(df) > 0):
