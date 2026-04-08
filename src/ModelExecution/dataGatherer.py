@@ -75,7 +75,7 @@ class DataGatherer:
         return post_processed_series_repository
     
 
-    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime, vector_index_lookup: dict[str, tuple[int, int]] = {}) -> dict[str, Series]:
+    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime, vector_index_lookup: dict[str, tuple[int, int]] = None) -> dict[str, Series]:
         """This method handles the process of requesting the dependant series from the DSPEC. Its requests will be temporally
         referenced from the passed reference time. It will:
             - Build the series description
@@ -97,6 +97,7 @@ class DataGatherer:
         """
         
         series_repository: dict[str, Series] = {}
+        vector_index_lookup = vector_index_lookup if vector_index_lookup is not None else {} 
 
         for dependentSeries in dependentSeriesList:
             
