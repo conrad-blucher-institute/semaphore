@@ -81,7 +81,7 @@ class LIGHTHOUSE(IDataIngestion):
         # These are only used to estimate the now-point if it's missing — they
         # never enter the series directly.
         extendedToDateTime = timeDescription.toDateTime + timedelta(hours=1)
-        toString = timeDescription.toDateTime.strftime('%m/%d/%y').replace('/', '%2F')
+        toString = extendedToDateTime.strftime('%m/%d/%y').replace('/', '%2F')
         
         ### Find what LIGHTHOUSE calls the series we want
         # SIM = series info map
