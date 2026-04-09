@@ -111,7 +111,7 @@
             "interval": 3600,
             "range": [24, 1],
             "outKey": "WSPD_FUTR_24",
-            "stalenessOffset": 39600
+            "stalenessOffset": 43200
         },
         {
             "_name": "wind direction future",
@@ -122,7 +122,7 @@
             "interval": 3600,
             "range": [24, 1],
             "outKey": "WDIR_FUTR_24",
-            "stalenessOffset": 39600
+            "stalenessOffset": 43200
         }
     ],
     "postProcessCall": [

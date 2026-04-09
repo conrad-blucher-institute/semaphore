@@ -112,7 +112,7 @@
             "interval": 3600,
             "range": [7, 1],
             "outKey": "PL_PWNDIR_F7",
-            "stalenessOffset": 39600,
+            "stalenessOffset": 43200,
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
                 "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
@@ -127,7 +127,7 @@
             "interval": 3600,
             "range": [7, 1],
             "outKey": "PL_PWSPD_F7",
-            "stalenessOffset": 39600,
+            "stalenessOffset": 43200,
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
