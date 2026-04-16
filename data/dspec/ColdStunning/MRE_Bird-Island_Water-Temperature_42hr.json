@@ -1,5 +1,5 @@
 {
-    "dspecVersion": "2.0",
+    "dspecVersion": "2.1",
     "modelName": "MRE_Bird-Island_Water-Temperature_42hr",
     "modelVersion": "1.0.0",
     "author": "Christian Duff",
@@ -15,6 +15,7 @@
         "series": "pWaterTmp",
         "location": "SouthBirdIsland",
         "unit": "celsius",
+        "statistics": true,
         "expectedOutputShape": {
             "memberCount": 1,
             "inputVectorCount": 100,

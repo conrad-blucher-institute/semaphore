@@ -1,5 +1,5 @@
 {
-    "dspecVersion": "2.0",
+    "dspecVersion": "2.1",
     "modelName": "CRPS_96hr",
     "modelVersion": "1.0.0",
     "author": "Miranda White",
@@ -15,6 +15,7 @@
         "series": "pWaterTmp",
         "location": "SouthBirdIsland",
         "unit": "celsius",
+        "statistics": true,
         "expectedOutputShape": {
             "memberCount": 10,
             "inputVectorCount": 100,
