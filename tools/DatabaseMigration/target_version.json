@@ -1,4 +1,4 @@
 {
-    "Target Version" : "3.6",
+    "Target Version" : "3.7",
     "Description" : "Retires current outputs table and creates the new outputs table."
 }

@@ -2,7 +2,7 @@
 #3_7_DatabaseMigration.py
 #----------------------------------
 # Created By: Anointiyae Beasley
-# Created Date: 02/25/2026
+# Created Date: 04/17/2026
 # Version 1.0
 #----------------------------------
 """This is a database migration script that will initialize version
@@ -19,7 +19,7 @@ class Migrator(IDatabaseMigration):
     def update(self, databaseEngine: Engine) -> bool:
         """
           Update behavior:
-            - Create the new statistics table
+            - Create the new statistics table and it's contraints
 
         Parameters:
             :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
@@ -52,7 +52,7 @@ class Migrator(IDatabaseMigration):
                     CONSTRAINT "fk_statistics_output"
                         FOREIGN KEY ("outputID")
                         REFERENCES public."outputs"("id")
-                        ON DELETE CASCADE
+                        ON DELETE CASCADE 
                 );
             """))
 
