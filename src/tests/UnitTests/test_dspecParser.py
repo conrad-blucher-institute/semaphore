@@ -33,11 +33,10 @@ def test_parseDSPEC(dspecFilePath: str):
     with open(dspecFilePath) as dspecFile:
         dspec_json = load(dspecFile)
     dspec_version = dspec_json.get('dspecVersion', '2.0')
-    match dspec_version:
-        case v if v.startswith('2.'):
-            sub_test_dspec_2_0(dspecFilePath)
-        case _:
-            raise NotImplementedError(f'No parser for dspec version {dspec_version} not found!')
+    if dspec_version.startswith('2.'):
+        sub_test_dspec_2_0(dspecFilePath)
+    else:
+        raise NotImplementedError(f'No parser for dspec version {dspec_version} not found!')
 
     assert True
 

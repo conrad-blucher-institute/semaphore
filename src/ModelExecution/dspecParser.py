@@ -36,11 +36,10 @@ class DSPEC_Parser:
         
         # only check for major version for sub parsers
         # minor versions should not break parsing and should be backwards compatible
-        match self.__dspec_version:
-            case v if v.startswith('2.'):
-                sub_parser = dspec_sub_Parser_2_0(self.__dspec_json)
-            case _:
-                raise NotImplementedError(f'No parser for dspec version {self.__dspec_version} not found!')
+        if self.__dspec_version.startswith('2.'):
+            sub_parser = dspec_sub_Parser_2_0(self.__dspec_json)
+        else:
+            raise NotImplementedError(f'No parser for dspec version {self.__dspec_version} not found!')
             
         return sub_parser.parse_dspec() 
 
