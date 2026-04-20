@@ -36,7 +36,7 @@ def test_parseDSPEC(dspecFilePath: str):
     if dspec_version.startswith('2.'):
         sub_test_dspec_2_0(dspecFilePath)
     else:
-        raise NotImplementedError(f'No parser for dspec version {dspec_version} not found!')
+        raise NotImplementedError(f'No parser found for dspec version: {dspec_version}!')
 
     assert True
 

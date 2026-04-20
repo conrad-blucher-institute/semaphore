@@ -39,7 +39,7 @@ class DSPEC_Parser:
         if self.__dspec_version.startswith('2.'):
             sub_parser = dspec_sub_Parser_2_0(self.__dspec_json)
         else:
-            raise NotImplementedError(f'No parser for dspec version {self.__dspec_version} not found!')
+            raise NotImplementedError(f'No parser found for dspec version: {self.__dspec_version}!')
             
         return sub_parser.parse_dspec() 
 
