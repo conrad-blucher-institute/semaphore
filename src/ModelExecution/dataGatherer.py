@@ -56,8 +56,12 @@ class DataGatherer:
         dependentSeries: list[DependentSeries] = dspec.dependentSeries
         postProcessCalls: list[PostProcessCall] = dspec.postProcessCall
 
+        # Build a dict of {key: index} so validation knows the actual consumed window
+        vector_order = dspec.orderedVector
+        key_to_index = dict(zip(vector_order.keys, vector_order.indexes))
+        
         # Get Dependent Data
-        dependent_data_repository = self.__request_dependent_data(dependentSeries, referenceTime)
+        dependent_data_repository = self.__request_dependent_data(dependentSeries, referenceTime, key_to_index)
 
         # Call post processing 
         post_processed_series_repository = self.__post_process_data(dependent_data_repository, postProcessCalls)
@@ -65,7 +69,7 @@ class DataGatherer:
         return post_processed_series_repository
     
 
-    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime) -> dict[str, Series]:
+    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime, key_to_index: dict[str, list[int]]) -> dict[str, Series]:
         """This method handles the process of requesting the dependant series from the DSPEC. Its requests will be temporally
         referenced from the passed reference time. It will:
             - Build the series description
@@ -100,17 +104,6 @@ class DataGatherer:
             # Request the data from Series provider from its description 
             series = self.__seriesProvider.request_input(seriesDescription, timeDescription, referenceTime)
 
-            # --- DEBUG: raw from DB before integrity ---
-            print(f'\n[DEBUG] Series "{key}" raw from DB (pre-integrity):')
-            print(f'  Reference time: {referenceTime}')
-            print(f'  Row count: {len(series.dataFrame)}')
-            df_display = series.dataFrame[['timeVerified', 'dataValue']].copy()
-            df_display['offset_from_ref'] = df_display['timeVerified'].apply(
-                lambda t: str(t - referenceTime) if hasattr(t, 'tzinfo') else str(t - referenceTime.replace(tzinfo=None))
-            )
-            print(df_display[['timeVerified', 'offset_from_ref', 'dataValue']].to_string(max_rows=10))
-# --- END DEBUG ---
-
             # Perform data integrity processing if specified
             if dependentSeries.dataIntegrityCall is not None:
                 # Create an instance of the data integrity class and execute it
@@ -130,36 +123,27 @@ class DataGatherer:
             # Reset the index
             series.dataFrame.reset_index(inplace=True)
 
-            # --- DEBUG: show actual data going into validation ---
-            print(f'\n[DEBUG] Series "{key}" post-reindex (pre-validation):')
-            print(f'  Reference time: {referenceTime}')
-            print(f'  Shape: {series.dataFrame.shape}')
-            print(f'  Expected range: {series.timeDescription.fromDateTime} → {series.timeDescription.toDateTime}  interval={series.timeDescription.interval}')
-            print(f'  Null count: {series.dataFrame["dataValue"].isnull().sum()} / {len(series.dataFrame)}')
-            df_display = series.dataFrame[['timeVerified', 'dataValue']].copy()
-            df_display['offset_from_ref'] = df_display['timeVerified'].apply(
-                lambda t: str(t - referenceTime) if t is not None and not df_display['timeVerified'].isnull().all() else 'NaT'
-            )
-            print(df_display[['timeVerified', 'offset_from_ref', 'dataValue']].to_string(max_rows=10))
-            # --- END DEBUG ---
-
-            # Validate the data
-            self.__validate_series(series, referenceTime)
-
-            # --- DEBUG: show actual data going into model ---
-            print(f'\n[DEBUG] Series "{key}" post-validation:')
-            print(f'  Reference time: {referenceTime}')
-            print(f'  Shape: {series.dataFrame.shape}')
-            print(f'  Expected range: {series.timeDescription.fromDateTime} → {series.timeDescription.toDateTime}  interval={series.timeDescription.interval}')
-            print(f'  Null count: {series.dataFrame["dataValue"].isnull().sum()} / {len(series.dataFrame)}')
-            df_display = series.dataFrame[['timeVerified', 'dataValue']].copy()
-            df_display['offset_from_ref'] = df_display['timeVerified'].apply(
-                lambda t: str(t - referenceTime) if t is not None and not df_display['timeVerified'].isnull().all() else 'NaT'
-            )
-            print(df_display[['timeVerified', 'offset_from_ref', 'dataValue']].to_string(max_rows=10))
-            # --- END DEBUG ---
+            # Before validation, trim to only the rows the model will actually consume
+            index = key_to_index.get(key)
+            if index is not None:
+                trimmed_df = series.dataFrame.iloc[index[0]:index[1]].reset_index(drop=True)
+                trimmed_from = trimmed_df['timeVerified'].iloc[0]
+                trimmed_to = trimmed_df['timeVerified'].iloc[-1]
+                trimmed_td = TimeDescription(
+                    trimmed_from,
+                    trimmed_to,
+                    series.timeDescription.interval,
+                    series.timeDescription.stalenessOffset
+                )
+                series_for_validation = Series.__new__(Series)
+                series_for_validation.__dict__.update(series.__dict__)
+                series_for_validation.dataFrame = trimmed_df
+                series_for_validation.timeDescription = trimmed_td
+                self.__validate_series(series_for_validation, referenceTime)
+            else:
+                self.__validate_series(series, referenceTime)
             
-            # Store the series in the repository
+            # Full Series (all 27 rows including buffer) still goes in the repo
             series_repository[key] = series
 
         return series_repository
