@@ -100,6 +100,17 @@ class DataGatherer:
             # Request the data from Series provider from its description 
             series = self.__seriesProvider.request_input(seriesDescription, timeDescription, referenceTime)
 
+            # --- DEBUG: raw from DB before integrity ---
+            print(f'\n[DEBUG] Series "{key}" raw from DB (pre-integrity):')
+            print(f'  Reference time: {referenceTime}')
+            print(f'  Row count: {len(series.dataFrame)}')
+            df_display = series.dataFrame[['timeVerified', 'dataValue']].copy()
+            df_display['offset_from_ref'] = df_display['timeVerified'].apply(
+                lambda t: str(t - referenceTime) if hasattr(t, 'tzinfo') else str(t - referenceTime.replace(tzinfo=None))
+            )
+            print(df_display[['timeVerified', 'offset_from_ref', 'dataValue']].to_string(max_rows=10))
+# --- END DEBUG ---
+
             # Perform data integrity processing if specified
             if dependentSeries.dataIntegrityCall is not None:
                 # Create an instance of the data integrity class and execute it
@@ -119,8 +130,34 @@ class DataGatherer:
             # Reset the index
             series.dataFrame.reset_index(inplace=True)
 
+            # --- DEBUG: show actual data going into validation ---
+            print(f'\n[DEBUG] Series "{key}" post-reindex (pre-validation):')
+            print(f'  Reference time: {referenceTime}')
+            print(f'  Shape: {series.dataFrame.shape}')
+            print(f'  Expected range: {series.timeDescription.fromDateTime} → {series.timeDescription.toDateTime}  interval={series.timeDescription.interval}')
+            print(f'  Null count: {series.dataFrame["dataValue"].isnull().sum()} / {len(series.dataFrame)}')
+            df_display = series.dataFrame[['timeVerified', 'dataValue']].copy()
+            df_display['offset_from_ref'] = df_display['timeVerified'].apply(
+                lambda t: str(t - referenceTime) if t is not None and not df_display['timeVerified'].isnull().all() else 'NaT'
+            )
+            print(df_display[['timeVerified', 'offset_from_ref', 'dataValue']].to_string(max_rows=10))
+            # --- END DEBUG ---
+
             # Validate the data
             self.__validate_series(series, referenceTime)
+
+            # --- DEBUG: show actual data going into model ---
+            print(f'\n[DEBUG] Series "{key}" post-validation:')
+            print(f'  Reference time: {referenceTime}')
+            print(f'  Shape: {series.dataFrame.shape}')
+            print(f'  Expected range: {series.timeDescription.fromDateTime} → {series.timeDescription.toDateTime}  interval={series.timeDescription.interval}')
+            print(f'  Null count: {series.dataFrame["dataValue"].isnull().sum()} / {len(series.dataFrame)}')
+            df_display = series.dataFrame[['timeVerified', 'dataValue']].copy()
+            df_display['offset_from_ref'] = df_display['timeVerified'].apply(
+                lambda t: str(t - referenceTime) if t is not None and not df_display['timeVerified'].isnull().all() else 'NaT'
+            )
+            print(df_display[['timeVerified', 'offset_from_ref', 'dataValue']].to_string(max_rows=10))
+            # --- END DEBUG ---
             
             # Store the series in the repository
             series_repository[key] = series

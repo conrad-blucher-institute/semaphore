@@ -121,6 +121,15 @@ class InputVectorBuilder:
 
                     # Select only the wanted data
                     indexed_data = casted_data[index[0] : index[1]]
+
+                    # --- DEBUG ---
+                    if batchIndex == 0:
+                        timestamps = series.dataFrame['timeVerified'].tolist()
+                        sliced_ts = timestamps[index[0] : index[1]]
+                        print(f'\n[DEBUG] "{key}" sliced into vector (index [{index[0]}:{index[1]}]):')
+                        for ts, val in zip(sliced_ts, indexed_data):
+                            print(f'  {ts}  val={val}')
+                    # --- END DEBUG ---
                     
                     log(f'\t\t{key}: - amnt_found: {len(casted_data)}, indexed_len: {len(indexed_data)}')
                     # Concatenate the designated slice of casted data into the input vector
