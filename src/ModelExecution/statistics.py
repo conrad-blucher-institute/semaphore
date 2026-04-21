@@ -18,7 +18,7 @@ class Statistics:
     # members
     PERCENTILES = [1, 5, 10, 25, 50, 75, 90, 95, 99]
 
-    def compute_statistics(self, data: np.ndarray | list[float] | list[int]) -> dict[str, float]:
+    def compute_statistics(self, data: np.ndarray | list[float | int]) -> dict[str, float]:
         '''
         Computes the following statistics for the given data:
         - Percentiles in the PERCENTILES list
@@ -29,13 +29,11 @@ class Statistics:
 
         NOTE: The 50th percentile is the same as the median, so we do not compute it separately.
 
-        :params:
-        data: np.ndarray | list[float] | list[int] - The input data to compute statistics on.
-            It can be a numpy ndarray or a list of floats/ints. If an ndarray is provided, it will
+        :param data: np.ndarray | list[float | int] - The input data to compute statistics on.
+            It can be a numpy ndarray or a list of floats/ints. If a multidimensional array is provided, it will
             be flattened to a 1D list regardless of its original shape.
 
-        :returns:
-        dict[str, float] - A dictionary with the computed statistics such as
+        :returns dict[str, float] - A dictionary with the computed statistics such as
             {
                 'p1': 1,
                 'p5': 5,
@@ -50,10 +48,10 @@ class Statistics:
         # statistics dictionary to hold the results
         statistics = {}
 
-        # convert data to a 1D list of floats
-        flattened_data = np.asarray(data,dtype=float).flatten().tolist()
+        # flatten data to a 1D ndarray of floats
+        flattened_data = np.asarray(data, dtype=float).flatten()
 
-        if not flattened_data:
+        if flattened_data.size == 0:
             raise ValueError("Cannot compute statistics on an empty dataset.")
         
         if np.any(np.isnan(flattened_data)):

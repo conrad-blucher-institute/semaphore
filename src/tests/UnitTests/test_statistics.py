@@ -108,6 +108,9 @@ class TestStatistics():
     def test_compute_statistics(self, data, expected):
         statistics = Statistics()
         result = statistics.compute_statistics(data)
+
+        # assert no extra keys are in the result
+        assert len(result) == len(expected), f"Expected {len(expected)} keys in the result, but got {len(result)}"
         
         # assert all expected values are within 3 decimal places of the result
         for key in expected:
