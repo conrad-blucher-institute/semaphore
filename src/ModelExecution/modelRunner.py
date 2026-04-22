@@ -89,10 +89,10 @@ class ModelRunner:
             :param shapedInputs: np.ndarray - The input data reshaped to match the model's expected input shape.
             :returns np.ndarray - A 3D array containing predictions from all models, stacked along a new axis.
         
-        This function properly calls the lower level model(x, training=False) instead of model.predict(). This is to avoid retracing and recompiling the model.
-        However, this means that we have no batching, dataset conversions, or other optimizations that come with using model.predict(). 
-        If performance becomes an issue, we may need to implement our own batching. Because our datasets are generally kbs in size, this should not be a problem. 
-        The batching overhead costs more than we would save.
+        This function prefers the lower level model(x, training=False) call instead of model.predict(). This avoids
+        retracing and recompiling overhead for normal TensorFlow execution. For compatibility with existing tests and
+        mocks that still provide only model.predict(), we fall back to model.predict() when a direct call is not
+        available or does not return a tensor-like object with .numpy().
         """
         input_dtype = models[0].input.dtype
         input_tensor = tf.constant(shapedInputs, dtype=input_dtype)
