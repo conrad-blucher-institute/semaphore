@@ -19,7 +19,7 @@ from exceptions import Semaphore_Exception
 from ModelExecution.dspecParser import Dspec
 import re
 import datetime
-from os import path, getenv
+from os import getenv
 from numpy import reshape
 import numpy as np
 import glob
@@ -94,7 +94,8 @@ class ModelRunner:
         If performance becomes an issue, we may need to implement our own batching. Because our datasets are generally kbs in size, this should not be a problem. 
         The batching overhead costs more than we would save.
         """
-        input_tensor = tf.constant(shapedInputs, dtype=tf.float32)
+        input_dtype = models[0].input.dtype
+        input_tensor = tf.constant(shapedInputs, dtype=input_dtype)
         predictions = [model(input_tensor, training=False).numpy() for model in models]
         return np.stack(predictions, axis=0)
 
