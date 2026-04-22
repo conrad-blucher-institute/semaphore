@@ -19,7 +19,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 import numpy as np
 from numpy import float32
-
+import tensorflow as tf
 from src.ModelExecution.modelRunner import ModelRunner
 from src.ModelExecution.dspecParser import Dspec, OutputInfo, ExpectedOutputShape
 from src.DataClasses import Series, SemaphoreSeriesDescription
@@ -66,15 +66,19 @@ def mock_models_with_order(num_models, num_outputs=5):
     for i in range(num_models):
         mock_model = MagicMock()
         mock_model.input_shape = (None, 87)
+        mock_model.input.dtype = tf.float32 
 
         def make_predict(val):
-            def predict(inputs):
-                batch_size = len(inputs)
+            def predict(inputs, training=False):
+                batch_size = int(inputs.shape[0])
                 row = [val + j for j in range(num_outputs)]
-                return np.array([row] * batch_size, dtype=float32)
+                arr = np.array([row] * batch_size, dtype=float32)
+                result = MagicMock()
+                result.numpy.return_value = arr
+                return result
             return predict
 
-        mock_model.predict.side_effect = make_predict(i + 1)
+        mock_model.side_effect = make_predict(i + 1)
         models.append(mock_model)
 
     return models
