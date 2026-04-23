@@ -25,7 +25,7 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                0,
+                1,
                 -26
             ],
             "outKey": "south-bird-island_water-temp_25",
@@ -46,7 +46,7 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                0,
+                1,
                 -26
             ],
             "outKey": "south-bird-island_air-temp_25",
