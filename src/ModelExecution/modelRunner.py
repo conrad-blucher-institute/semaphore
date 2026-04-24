@@ -94,8 +94,7 @@ class ModelRunner:
         If performance becomes an issue, we may need to implement our own batching. Because our datasets are generally kbs in size, this should not be a problem. 
         The batching overhead costs more than we would save.
         """
-        input_dtype = models[0].input.dtype
-        input_tensor = tf.constant(shapedInputs, dtype=input_dtype)
+        input_tensor = tf.constant(shapedInputs)
         predictions = [model(input_tensor, training=False).numpy() for model in models]
         return np.stack(predictions, axis=0)
 
