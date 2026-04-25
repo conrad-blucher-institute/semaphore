@@ -20,9 +20,9 @@ import pytest
 from src.ModelExecution.dspecParser import DSPEC_Parser
 
 @pytest.mark.parametrize("dspecFilePath", [
-     ('./data/dspec/TestModels/test_dspec.json'),
      ('./data/dspec/TestModels/test_dspec-2-0.json'),
-     ('./data/dspec/TestModels/test_multiVector.json')
+     ('./data/dspec/TestModels/test_dspec-2-1.json'),
+     ('./data/dspec/TestModels/test_multiVector.json'),
 ])
 def test_parseDSPEC(dspecFilePath: str):
     """This function tests whether the specified DSPEC file
@@ -32,14 +32,11 @@ def test_parseDSPEC(dspecFilePath: str):
     # Read dspec from file and grab version
     with open(dspecFilePath) as dspecFile:
         dspec_json = load(dspecFile)
-    dspec_version = dspec_json.get('dspecVersion', '1.0')
-    match dspec_version:
-        case '1.0':
-            sub_test_dspec_1_0(dspecFilePath)
-        case '2.0':
-            sub_test_dspec_2_0(dspecFilePath)
-        case _:
-            raise NotImplementedError(f'No parser for dspec version {dspec_version} not found!')
+    dspec_version = dspec_json.get('dspecVersion', '2.0')
+    if dspec_version.startswith('2.'):
+        sub_test_dspec_2_0(dspecFilePath)
+    else:
+        raise NotImplementedError(f'No parser found for dspec version: {dspec_version}!')
 
     assert True
 
@@ -73,64 +70,6 @@ def test_invalid_vector_order():
     ):
         dspecParser = DSPEC_Parser()
         dspecParser.parse_dspec(dspecFilePath)
-            
-def sub_test_dspec_1_0(dspecFilePath: str):
-
-    dspecParser = DSPEC_Parser()
-    dspec = dspecParser.parse_dspec(dspecFilePath)
-    with open(dspecFilePath) as dspecFile:
-        json = load(dspecFile)
-        # Metadata
-        assert dspec.modelName == json['modelName']
-        assert dspec.modelVersion == json['modelVersion']
-        assert dspec.author == json['author']
-        assert dspec.modelFileName == json['modelFileName']
-
-        # OutputInfo
-        outputJson = json["outputInfo"]
-        outputInfo = dspec.outputInfo
-        assert outputInfo.outputMethod == outputJson["outputMethod"]
-        assert outputInfo.leadTime == outputJson["leadTime"]
-        assert outputInfo.series == outputJson["series"]
-        assert outputInfo.location == outputJson["location"]
-        assert outputInfo.interval == outputJson["interval"]
-        assert outputInfo.unit == outputJson["unit"]
-        expected = outputJson.get("expectedOutputShape", None)
-        eos = outputInfo.expectedOutputShape
-        if expected == None:
-            assert eos.memberCount == 1
-            assert eos.inputVectorCount == 1
-            assert eos.outputsPerVector == 1
-        else:
-            assert eos.memberCount == expected["memberCount"]
-            assert eos.inputVectorCount == expected["inputVectorCount"]
-            assert eos.outputsPerVector == expected["outputsPerVector"]
-        
-        # DSPEC 1.0 has Inputs (Only first one)
-        inputsJson = json["inputs"]
-        dependentSeries = dspec.dependentSeries[0]
-        assert dependentSeries.location == inputsJson[0]["location"]
-        assert dependentSeries.source == inputsJson[0]["source"]
-        assert dependentSeries.series == inputsJson[0]["series"]
-        assert dependentSeries.interval == inputsJson[0]["interval"]
-        assert dependentSeries.range == inputsJson[0]["range"]
-
-        # Dependent Series Count
-        assert len(dspec.dependentSeries) == 9
-
-        # There should be no post process calls in 1.0
-        assert len(dspec.postProcessCall) == 0
-
-        # Vector order (Only the first one)
-        inputsJson = json["inputs"]
-        vectorOrder = dspec.orderedVector
-        assert vectorOrder.keys[0] == '0'
-        assert vectorOrder.dTypes[0] == inputsJson[0]["type"]
-
-        # Vector order Count
-        assert len(dspec.orderedVector.keys) == 9
-        assert len(dspec.orderedVector.dTypes) == 9
-
 
 
 def sub_test_dspec_2_0(dspecFilePath: str):
@@ -154,6 +93,8 @@ def sub_test_dspec_2_0(dspecFilePath: str):
         assert outputInfo.location == outputJson["location"]
         assert outputInfo.interval == outputJson["interval"]
         assert outputInfo.unit == outputJson["unit"]
+        statistics = outputJson.get("statistics", None)
+        assert outputInfo.statistics == statistics
         expected = outputJson.get("expectedOutputShape", None)
         eos = outputInfo.expectedOutputShape
         if expected == None:

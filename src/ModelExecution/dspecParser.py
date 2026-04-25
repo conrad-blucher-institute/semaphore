@@ -3,7 +3,7 @@
 #----------------------------------
 # Created By : Matthew Kastl
 # Created Date: 4/28/2024
-# version 2.0
+# version 2.1
 #----------------------------------
 """ The DPSEC or data specification file is a file containing all instruction and information
 for semaphore to run a model. This file contains a parent parser that will execute sub parsers
@@ -31,128 +31,17 @@ class DSPEC_Parser:
             
             # Read dspec from file and grab version
             dspec_json = load(dspecFile)
-            self.__dspec_version = dspec_json.get('dspecVersion', '1.0')
+            self.__dspec_version = dspec_json.get('dspecVersion', '2.0')
             self.__dspec_json = dspec_json
         
-        match self.__dspec_version:
-            case '1.0':
-                sub_parser = dspec_sub_Parser_1_0(self.__dspec_json)
-            case '2.0':
-                sub_parser = dspec_sub_Parser_2_0(self.__dspec_json)
-            case _:
-                raise NotImplementedError(f'No parser for dspec version {self.__dspec_version} not found!')
+        # only check for major version for sub parsers
+        # minor versions should not break parsing and should be backwards compatible
+        if self.__dspec_version.startswith('2.'):
+            sub_parser = dspec_sub_Parser_2_0(self.__dspec_json)
+        else:
+            raise NotImplementedError(f'No parser found for dspec version: {self.__dspec_version}!')
             
         return sub_parser.parse_dspec() 
-
-        
-
-class dspec_sub_Parser_1_0:
-
-    def __init__(self, json: dict) -> None:
-        self.__dspec_json = json
-        self.__dspec = Dspec()
-
-    def parse_dspec(self):
-        self.__parse_meta()
-        self.__parse_timing()
-        self.__parse_output()
-        self.__parse_inputs()
-        return self.__dspec
-
-    def __parse_meta(self):
-        self.__dspec.modelName = self.__dspec_json["modelName"]
-        self.__dspec.modelVersion = self.__dspec_json["modelVersion"]
-        self.__dspec.author = self.__dspec_json["author"]
-        self.__dspec.modelFileName = self.__dspec_json["modelFileName"]
-
-    def __parse_timing(self):
-        # Grab timing info from dict
-        timingJson = self.__dspec_json["timingInfo"]
-        
-        # Parse
-        timingInfo = TimingInfo()
-        timingInfo.offset = timingJson["offset"]
-        timingInfo.interval = timingJson["interval"]
-
-        # Bind to dspec
-        self.__dspec.timingInfo = timingInfo 
-    
-    def __parse_output(self):
-        # Grab output info from dict
-        outputJson = self.__dspec_json["outputInfo"]
-        
-        # Parse
-        outputInfo = OutputInfo()
-        outputInfo.outputMethod = outputJson["outputMethod"]
-        outputInfo.leadTime = outputJson["leadTime"]
-        outputInfo.series = outputJson["series"]
-        outputInfo.location = outputJson["location"]
-        outputInfo.interval = outputJson.get("interval")
-        outputInfo.unit = outputJson.get("unit")
-        outputInfo.datum = outputJson.get("datum")
-        # DSPEC v1 models are always legacy (1,1,1)
-        if "expectedOutputShape" in outputJson:
-            raise ValueError(
-                "DSPEC v1.0 does not support 'expectedOutputShape'. "
-                "Legacy models default to (1,1,1)."
-            )
-        outputInfo.expectedOutputShape = ExpectedOutputShape()
-        outputInfo.expectedOutputShape.memberCount = 1
-        outputInfo.expectedOutputShape.inputVectorCount = 1
-        outputInfo.expectedOutputShape.outputsPerVector = 1
-
-        self.__dspec.outputInfo = outputInfo 
-
-
-    def __parse_inputs(self) -> None:
-
-            # Grab the list of inputs.
-            # They are mostly the same as the new Dependent Series
-            # Except for type, which has been moved to vector order
-            # We also need to implicitly create outkeys for them
-            # Such that they are compatible with the new ordered vector
-            # The keys are just the order in which the inputs appear
-            
-            inputsJson = self.__dspec_json["inputs"]
-            dependentSeriesList = []
-
-            keys = []
-            types = []
-            indexes = []
-            multipliedKeys = []
-            
-            for idx, inputJson in enumerate(inputsJson):
-                dseries = DependentSeries()
-                dseries.name = inputJson["_name"]
-                dseries.location = inputJson["location"]
-                dseries.source = inputJson["source"]
-                dseries.series = inputJson["series"]
-                dseries.interval = inputJson["interval"]
-                dseries.range = inputJson["range"]
-                dseries.interpolationParameters = inputJson.get("interpolationParameters")
-                dseries.datum = inputJson.get("datum")
-                dseries.unit = inputJson.get("unit")
-                dseries.verificationOverride = inputJson.get("verificationOverride")
-                dseries.outKey = str(idx) # Assign it a key for ordered vector
-
-
-                # We record what is needed for the ordered vector
-                types.append(inputJson["type"])
-                keys.append(str(idx))
-                indexes.append((None, None))
-                
-
-                dependentSeriesList.append(dseries)
-            # Bind to dspec
-            self.__dspec.dependentSeries = dependentSeriesList 
-
-            vOrder = VectorOrder()
-            vOrder.keys = keys
-            vOrder.dTypes = types
-            vOrder.indexes = indexes
-            vOrder.multipliedKeys = []
-            self.__dspec.orderedVector = vOrder
-
 
 
 class dspec_sub_Parser_2_0:
@@ -200,6 +89,7 @@ class dspec_sub_Parser_2_0:
         outputInfo.interval = outputJson.get("interval")
         outputInfo.unit = outputJson.get("unit")
         outputInfo.datum = outputJson.get("datum")
+        outputInfo.statistics = outputJson.get("statistics", None)
         expectedOutputShapeDict = outputJson.get("expectedOutputShape", None)
         expectedOutputShape = ExpectedOutputShape()
         if expectedOutputShapeDict is None:
@@ -339,13 +229,14 @@ class OutputInfo:
         self.toDateTime = None
         self.datum = None
         self.unit = None
+        self.statistics = None
         self.expectedOutputShape = None
 
     def __str__(self) -> str:
-        return f'\n[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, interval: {self.interval}, fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, datum: {self.datum}, unit: {self.unit}, expectedOutputShape: {self.expectedOutputShape}'
+        return f'\n[OutputInfo] -> outputMethod: {self.outputMethod}, leadTime: {self.leadTime}, series: {self.series}, location: {self.location}, interval: {self.interval}, fromDateTime: {self.fromDateTime}, toDateTime: {self.toDateTime}, datum: {self.datum}, unit: {self.unit}, statistics: {self.statistics}, expectedOutputShape: {self.expectedOutputShape}'
     
     def __repr__(self):
-        return f'\nOutputInfo({self.outputMethod}, {self.leadTime}, {self.series}, {self.location}, {self.interval}, {self.fromDateTime}, {self.toDateTime}, {self.datum}, {self.unit}, {self.expectedOutputShape})'
+        return f'\nOutputInfo({self.outputMethod}, {self.leadTime}, {self.series}, {self.location}, {self.interval}, {self.fromDateTime}, {self.toDateTime}, {self.datum}, {self.unit}, {self.statistics}, {self.expectedOutputShape})'
 
 class DependentSeries:
     '''A dependant series is a described series to pull from Series provider.'''
