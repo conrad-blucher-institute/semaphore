@@ -258,11 +258,11 @@ class Orchestrator:
         series_storage = series_storage_factory()
         try:
             statistics_dict = statistics_class.compute_statistics(data)
-            storage_result = series_storage.insert_statistics(output_table_id, statistics_dict)
+            storage_result = series_storage.insert_output_statistics(output_table_id, statistics_dict)
             
             if storage_result:
-                log_success(f"Statistics for model: {model_name} computed and stored successfully ✓")
+                log_success(f"Computed and stored statistics for model: {model_name} successfully ✓")
             else:
-                log_error('STATISTICS ERROR:: Failed to insert statistics into the database')
+                log_error('STATISTICS:: Failed to insert statistics into the database')
         except:
-            log_error('STATISTICS ERROR:: An error occurred while trying to compute or store statistics')
+            log_error('STATISTICS:: An error occurred while trying to compute or store statistics')

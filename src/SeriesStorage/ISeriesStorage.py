@@ -37,6 +37,10 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
     
     @abstractmethod
+    def select_latest_output_statistics(self, model_names: list[str]) -> list[dict] | None:
+        raise NotImplementedError()
+    
+    @abstractmethod
     def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
         raise NotImplementedError()
 
@@ -57,7 +61,7 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
     
     @abstractmethod
-    def insert_statistics(self, output_table_id: int, statistics_dict: dict) -> tuple | None:
+    def insert_output_statistics(self, output_table_id: int, statistics_dict: dict) -> tuple | None:
         raise NotImplementedError()
     
     @abstractmethod

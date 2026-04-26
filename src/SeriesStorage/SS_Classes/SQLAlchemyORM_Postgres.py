@@ -347,7 +347,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         return results
     
     
-    def select_latest_statistics(self, model_names: list[str]) -> list[dict] | None:
+    def select_latest_output_statistics(self, model_names: list[str]) -> list[dict] | None:
         '''
         This function returns the latest statistics for each model in the list of model names, or None
         if no statistics are found for any of the models.
@@ -391,7 +391,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         INNER JOIN latest_time_per_model AS ltpm
             ON o."modelName" = ltpm."modelName"
             AND o."timeGenerated" = ltpm.latest_time
-        INNER JOIN statistics AS s
+        INNER JOIN output_statistics AS s
             ON s."outputID" = o."id"
         ORDER BY
             o."modelName"
@@ -666,7 +666,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             id = result[0]
         return resultSeries, id
     
-    def insert_statistics(self, output_table_id: int, statistics_dict: dict) -> tuple | None:
+    def insert_output_statistics(self, output_table_id: int, statistics_dict: dict) -> tuple | None:
         '''
         This function will insert the statistics dictionary into the statistics table and return
         what was inserted as a sanity check.
@@ -696,7 +696,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         '''
 
         stmt = text("""
-        INSERT INTO statistics (
+        INSERT INTO output_statistics (
             "outputID",
             "p1",
             "p5",
@@ -728,7 +728,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             :mean,
             :std_dev
             )
-        ON CONFLICT ON CONSTRAINT ...
+        ON CONFLICT ON CONSTRAINT "fk_statistics_output" DO NOTHING
         RETURNING *;
         """)
 
