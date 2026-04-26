@@ -57,6 +57,10 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
     
     @abstractmethod
+    def insert_statistics(self, output_table_id: int, statistics_dict: dict) -> tuple | None:
+        raise NotImplementedError()
+    
+    @abstractmethod
     def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime:
         raise NotImplementedError()
     

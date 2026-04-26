@@ -17,6 +17,7 @@ This file handles the following:
 from os import path, getenv
 from datetime import datetime, timedelta, timezone
 import traceback
+import numpy as np
 from exceptions import Semaphore_Exception, Semaphore_Data_Exception, Semaphore_Ingestion_Exception
 from discord import Discord_Notify
 from DataClasses import Series, SemaphoreSeriesDescription, get_output_dataFrame
@@ -27,6 +28,7 @@ from ModelExecution.dataGatherer import DataGatherer
 from ModelExecution.InputVectorBuilder import InputVectorBuilder
 from ModelExecution.modelRunner import ModelRunner
 from ModelExecution.dspecParser import DSPEC_Parser, Dspec
+from ModelExecution.statistics import Statistics
 
 
 class Orchestrator:
@@ -59,6 +61,7 @@ class Orchestrator:
         """
         model_name = None
         DSPEC = None
+        statistics_call = None
 
         # By default the DSPECs will be ordered left -> right from the command
         checked_dspecs = [self.__clean_and_check_dspec(dspec) for dspec in dspecPaths]
@@ -70,6 +73,7 @@ class Orchestrator:
                 try:
                     
                     DSPEC = self.DSPEC_parser.parse_dspec(dspecPath)
+                    statistics_call = DSPEC.outputInfo.statistics
                     model_name: str = DSPEC.modelName
                     reference_time = self.__calculate_referenceTime(executionTime, DSPEC)
 
@@ -80,7 +84,7 @@ class Orchestrator:
                     input_vectors = self.inputVectorBuilder.build_batch(DSPEC, data_repository)
                     result = self.modelRunner.make_predictions(DSPEC, input_vectors, reference_time)
 
-                    self.__handle_successful_prediction(model_name, reference_time, result, toss)
+                    self.__handle_successful_prediction(model_name, reference_time, result, toss, statistics_call)
                 
                 except Exception:
                         raise Semaphore_Exception('Error:: An unknown error ocurred!')
@@ -129,7 +133,7 @@ class Orchestrator:
 
         return datetime.fromtimestamp(execution_time.timestamp() - (execution_time.timestamp() % dspec.timingInfo.interval),tz=timezone.utc)
 
-    def __handle_successful_prediction(self, model_name: str, execution_time: datetime, result_series: Series, toss: bool):
+    def __handle_successful_prediction(self, model_name: str, execution_time: datetime, result_series: Series, toss: bool, statistics_call: bool | None):
         """Handels a successful run of semaphore, sending a notification and placing the result in the database.
                 - Safely sends a discord notification about the successful prediction.
                 - If the toss flag is not set, it will attempt to store the prediction in the database.
@@ -138,6 +142,8 @@ class Orchestrator:
         :param execution_time: datetime - The time the model was run.
         :param result_series: Series - The series of results that were predicted.
         :param toss: bool - A flag that will prevent the computed prediction from actually being saved in the database.
+        :param statistics_call: bool | None - A flag that indicates whether this model run should calculate statistics.
+            Defaults to None if not provided in the DSPEC.
         """
     
         self.__safe_discord_notification(model_name, execution_time, 0, '')
@@ -145,12 +151,19 @@ class Orchestrator:
         try:
             if not toss:
                 series_storage = series_storage_factory()
-                inserted_results, _ = series_storage.insert_output_and_model_run(result_series, execution_time, 0)
+                inserted_results, model_run_result = series_storage.insert_output_and_model_run(result_series, execution_time, 0)
 
                 # SUCCESS: Log successful database insertion
                 log_success(f"Model {model_name} completed successfully ✓")
                 log_success(f"Results inserted: {inserted_results}")
                 log_success(inserted_results.dataFrame if inserted_results is not None else 'No dataframe')
+
+                # only compute statistics if the call is true and the results were successfully inserted
+                if statistics_call and model_run_result is not None:
+                    # model_run_result has the form (id, outputID, executionTime, returnCode)
+                    output_table_id = model_run_result[1]
+                    inserted_data = inserted_results.dataFrame.iloc[0]['dataValue']
+                    self.__handle_statistics_call(model_name, inserted_data, output_table_id)
         except:
             log_error(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))    
 
@@ -226,3 +239,30 @@ class Orchestrator:
                 discord_notify.send_notification(model_name, execution_time, error_code, message)
         except Exception as e:
             log_error(Semaphore_Exception('ERROR:: An error occurred while trying to send a discord notification'))
+
+    def __handle_statistics_call(self, model_name: str, data: np.ndarray, output_table_id: int) -> None:
+        '''
+        This function handles the logic for when a model run should also compute statistics. It will attempt
+        to compute the statistics based on the data stored in the output table, then store the statistics into
+        the statistics table. 
+
+        :param model_name: str - the name of the model that was ran
+        :param data: np.ndarray - the data that was stored in the output table that the statistics should be computed on
+            The data is formated in a 3D ndarray with the shape (member count, input vector count, outputs per vector).
+        :param output_table_id: int - the id to the output table entry this data is linked to
+
+        NOTE: On statistics failures, we do not want to raise an exception as this would show that the entire model run
+        failed. Instead, we simply log an error with a clear headline on statistics failures.
+        '''
+        statistics_class = Statistics()
+        series_storage = series_storage_factory()
+        try:
+            statistics_dict = statistics_class.compute_statistics(data)
+            storage_result = series_storage.insert_statistics(output_table_id, statistics_dict)
+            
+            if storage_result:
+                log_success(f"Statistics for model: {model_name} computed and stored successfully ✓")
+            else:
+                log_error('STATISTICS ERROR:: Failed to insert statistics into the database')
+        except:
+            log_error('STATISTICS ERROR:: An error occurred while trying to compute or store statistics')

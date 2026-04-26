@@ -346,6 +346,75 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             results.append(series)
         return results
     
+    
+    def select_latest_statistics(self, model_names: list[str]) -> list[dict] | None:
+        '''
+        This function returns the latest statistics for each model in the list of model names, or None
+        if no statistics are found for any of the models.
+
+        :param model_names: list[str] - A list of model names to query for
+
+        :returns list[dict] | None - A list of dictionaries where each dictionary contains the latest statistics for a model
+            or None if no statistics are found for any of the models. Each dictionary will have the following format:
+            {
+                'modelName': str,
+                'p1': float,
+                'p5': float,
+                'p10': float,
+                'p25': float,
+                'p50': float,
+                'p75': float,
+                'p90': float,
+                'p95': float,
+                'p99': float,
+                'min': float,
+                'max': float,
+                'mean': float,
+                'std_dev': float
+            }
+        '''
+
+        stmt = text('''
+        WITH latest_time_per_model AS (
+            SELECT 
+                o."modelName",
+                MAX(o."timeGenerated") AS latest_time
+            FROM outputs AS o
+            WHERE o."modelName" IN :model_names
+            GROUP BY o."modelName"
+        )
+        SELECT 
+            o."id",
+            o."timeGenerated",
+            o."modelName"
+        FROM outputs AS o
+        INNER JOIN latest_time_per_model AS ltpm
+            ON o."modelName" = ltpm."modelName"
+            AND o."timeGenerated" = ltpm.latest_time
+        INNER JOIN statistics AS s
+            ON s."outputID" = o."id"
+        ORDER BY
+            o."modelName"
+        ''')
+        stmt = stmt.bindparams(bindparam("model_names", value=tuple(model_names), expanding=True, type_=String))
+
+        # the result tuples will have the form 
+        # 
+        result = self.__dbSelection(stmt).fetchall()
+        
+        if not result:
+            return None
+        
+        statistics_results = []
+        for row in result:
+            statistics_dict = {
+                # need to finish
+            }
+            statistics_results.append(statistics_dict)
+        
+        return statistics_results
+
+    
     def find_external_location_code(self, sourceCode: str, location: str, priorityOrder: int = 0) -> str:
         """Returns a data source location code based off of passed parameters
            :param sourceCode: str - the data source code (noaaT&C)
@@ -596,6 +665,100 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             resultSeries.dataFrame = self.__splice_output([result])
             id = result[0]
         return resultSeries, id
+    
+    def insert_statistics(self, output_table_id: int, statistics_dict: dict) -> tuple | None:
+        '''
+        This function will insert the statistics dictionary into the statistics table and return
+        what was inserted as a sanity check.
+
+        :param output_table_id: int - The id of the output table row these statistics are associated with
+        :param statistics_dict: dict - A dictionary containing the statistics to insert. 
+            The dictionary should have the format
+            {
+                'p1': 1.09,
+                'p5': 1.45,
+                'p10': 1.9,
+                'p25': 3.25,
+                'p50': 5.5,
+                'p75': 7.75,
+                'p90': 9.1,
+                'p95': 9.55,
+                'p99': 9.91,
+                'min': 1,
+                'max': 10,
+                'mean': 5.5,
+                'std_dev': 2.872281323269
+            }
+
+        :returns tuple | None - a tuple representing the row inserted into the statistics table or None if no row
+            was inserted due to a conflict with an existing row. The tuple will have the order of
+            (id, outputID, p1, p5, p10, p25, p50, p75, p90, p95, p99, min, max, mean, std_dev)
+        '''
+
+        stmt = text("""
+        INSERT INTO statistics (
+            "outputID",
+            "p1",
+            "p5",
+            "p10",
+            "p25",
+            "p50",
+            "p75",
+            "p90",
+            "p95",
+            "p99",
+            "min",
+            "max",
+            "mean",
+            "std_dev"
+            )
+        VALUES (
+            :outputID,
+            :p1,
+            :p5,
+            :p10,
+            :p25,
+            :p50,
+            :p75,
+            :p90,
+            :p95,
+            :p99,
+            :min,
+            :max,
+            :mean,
+            :std_dev
+            )
+        ON CONFLICT ON CONSTRAINT ...
+        RETURNING *;
+        """)
+
+        bind_params = {
+            'outputID': output_table_id,
+            'p1':       statistics_dict['p1'],
+            'p5':       statistics_dict['p5'],
+            'p10':      statistics_dict['p10'],
+            'p25':      statistics_dict['p25'],
+            'p50':      statistics_dict['p50'],
+            'p75':      statistics_dict['p75'],
+            'p90':      statistics_dict['p90'],
+            'p95':      statistics_dict['p95'],
+            'p99':      statistics_dict['p99'],
+            'min':      statistics_dict['min'],
+            'max':      statistics_dict['max'],
+            'mean':     statistics_dict['mean'],
+            'std_dev':  statistics_dict['std_dev']
+        }
+        stmt = stmt.bindparams(**bind_params)
+
+        # insert the row into the statistics table returning what is inserted as a sanity check
+        with self.__get_engine().connect() as conn:
+            cursor = conn.execute(stmt)
+            result = cursor.fetchone()
+            conn.commit()
+        
+        # return the inserted tuple or None if no row was inserted due to a conflict with an existing row
+        return result
+    
 
     def fetch_oldest_generated_time(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> datetime | None:
         """
