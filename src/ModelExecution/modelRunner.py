@@ -19,12 +19,12 @@ from exceptions import Semaphore_Exception
 from ModelExecution.dspecParser import Dspec
 import re
 import datetime
-from os import path, getenv
+from os import getenv
 from numpy import reshape
 import numpy as np
 import glob
+import tensorflow as tf
 from tensorflow.keras.models import load_model, Model
-
 
 class ModelRunner:
 
@@ -60,15 +60,7 @@ class ModelRunner:
         shapedInputs = reshape(input_vectors, expectedShape)
 
         log('Init compute predictions for all models....')
-
-        all_predictions = []
-
-        for model in models:
-            prediction = model.predict(shapedInputs)
-            all_predictions.append(prediction)
-
-        # Stack predictions → shape becomes (models, input_vectors, outputs)
-        stacked_predictions = np.stack(all_predictions, axis=0)
+        stacked_predictions: np.ndarray = self.predict(models, shapedInputs)
 
         log('Init prediction post process....')
 
@@ -89,12 +81,27 @@ class ModelRunner:
 
         series.dataFrame = processedOutputs
         return series
-    
+
+    def predict(self, models: list[Model], shapedInputs: np.ndarray) -> np.ndarray:
+        """
+        This function runs predictions for each model using the same input data and stacks the results.
+            :param models: list[Model] - A list of loaded TensorFlow models to run predictions with.
+            :param shapedInputs: np.ndarray - The input data reshaped to match the model's expected input shape.
+            :returns np.ndarray - A 3D array containing predictions from all models, stacked along a new axis.
+        
+        This function properly calls the lower level model(x, training=False) instead of model.predict(). This is to avoid retracing and recompiling the model.
+        However, this means that we have no batching, dataset conversions, or other optimizations that come with using model.predict(). 
+        If performance becomes an issue, we may need to implement our own batching. Because our datasets are generally kbs in size, this should not be a problem. 
+        The batching overhead costs more than we would save.
+        """
+        input_tensor = tf.constant(shapedInputs)
+        predictions = [model(input_tensor, training=False).numpy() for model in models]
+        return np.stack(predictions, axis=0)
 
     def __load_models(self, DSPEC: Dspec) -> list[Model]:
         """
         This function will construct the model path based on the dspec and will 
-        to load all models that match the path.
+        load all models that match the path.
 
         :param DSPEC: Dspec - The Dspec file with the model loading information
 
