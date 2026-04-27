@@ -405,6 +405,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         if not result:
             return None
         
+        # splice the results into dictionaries
         statistics_results = []
         for row in result:
             statistics_dict = {

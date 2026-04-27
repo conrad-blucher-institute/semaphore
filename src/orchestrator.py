@@ -133,7 +133,8 @@ class Orchestrator:
 
         return datetime.fromtimestamp(execution_time.timestamp() - (execution_time.timestamp() % dspec.timingInfo.interval),tz=timezone.utc)
 
-    def __handle_successful_prediction(self, model_name: str, execution_time: datetime, result_series: Series, toss: bool, statistics_call: bool | None):
+    def __handle_successful_prediction(self, model_name: str, execution_time: datetime, result_series: Series,
+                                        toss: bool, statistics_call: bool | None = None):
         """Handels a successful run of semaphore, sending a notification and placing the result in the database.
                 - Safely sends a discord notification about the successful prediction.
                 - If the toss flag is not set, it will attempt to store the prediction in the database.
