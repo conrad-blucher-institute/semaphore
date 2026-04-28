@@ -25,7 +25,7 @@
             "series": "dWaterTmp",
             "unit": "celsius",
             "interval": 3600,
-            "range": [0, -23],
+            "range": [1, -23],
             "outKey": "NPSBI_DWT_24"
         },
         { 
@@ -35,7 +35,7 @@
             "series": "dAirTmp",
             "unit": "celsius",
             "interval": 3600,
-            "range": [0, -23],
+            "range": [1, -23],
             "outKey": "PACK_DAT_24"
         },
         { 
