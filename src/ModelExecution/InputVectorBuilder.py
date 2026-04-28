@@ -119,8 +119,8 @@ class InputVectorBuilder:
                     # Cast Data
                     casted_data = [self.__cast_value(d, dtype) for d in data]
 
-                    # Select only the wanted data
-                    indexed_data = casted_data[index[0] : index[1]]
+                    # Select only the wanted data, inclusive on right and left sides
+                    indexed_data = casted_data[index[0] : index[1] + 1]
                     
                     log(f'\t\t{key}: - amnt_found: {len(casted_data)}, indexed_len: {len(indexed_data)}')
                     # Concatenate the designated slice of casted data into the input vector

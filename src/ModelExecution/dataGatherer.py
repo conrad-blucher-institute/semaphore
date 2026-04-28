@@ -156,7 +156,7 @@ class DataGatherer:
             # Slice the dataframe to only the rows vectorOrder will read.
             # This is the same slice InputVectorBuilder applies — validation should
             # only check what the model actually consumes.
-            trimmed_df = series.dataFrame.iloc[index[0]:index[1]].reset_index(drop=True)
+            trimmed_df = series.dataFrame.iloc[index[0]:index[1] + 1].reset_index(drop=True)
 
             # Build a corrected TimeDescription whose fromDateTime and toDateTime
             # match the actual first and last rows of the trimmed slice. DateRangeValidation
@@ -171,6 +171,13 @@ class DataGatherer:
 
             series.dataFrame = trimmed_df
             series.timeDescription = trimmed_td
+
+            log(f'[DataGatherer] Clipped series for key "{key}":\n'
+                f'\t  rows      : {len(series.dataFrame)}\n'
+                f'\t  first     : {series.dataFrame["timeVerified"].iloc[0]}\n'
+                f'\t  last      : {series.dataFrame["timeVerified"].iloc[-1]}\n'
+                f'\t  td.from   : {series.timeDescription.fromDateTime}\n'
+                f'\t  td.to     : {series.timeDescription.toDateTime}')
 
         self.__validate_series(series, referenceTime)
         return series
