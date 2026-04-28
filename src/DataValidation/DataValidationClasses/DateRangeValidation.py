@@ -25,7 +25,7 @@ class DateRangeValidation(IDataValidation):
         self.referenceTime = referenceTime
         
     def validate(self, series: Series) -> bool:
-        """ This method checks for missing data points in the the expected time series. 
+        """ This method checks for missing data points in the expected time series. 
             :param series: Series - The series to validate
             :return: bool - True if the series passes validation, False otherwise
         """
@@ -63,7 +63,7 @@ class DateRangeValidation(IDataValidation):
             if time_difference > series.timeDescription.stalenessOffset:
                 log_error(f'DateRangeValidation: Series {series} is stale.')
                 log_error(f'Time difference: {time_difference}. Staleness offset: {series.timeDescription.stalenessOffset}')
-                log_error(f'Min timeGenerated: {series.dataFrame["timeGenerated"].min()}')
+                log_error(f'Min timeGenerated: {df_to_validate["timeGenerated"].min()}')
                 return False
         
         return True
