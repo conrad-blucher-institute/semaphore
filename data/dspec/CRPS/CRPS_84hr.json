@@ -89,30 +89,8 @@
     ],
     "postProcessCall": [],
     "vectorOrder": [
-        {
-            "key": "south-bird-island_water-temp_25",
-            "dType": "float",
-            "indexes": [
-                0,
-                25
-            ]
-        },
-        {
-            "key": "south-bird-island_air-temp_25",
-            "dType": "float",
-            "indexes": [
-                0,
-                25
-            ]
-        },
-        {
-            "key": "ensemble-south-bird-island_predicted_air-temp_84",
-            "dType": "float",
-            "indexes": [
-                0,
-                84
-            ],
-            "isMultipliedKey": true
-        }
+        { "key": "south-bird-island_water-temp_25"                 , "dType": "float", "indexes": [2, 26] },
+        { "key": "south-bird-island_air-temp_25"                   , "dType": "float", "indexes": [2, 26] },
+        { "key": "ensemble-south-bird-island_predicted_air-temp_84", "dType": "float", "indexes": [0, 83], "isMultipliedKey": true }
     ]
 }
