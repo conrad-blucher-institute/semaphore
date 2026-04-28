@@ -23,7 +23,7 @@ import copy
 from numpy import nan
 from unittest.mock import MagicMock, patch
 from src.ModelExecution.dataGatherer import DataGatherer
-from src.ModelExecution.dspecParser import Dspec, DependentSeries, PostProcessCall, VectorOrder
+from src.ModelExecution.dspecParser import Dspec, DependentSeries, PostProcessCall
 from src.DataClasses import Series, SeriesDescription, TimeDescription, DataIntegrityDescription
 
 ## Mocks
