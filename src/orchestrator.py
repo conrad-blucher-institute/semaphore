@@ -78,6 +78,12 @@ class Orchestrator:
 
                     data_repository = self.dataGatherer.get_data_repository(DSPEC, reference_time)
                     input_vectors = self.inputVectorBuilder.build_batch(DSPEC, data_repository)
+                    
+                    # I want a print statment here of what the input vectors look like before they go into the model runner. 
+                    # This is a critical point that will help with debugging and ensuring that the data is being gathered and processed correctly.
+                    log(f'[Orchestrator] Input vectors for {model_name} @ {reference_time}\n' + '\n'.join(f'\t[{k}] {input_vectors[0][i[0]:i[1]]}' for k, i in zip(DSPEC.orderedVector.keys, DSPEC.orderedVector.indexes)))
+
+
                     result = self.modelRunner.make_predictions(DSPEC, input_vectors, reference_time)
 
                     self.__handle_successful_prediction(model_name, reference_time, result, toss)
