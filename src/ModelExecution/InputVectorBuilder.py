@@ -91,7 +91,7 @@ class InputVectorBuilder:
             
             input_vector = []
             # We iterate over every series the input vector has in order
-            for key, dtype, index in zip(ordered_keys, ordered_dtypes, ordered_indexes):            
+            for key, dtype in zip(ordered_keys, ordered_dtypes):            
 
                 # Check to see if this series is marked as a multi input series
                 keyIsMulti = key in multipliedKeys 
@@ -119,12 +119,8 @@ class InputVectorBuilder:
                     # Cast Data
                     casted_data = [self.__cast_value(d, dtype) for d in data]
 
-                    # Select only the wanted data, inclusive on right and left sides
-                    indexed_data = casted_data[index[0] : index[1] + 1]
-                    
-                    log(f'\t\t{key}: - amnt_found: {len(casted_data)}, indexed_len: {len(indexed_data)}')
-                    # Concatenate the designated slice of casted data into the input vector
-                    input_vector += indexed_data
+                    # Concatenate the casted data into the input vector
+                    input_vector += casted_data
 
             batchIndex += 1   
             yield input_vector
