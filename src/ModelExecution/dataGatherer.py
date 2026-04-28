@@ -24,7 +24,6 @@ from DataValidation.IDataValidation import data_validation_factory
 from exceptions import Semaphore_Data_Exception, Semaphore_Ingestion_Exception
 from datetime import datetime, timedelta
 from pandas import date_range
-import copy
 
 
 class DataGatherer:
@@ -129,9 +128,9 @@ class DataGatherer:
             # over-requested window including interpolation buffer slots.
             # The full series (all rows) still goes into the repository so vectorOrder
             # can index it normally downstream.
-            self.__clip_and_validate_series(series, key, key_to_index, referenceTime)
+            series = self.__clip_and_validate_series(series, key, key_to_index, referenceTime)
             
-            # Full Series (all 27 rows including buffer) still goes in the repo
+            # Clipped Series (only points that the model actually wantes) goes in the repo
             series_repository[key] = series
 
         return series_repository
@@ -170,17 +169,11 @@ class DataGatherer:
                 series.timeDescription.stalenessOffset
             )
 
-            # Shallow copy so we can swap dataFrame and timeDescription without
-            # mutating the original series that will be stored in the repository.
-            # A shallow copy is sufficient here — we only need to replace two attributes,
-            # and DateRangeValidation makes its own internal copy before operating.
-            series_for_validation = copy.copy(series)
-            series_for_validation.dataFrame = trimmed_df
-            series_for_validation.timeDescription = trimmed_td
+            series.dataFrame = trimmed_df
+            series.timeDescription = trimmed_td
 
-            self.__validate_series(series_for_validation, referenceTime)
-        else:
-            self.__validate_series(series, referenceTime)
+        self.__validate_series(series, referenceTime)
+        return series
 
     
     def __post_process_data(self, series_repository: dict[str, Series], postProcessCalls: list[PostProcessCall]) -> dict[str, Series]:
