@@ -91,21 +91,23 @@ class InputVectorBuilder:
             
             input_vector = []
             # We iterate over every series the input vector has in order
-            for key, dtype in zip(ordered_keys, ordered_dtypes):            
+            for key, dtype, index in zip(ordered_keys, ordered_dtypes, ordered_indexes):
 
                 # Check to see if this series is marked as a multi input series
-                keyIsMulti = key in multipliedKeys 
+                keyIsMulti = key in multipliedKeys
 
                 # Get the Series from the data repository, error if its missing!
                 series = dataRepository.get(key)
                 if series is None:
                     raise Semaphore_Exception(f'ERROR: There was a problem with input gatherer finding outKey {key} in {dataRepository}')
-                
+
                 # Grab all data, this changes if its a multi series or not
                 data = None
                 isFinished = True # Assume we are finished unless we find a multi series that has more data
                 if not keyIsMulti:
                     data = series.dataFrame['dataValue'].to_list()
+                    if index[0] is not None:
+                        data = data[index[0]:index[1]]
                 else:
                     data = [ensemble_members[batchIndex] for ensemble_members in series.dataFrame['dataValue']] # We pull a slice of data determined by the batch index
                     

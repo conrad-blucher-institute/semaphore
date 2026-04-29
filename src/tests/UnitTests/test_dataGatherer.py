@@ -369,7 +369,7 @@ def test_buffer_slots_trimmed_before_validation(data_gatherer, mock_dspec):
     # leaving the 2 null buffer slots outside the index window
     mock_vector_order = MagicMock()
     mock_vector_order.keys = ['key1']
-    mock_vector_order.indexes = [[0, 3]]
+    mock_vector_order.indexes = [[0, 2]]
     mock_dspec.orderedVector = mock_vector_order
 
     # Return our 5-row series (including null buffer slots) from the series provider
