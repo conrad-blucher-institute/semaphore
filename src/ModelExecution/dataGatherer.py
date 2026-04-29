@@ -152,7 +152,7 @@ class DataGatherer:
         """
         index = key_to_index.get(key)
 
-        if index is not None:
+        if index is not None and index[0] is not None:
             # Slice the dataframe to only the rows vectorOrder will read.
             # This is the same slice InputVectorBuilder applies — validation should
             # only check what the model actually consumes.
