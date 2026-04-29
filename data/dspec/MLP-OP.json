@@ -52,17 +52,8 @@
     ],
     "postProcessCall": [],
     "vectorOrder": [
-        {
-            "key": "NPSBI_DWT_24",
-            "dType": "float"
-        },
-        {
-            "key": "PACK_DAT_24",
-            "dType": "float"
-        },
-        {
-            "key": "SBI_PAT_16",
-            "dType": "float"
-        }
+        { "key": "NPSBI_DWT_24", "dType": "float", "indexes": [1, 24] },
+        { "key": "PACK_DAT_24",  "dType": "float", "indexes": [1, 24] },
+        { "key": "SBI_PAT_16",   "dType": "float" }
     ]
 }
