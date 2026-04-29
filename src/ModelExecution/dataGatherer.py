@@ -172,7 +172,7 @@ class DataGatherer:
             series.dataFrame = trimmed_df
             series.timeDescription = trimmed_td
 
-            log(f'[DataGatherer] Clipped series for key "{key}":\n'
+            log(f'[DataGatherer] Clipped series for key "{key}" @ {referenceTime}:\n'
                 f'\t  rows      : {len(series.dataFrame)}\n'
                 f'\t  first     : {series.dataFrame["timeVerified"].iloc[0]}\n'
                 f'\t  last      : {series.dataFrame["timeVerified"].iloc[-1]}\n'

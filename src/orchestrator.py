@@ -85,8 +85,8 @@ class Orchestrator:
                     for k in DSPEC.orderedVector.keys:
                         df = data_repository[k].dataFrame
                         lines.append(f'\t[{k}]')
-                        for _, row in df.iterrows():
-                            lines.append(f'\t\t{row["timeVerified"]} : {row["dataValue"]}')
+                        for i, (_, row) in enumerate(df.iterrows()):
+                            lines.append(f'\t\t{i+1}. {row["timeVerified"]} : {row["dataValue"]}')
                     log('\n'.join(lines))
 
                     result = self.modelRunner.make_predictions(DSPEC, input_vectors, reference_time)
