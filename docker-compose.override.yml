@@ -1,0 +1,24 @@
+services:
+  core:
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./tools
+          target: /app/tools
+        - action: rebuild
+          path: ./.env
+
+  api:
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./tools
+          target: /app/tools
+        - action: rebuild
+          path: ./.env
