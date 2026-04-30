@@ -91,16 +91,16 @@ class InputVectorBuilder:
             
             input_vector = []
             # We iterate over every series the input vector has in order
-            for key, dtype, index in zip(ordered_keys, ordered_dtypes, ordered_indexes):            
+            for key, dtype, in zip(ordered_keys, ordered_dtypes):
 
                 # Check to see if this series is marked as a multi input series
-                keyIsMulti = key in multipliedKeys 
+                keyIsMulti = key in multipliedKeys
 
                 # Get the Series from the data repository, error if its missing!
                 series = dataRepository.get(key)
                 if series is None:
                     raise Semaphore_Exception(f'ERROR: There was a problem with input gatherer finding outKey {key} in {dataRepository}')
-                
+
                 # Grab all data, this changes if its a multi series or not
                 data = None
                 isFinished = True # Assume we are finished unless we find a multi series that has more data
@@ -119,12 +119,8 @@ class InputVectorBuilder:
                     # Cast Data
                     casted_data = [self.__cast_value(d, dtype) for d in data]
 
-                    # Select only the wanted data
-                    indexed_data = casted_data[index[0] : index[1]]
-                    
-                    log(f'\t\t{key}: - amnt_found: {len(casted_data)}, indexed_len: {len(indexed_data)}')
-                    # Concatenate the designated slice of casted data into the input vector
-                    input_vector += indexed_data
+                    # Concatenate the casted data into the input vector
+                    input_vector += casted_data
 
             batchIndex += 1   
             yield input_vector

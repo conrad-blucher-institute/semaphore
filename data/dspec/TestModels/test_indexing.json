@@ -4,7 +4,7 @@
     "modelVersion": "1.0.0",
     "author": "John Doe",
     "modelFileName": "test_AI",
-    "timingInfo":{
+    "timingInfo": {
         "active": false,
         "offset": 0,
         "interval": 3600
@@ -14,12 +14,12 @@
         "leadTime": 86400,
         "series": "NA",
         "location": "NA",
-        "interval" : 3600, 
+        "interval": 3600,
         "datum": "NA",
-        "unit" : "NA"
+        "unit": "NA"
     },
     "dependentSeries": [
-        { 
+        {
             "_name": "TEST",
             "location": "TEST",
             "source": "TEST_DI",
@@ -32,15 +32,7 @@
     ],
     "postProcessCall": [],
     "vectorOrder": [
-        {
-            "key": "test_out",
-            "dType": "float",
-            "indexes": [0, 3]
-        },
-        {
-            "key": "test_out",
-            "dType": "float",
-            "indexes": [4, 6]
-        }
+        { "key": "test_out", "dType": "float", "indexes": [0, 2] },
+        { "key": "test_out", "dType": "float", "indexes": [4, 5] }
     ]
 }

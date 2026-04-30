@@ -83,6 +83,11 @@ def mock_dspec():
             postProcessCall
         ]
 
+    mock_vector_order = MagicMock()
+    mock_vector_order.keys = ['key1']
+    mock_vector_order.indexes = [[0, 2]]  # matches the 2-row dataframe used in tests
+    dspec.orderedVector = mock_vector_order
+
     return dspec
 
 
@@ -316,3 +321,62 @@ def test_data_validation_call(data_gatherer):
 
         # Assert that the returned object's .validate method was called
         mock_validator.validate.assert_called_once_with(mock_series)
+
+def test_buffer_slots_trimmed_before_validation(data_gatherer, mock_dspec):
+    """Asserts that only the rows specified by vectorOrder indexes are validated,
+    not the full series including interpolation buffer slots.
+    
+    The fix being tested: DataGatherer now clips the series to the vectorOrder
+    index window before running DateRangeValidation, so null buffer slots at the
+    end of the series (which exist only to support interpolation) don't cause
+    false-positive validation failures.
+    """
+    reference_time = datetime.now(timezone.utc)
+
+    # Build a time description spanning 5 hours to match the 5-row dataframe below
+    mock_timeDescription = MagicMock(spec=TimeDescription)
+    mock_timeDescription.configure_mock(
+        fromDateTime=reference_time,
+        toDateTime=reference_time + timedelta(hours=4),
+        interval=timedelta(hours=1),
+        stalenessOffset=timedelta(hours=7)
+    )
+
+    # No verification override so DateRangeValidation will be used
+    mock_description = MagicMock(spec=SeriesDescription)
+    mock_description.configure_mock(verificationOverride=None)
+
+    mock_series = MagicMock(spec=Series)
+    mock_series.configure_mock(description=mock_description, timeDescription=mock_timeDescription)
+
+    # 5 rows total: the first 3 are real data the model will consume,
+    # the last 2 are null buffer slots that exist only so interpolation
+    # has boundary points to work with. Without the fix, DateRangeValidation
+    # would see these nulls and fail the whole model run.
+    mock_series.configure_mock(dataFrame=DataFrame({
+        'dataValue': [1.0, 2.0, 3.0, None, None],
+        'timeVerified': [
+            reference_time,
+            reference_time + timedelta(hours=1),
+            reference_time + timedelta(hours=2),
+            reference_time + timedelta(hours=3),  # buffer slot
+            reference_time + timedelta(hours=4),  # buffer slot
+        ],
+        'timeGenerated': [reference_time] * 5
+    }))
+
+    # Override the mock_dspec's vectorOrder to only consume the first 3 rows,
+    # leaving the 2 null buffer slots outside the index window
+    mock_vector_order = MagicMock()
+    mock_vector_order.keys = ['key1']
+    mock_vector_order.indexes = [[0, 2]]
+    mock_dspec.orderedVector = mock_vector_order
+
+    # Return our 5-row series (including null buffer slots) from the series provider
+    data_gatherer._DataGatherer__seriesProvider.request_input.return_value = mock_series
+
+    # Should succeed: validation only runs against rows 0-2 (the 3 real data points).
+    # If the fix is broken and validation runs against all 5 rows, the nulls at
+    # index 3 and 4 will cause DateRangeValidation to fail and raise an exception.
+    result = data_gatherer.get_data_repository(mock_dspec, reference_time)
+    assert 'key1' in result

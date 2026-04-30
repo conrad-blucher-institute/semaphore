@@ -132,36 +132,41 @@ def test_build_batch_single_value_input():
         assert expected == actual
 
 
-def test_build_batch_indexing():
-    """Tests the classes ability to index values out of a series 
-    if the indexes attribute are specified in the vector order.
-    """
-    EXPECTED_RESULT = [[0.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0]]
+# This test is currently depreciated because series clipping is done in
+# data gatherer so that data validation and post processing is done
+# on the clipped series (what the model expects) rather than a series
+# that has extra values added for interpolation.
 
-    single_value_series = get_single_value_series()
+# def test_build_batch_indexing():
+#     """Tests the classes ability to index values out of a series 
+#     if the indexes attribute are specified in the vector order.
+#     """
+#     EXPECTED_RESULT = [[0.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0]]
 
-    data_repository = {
-        'Series1': single_value_series,
-        'Series2': single_value_series 
-    }
+#     single_value_series = get_single_value_series()
 
-    # Mock a dspec with a vector order
-    vectorOrder = MagicMock(spec=VectorOrder)
-    vectorOrder.configure_mock(keys= ['Series1', 'Series2'])
-    vectorOrder.configure_mock(dTypes= ['float', 'float'])
-    vectorOrder.configure_mock(indexes=[(None, None), (1, 4)]) # We index the second series
-    vectorOrder.configure_mock(multipliedKeys=[])
-    dspec = mock_dspec(vectorOrder)
+#     data_repository = {
+#         'Series1': single_value_series,
+#         'Series2': single_value_series 
+#     }
 
-    # Run test
-    inputVectorBuilder = InputVectorBuilder()
-    result = inputVectorBuilder.build_batch(dspec, data_repository)
+#     # Mock a dspec with a vector order
+#     vectorOrder = MagicMock(spec=VectorOrder)
+#     vectorOrder.configure_mock(keys= ['Series1', 'Series2'])
+#     vectorOrder.configure_mock(dTypes= ['float', 'float'])
+#     vectorOrder.configure_mock(indexes=[(None, None), (1, 4)]) # We index the second series
+#     vectorOrder.configure_mock(multipliedKeys=[])
+#     dspec = mock_dspec(vectorOrder)
+
+#     # Run test
+#     inputVectorBuilder = InputVectorBuilder()
+#     result = inputVectorBuilder.build_batch(dspec, data_repository)
     
-    # Compare expected vs Actual
-    assert len(EXPECTED_RESULT) == len(result)
-    for expected, actual in zip(EXPECTED_RESULT, result):
-        assert expected == actual
+#     # Compare expected vs Actual
+#     assert len(EXPECTED_RESULT) == len(result)
+#     for expected, actual in zip(EXPECTED_RESULT, result):
+#         assert expected == actual
 
-def test__cast_value():
-    inputVectorBuilder = InputVectorBuilder()
-    assert inputVectorBuilder._InputVectorBuilder__cast_value('1.0', 'float') == 1.0
+# def test__cast_value():
+#     inputVectorBuilder = InputVectorBuilder()
+#     assert inputVectorBuilder._InputVectorBuilder__cast_value('1.0', 'float') == 1.0

@@ -26,7 +26,6 @@ from datetime import datetime, timedelta
 from pandas import date_range
 
 
-
 class DataGatherer:
 
     def __init__(self) -> None:
@@ -56,8 +55,12 @@ class DataGatherer:
         dependentSeries: list[DependentSeries] = dspec.dependentSeries
         postProcessCalls: list[PostProcessCall] = dspec.postProcessCall
 
+        # Build a dict of {key: index} so validation knows the actual consumed window
+        vector_order = dspec.orderedVector
+        key_to_index = dict(zip(vector_order.keys, vector_order.indexes))
+        
         # Get Dependent Data
-        dependent_data_repository = self.__request_dependent_data(dependentSeries, referenceTime)
+        dependent_data_repository = self.__request_dependent_data(dependentSeries, referenceTime, key_to_index)
 
         # Call post processing 
         post_processed_series_repository = self.__post_process_data(dependent_data_repository, postProcessCalls)
@@ -65,7 +68,7 @@ class DataGatherer:
         return post_processed_series_repository
     
 
-    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime) -> dict[str, Series]:
+    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime, key_to_index: dict[str, list[int]]) -> dict[str, Series]:
         """This method handles the process of requesting the dependant series from the DSPEC. Its requests will be temporally
         referenced from the passed reference time. It will:
             - Build the series description
@@ -79,6 +82,8 @@ class DataGatherer:
 
         :param dependentSeriesList: list[DependentSeries] - The list of dependent series from the DSEPC
         :param referenceTime: datetime - The reference time to build the time description from.
+        :param key_to_index: dict[str, list[int]] - A mapping of outKey to vectorOrder index slice,
+            used to clip the series before validation so buffer slots are not validated.
 
         :returns: dict[str, Series] - The dictionary of the data it collected 
 
@@ -119,15 +124,63 @@ class DataGatherer:
             # Reset the index
             series.dataFrame.reset_index(inplace=True)
 
-            # Validate the data
-            self.__validate_series(series, referenceTime)
+            # Validate only the rows the model will actually consume, not the full
+            # over-requested window including interpolation buffer slots.
+            series = self.__clip_and_validate_series(series, key, key_to_index, referenceTime)
             
-            # Store the series in the repository
+            # Clipped Series (only points that the model actually wantes) goes in the repo
             series_repository[key] = series
 
         return series_repository
 
 
+    def __clip_and_validate_series(self, series: Series, key: str, key_to_index: dict[str, list[int]], referenceTime: datetime):
+        """Clips the series to the rows the model will actually consume according to
+        the vectorOrder index, then validates the clipped series. This prevents
+        interpolation buffer slots (over-requested rows that exist only to support
+        interpolation at the boundaries) from causing false-positive validation failures.
+
+        If no index is found for the key (e.g. the key is only used in post-processing
+        and not directly in vectorOrder), the full series is validated as-is.
+
+        :param series: Series - The full series to clip and validate
+        :param key: str - The outKey for this series, used to look up the vectorOrder index
+        :param key_to_index: dict[str, list[int]] - Mapping of outKey to vectorOrder [start, end] slice
+        :param referenceTime: datetime - The reference time for this model
+        """
+        index = key_to_index.get(key)
+
+        if index is not None and index[0] is not None:
+            # Slice the dataframe to only the rows vectorOrder will read.
+            # This is the same slice InputVectorBuilder applies — validation should
+            # only check what the model actually consumes.
+            trimmed_df = series.dataFrame.iloc[index[0]:index[1] + 1].reset_index(drop=True)
+
+            # Build a corrected TimeDescription whose fromDateTime and toDateTime
+            # match the actual first and last rows of the trimmed slice. DateRangeValidation
+            # uses these to construct its expected index — if they still pointed at the
+            # full over-requested window, validation would flag the trimmed rows as missing.
+            trimmed_td = TimeDescription(
+                trimmed_df['timeVerified'].iloc[0],
+                trimmed_df['timeVerified'].iloc[-1],
+                series.timeDescription.interval,
+                series.timeDescription.stalenessOffset
+            )
+
+            series.dataFrame = trimmed_df
+            series.timeDescription = trimmed_td
+
+            log(f'[DataGatherer] Clipped series for key "{key}" @ {referenceTime}:\n'
+                f'\t  rows      : {len(series.dataFrame)}\n'
+                f'\t  first     : {series.dataFrame["timeVerified"].iloc[0]}\n'
+                f'\t  last      : {series.dataFrame["timeVerified"].iloc[-1]}\n'
+                f'\t  td.from   : {series.timeDescription.fromDateTime}\n'
+                f'\t  td.to     : {series.timeDescription.toDateTime}')
+
+        self.__validate_series(series, referenceTime)
+        return series
+
+    
     def __post_process_data(self, series_repository: dict[str, Series], postProcessCalls: list[PostProcessCall]) -> dict[str, Series]:
         """
         This function calls the post processing methods for any inputs that need post processing.

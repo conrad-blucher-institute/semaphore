@@ -25,7 +25,7 @@
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
-            "range": [0, -26],
+            "range": [1, -26],
             "outKey": "PL_PWL_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -39,7 +39,7 @@
             "series": "dSurge",
             "unit": "meter",
             "interval": 3600,
-            "range": [0, -26],
+            "range": [1, -26],
             "outKey": "PL_Surge_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -54,7 +54,7 @@
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
-            "range": [0, -26],
+            "range": [1, -26],
             "outKey": "POC_PWL_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -68,7 +68,7 @@
             "series": "dSurge",
             "unit": "meter",
             "interval": 3600,
-            "range": [0, -26],
+            "range": [1, -26],
             "outKey": "POC_Surge_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -82,7 +82,7 @@
             "series": "dWnDir",
             "unit": "degrees",
             "interval": 3600,
-            "range": [0, -26],
+            "range": [1, -26],
             "outKey": "PL_WNDIR_25",
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
@@ -96,7 +96,7 @@
             "series": "dWnSpd",
             "unit": "mps",
             "interval": 3600,
-            "range": [0, -26],
+            "range": [1, -26],
             "outKey": "PL_WNSPD_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -173,14 +173,14 @@
         }
     ],
     "vectorOrder": [
-        { "key": "PL_PWL_25",        "dType": "float", "indexes": [0, 25] },
-        { "key": "PL_Surge_25",       "dType": "float", "indexes": [0, 25] },
-        { "key": "POC_PWL_25",        "dType": "float", "indexes": [0, 25] },
-        { "key": "POC_Surge_25",      "dType": "float", "indexes": [0, 25] },
-        { "key": "AVG_PWL_25",        "dType": "float", "indexes": [0, 25] },
-        { "key": "AVG_Surge_25",      "dType": "float", "indexes": [0, 25] },
-        { "key": "x_PL_PWNDCMP_25",  "dType": "float", "indexes": [0, 25] },
-        { "key": "y_PL_PWNDCMP_25",  "dType": "float", "indexes": [0, 25] },
+        { "key": "PL_PWL_25"       , "dType": "float", "indexes": [2, 26] },
+        { "key": "PL_Surge_25"     , "dType": "float", "indexes": [2, 26] },
+        { "key": "POC_PWL_25"      , "dType": "float", "indexes": [2, 26] },
+        { "key": "POC_Surge_25"    , "dType": "float", "indexes": [2, 26] },
+        { "key": "AVG_PWL_25"      , "dType": "float", "indexes": [2, 26] },
+        { "key": "AVG_Surge_25"    , "dType": "float", "indexes": [2, 26] },
+        { "key": "x_PL_PWNDCMP_25" , "dType": "float", "indexes": [2, 26] },
+        { "key": "y_PL_PWNDCMP_25" , "dType": "float", "indexes": [2, 26] },
         { "key": "x_PL_PWNDCMP_F20", "dType": "float" },
         { "key": "y_PL_PWNDCMP_F20", "dType": "float" }
     ]
