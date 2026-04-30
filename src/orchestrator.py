@@ -79,7 +79,7 @@ class Orchestrator:
                     data_repository = self.dataGatherer.get_data_repository(DSPEC, reference_time)
                     input_vectors = self.inputVectorBuilder.build_batch(DSPEC, data_repository)
                     
-                    # I want a print statment here of what the input vectors look like before they go into the model runner. 
+                    # I want a print statement here of what the input vectors look like before they go into the model runner. 
                     # This is a critical point that will help with debugging and ensuring that the data is being gathered and processed correctly.
                     lines = [f'[Orchestrator] Input vectors for {model_name} @ {reference_time}']
                     for k in DSPEC.orderedVector.keys:

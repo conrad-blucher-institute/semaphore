@@ -91,7 +91,7 @@ class InputVectorBuilder:
             
             input_vector = []
             # We iterate over every series the input vector has in order
-            for key, dtype, index in zip(ordered_keys, ordered_dtypes, ordered_indexes):
+            for key, dtype, in zip(ordered_keys, ordered_dtypes):
 
                 # Check to see if this series is marked as a multi input series
                 keyIsMulti = key in multipliedKeys
@@ -106,8 +106,6 @@ class InputVectorBuilder:
                 isFinished = True # Assume we are finished unless we find a multi series that has more data
                 if not keyIsMulti:
                     data = series.dataFrame['dataValue'].to_list()
-                    if index[0] is not None:
-                        data = data[index[0]:index[1]]
                 else:
                     data = [ensemble_members[batchIndex] for ensemble_members in series.dataFrame['dataValue']] # We pull a slice of data determined by the batch index
                     

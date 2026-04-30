@@ -126,8 +126,6 @@ class DataGatherer:
 
             # Validate only the rows the model will actually consume, not the full
             # over-requested window including interpolation buffer slots.
-            # The full series (all rows) still goes into the repository so vectorOrder
-            # can index it normally downstream.
             series = self.__clip_and_validate_series(series, key, key_to_index, referenceTime)
             
             # Clipped Series (only points that the model actually wantes) goes in the repo
