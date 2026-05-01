@@ -358,6 +358,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             or None if no statistics are found for any of the models. Each dictionary will have the following format:
             {
                 'modelName': str,
+                'timeGenerated': timestamp without time zone,
                 'p1': float,
                 'p5': float,
                 'p10': float,
@@ -384,9 +385,21 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             GROUP BY o."modelName"
         )
         SELECT 
-            o."id",
+            o."modelName",
             o."timeGenerated",
-            o."modelName"
+            s."p1",
+            s."p5",
+            s."p10",
+            s."p25",
+            s."p50",
+            s."p75",
+            s."p90",
+            s."p95",
+            s."p99",
+            s."min",
+            s."max",
+            s."mean",
+            s."std_dev"
         FROM outputs AS o
         INNER JOIN latest_time_per_model AS ltpm
             ON o."modelName" = ltpm."modelName"
@@ -399,7 +412,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         stmt = stmt.bindparams(bindparam("model_names", value=tuple(model_names), expanding=True, type_=String))
 
         # the result tuples will have the form 
-        # 
+        # (modelName, timeGenerated, p1, p5, p10, p25, p50, p75, p90, p95, p99, min, max, mean, std_dev)
         result = self.__dbSelection(stmt).fetchall()
         
         if not result:
@@ -409,7 +422,21 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         statistics_results = []
         for row in result:
             statistics_dict = {
-                # need to finish
+                'modelName': row[0],
+                'timeGenerated': row[1],
+                'p1': row[2],
+                'p5': row[3],
+                'p10': row[4],
+                'p25': row[5],
+                'p50': row[6],
+                'p75': row[7],
+                'p90': row[8],
+                'p95': row[9],
+                'p99': row[10],
+                'min': row[11],
+                'max': row[12],
+                'mean': row[13],
+                'std_dev': row[14]
             }
             statistics_results.append(statistics_dict)
         
@@ -729,7 +756,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             :mean,
             :std_dev
             )
-        ON CONFLICT ON CONSTRAINT "fk_statistics_output" DO NOTHING
+        ON CONFLICT ON CONSTRAINT "output_statistics_outputID_key" DO NOTHING
         RETURNING *;
         """)
 
