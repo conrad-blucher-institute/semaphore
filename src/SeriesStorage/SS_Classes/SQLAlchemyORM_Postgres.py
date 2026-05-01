@@ -421,24 +421,27 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # splice the results into dictionaries
         statistics_results = []
         for row in result:
-            statistics_dict = {
-                'modelName': row[0],
-                'timeGenerated': row[1],
-                'p1': row[2],
-                'p5': row[3],
-                'p10': row[4],
-                'p25': row[5],
-                'p50': row[6],
-                'p75': row[7],
-                'p90': row[8],
-                'p95': row[9],
-                'p99': row[10],
-                'min': row[11],
-                'max': row[12],
-                'mean': row[13],
-                'std_dev': row[14]
-            }
-            statistics_results.append(statistics_dict)
+            # if p1 exists, then all statistics must exist so we can parse them
+            # for models that do not compute stats, they will not have an entry in the returned dictionary list
+            if row[2] is not None:
+                statistics_dict = {
+                    'modelName': row[0],
+                    'timeGenerated': row[1],
+                    'p1': row[2],
+                    'p5': row[3],
+                    'p10': row[4],
+                    'p25': row[5],
+                    'p50': row[6],
+                    'p75': row[7],
+                    'p90': row[8],
+                    'p95': row[9],
+                    'p99': row[10],
+                    'min': row[11],
+                    'max': row[12],
+                    'mean': row[13],
+                    'std_dev': row[14]
+                }
+                statistics_results.append(statistics_dict)
         
         return statistics_results
 
