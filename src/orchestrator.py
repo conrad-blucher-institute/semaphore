@@ -247,9 +247,9 @@ class Orchestrator:
         to compute the statistics based on the data stored in the output table, then store the statistics into
         the statistics table. 
 
-        :param model_name: str - the name of the model that was ran
+        :param model_name: str - the name of the model that was run
         :param data: np.ndarray - the data that was stored in the output table that the statistics should be computed on
-            The data is formated in a 3D ndarray with the shape (member count, input vector count, outputs per vector).
+            The data is formatted in a 3D ndarray with the shape (member count, input vector count, outputs per vector).
         :param output_table_id: int - the id to the output table entry this data is linked to
 
         NOTE: On statistics failures, we do not want to raise an exception as this would show that the entire model run
@@ -265,5 +265,8 @@ class Orchestrator:
                 log_success(f"Computed and stored statistics for model: {model_name} successfully ✓")
             else:
                 log_error('STATISTICS:: Failed to insert statistics into the database')
-        except:
-            log_error('STATISTICS:: An error occurred while trying to compute or store statistics')
+        except Exception as e:
+            log_error(
+                f'STATISTICS:: An error occurred while trying to compute or store statistics for model: {model_name}'
+                f"\nError: {e}. Traceback: {traceback.format_exc()}"
+            )

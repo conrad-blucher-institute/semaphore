@@ -557,7 +557,7 @@ def test_deserialize(data_array):
             [
                 {
                     'modelName': "ModelA",
-                    'timeGenerated': datetime(2026, 1, 1, 0, 0),
+                    'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
                     'p1':  1.0,
                     'p5':  2.0,
                     'p10': 3.0,
@@ -574,7 +574,7 @@ def test_deserialize(data_array):
                 },
                 {
                     'modelName': "ModelB",
-                    'timeGenerated': datetime(2026, 1, 1, 0, 0),
+                    'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
                     'p1': 2.0,
                     'p5': 4.0,
                     'p10': 6.0,
@@ -601,7 +601,7 @@ def test_deserialize(data_array):
             [
                 {
                     'modelName': "ModelA",
-                    'timeGenerated': datetime(2026, 1, 1, 0, 0),
+                    'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
                     'p1':  1.0,
                     'p5':  2.0,
                     'p10': 3.0,

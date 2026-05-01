@@ -358,7 +358,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             or None if no statistics are found for any of the models. Each dictionary will have the following format:
             {
                 'modelName': str,
-                'timeGenerated': timestamp without time zone,
+                'timeGenerated': timestamp in UTC,
                 'p1': float,
                 'p5': float,
                 'p10': float,
@@ -375,12 +375,19 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             }
         '''
 
+        # Get the latest output per model that has statistics available.
+        # By joining outputs to output_statistics in the CTE, we ensure we fall back
+        # to the most recent run that successfully computed statistics if the latest
+        # run did not compute statistics.
+        # In other words, get the latest statistics available per model for the given list of models
         stmt = text('''
         WITH latest_time_per_model AS (
             SELECT 
                 o."modelName",
                 MAX(o."timeGenerated") AS latest_time
             FROM outputs AS o
+            INNER JOIN output_statistics AS s
+                ON s."outputID" = o."id"
             WHERE o."modelName" IN :model_names
             GROUP BY o."modelName"
         )
@@ -421,27 +428,24 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # splice the results into dictionaries
         statistics_results = []
         for row in result:
-            # if p1 exists, then all statistics must exist so we can parse them
-            # for models that do not compute stats, they will not have an entry in the returned dictionary list
-            if row[2] is not None:
-                statistics_dict = {
-                    'modelName': row[0],
-                    'timeGenerated': row[1],
-                    'p1': row[2],
-                    'p5': row[3],
-                    'p10': row[4],
-                    'p25': row[5],
-                    'p50': row[6],
-                    'p75': row[7],
-                    'p90': row[8],
-                    'p95': row[9],
-                    'p99': row[10],
-                    'min': row[11],
-                    'max': row[12],
-                    'mean': row[13],
-                    'std_dev': row[14]
-                }
-                statistics_results.append(statistics_dict)
+            statistics_dict = {
+                'modelName': row[0],
+                'timeGenerated': row[1].replace(tzinfo=timezone.utc),
+                'p1': row[2],
+                'p5': row[3],
+                'p10': row[4],
+                'p25': row[5],
+                'p50': row[6],
+                'p75': row[7],
+                'p90': row[8],
+                'p95': row[9],
+                'p99': row[10],
+                'min': row[11],
+                'max': row[12],
+                'mean': row[13],
+                'std_dev': row[14]
+            }
+            statistics_results.append(statistics_dict)
         
         return statistics_results
 
