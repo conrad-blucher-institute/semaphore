@@ -375,23 +375,11 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             }
         '''
 
-        # Get the latest output per model that has statistics available.
-        # By joining outputs to output_statistics in the CTE, we ensure we fall back
-        # to the most recent run that successfully computed statistics if the latest
-        # run did not compute statistics.
-        # In other words, get the latest statistics available per model for the given list of models
+        # by sorting by generated time descending and using
+        # distinct on model names, we can get the latest
+        # statistics for each model in a simple query
         stmt = text('''
-        WITH latest_time_per_model AS (
-            SELECT 
-                o."modelName",
-                MAX(o."timeGenerated") AS latest_time
-            FROM outputs AS o
-            INNER JOIN output_statistics AS s
-                ON s."outputID" = o."id"
-            WHERE o."modelName" IN :model_names
-            GROUP BY o."modelName"
-        )
-        SELECT 
+        SELECT DISTINCT ON (o."modelName")
             o."modelName",
             o."timeGenerated",
             s."p1",
@@ -408,13 +396,10 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             s."mean",
             s."std_dev"
         FROM outputs AS o
-        INNER JOIN latest_time_per_model AS ltpm
-            ON o."modelName" = ltpm."modelName"
-            AND o."timeGenerated" = ltpm.latest_time
         INNER JOIN output_statistics AS s
             ON s."outputID" = o."id"
-        ORDER BY
-            o."modelName"
+        WHERE o."modelName" IN :model_names
+        ORDER BY o."modelName", o."timeGenerated" DESC
         ''')
         stmt = stmt.bindparams(bindparam("model_names", value=tuple(model_names), expanding=True, type_=String))
 
