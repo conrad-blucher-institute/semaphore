@@ -12,6 +12,13 @@ services:
           path: ./.env
 
   api:
+    command: [
+      "uvicorn", "API.apiDriver:app",
+      "--host", "0.0.0.0",
+      "--port", "8000",
+      "--log-config", "./API/semaphore_api_log_config.json",
+      "--reload"
+    ]
     develop:
       watch:
         - action: sync
