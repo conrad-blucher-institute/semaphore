@@ -79,15 +79,7 @@ class Orchestrator:
                     data_repository = self.dataGatherer.get_data_repository(DSPEC, reference_time)
                     input_vectors = self.inputVectorBuilder.build_batch(DSPEC, data_repository)
                     
-                    # I want a print statement here of what the input vectors look like before they go into the model runner. 
-                    # This is a critical point that will help with debugging and ensuring that the data is being gathered and processed correctly.
-                    lines = [f'[Orchestrator] Input vectors for {model_name} @ {reference_time}']
-                    for k in DSPEC.orderedVector.keys:
-                        df = data_repository[k].dataFrame
-                        lines.append(f'\t[{k}]')
-                        for i, (_, row) in enumerate(df.iterrows()):
-                            lines.append(f'\t\t{i+1}. {row["timeVerified"]} : {row["dataValue"]}')
-                    log('\n'.join(lines))
+                    self._log_input_vectors(model_name, reference_time, data_repository, DSPEC)
 
                     result = self.modelRunner.make_predictions(DSPEC, input_vectors, reference_time)
 
@@ -237,3 +229,22 @@ class Orchestrator:
                 discord_notify.send_notification(model_name, execution_time, error_code, message)
         except Exception as e:
             log_error(Semaphore_Exception('ERROR:: An error occurred while trying to send a discord notification'))
+
+    def _log_input_vectors(model_name: str, reference_time, data_repository: dict, dspec) -> None:
+        """
+        Logs the input vectors that were built for the model. 
+        This is a critical point that will help with debugging 
+        and ensuring that the data is being gathered and processed correctly.
+
+        :param model_name: str - The name of the model that was run.
+        :param reference_time: datetime - The reference time that was used to gather the data.
+        :param data_repository: dict - The data repository that was used to build the input vectors.
+        :param dspec: Dspec - The dspec that was used to build the input vectors.
+        """
+        lines = [f'[Orchestrator] Input vectors for {model_name} @ {reference_time}']
+        for k in dspec.orderedVector.keys:
+            df = data_repository[k].dataFrame
+            lines.append(f'\t[{k}]')
+            for i, (_, row) in enumerate(df.iterrows()):
+                lines.append(f'\t\t{i+1}. {row["timeVerified"]} : {row["dataValue"]}')
+        log('\n'.join(lines))
