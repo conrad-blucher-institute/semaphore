@@ -126,15 +126,17 @@ class DataGatherer:
 
             # Validate only the rows the model will actually consume, not the full
             # over-requested window including interpolation buffer slots.
-            series = self.__clip_and_validate_series(series, key, key_to_index, referenceTime)
+            series = self.__clip_series(series, key, key_to_index, referenceTime)
+
+            self.__validate_series(series, referenceTime)
             
-            # Clipped Series (only points that the model actually wantes) goes in the repo
+            # Clipped Series (only points that the model actually wants) goes in the repo
             series_repository[key] = series
 
         return series_repository
 
 
-    def __clip_and_validate_series(self, series: Series, key: str, key_to_index: dict[str, list[int]], referenceTime: datetime):
+    def __clip_series(self, series: Series, key: str, key_to_index: dict[str, list[int]], referenceTime: datetime):
         """Clips the series to the rows the model will actually consume according to
         the vectorOrder index, then validates the clipped series. This prevents
         interpolation buffer slots (over-requested rows that exist only to support
@@ -177,7 +179,6 @@ class DataGatherer:
                 f'\t  td.from   : {series.timeDescription.fromDateTime}\n'
                 f'\t  td.to     : {series.timeDescription.toDateTime}')
 
-        self.__validate_series(series, referenceTime)
         return series
 
     
