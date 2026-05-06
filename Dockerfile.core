@@ -1,5 +1,5 @@
 # Start with the base image of tensorflow
-FROM python:3.12
+FROM python:3.13.13
 
 ARG SERVICE_ACCOUNT_USERNAME
 ARG SERVICE_ACCOUNT_UID
@@ -12,6 +12,9 @@ ENV PYTHONUNBUFFERED 1
 
 # Set the working directory to /app
 WORKDIR /app
+
+# Upgrade pip to the latest version
+RUN pip install --upgrade pip
 
 # Copy the requirements.txt file to the Docker image
 COPY requirements.txt .
