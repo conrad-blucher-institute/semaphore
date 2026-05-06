@@ -230,7 +230,7 @@ class Orchestrator:
         except Exception as e:
             log_error(Semaphore_Exception('ERROR:: An error occurred while trying to send a discord notification'))
 
-    def _log_input_vectors(model_name: str, reference_time, data_repository: dict, dspec) -> None:
+    def _log_input_vectors(self, model_name: str, reference_time, data_repository: dict, dspec) -> None:
         """
         Logs the input vectors that were built for the model. 
         This is a critical point that will help with debugging 
