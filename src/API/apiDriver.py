@@ -112,7 +112,7 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
 @app.get('/output_latest/')
 async def get_outputs_latest(modelNames: list[str] = Query(None)):
     """
-    Queries outputs for a given models looking for the last prediction that was made with them.
+    Queries outputs for given models looking for the last prediction that was made with them.
     Args:
         - `modelNames` (string): The name of the model (e.g. "test AI"), you can repeat this parameter to request multiple models
 
@@ -143,6 +143,47 @@ async def get_outputs_latest(modelNames: list[str] = Query(None)):
     
     return serializedResults
 
+@app.get('/output_statistics/')
+async def get_outputs_statistics(
+    modelNames: list[str] = Query(None)
+):
+    """
+    Queries output statistics for given models.
+     Args:
+        - `modelNames` (string): The name of the model (e.g. "test AI"), you can repeat this parameter to request multiple models
+    Returns:
+    - A list of dictionaries containing these statistics for each model:
+        model name, time generated, percentile values (p1-p99),
+        minimum, maximum, mean, and standard deviation.
+
+    """
+
+    try:
+        if not modelNames:
+            raise HTTPException(
+                status_code=422,
+                detail='No model names were provided'
+            )
+
+        provider = SeriesProvider()
+
+        results = provider.request_output(
+            'STATISTICS',
+            model_names=modelNames
+        )
+
+        return results
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        print(f"Error retrieving output statistics: {e}")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to retrieve output statistics"
+        )
 
 @app.get('/output_time_span/')
 async def get_outputs_time_span(fromDateTime: str, toDateTime: str, modelNames: list[str] = Query(None)):
