@@ -126,7 +126,7 @@ class DataGatherer:
 
             # Validate only the rows the model will actually consume, not the full
             # over-requested window including interpolation buffer slots.
-            series = self.__clip_series(series, key, key_to_index, referenceTime)
+            series = self.__clip_series(series, key, key_to_index.get(key), referenceTime)
 
             self.__validate_series(series, referenceTime)
             
@@ -136,21 +136,20 @@ class DataGatherer:
         return series_repository
 
 
-    def __clip_series(self, series: Series, key: str, key_to_index: dict[str, list[int]], referenceTime: datetime):
+    def __clip_series(self, series: Series, key: str, index: list[int] | None, referenceTime: datetime):
         """Clips the series to the rows the model will actually consume according to
         the vectorOrder index, then validates the clipped series. This prevents
         interpolation buffer slots (over-requested rows that exist only to support
         interpolation at the boundaries) from causing false-positive validation failures.
 
-        If no index is found for the key (e.g. the key is only used in post-processing
-        and not directly in vectorOrder), the full series is validated as-is.
+        If index is None (e.g. the key is only used in post-processing and not directly
+        in vectorOrder), the full series is validated as-is.
 
         :param series: Series - The full series to clip and validate
-        :param key: str - The outKey for this series, used to look up the vectorOrder index
-        :param key_to_index: dict[str, list[int]] - Mapping of outKey to vectorOrder [start, end] slice
+        :param key: str - The outKey for this series, used in log messages
+        :param index: list[int] | None - The [start, end] vectorOrder slice for this series
         :param referenceTime: datetime - The reference time for this model
         """
-        index = key_to_index.get(key)
 
         if index is not None and index[0] is not None:
             # Slice the dataframe to only the rows vectorOrder will read.
