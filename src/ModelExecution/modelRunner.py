@@ -60,7 +60,7 @@ class ModelRunner:
         shapedInputs = reshape(input_vectors, expectedShape)
 
         log('Init compute predictions for all models....')
-        stacked_predictions: np.ndarray = self.predict(models, shapedInputs)
+        stacked_predictions: np.ndarray = self.__predict(models, shapedInputs)
 
         log('Init prediction post process....')
 
@@ -82,7 +82,7 @@ class ModelRunner:
         series.dataFrame = processedOutputs
         return series
 
-    def predict(self, models: list[Model], shapedInputs: np.ndarray) -> np.ndarray:
+    def __predict(self, models: list[Model], shapedInputs: np.ndarray) -> np.ndarray:
         """
         This function runs predictions for each model using the same input data and stacks the results.
             :param models: list[Model] - A list of loaded TensorFlow models to run predictions with.
