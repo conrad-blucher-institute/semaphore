@@ -1,0 +1,31 @@
+services:
+  core:
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./tools
+          target: /app/tools
+        - action: rebuild
+          path: ./.env
+
+  api:
+    command: [
+      "uvicorn", "API.apiDriver:app",
+      "--host", "0.0.0.0",
+      "--port", "8000",
+      "--log-config", "./API/semaphore_api_log_config.json",
+      "--reload"
+    ]
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./tools
+          target: /app/tools
+        - action: rebuild
+          path: ./.env

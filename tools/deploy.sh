@@ -19,7 +19,7 @@ exec > >(tee -a "$LOG_FILE") 2>&1
 echo "=== Deployment started at $(date '+%Y-%m-%d %H:%M:%S') with tag: $DEPLOY_TAG ===" | tee -a "$LOG_FILE"
 
 # Lower active containers
-docker compose down
+docker compose -f ./docker-compose.yml down
 
 # Fetch origin            vvvvvv - This will delete any tags that origin has deleted
 git fetch origin --tags --prune --prune-tags
@@ -28,8 +28,8 @@ git fetch origin --tags --prune --prune-tags
 git checkout "$DEPLOY_TAG"
 
 # Build new images and raise containers
-docker compose build
-docker compose up -d
+docker compose -f ./docker-compose.yml build
+docker compose -f ./docker-compose.yml up -d
 
 # Update the cron file on the VM
 python3 tools/init_cron.py -r ./data/dspec -i ./schedule
