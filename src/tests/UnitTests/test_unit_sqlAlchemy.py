@@ -35,7 +35,7 @@ from sqlalchemy.engine import Engine
 
 from SeriesProvider import SeriesProvider
 from SeriesStorage.SS_Classes.SQLAlchemyORM_Postgres import SQLAlchemyORM_Postgres
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from DataClasses import SeriesDescription, TimeDescription
 
 
@@ -541,3 +541,108 @@ def test_deserialize(data_array):
 
         # assert that the deserialized array matches the original array
         np.testing.assert_array_equal(deserialized_array, data_array)
+
+
+@pytest.mark.parametrize(
+    "test_data, expected_result",
+    [
+        # Test case 1: Basic test with multiple models
+        (
+            # test tuples that would be returned from the DB query
+            [
+                ( "ModelA", datetime(2026, 1, 1, 0, 0), 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0),
+                ( "ModelB", datetime(2026, 1, 1, 0, 0), 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0)
+            ],
+            # the expected output after parsing the DB results
+            [
+                {
+                    'modelName': "ModelA",
+                    'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
+                    'p1':  1.0,
+                    'p5':  2.0,
+                    'p10': 3.0,
+                    'p25': 4.0,
+                    'p50': 5.0,
+                    'p75': 6.0,
+                    'p90': 7.0,
+                    'p95': 8.0,
+                    'p99': 9.0,
+                    'min': 10.0,
+                    'max': 11.0,
+                    'mean': 12.0,
+                    'std_dev': 13.0
+                },
+                {
+                    'modelName': "ModelB",
+                    'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
+                    'p1': 2.0,
+                    'p5': 4.0,
+                    'p10': 6.0,
+                    'p25': 8.0,
+                    'p50': 10.0,
+                    'p75': 12.0,
+                    'p90': 14.0,
+                    'p95': 16.0,
+                    'p99': 18.0,
+                    'min': 20.0,
+                    'max': 22.0,
+                    'mean': 24.0,
+                    'std_dev': 26.0
+                }
+            ]
+        ),
+        # Test case 2: Test with missing model (only one model's statistics are returned)
+        (
+            # test tuples that would be returned from the DB query
+            [
+                ( "ModelA", datetime(2026, 1, 1, 0, 0), 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0)
+            ],
+            # the expected tuple splicing
+            [
+                {
+                    'modelName': "ModelA",
+                    'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
+                    'p1':  1.0,
+                    'p5':  2.0,
+                    'p10': 3.0,
+                    'p25': 4.0,
+                    'p50': 5.0,
+                    'p75': 6.0,
+                    'p90': 7.0,
+                    'p95': 8.0,
+                    'p99': 9.0,
+                    'min': 10.0,
+                    'max': 11.0,
+                    'mean': 12.0,
+                    'std_dev': 13.0
+                }
+            ]
+        )
+    ],
+    ids=["MultipleModels", "MissingModel"]
+)
+def test_select_latest_output_statistics(test_data, expected_result):
+    '''
+    This test checks that the tuple splicing in select_latest_output_statistics
+    correctly parses the DB results into the expected dictionary format
+
+    When requesting a model that does not compute statistics, no dictionary should be returned
+    for that model in the dictionary list.
+
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_select_latest_output_statistics -s
+    '''
+
+    # skip the db connection by replacing the __init__ method
+    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
+        storage = SQLAlchemyORM_Postgres()
+
+        # force the __dbSelection method to return our test data instead of querying the DB
+        mock_results = MagicMock()
+        mock_results.fetchall.return_value = test_data
+
+        with patch.object(storage, '_SQLAlchemyORM_Postgres__dbSelection', return_value=mock_results):
+            result = storage.select_latest_output_statistics(['ModelA', 'ModelB'])
+
+        # ensure the tuple splicing matches the expected result
+        assert len(result) == len(expected_result)
+        assert result == expected_result
