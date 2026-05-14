@@ -74,7 +74,7 @@ class Statistics:
 
         return statistics
     
-    def retrieve_statistics(self, model_names: list[str]) -> Series | list[Series] | None:
+    def retrieve_statistics(self, model_names: list[str]) -> list[dict] | None:
         '''
             Retrieve statistics for the list of models passed.
         
