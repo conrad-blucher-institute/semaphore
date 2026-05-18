@@ -12,6 +12,8 @@ a given dataset.
 """ 
 #----------------------------------
 import numpy as np
+from SeriesStorage.ISeriesStorage import series_storage_factory
+from DataClasses import Series
 
 
 class Statistics:
@@ -71,3 +73,12 @@ class Statistics:
             statistics[key] = float(statistics[key])
 
         return statistics
+    
+    def retrieve_statistics(self, model_names: list[str]) -> list[dict] | None:
+        '''
+            Retrieve statistics for the list of models passed.
+        
+        '''
+        self.seriesStorage = series_storage_factory()
+        return self.seriesStorage.select_latest_output_statistics(model_names)
+
