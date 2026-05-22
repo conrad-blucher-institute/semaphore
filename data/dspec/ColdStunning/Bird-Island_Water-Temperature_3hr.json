@@ -25,7 +25,7 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                0,
+                1,
                 -26
             ],
             "outKey": "south-bird-island_water-temp_25",
@@ -46,7 +46,7 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                0,
+                1,
                 -26
             ],
             "outKey": "south-bird-island_air-temp_25",
@@ -84,29 +84,8 @@
     ],
     "postProcessCall": [],
     "vectorOrder": [
-        {
-            "key": "south-bird-island_water-temp_25",
-            "dType": "float",
-            "indexes": [
-                0,
-                25
-            ]
-        },
-        {
-            "key": "south-bird-island_air-temp_25",
-            "dType": "float",
-            "indexes": [
-                0,
-                25
-            ]
-        },
-        {
-            "key": "south-bird-island_predicted_air-temp_9",
-            "dType": "float",
-            "indexes": [
-                0,
-                3
-            ]
-        }
+        { "key": "south-bird-island_water-temp_25"       , "dType": "float", "indexes": [2, 26] },
+        { "key": "south-bird-island_air-temp_25"         , "dType": "float", "indexes": [2, 26] },
+        { "key": "south-bird-island_predicted_air-temp_9", "dType": "float", "indexes": [0, 2] }
     ]
 }

@@ -57,13 +57,13 @@
     ],
     "postProcessCall": [],
     "vectorOrder": [
-        { "key": "bird-island_water-temp", "dType": "float", "indexes": [1, 2] },
-        { "key": "bird-island_air-temp",   "dType": "float", "indexes": [1, 2] },
-        { "key": "bird-island_water-temp", "dType": "float", "indexes": [2, 3] },
-        { "key": "bird-island_air-temp",   "dType": "float", "indexes": [2, 3] },
-        { "key": "bird-island_water-temp", "dType": "float", "indexes": [3, 4] },
-        { "key": "bird-island_air-temp",   "dType": "float", "indexes": [3, 4] },
-        { "key": "bird-island_water-temp", "dType": "float", "indexes": [4, 5] },
-        { "key": "bird-island_air-temp",   "dType": "float", "indexes": [5, 6] }
+        { "key": "bird-island_water-temp", "dType": "float", "indexes": [1, 1] },
+        { "key": "bird-island_air-temp"  , "dType": "float", "indexes": [1, 1] },
+        { "key": "bird-island_water-temp", "dType": "float", "indexes": [2, 2] },
+        { "key": "bird-island_air-temp"  , "dType": "float", "indexes": [2, 2] },
+        { "key": "bird-island_water-temp", "dType": "float", "indexes": [3, 3] },
+        { "key": "bird-island_air-temp"  , "dType": "float", "indexes": [3, 3] },
+        { "key": "bird-island_water-temp", "dType": "float", "indexes": [4, 4] },
+        { "key": "bird-island_air-temp"  , "dType": "float", "indexes": [5, 5] }
     ]
 }
