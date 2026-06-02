@@ -60,7 +60,7 @@ class DataGatherer:
         key_to_index = dict(zip(vector_order.keys, vector_order.indexes))
         
         # Get Dependent Data
-        dependent_data_repository = self.__request_dependent_data(dependentSeries, referenceTime, key_to_index)
+        dependent_data_repository = self.__request_dependent_data(dependentSeries, referenceTime, key_to_index, postProcessCalls)
 
         # Call post processing 
         post_processed_series_repository = self.__post_process_data(dependent_data_repository, postProcessCalls)
@@ -68,7 +68,7 @@ class DataGatherer:
         return post_processed_series_repository
     
 
-    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime, key_to_index: dict[str, list[int]]) -> dict[str, Series]:
+    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime, key_to_index: dict[str, list[int]], postProcessCalls: dict[str, Series]) -> dict[str, Series]:
         """This method handles the process of requesting the dependant series from the DSPEC. Its requests will be temporally
         referenced from the passed reference time. It will:
             - Build the series description
@@ -126,8 +126,7 @@ class DataGatherer:
 
             # Validate only the rows the model will actually consume, not the full
             # over-requested window including interpolation buffer slots.
-            series = self.__clip_series(series, key, key_to_index.get(key), referenceTime)
-
+            series = self.__clip_series(series, key, self.__resolve_indexes(key, key_to_index, dependentSeriesList, postProcessCalls), referenceTime)
             self.__validate_series(series, referenceTime)
             
             # Clipped Series (only points that the model actually wants) goes in the repo
@@ -135,6 +134,35 @@ class DataGatherer:
 
         return series_repository
 
+
+    def __resolve_indexes(self, key: str, key_to_index: dict, dependentSeriesList: list[DependentSeries], postProcessCalls: dict[str, Series]) -> tuple | None:
+        """Resolves the vectorOrder indexes for a given key. If the key is directly in
+        vectorOrder, returns its indexes. If the key is only consumed by a post-process
+        call (i.e. not in vectorOrder directly), walks the post-process args to find the
+        outKey that this key feeds into, then returns that outKey's indexes.
+
+        Relies on the convention that post-process args use '_inKey' and '_outKey' suffixes.
+
+        :param key: str - The outKey of the dependent series to resolve indexes for
+        :param key_to_index: dict - The vectorOrder key -> indexes mapping
+        :param postProcessCalls: list[PostProcessCall] - The post-process calls from the dspec
+        :returns: tuple | None - The (start, end) index tuple, or None if unresolvable
+        """
+        # Direct hit — key is in vectorOrder
+        if key in key_to_index:
+            return key_to_index[key]
+
+        # Key is not in vectorOrder — search post-process calls for one that
+        # consumes this key as an inKey, then return the indexes of its outKey
+        for call in postProcessCalls:
+            in_keys  = [v for k, v in call.args.items() if k.endswith('_inKey')]
+            out_keys = [v for k, v in call.args.items() if k.endswith('_outKey')]
+            if key in in_keys:
+                for out_key in out_keys:
+                    if out_key in key_to_index:
+                        return key_to_index[out_key]
+
+        return None
 
     def __clip_series(self, series: Series, key: str, index: list[int] | None, referenceTime: datetime):
         """Clips the series to the rows the model will actually consume according to
