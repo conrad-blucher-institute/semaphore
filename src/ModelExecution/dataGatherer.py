@@ -126,7 +126,7 @@ class DataGatherer:
 
             # Validate only the rows the model will actually consume, not the full
             # over-requested window including interpolation buffer slots.
-            series = self.__clip_series(series, key, self.__resolve_indexes(key, key_to_index, dependentSeriesList, postProcessCalls), referenceTime)
+            series = self.__clip_series(series, key, self.__resolve_indexes(key, key_to_index, postProcessCalls), referenceTime)
             self.__validate_series(series, referenceTime)
             
             # Clipped Series (only points that the model actually wants) goes in the repo
@@ -135,7 +135,7 @@ class DataGatherer:
         return series_repository
 
 
-    def __resolve_indexes(self, key: str, key_to_index: dict, dependentSeriesList: list[DependentSeries], postProcessCalls: dict[str, Series]) -> tuple | None:
+    def __resolve_indexes(self, key: str, key_to_index: dict, postProcessCalls: dict[str, Series]) -> tuple | None:
         """Resolves the vectorOrder indexes for a given key. If the key is directly in
         vectorOrder, returns its indexes. If the key is only consumed by a post-process
         call (i.e. not in vectorOrder directly), walks the post-process args to find the
