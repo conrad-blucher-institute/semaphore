@@ -124,9 +124,15 @@ class DataGatherer:
             # Reset the index
             series.dataFrame.reset_index(inplace=True)
 
+            # Resolve the vectorOrder indexes for the series, either directly or through post-process calls. 
+            # This is used to clip the series before validation so that interpolation buffer slots do not cause false positives.
+            resolved = self.__resolve_indexes(key, key_to_index, postProcessCalls)
+            if resolved is None:
+                log(f'[DataGatherer] Warning: key "{key}" is not in vectorOrder and could not be resolved through post-process calls. Validating full series.')
+           
             # Validate only the rows the model will actually consume, not the full
             # over-requested window including interpolation buffer slots.
-            series = self.__clip_series(series, key, self.__resolve_indexes(key, key_to_index, postProcessCalls), referenceTime)
+            series = self.__clip_series(series, key, resolved, referenceTime)
             self.__validate_series(series, referenceTime)
             
             # Clipped Series (only points that the model actually wants) goes in the repo
