@@ -135,7 +135,7 @@ def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], r
         return series_repository
 
 
-    def __resolve_indexes(self, key: str, key_to_index: dict, postProcessCalls: dict[str, Series]) -> tuple | None:
+def __resolve_indexes(self, key: str, key_to_index: dict, postProcessCalls: list[PostProcessCall]) -> tuple | None:
         """Resolves the vectorOrder indexes for a given key. If the key is directly in
         vectorOrder, returns its indexes. If the key is only consumed by a post-process
         call (i.e. not in vectorOrder directly), walks the post-process args to find the
