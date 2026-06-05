@@ -155,8 +155,8 @@ def __resolve_indexes(self, key: str, key_to_index: dict, postProcessCalls: list
         # Key is not in vectorOrder — search post-process calls for one that
         # consumes this key as an inKey, then return the indexes of its outKey
         for call in postProcessCalls:
-            in_keys  = [v for k, v in call.args.items() if k.endswith('_inKey')]
-            out_keys = [v for k, v in call.args.items() if k.endswith('_outKey')]
+            in_keys  = [v for k, v in call.args.items() if k.lower().endswith('_inkey')]
+            out_keys = [v for k, v in call.args.items() if k.lower().endswith('_outkey')]
             if key in in_keys:
                 for out_key in out_keys:
                     if out_key in key_to_index:
