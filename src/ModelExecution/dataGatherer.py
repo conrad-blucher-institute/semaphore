@@ -147,6 +147,11 @@ class DataGatherer:
         :param key_to_index: dict - The vectorOrder key -> indexes mapping
         :param postProcessCalls: list[PostProcessCall] - The post-process calls from the dspec
         :returns: tuple | None - The (start, end) index tuple, or None if unresolvable
+        
+        NOTE: This method will not work for series that feed into multiple post-process calls, 
+              or for post-process calls that consume multiple series and produce multiple outKeys.
+              Right now we restrict the chain of keys to a 2 level chain and this will have to be 
+              fixed later on if a series must go through more than one post processing class. 
         """
         # Direct hit — key is in vectorOrder
         if key in key_to_index:
