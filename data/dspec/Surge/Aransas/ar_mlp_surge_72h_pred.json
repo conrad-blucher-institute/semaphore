@@ -178,7 +178,7 @@
                 "op": "subtraction",
                 "targetFirst_inKey": "DWL_NOW_1",
                 "targetSecond_inKey": "PWL_NOW_1",
-                "outkey": "SURGE_NOW_1"    
+                "outKey": "SURGE_NOW_1"    
             }
         },
         {
@@ -187,7 +187,7 @@
                 "op": "subtraction",
                 "targetFirst_inKey": "DWL_PAST_6",
                 "targetSecond_inKey": "PWL_PAST_6",
-                "outkey": "SURGE_PAST_6"    
+                "outKey": "SURGE_PAST_6"    
             }
         }
     ],

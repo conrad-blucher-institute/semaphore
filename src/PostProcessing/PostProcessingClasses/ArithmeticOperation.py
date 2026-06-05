@@ -34,7 +34,7 @@ class ArithmeticOperation(IPostProcessing):
                 op - the operation to preform (ex. addition)
                 targetFirst_inKey - The key for the first series.
                 targetSecond_inKey - The key for the second series.
-                outkey - The key to save the series as.
+                outKey - The key to save the series as.
 
         json_copy:
         {
@@ -43,7 +43,7 @@ class ArithmeticOperation(IPostProcessing):
                 "op": "",
                 "targetFirst_inKey": "",
                 "targetSecond_inKey": "",
-                "outkey": "" 
+                "outKey": "" 
                      
             }
         },
@@ -57,7 +57,7 @@ class ArithmeticOperation(IPostProcessing):
             postProcessCall (PostProcessCall): The type of post processing the model requires. Located in the dspec.
 
         Returns:
-            dict[key, Series]: A dictionary with the new preprocessed series and their outkeys
+            dict[key, Series]: A dictionary with the new preprocessed series and their outKeys
         """
 
         # Unpack arguments from arg object
@@ -65,7 +65,7 @@ class ArithmeticOperation(IPostProcessing):
         OPERATION = args['op']
         FIRST_SERIES = preprocessedData[args['targetFirst_inKey']]
         SECOND_SERIES = preprocessedData[args['targetSecond_inKey']]
-        OUT_KEY = args['outkey']
+        OUT_KEY = args['outKey']
         
         # Unpack the data
         first_data = FIRST_SERIES.dataFrame['dataValue'].astype(float).to_numpy()

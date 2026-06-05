@@ -51,7 +51,7 @@ class ResolveVectorComponents(IPostProcessing):
             postProcessCall (PostProcessCall): The type of post processing the model requires. Located in the dspec.
 
         Returns:
-            dict[key, Series]: A dictionary with the new preprocessed series and their outkeys
+            dict[key, Series]: A dictionary with the new preprocessed series and their outKeys
         """
 
         # Unpack arguments from arg object

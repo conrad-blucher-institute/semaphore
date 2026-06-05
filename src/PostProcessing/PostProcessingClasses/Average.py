@@ -23,7 +23,7 @@ class Average(IPostProcessing):
         args: 
                 targetAvgFirst_inKey - The key for the first series.
                 targetAvgSecond_inKey - The key for the second series.
-                avg_outkey - The key to save the series of averages as.
+                avg_outKey - The key to save the series of averages as.
 
         json_copy:
         {
@@ -31,7 +31,7 @@ class Average(IPostProcessing):
             "args": {
                 "targetAvgFirst_inKey": "",
                 "targetAvgSecond_inKey": "",
-                "avg_outkey": "" 
+                "avg_outKey": "" 
                      
             }
         },
@@ -45,7 +45,7 @@ class Average(IPostProcessing):
             postProcessCall (PostProcessCall): The type of post processing the model requires. Located in the dspec.
 
         Returns:
-            dict[key, Series]: A dictionary with the new preprocessed series and their outkeys
+            dict[key, Series]: A dictionary with the new preprocessed series and their outKeys
         """
 
         # Unpack arguments from arg object
@@ -68,7 +68,7 @@ class Average(IPostProcessing):
 
         # Repack average as new series, reading the key from the arguments obj
         desc = first_series.description
-        average_outKey = args['avg_outkey']
+        average_outKey = args['avg_outKey']
         desc.dataSeries = average_outKey
         a_series = Series(desc, first_series.timeDescription)
         a_series.dataFrame = df_result

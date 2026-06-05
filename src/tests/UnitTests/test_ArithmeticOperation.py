@@ -68,7 +68,7 @@ def test_post_process_data(test_preprocess_data, operation, expected_results):
                 "op": operation,
                 "targetFirst_inKey": "first",
                 "targetSecond_inKey": "second",
-                "outkey": "result"  
+                "outKey": "result"  
             }
 
     # Call the factory to get the resolver and pass it the fake input data and the post process call

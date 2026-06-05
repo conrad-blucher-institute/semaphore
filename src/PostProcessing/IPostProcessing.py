@@ -29,7 +29,7 @@ class IPostProcessing(ABC):
             NotImplementedError: An error will appear when the function haas not been implemented
 
         Returns:
-            dict[key, Series]: A dictionary with the new preprocessed series and their outkeys
+            dict[key, Series]: A dictionary with the new preprocessed series and their outKeys
         """
         raise NotImplementedError
     

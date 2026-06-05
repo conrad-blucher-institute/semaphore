@@ -27,7 +27,7 @@ class FourMaxMean(IPostProcessing):
                 target_inKey - The key for the to preform the operation on series.
                 warning_trigger - Parsed as int. If amount of data is less than this value before 
                     fmm a warning will be triggered.
-                outkey - The key to save the series of four max mean as.
+                outKey - The key to save the series of four max mean as.
 
         json_copy:
         {
@@ -35,7 +35,7 @@ class FourMaxMean(IPostProcessing):
             "args": {
                 "target_inKey": "",
                 "warning_trigger": "",
-                "outkey": "" 
+                "outKey": "" 
                      
             }
         },
@@ -49,14 +49,14 @@ class FourMaxMean(IPostProcessing):
             postProcessCall (PostProcessCall): The type of post processing the model requires. Located in the dspec.
 
         Returns:
-            dict[key, Series]: A dictionary with the new preprocessed series and their outkeys
+            dict[key, Series]: A dictionary with the new preprocessed series and their outKeys
         """
 
         # Unpack data and arguments from arg object
         args = postProcessCall.args
         IN_SERIES = preprocessedData[args['target_inKey']]
         IN_SERIES_DATA = IN_SERIES.dataFrame['dataValue'].astype(float).to_list()
-        OUT_KEY = args['outkey']
+        OUT_KEY = args['outKey']
 
         # filter out any NaN values
         filtered_data = [value for value in IN_SERIES_DATA if not pd.isna(value)]

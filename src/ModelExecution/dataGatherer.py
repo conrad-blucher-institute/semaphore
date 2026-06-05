@@ -68,7 +68,7 @@ class DataGatherer:
         return post_processed_series_repository
     
 
-def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime, key_to_index: dict[str, list[int]], postProcessCalls: list[PostProcessCall]) -> dict[str, Series]:
+    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime, key_to_index: dict[str, list[int]], postProcessCalls: list[PostProcessCall]) -> dict[str, Series]:
         """This method handles the process of requesting the dependant series from the DSPEC. Its requests will be temporally
         referenced from the passed reference time. It will:
             - Build the series description
@@ -135,7 +135,7 @@ def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], r
         return series_repository
 
 
-def __resolve_indexes(self, key: str, key_to_index: dict, postProcessCalls: list[PostProcessCall]) -> tuple | None:
+    def __resolve_indexes(self, key: str, key_to_index: dict, postProcessCalls: list[PostProcessCall]) -> tuple | None:
         """Resolves the vectorOrder indexes for a given key. If the key is directly in
         vectorOrder, returns its indexes. If the key is only consumed by a post-process
         call (i.e. not in vectorOrder directly), walks the post-process args to find the
@@ -214,7 +214,7 @@ def __resolve_indexes(self, key: str, key_to_index: dict, postProcessCalls: list
         This function calls the post processing methods for any inputs that need post processing.
         The post_process_data function is passed the input dictionary and the process call
         so that the function can easily find the series needed for the computation and return 
-        a dictionary with the new outkeys and series. 
+        a dictionary with the new outKeys and series. 
 
         :param series_repository: dict[str, Series] - The dictionary of the data it collected
         :param postProcessCalls: list[PostProcessCall] - The list of post processing calls to execute
