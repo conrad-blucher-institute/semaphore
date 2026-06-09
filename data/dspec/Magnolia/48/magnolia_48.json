@@ -160,7 +160,7 @@
             "args": {
                 "targetAvgFirst_inKey": "PL_PWL_25",
                 "targetAvgSecond_inKey": "POC_PWL_25",
-                "avg_outkey": "AVG_PWL_25"
+                "avg_outKey": "AVG_PWL_25"
             }
         },
         {
@@ -168,7 +168,7 @@
             "args": {
                 "targetAvgFirst_inKey": "PL_Surge_25",
                 "targetAvgSecond_inKey": "POC_Surge_25",
-                "avg_outkey": "AVG_Surge_25"
+                "avg_outKey": "AVG_Surge_25"
             }
         }
     ],

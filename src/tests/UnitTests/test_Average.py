@@ -53,7 +53,7 @@ def test_post_process_data():
     ppc.args = {
                 "targetAvgFirst_inKey": "first",
                 "targetAvgSecond_inKey": "second",
-                "avg_outkey": "avg"    
+                "avg_outKey": "avg"    
             }
 
     # Call the factory to get the resolver and pass it the fake input data and the post process call

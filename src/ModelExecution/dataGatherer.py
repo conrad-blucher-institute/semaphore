@@ -60,7 +60,7 @@ class DataGatherer:
         key_to_index = dict(zip(vector_order.keys, vector_order.indexes))
         
         # Get Dependent Data
-        dependent_data_repository = self.__request_dependent_data(dependentSeries, referenceTime, key_to_index)
+        dependent_data_repository = self.__request_dependent_data(dependentSeries, referenceTime, key_to_index, postProcessCalls)
 
         # Call post processing 
         post_processed_series_repository = self.__post_process_data(dependent_data_repository, postProcessCalls)
@@ -68,7 +68,7 @@ class DataGatherer:
         return post_processed_series_repository
     
 
-    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime, key_to_index: dict[str, list[int]]) -> dict[str, Series]:
+    def __request_dependent_data(self, dependentSeriesList: list[DependentSeries], referenceTime: datetime, key_to_index: dict[str, list[int]], postProcessCalls: list[PostProcessCall]) -> dict[str, Series]:
         """This method handles the process of requesting the dependant series from the DSPEC. Its requests will be temporally
         referenced from the passed reference time. It will:
             - Build the series description
@@ -124,10 +124,15 @@ class DataGatherer:
             # Reset the index
             series.dataFrame.reset_index(inplace=True)
 
+            # Resolve the vectorOrder indexes for the series, either directly or through post-process calls. 
+            # This is used to clip the series before validation so that interpolation buffer slots do not cause false positives.
+            resolved = self.__resolve_indexes(key, key_to_index, postProcessCalls)
+            if resolved is None:
+                log(f'[DataGatherer] Warning: key "{key}" is not in vectorOrder and could not be resolved through post-process calls. Validating full series.')
+           
             # Validate only the rows the model will actually consume, not the full
             # over-requested window including interpolation buffer slots.
-            series = self.__clip_series(series, key, key_to_index.get(key), referenceTime)
-
+            series = self.__clip_series(series, key, resolved, referenceTime)
             self.__validate_series(series, referenceTime)
             
             # Clipped Series (only points that the model actually wants) goes in the repo
@@ -135,6 +140,40 @@ class DataGatherer:
 
         return series_repository
 
+
+    def __resolve_indexes(self, key: str, key_to_index: dict, postProcessCalls: list[PostProcessCall]) -> tuple | None:
+        """Resolves the vectorOrder indexes for a given key. If the key is directly in
+        vectorOrder, returns its indexes. If the key is only consumed by a post-process
+        call (i.e. not in vectorOrder directly), walks the post-process args to find the
+        outKey that this key feeds into, then returns that outKey's indexes.
+
+        Relies on the convention that post-process args use '_inKey' and '_outKey' suffixes.
+
+        :param key: str - The outKey of the dependent series to resolve indexes for
+        :param key_to_index: dict - The vectorOrder key -> indexes mapping
+        :param postProcessCalls: list[PostProcessCall] - The post-process calls from the dspec
+        :returns: tuple | None - The (start, end) index tuple, or None if unresolvable
+        
+        NOTE: This method will not work for series that feed into multiple post-process calls, 
+              or for post-process calls that consume multiple series and produce multiple outKeys.
+              Right now we restrict the chain of keys to a 2 level chain and this will have to be 
+              fixed later on if a series must go through more than one post processing class. 
+        """
+        # Direct hit — key is in vectorOrder
+        if key in key_to_index:
+            return key_to_index[key]
+
+        # Key is not in vectorOrder — search post-process calls for one that
+        # consumes this key as an inKey, then return the indexes of its outKey
+        for call in postProcessCalls:
+            in_keys  = [v for k, v in call.args.items() if k.lower().endswith('_inkey')]
+            out_keys = [v for k, v in call.args.items() if k.lower().endswith('_outkey')]
+            if key in in_keys:
+                for out_key in out_keys:
+                    if out_key in key_to_index:
+                        return key_to_index[out_key]
+
+        return None
 
     def __clip_series(self, series: Series, key: str, index: list[int] | None, referenceTime: datetime):
         """Clips the series to the rows the model will actually consume according to
@@ -186,7 +225,7 @@ class DataGatherer:
         This function calls the post processing methods for any inputs that need post processing.
         The post_process_data function is passed the input dictionary and the process call
         so that the function can easily find the series needed for the computation and return 
-        a dictionary with the new outkeys and series. 
+        a dictionary with the new outKeys and series. 
 
         :param series_repository: dict[str, Series] - The dictionary of the data it collected
         :param postProcessCalls: list[PostProcessCall] - The list of post processing calls to execute

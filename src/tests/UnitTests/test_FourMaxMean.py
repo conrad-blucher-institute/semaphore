@@ -53,7 +53,7 @@ def test_post_process_data():
     ppc.args = {
                 "target_inKey": "data",
                 "warning_trigger": "0",
-                "outkey": "fmm"         
+                "outKey": "fmm"         
             }
 
     # Call the factory to get the resolver and pass it the fake input data and the post process call

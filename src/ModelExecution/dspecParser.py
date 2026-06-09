@@ -256,7 +256,7 @@ class DependentSeries:
         
         
     def __str__(self) -> str:
-        return f'\n[DependentSeries] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, datum: {self.datum}, range: {self.range}, outkey: {self.outKey}, dataIntegrityCall: {self.dataIntegrityCall}, verificationOverride: {self.verificationOverride}, stalenessOffset: {self.stalenessOffset}'
+        return f'\n[DependentSeries] -> name: {self.name}, location: {self.location}, source: {self.source}, series: {self.series}, unit: {self.unit}, datum: {self.datum}, range: {self.range}, outKey: {self.outKey}, dataIntegrityCall: {self.dataIntegrityCall}, verificationOverride: {self.verificationOverride}, stalenessOffset: {self.stalenessOffset}'
 
     def __repr__(self):
         return f'\nDependentSeries({self.name}, {self.location}, {self.source}, {self.series}, {self.unit}, {self.datum}, {self.range}, {self.outKey},{self.dataIntegrityCall}, {self.verificationOverride}, {self.stalenessOffset})'

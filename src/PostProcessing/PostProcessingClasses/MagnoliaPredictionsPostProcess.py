@@ -46,7 +46,7 @@ class MagnoliaPredictionsPostProcess(IPostProcessing):
             postProcessCall (PostProcessCall): The type of post processing the model requires. Located in the dspec.
 
         Returns:
-            dict[key, Series]: A dictionary with the new preprocessed series and their outkeys
+            dict[key, Series]: A dictionary with the new preprocessed series and their outKeys
         """
 
         # Unpack arguments from arg object
@@ -78,10 +78,10 @@ class MagnoliaPredictionsPostProcess(IPostProcessing):
         # Repack transformed values in a new Series
         desc = magnolia_Preds.description
 
-        transformed_outkey = args['Magnolia_WL_outKey']
-        desc.dataSeries = transformed_outkey
+        transformed_outKey = args['Magnolia_WL_outKey']
+        desc.dataSeries = transformed_outKey
         transformed_series = Series(desc, magnolia_predHarmSecond.timeDescription)
         transformed_series.dataFrame = df_result
-        preprocessedData[transformed_outkey] = transformed_series
+        preprocessedData[transformed_outKey] = transformed_series
 
         return preprocessedData
