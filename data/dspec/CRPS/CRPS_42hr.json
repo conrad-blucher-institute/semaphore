@@ -1,9 +1,9 @@
 {
     "dspecVersion": "2.1",
-    "modelName": "CRPS_60hr",
+    "modelName": "CRPS_42hr",
     "modelVersion": "1.0.0",
     "author": "Miranda White",
-    "modelFileName": "./CRPS/CRPS_60hr/CRPS_60hr_member*.keras",
+    "modelFileName": "./CRPS/CRPS_42hr/CRPS_42hr_member*.keras",
     "timingInfo": {
         "active": true,
         "offset": 1200,
@@ -11,7 +11,7 @@
     },
     "outputInfo": {
         "outputMethod": "DefaultOutputHandler",
-        "leadTime": 216000,
+        "leadTime": 151200,
         "series": "pWaterTmp",
         "location": "SouthBirdIsland",
         "unit": "celsius",
@@ -73,10 +73,10 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                60,
+                42,
                 1
             ],
-            "outKey": "ensemble-south-bird-island_predicted_air-temp_60",
+            "outKey": "ensemble-south-bird-island_predicted_air-temp_42",
             "dataIntegrityCall": {
                 "call": "EnsemblePandasInterpolation",
                 "args": {
@@ -91,6 +91,6 @@
     "vectorOrder": [
         { "key": "south-bird-island_water-temp_25"                 , "dType": "float", "indexes": [2, 26] },
         { "key": "south-bird-island_air-temp_25"                   , "dType": "float", "indexes": [2, 26] },
-        { "key": "ensemble-south-bird-island_predicted_air-temp_60", "dType": "float", "indexes": [0, 59], "isMultipliedKey": true }
+        { "key": "ensemble-south-bird-island_predicted_air-temp_42", "dType": "float", "indexes": [0, 41], "isMultipliedKey": true }
     ]
 }
