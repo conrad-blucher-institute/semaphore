@@ -36,7 +36,7 @@ MODEL_GROUPS = [
     "ColdStunning",
     "CRPS",
     "Inundation",
-    #"Magnolia", # Missing one datapoint, not sure why
+    #"Magnolia", # Transform models require 1 additional point than stated in the DSPEC, not sure why
     "Surge",
     "VirginiaKey",
 ]
@@ -132,7 +132,6 @@ def build_mock_repository(dspec, reference_time):
             is_multi=(key in vo.multipliedKeys),
             input_vector_count=dspec.outputInfo.expectedOutputShape.inputVectorCount
         )
-
     return repository
 
 
