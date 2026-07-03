@@ -8,9 +8,6 @@
 """
 Unit tests to test a successful run of each model group.
 
-High-level flow:
-1) Mock ingestion data for each model group.
-2) Feed to model execution.
 """
 
 import sys
