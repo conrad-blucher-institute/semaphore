@@ -39,7 +39,7 @@ MODEL_GROUPS = [
     "ColdStunning",
     "CRPS",
     "Inundation",
-    #"Magnolia",
+    #"Magnolia", # Missing one datapoint, not sure why
     "Surge",
     "VirginiaKey",
 ]
@@ -56,7 +56,7 @@ def make_series(index, reference_time, is_multi, input_vector_count) -> Series:
     start_time = reference_time + from_offset * interval
 
     rows = abs(to_offset - from_offset) + 1
-
+    #Creates the fake source with randomized data for the series. The data is generated based on the index range and the input vector count.
     description = SeriesDescription(
         dataSource=random.choice(["Source1", "Source2", "Source3", "Source4", "Source5"]),
         dataSeries=random.choice(["Series1", "Series2", "Series3", "Series4", "Series5"]),
@@ -84,6 +84,7 @@ def make_series(index, reference_time, is_multi, input_vector_count) -> Series:
         tz="UTC",
     )
 
+    # If the series is multi, create a list of values for each row, otherwise create a single value for each row. 
     if is_multi:
         df["dataValue"] = [
             [str(float(i + j)) for j in range(input_vector_count)]
@@ -115,15 +116,19 @@ def build_mock_repository(dspec, reference_time):
     vo = dspec.orderedVector
 
     for key, index in zip(vo.keys, vo.indexes) :
-        print(f"==================={key}: {index}====================")
+        # Legacy models do not have a set index in vector order. Data gathering handles this when it occurs, but since we are mocking it it needs to be handled by the test.
+        # All keys contain the range of data at the end of the name, so we can infer the index range from the key name.
         if index == (None, None):
             suffix = key.rsplit("_", 1)[1]
             if suffix.isdigit():
                 number = int(suffix)
                 index = (0, number - 1)
+            elif suffix[1:].isdigit():
+                number = int(suffix[1:])
+                index = (0, number - 1)
             else:
                 raise ValueError(f"Cannot infer index range from key '{key}'")
-
+       
         repository[key] = make_series(
             index,
             reference_time,
@@ -165,7 +170,7 @@ def test_model_group_runs(model_group):
         orchestrator.dataGatherer.get_data_repository = MagicMock(
             side_effect=build_mock_repository
         )
-
+        # Ignore comment.json files found in the legacy folders
         dspecs = [
             path
             for path in get_dspec_paths(model_group)
@@ -185,4 +190,5 @@ def test_model_group_runs(model_group):
         
         
 
+        # Assert that "handle successful predictions" function was called for each DSPEC, indicating that the model ran successfully and produced a prediction.
         assert mock_success.call_count == len(dspecs)
