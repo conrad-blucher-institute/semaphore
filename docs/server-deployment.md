@@ -76,7 +76,6 @@ sudo systemctl reload nginx
 Verify that the API is accessible through the expected URL before deploying.
 
 ---
-
 # Deploying Semaphore
 
 Semaphore deployments are performed using the deployment script.
@@ -107,19 +106,6 @@ The deployment script automatically performs the following steps:
 If every container reports a healthy status, the deployment is considered successful.
 
 ---
-
-# Deployment Logs
-
-Deployment logs are written to:
-
-```text
-logs/deployment/
-```
-
-Each log is timestamped and can be used to troubleshoot failed deployments.
-
----
-
 # Verifying the Deployment
 
 In an hour confirm that all containers are healthy and working as expected.
@@ -142,7 +128,6 @@ Verify that:
 - database migrations completed successfully.
 
 ---
-
 # Cleaning Docker Images
 
 Every deployment creates new Docker images.
@@ -170,7 +155,6 @@ docker system prune
 > It is recommended to periodically clean unused Docker images on the Semaphore servers to avoid disk space issues.
 
 ---
-
 # Rolling Back
 
 To roll back to a previous release, redeploy an older Git tag.

@@ -49,8 +49,6 @@ docker compose down --volumes
 ```
 
 ---
-
-
 ## Resetting the Database - LOCAL USE ONLY
 
 If the database becomes corrupted or you switch to a branch that expects a different database version that doesn't exist, remove the existing Docker volumes and recreate the containers.
@@ -64,8 +62,6 @@ docker exec semaphore-core python3 tools/migrate_db.py
 This creates a fresh database using the schema specified in `DatabaseMigration/target_version.json`.
 
 ---
-
-
 ## Viewing the Database Through pgAdmin
 
 You can use pgAdmin to connect to the Semaphore PostgreSQL database and view or edit its contents.
