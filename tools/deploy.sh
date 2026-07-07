@@ -12,13 +12,26 @@ mkdir -p ./logs/deployment/archive
 LOG_FILE="./logs/deployment/$(date "+%Y")_$(date "+%m")_deployment.log"
 
 # Compress deployment logs older than 90 days
-find ./logs/deployment -maxdepth 1 -name "*.log" -mtime +90 -exec gzip {} \ ;
+find ./logs/deployment -path "./logs/deployment/archive" -prune -o -name "*.log" -mtime +90 -exec gzip {} \;
 
 # Move archived logs into the archive folder
-find ./logs/deployment -maxdepth 1  -name "*.gz" -exec mv {} ./logs/deployment/archive/ \;
+find ./logs/deployment -path "./logs/deployment/archive" -prune -o -name "*.gz" -exec mv {} ./logs/deployment/archive/ \;
 
 # Delete archived logs older than one year
 find ./logs/deployment/archive -name "*.gz" -mtime +365 -delete
+
+# Create model logs directory if it doesn't exist
+mkdir -p ./data/logs
+mkdir -p ./data/logs/archive
+
+# Compress deployment logs older than 90 days
+find ./data/logs -path "./data/logs/archive" -prune -o -name "*.log" -mtime +90 -exec gzip {} \;
+
+# Move archived logs into the archive folder
+find ./data/logs -path "./data/logs/archive" -prune -o -name "*.gz" -exec mv {} ./data/logs/archive/ \;
+
+# Delete archived logs older than one year
+find ./data/logs/archive -name "*.gz" -mtime +365 -delete
 
 DEPLOY_TAG="$1"
 
