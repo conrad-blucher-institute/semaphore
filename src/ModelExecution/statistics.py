@@ -13,7 +13,8 @@ a given dataset.
 #----------------------------------
 import numpy as np
 from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataClasses import Series
+from DataClasses import Series, TimeDescription
+from datetime import datetime
 
 
 class Statistics:
@@ -74,11 +75,19 @@ class Statistics:
 
         return statistics
     
-    def retrieve_statistics(self, model_names: list[str]) -> list[dict] | None:
+    def retrieve_statistics(self, model_names: list[str], fromDateTime: str = None, toDateTime: str = None) -> list[dict] | None:
         '''
             Retrieve statistics for the list of models passed.
         
         '''
+        print(f"==============Retrieving statistics for models: {model_names} from {fromDateTime} to {toDateTime}=============")
+        from datetime import datetime
+
+        fromDateTime = datetime.strptime(fromDateTime, "%Y%m%d%H")
+        toDateTime = datetime.strptime(toDateTime, "%Y%m%d%H")
         self.seriesStorage = series_storage_factory()
+        if fromDateTime is not None and toDateTime is not None:
+            return self.seriesStorage.select_output_statistics_range(model_names, fromDateTime, toDateTime)
+        
         return self.seriesStorage.select_latest_output_statistics(model_names)
 
