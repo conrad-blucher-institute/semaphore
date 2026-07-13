@@ -909,7 +909,13 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             permaString: str - An sqlalchemy string that defines the location the engine should point to: (e.g. "sqlite+pysqlite:///:memory:")
             echo: str - Weather or not the engine should echo to stdout
         """
-        self._engine = sqlalchemy_create_engine(parmaString, echo=echo) #, pool_pre_ping=True
+        # pool_pre_ping tests each pooled connection with a cheap "SELECT 1" before handing it
+        # out, and transparently reconnects if it's gone stale/dead, instead of returning a
+        # broken connection to the caller. Now that engines/pools are long-lived (reused via
+        # the series_storage_factory() singleton rather than recreated per call), connections
+        # can sit idle in the pool long enough to be dropped by Postgres or the network, so this
+        # is needed to avoid surfacing that as a "connection refused" error.
+        self._engine = sqlalchemy_create_engine(parmaString, echo=echo, pool_pre_ping=True)
 
     
     def __get_engine(self) -> Engine:

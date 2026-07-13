@@ -17,6 +17,7 @@ from datetime import datetime
 from abc import ABC, abstractmethod
 from importlib import import_module
 from os import getenv
+from threading import Lock
 
 class ISeriesStorage(ABC):
 
@@ -73,15 +74,35 @@ class ISeriesStorage(ABC):
         raise NotImplementedError()
 
 
+
+# Cached singleton returned by series_storage_factory(). Every call used to build a brand new
+# storage instance, which in turn opened a brand new SQLAlchemy engine (its own connection
+# pool) that was never disposed. Under bursts of concurrent calls (e.g. apiDriver.py handling
+# several requests at once across its worker processes) this could open far more Postgres
+# connections than intended before garbage collection reclaimed the abandoned pools, which we
+# believe caused the intermittent "connection refused" errors seen running the Magnolia models.
+# Caching a single instance means one engine/pool is created per process and reused thereafter.
+_series_storage_instance: ISeriesStorage | None = None
+_series_storage_lock = Lock()
+
+
 def series_storage_factory() -> ISeriesStorage:
     """Imports the series storage class from the environment variable ISERIESSTORAGE_INSTANCE
+    and returns a cached singleton instance of it, creating it on the first call.
     ------
     Returns
         ISeriesStorage - An child of the ISeriesStorage interface.
     """
+    global _series_storage_instance
 
-    ss = getenv('ISERIESSTORAGE_INSTANCE')
-   
+    # Double-checked locking: avoid taking the lock on the common case (instance already
+    # exists) while still preventing two concurrent callers from each constructing their own
+    # instance the first time this is called.
+    if _series_storage_instance is None:
+        with _series_storage_lock:
+            if _series_storage_instance is None:
+                ss = getenv('ISERIESSTORAGE_INSTANCE')
+                _series_storage_instance = getattr(import_module(f'.SS_Classes.{ss}', 'SeriesStorage'), f'{ss}')()
 
-    return getattr(import_module(f'.SS_Classes.{ss}', 'SeriesStorage'), f'{ss}')()
-    
+    return _series_storage_instance
+
