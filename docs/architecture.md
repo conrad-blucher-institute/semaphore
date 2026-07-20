@@ -271,12 +271,11 @@ The Statistics Engine can also retrieve the latest stored statistics for one or 
 ---
 ## Output Handlers
 
-Output handlers determine where model predictions are written.
+Output handlers convert raw model predictions into a standard output format.
 
-The default implementation stores results in PostgreSQL.
+After a model runs, the `ModelRunner` passes its predictions to the configured output handler. The output handler formats the predictions into a single-row DataFrame and adds metadata such as the unit, generation time, and lead time.
 
-Additional output handlers can be created if new output destinations are needed.
-
+The default output handler also validates that the prediction shape matches the shape defined in the DSPEC. Other output handlers can be created to support models with different output formats.
 ---
 # Scheduling
 
