@@ -646,6 +646,7 @@ def test_select_latest_output_statistics(test_data, expected_result):
         # ensure the tuple splicing matches the expected result
         assert len(result) == len(expected_result)
         assert result == expected_result
+        
 @pytest.mark.parametrize(
     "test_specific_data, test_expected_result",
     [
@@ -653,10 +654,10 @@ def test_select_latest_output_statistics(test_data, expected_result):
         (
             # test tuples that would be returned from the DB query
             [
-                ( "ModelA", datetime(2026, 1, 1, 0, 0), 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0),
+                # ( "ModelA", datetime(2026, 1, 1, 0, 0), 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0),
                 ( "ModelB", datetime(2026, 1, 2, 0, 0), 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0),
                 ( "ModelC", datetime(2026, 1, 3, 0, 0), 3.0, 6.0, 9.0, 12.0, 15.0, 18.0, 21.0, 24.0, 27.0, 30.0, 33.0, 36.0, 39.0),
-                ( "ModelD", datetime(2026, 1, 4, 0, 0), 4.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0, 36.0, 40.0, 44.0, 48.0, 52.0),
+                # ( "ModelD", datetime(2026, 1, 4, 0, 0), 4.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0, 36.0, 40.0, 44.0, 48.0, 52.0),
             ],
             # the expected output after parsing the DB results
             [
@@ -722,7 +723,7 @@ def test_select_output_statistics_range(test_specific_data, test_expected_result
         mock_results.fetchall.return_value = test_specific_data
 
         with patch.object(storage, '_SQLAlchemyORM_Postgres__dbSelection', return_value=mock_results):
-            result = storage.select_output_statistics_range(['ModelA', 'ModelB','ModelC','ModelD'], datetime(2026, 1, 2, 0, 0), datetime(2026, 1, 3, 0, 0))
+            result = storage.select_output_statistics_range([ 'ModelB','ModelC'], datetime(2026, 1, 2, 0, 0), datetime(2026, 1, 3, 0, 0))
         print(f'==========================Result=============================-: \n{result}')
         # ensure the tuple splicing matches the expected result
         assert len(result) == len(test_expected_result)
