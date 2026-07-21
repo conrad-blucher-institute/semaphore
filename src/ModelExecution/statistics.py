@@ -80,13 +80,12 @@ class Statistics:
             Retrieve statistics for the list of models passed.
         
         '''
-        print(f"==============Retrieving statistics for models: {model_names} from {fromDateTime} to {toDateTime}=============")
-        from datetime import datetime
 
-        fromDateTime = datetime.strptime(fromDateTime, "%Y%m%d%H")
-        toDateTime = datetime.strptime(toDateTime, "%Y%m%d%H")
         self.seriesStorage = series_storage_factory()
+
         if fromDateTime is not None and toDateTime is not None:
+            fromDateTime = datetime.strptime(fromDateTime, "%Y%m%d%H")
+            toDateTime = datetime.strptime(toDateTime, "%Y%m%d%H")
             return self.seriesStorage.select_output_statistics_range(model_names, fromDateTime, toDateTime)
         
         return self.seriesStorage.select_latest_output_statistics(model_names)

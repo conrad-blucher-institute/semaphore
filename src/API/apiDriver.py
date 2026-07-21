@@ -174,6 +174,8 @@ async def get_output_statistics_range(modelNames: list[str] = Query(None), fromD
     Queries output statistics for given models in a specefic range of time.
      Args:
         - `modelNames` (string): The name of the model (e.g. "test AI"), you can repeat this parameter to request multiple models
+        - `fromDateTime` (string): "YYYYMMDDHH" UTC Date to start at. Ex. 2024010100 for Jan 1, 2024 at 00:00 UTC
+        - `toDateTime` (string): "YYYYMMDDHH" UTC Date to end at. Ex. 2024010200 for Jan 2, 2024 at 00:00 UTC
     Returns:
     - A list of dictionaries containing these statistics for each model:
         model name, time generated, percentile values (p1-p99),
@@ -458,11 +460,7 @@ def serialize_statistics(statistics_results: list[dict] | None, requested_model_
     for stats in statistics_results:
         serialized = {
             "modelName": stats["modelName"],
-            "timeGenerated": jsonable_encoder(
-                stats["timeGenerated"].replace(tzinfo=None)
-                if stats.get("timeGenerated") is not None
-                else None
-            ),
+            "timeGenerated": jsonable_encoder(stats['timeGenerated'].replace(tzinfo=None) if stats.get('timeGenerated') is not None else None ),
             'p1': stats['p1'],
             'p5': stats['p5'],
             'p10': stats['p10'],
