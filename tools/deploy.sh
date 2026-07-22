@@ -9,6 +9,7 @@
 mkdir -p ./logs/deployment
 mkdir -p ./logs/docker/api
 mkdir -p ./logs/docker/db
+mkdir -p ./logs/deployment/archive
 
 # Set up logging - capture both stdout and stderr
 LOG_FILE="./logs/deployment/$(date "+%Y")_$(date "+%m")_deployment.log"
@@ -22,6 +23,28 @@ echo "========== $(date) ==========" >> "$DB_LOG_FILE"
 #Capture docker logs before rebuilding containers
 docker logs semaphore-api >> "$API_LOG_FILE" 2>&1
 docker logs semaphore-db >> "$DB_LOG_FILE" 2>&1
+
+# Compress deployment logs older than 90 days
+find ./logs/deployment -path "./logs/deployment/archive" -prune -o -name "*.log" -mtime +90 -exec gzip {} \;
+
+# Move archived logs into the archive folder
+find ./logs/deployment -path "./logs/deployment/archive" -prune -o -name "*.gz" -exec mv {} ./logs/deployment/archive/ \;
+
+# Delete archived logs older than one year
+find ./logs/deployment/archive -name "*.gz" -mtime +365 -delete
+
+# Create model logs directory if it doesn't exist
+mkdir -p ./data/logs
+mkdir -p ./data/logs/archive
+
+# Compress deployment logs older than 90 days
+find ./data/logs -path "./data/logs/archive" -prune -o -name "*.log" -mtime +90 -exec gzip {} \;
+
+# Move archived logs into the archive folder
+find ./data/logs -path "./data/logs/archive" -prune -o -name "*.gz" -exec mv {} ./data/logs/archive/ \;
+
+# Delete archived logs older than one year
+find ./data/logs/archive -name "*.gz" -mtime +365 -delete
 
 DEPLOY_TAG="$1"
 
@@ -39,6 +62,9 @@ git fetch origin --tags --prune --prune-tags
 
 # Checkout correct tag
 git checkout "$DEPLOY_TAG"
+
+# Set the IMAGE_TAG environment variable to the deployment tag
+export IMAGE_TAG="$DEPLOY_TAG"
 
 # Build new images and raise containers
 docker compose -f ./docker-compose.yml build

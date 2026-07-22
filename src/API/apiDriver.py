@@ -168,6 +168,32 @@ async def get_output_statistics(modelNames: list[str] = Query(None)):
 
     return serialize_statistics( statistics_results, modelNames)
 
+@app.get('/select_output_statistics_range/')
+async def get_output_statistics_range(modelNames: list[str] = Query(None), fromDateTime: str = Query(None), toDateTime: str = Query(None)):
+    """
+    Queries output statistics for given models in a specefic range of time.
+     Args:
+        - `modelNames` (string): The name of the model (e.g. "test AI"), you can repeat this parameter to request multiple models
+        - `fromDateTime` (string): "YYYYMMDDHH" UTC Date to start at. Ex. 2024010100 for Jan 1, 2024 at 00:00 UTC
+        - `toDateTime` (string): "YYYYMMDDHH" UTC Date to end at. Ex. 2024010200 for Jan 2, 2024 at 00:00 UTC
+    Returns:
+    - A list of dictionaries containing these statistics for each model:
+        model name, time generated, percentile values (p1-p99),
+        minimum, maximum, mean, and standard deviation.
+
+    """
+    if not modelNames:
+        raise HTTPException(
+            status_code=422,
+            detail='No model names were provided'
+        )
+
+    statistics_class = Statistics()
+
+    statistics_results = (statistics_class.retrieve_statistics(modelNames, fromDateTime=fromDateTime, toDateTime=toDateTime))
+
+    return serialize_statistics( statistics_results, modelNames, ranged=True)
+
 @app.get('/output_time_span/')
 async def get_outputs_time_span(fromDateTime: str, toDateTime: str, modelNames: list[str] = Query(None)):
     """
@@ -403,10 +429,16 @@ def serialize_output_series(series: Series) -> dict[any]:
     serialized['_Series__data'] = serialized_data # Add it back to the response
     return serialized
 
-def serialize_statistics(statistics_results: list[dict] | None, requested_model_names: list[str]) -> dict:
+def serialize_statistics(statistics_results: list[dict] | None, requested_model_names: list[str], ranged: bool = False) -> dict:
     """
     Serializes statistics results so that every requested model name
     is included in the response, even if no statistics exist for it.
+
+    If ranged=False (default):
+        Returns one statistics dictionary per model.
+
+    If ranged=True:
+        Returns a list of statistics dictionaries per model.
     """
 
     if statistics_results is None:
@@ -414,14 +446,21 @@ def serialize_statistics(statistics_results: list[dict] | None, requested_model_
             model_name: None
             for model_name in requested_model_names
         }
-
+    
     # Build lookup table
-    statistics_by_model = {}
+    if ranged:
+        statistics_by_model = {
+            model_name: []
+            for model_name in requested_model_names
+        }
+    else:
+        statistics_by_model = {}
+
 
     for stats in statistics_results:
-        statistics_by_model[stats['modelName']] = {
-            'modelName': stats['modelName'],
-            'timeGenerated': jsonable_encoder(stats['timeGenerated'].replace(tzinfo=None) if stats.get('timeGenerated') is not None else None ),
+        serialized = {
+            "modelName": stats["modelName"],
+            "timeGenerated": jsonable_encoder(stats['timeGenerated'].replace(tzinfo=None) if stats.get('timeGenerated') is not None else None ),
             'p1': stats['p1'],
             'p5': stats['p5'],
             'p10': stats['p10'],
@@ -437,10 +476,23 @@ def serialize_statistics(statistics_results: list[dict] | None, requested_model_
             'std_dev': stats['std_dev']
         }
 
+        if ranged:
+            statistics_by_model[stats["modelName"]].append(serialized)
+        else:
+            statistics_by_model[stats["modelName"]] = serialized
+
     # Ensure all requested models exist
     serialized_results = {}
 
     for model_name in requested_model_names:
-        serialized_results[model_name] = (statistics_by_model.get(model_name))
+        if ranged:
+            serialized_results[model_name] = (
+                statistics_by_model[model_name]
+                if statistics_by_model[model_name]
+                else None
+            )
+        else:
+            serialized_results[model_name] = statistics_by_model.get(model_name)
+
     return serialized_results
 #endregion

@@ -346,7 +346,99 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             results.append(series)
         return results
     
-    
+    def select_output_statistics_range(self, model_names: list[str], fromDateTime: datetime, toDateTime: datetime) -> list[dict] | None:
+        '''
+        This function returns the statistics for each model in the provided list of model names
+        whose generation time falls within the specified time range, or None if no matching
+        statistics are found.
+
+        :param model_names: list[str] - A list of model names to query for.
+        :param fromDateTime: datetime - The inclusive start of the time range (UTC).
+        :param toDateTime: datetime - The inclusive end of the time range (UTC).
+
+        :returns list[dict] | None - A list of dictionaries where each dictionary contains
+            the statistics for a model, or None if no statistics are found. Each dictionary
+            has the following format:
+            {
+                'modelName': str,
+                'timeGenerated': timestamp in UTC,
+                'p1': float,
+                'p5': float,
+                'p10': float,
+                'p25': float,
+                'p50': float,
+                'p75': float,
+                'p90': float,
+                'p95': float,
+                'p99': float,
+                'min': float,
+                'max': float,
+                'mean': float,
+                'std_dev': float
+            }
+        '''
+        stmt = text("""
+        SELECT
+            o."modelName",
+            o."timeGenerated",
+            s."p1",
+            s."p5",
+            s."p10",
+            s."p25",
+            s."p50",
+            s."p75",
+            s."p90",
+            s."p95",
+            s."p99",
+            s."min",
+            s."max",
+            s."mean",
+            s."std_dev"
+        FROM outputs AS o
+        INNER JOIN output_statistics AS s
+            ON s."outputID" = o."id"
+        WHERE o."modelName" IN :model_names
+        AND o."timeGenerated" >= :fromDateTime
+        AND o."timeGenerated" <= :toDateTime
+        ORDER BY o."modelName", o."timeGenerated" DESC
+        """)
+
+        stmt = stmt.bindparams(
+            bindparam("model_names", value=tuple(model_names), expanding=True, type_=String),
+            bindparam("fromDateTime", value=fromDateTime),
+            bindparam("toDateTime", value=toDateTime),
+        )
+
+        result = self.__dbSelection(stmt).fetchall()
+        
+        if not result:
+            return None
+        
+        # splice the results into dictionaries
+        statistics_results = []
+        for row in result:
+            statistics_dict = {
+                'modelName': row[0],
+                'timeGenerated': row[1].replace(tzinfo=timezone.utc),
+                'p1': row[2],
+                'p5': row[3],
+                'p10': row[4],
+                'p25': row[5],
+                'p50': row[6],
+                'p75': row[7],
+                'p90': row[8],
+                'p95': row[9],
+                'p99': row[10],
+                'min': row[11],
+                'max': row[12],
+                'mean': row[13],
+                'std_dev': row[14]
+            }
+            statistics_results.append(statistics_dict)
+        
+        return statistics_results
+        
+            
     def select_latest_output_statistics(self, model_names: list[str]) -> list[dict] | None:
         '''
         This function returns the latest statistics for each model in the list of model names, or None

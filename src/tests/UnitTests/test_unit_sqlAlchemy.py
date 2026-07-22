@@ -646,3 +646,82 @@ def test_select_latest_output_statistics(test_data, expected_result):
         # ensure the tuple splicing matches the expected result
         assert len(result) == len(expected_result)
         assert result == expected_result
+        
+@pytest.mark.parametrize(
+    "test_specific_data, test_expected_result",
+    [
+        # Test case 1: Test with multiple models within 
+        (
+            # test tuples that would be returned from the DB query
+            [
+                ( "ModelB", datetime(2026, 1, 2, 0, 0), 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0),
+                ( "ModelC", datetime(2026, 1, 3, 0, 0), 3.0, 6.0, 9.0, 12.0, 15.0, 18.0, 21.0, 24.0, 27.0, 30.0, 33.0, 36.0, 39.0),
+            ],
+            # the expected output after parsing the DB results
+            [
+            
+                {
+                    'modelName': "ModelB",
+                    'timeGenerated': datetime(2026, 1, 2, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
+                    'p1': 2.0,
+                    'p5': 4.0,
+                    'p10': 6.0,
+                    'p25': 8.0,
+                    'p50': 10.0,
+                    'p75': 12.0,
+                    'p90': 14.0,
+                    'p95': 16.0,
+                    'p99': 18.0,
+                    'min': 20.0,
+                    'max': 22.0,
+                    'mean': 24.0,
+                    'std_dev': 26.0
+                },
+                {
+                    'modelName': "ModelC",
+                    'timeGenerated': datetime(2026, 1, 3, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
+                    'p1': 3.0,
+                    'p5': 6.0,
+                    'p10': 9.0,
+                    'p25': 12.0,
+                    'p50': 15.0,
+                    'p75': 18.0,
+                    'p90': 21.0,
+                    'p95': 24.0,
+                    'p99': 27.0,
+                    'min': 30.0,
+                    'max': 33.0,
+                    'mean': 36.0,
+                    'std_dev': 39.0
+                }
+
+            ]
+        )
+    ],
+    ids=["ModelsWithinRange"]
+)
+
+def test_select_output_statistics_range(test_specific_data, test_expected_result):
+    '''
+    This test checks that the tuple splicing in select_output_statistics_range
+    correctly parses the DB results into the expected dictionary format
+
+    When requesting a model that does not compute statistics, no dictionary should be returned
+    for that model in the dictionary list.
+
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_select_output_statistics_range -s
+    '''
+
+    # skip the db connection by replacing the __init__ method
+    with patch.object(SQLAlchemyORM_Postgres, '__init__', lambda x: None):
+        storage = SQLAlchemyORM_Postgres()
+
+        # force the __dbSelection method to return our test data instead of querying the DB
+        mock_results = MagicMock()
+        mock_results.fetchall.return_value = test_specific_data
+
+        with patch.object(storage, '_SQLAlchemyORM_Postgres__dbSelection', return_value=mock_results):
+            result = storage.select_output_statistics_range([ 'ModelB','ModelC'], datetime(2026, 1, 2, 0, 0), datetime(2026, 1, 3, 0, 0))
+        # ensure the tuple splicing matches the expected result
+        assert len(result) == len(test_expected_result)
+        assert result == test_expected_result
