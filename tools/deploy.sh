@@ -7,9 +7,22 @@
 
 # Create deployment logs directory if it doesn't exist
 mkdir -p ./logs/deployment
+mkdir -p ./logs/docker/api
+mkdir -p ./logs/docker/db
 mkdir -p ./logs/deployment/archive
+
 # Set up logging - capture both stdout and stderr
 LOG_FILE="./logs/deployment/$(date "+%Y")_$(date "+%m")_deployment.log"
+
+API_LOG_FILE="./logs/docker/api/$(date "+%Y_%m").log"
+DB_LOG_FILE="./logs/docker/db/$(date "+%Y_%m").log"
+
+echo "========== $(date) ==========" >> "$API_LOG_FILE"
+echo "========== $(date) ==========" >> "$DB_LOG_FILE"
+
+#Capture docker logs before rebuilding containers
+docker logs semaphore-api >> "$API_LOG_FILE" 2>&1
+docker logs semaphore-db >> "$DB_LOG_FILE" 2>&1
 
 # Compress deployment logs older than 90 days
 find ./logs/deployment -path "./logs/deployment/archive" -prune -o -name "*.log" -mtime +90 -exec gzip {} \;
