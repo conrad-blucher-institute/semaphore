@@ -1,6 +1,7 @@
 services:
   core:
     container_name: semaphore-core
+    image: semaphore-core:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile.core
@@ -44,6 +45,7 @@ services:
       "--workers", "8"
     ]
     container_name: semaphore-api
+    image: semaphore-api:${IMAGE_TAG:-latest}
     platform: linux/amd64
     build:
       context: .

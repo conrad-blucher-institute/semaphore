@@ -13,9 +13,9 @@ docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_api.p
 import numpy as np
 import pandas as pd
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from DataClasses import Series, SemaphoreSeriesDescription
-from src.API.apiDriver import serialize_output_series
+from src.API.apiDriver import serialize_output_series, serialize_statistics
 
 @pytest.mark.parametrize(
     "data_array",
@@ -263,3 +263,178 @@ def test_serialize_output_multiple_rows():
         assert result['_Series__data'][idx]['leadTime'] == 367200
         assert result['_Series__data'][idx]['timeGenerated'] == "2026-01-01T00:00:00"
 
+@pytest.mark.parametrize(
+    "ranged, statistics_results, requested_model_names, expected_result",
+    [
+        # Single result per model
+        (
+            False,
+            [
+                {
+                    "modelName": "ModelA",
+                    "timeGenerated": datetime(2026, 1, 1, tzinfo=timezone.utc),
+                    "p1": 1.0,
+                    "p5": 2.0,
+                    "p10": 3.0,
+                    "p25": 4.0,
+                    "p50": 5.0,
+                    "p75": 6.0,
+                    "p90": 7.0,
+                    "p95": 8.0,
+                    "p99": 9.0,
+                    "min": 10.0,
+                    "max": 11.0,
+                    "mean": 12.0,
+                    "std_dev": 13.0,
+                },
+                {
+                    "modelName": "ModelB",
+                    "timeGenerated": datetime(2026, 1, 2, tzinfo=timezone.utc),
+                    "p1": 2.0,
+                    "p5": 4.0,
+                    "p10": 6.0,
+                    "p25": 8.0,
+                    "p50": 10.0,
+                    "p75": 12.0,
+                    "p90": 14.0,
+                    "p95": 16.0,
+                    "p99": 18.0,
+                    "min": 20.0,
+                    "max": 22.0,
+                    "mean": 24.0,
+                    "std_dev": 26.0,
+                },
+            ],
+            ["ModelA", "ModelB"],
+            {
+                "ModelA": {
+                    "modelName": "ModelA",
+                    "timeGenerated": "2026-01-01T00:00:00",
+                    "p1": 1.0,
+                    "p5": 2.0,
+                    "p10": 3.0,
+                    "p25": 4.0,
+                    "p50": 5.0,
+                    "p75": 6.0,
+                    "p90": 7.0,
+                    "p95": 8.0,
+                    "p99": 9.0,
+                    "min": 10.0,
+                    "max": 11.0,
+                    "mean": 12.0,
+                    "std_dev": 13.0,
+                },
+                "ModelB": {
+                    "modelName": "ModelB",
+                    "timeGenerated": "2026-01-02T00:00:00",
+                    "p1": 2.0,
+                    "p5": 4.0,
+                    "p10": 6.0,
+                    "p25": 8.0,
+                    "p50": 10.0,
+                    "p75": 12.0,
+                    "p90": 14.0,
+                    "p95": 16.0,
+                    "p99": 18.0,
+                    "min": 20.0,
+                    "max": 22.0,
+                    "mean": 24.0,
+                    "std_dev": 26.0,
+                },
+            },
+        ),
+
+        # Multiple results per model
+        (
+            True,
+            [
+                {
+                    "modelName": "ModelA",
+                    "timeGenerated": datetime(2026, 1, 1, tzinfo=timezone.utc),
+                    "p1": 1.0,
+                    "p5": 2.0,
+                    "p10": 3.0,
+                    "p25": 4.0,
+                    "p50": 5.0,
+                    "p75": 6.0,
+                    "p90": 7.0,
+                    "p95": 8.0,
+                    "p99": 9.0,
+                    "min": 10.0,
+                    "max": 11.0,
+                    "mean": 12.0,
+                    "std_dev": 13.0,
+                },
+                {
+                    "modelName": "ModelA",
+                    "timeGenerated": datetime(2026, 1, 2, tzinfo=timezone.utc),
+                    "p1": 2.0,
+                    "p5": 4.0,
+                    "p10": 6.0,
+                    "p25": 8.0,
+                    "p50": 10.0,
+                    "p75": 12.0,
+                    "p90": 14.0,
+                    "p95": 16.0,
+                    "p99": 18.0,
+                    "min": 20.0,
+                    "max": 22.0,
+                    "mean": 24.0,
+                    "std_dev": 26.0,
+                },
+            ],
+            ["ModelA"],
+            {
+                "ModelA": [
+                    {
+                        "modelName": "ModelA",
+                        "timeGenerated": "2026-01-01T00:00:00",
+                        "p1": 1.0,
+                        "p5": 2.0,
+                        "p10": 3.0,
+                        "p25": 4.0,
+                        "p50": 5.0,
+                        "p75": 6.0,
+                        "p90": 7.0,
+                        "p95": 8.0,
+                        "p99": 9.0,
+                        "min": 10.0,
+                        "max": 11.0,
+                        "mean": 12.0,
+                        "std_dev": 13.0,
+                    },
+                    {
+                        "modelName": "ModelA",
+                        "timeGenerated": "2026-01-02T00:00:00",
+                        "p1": 2.0,
+                        "p5": 4.0,
+                        "p10": 6.0,
+                        "p25": 8.0,
+                        "p50": 10.0,
+                        "p75": 12.0,
+                        "p90": 14.0,
+                        "p95": 16.0,
+                        "p99": 18.0,
+                        "min": 20.0,
+                        "max": 22.0,
+                        "mean": 24.0,
+                        "std_dev": 26.0,
+                    },
+                ]
+            },
+        ),
+    ],
+    ids=["single", "ranged"],
+)
+def test_serialize_statistics(ranged,statistics_results,requested_model_names, expected_result,):
+    """
+    Verify that statistics are serialized into the format returned by the API.
+    """
+
+    result = serialize_statistics(
+        statistics_results,
+        requested_model_names,
+        ranged=ranged,
+    )
+
+    assert result == expected_result
