@@ -37,7 +37,7 @@
             }
         },
          {
-            "_name": "Water Temp_SD",
+            "_name": "Water_Temp_SD",
             "location": "Seadrift",
             "source": "LIGHTHOUSE",
             "series": "dWaterTmp",
@@ -56,8 +56,8 @@
             }
         },        
         {
-            "_name": "Water Temp_PO",
-            "location": "PortOconnor",
+            "_name": "Water_Temp_PO",
+            "location": "PortOConnor",
             "source": "LIGHTHOUSE",
             "series": "dWaterTmp",
             "unit": "celsius",
@@ -75,7 +75,7 @@
             }
         },       
         {
-            "_name": "Water Temp_AWR",
+            "_name": "Water_Temp_AWR",
             "location": "AransasWildlifeRefuge",
             "source": "LIGHTHOUSE",
             "series": "dWaterTmp",
@@ -94,7 +94,7 @@
             }
         },       
         {
-            "_name": "Air Temp_PL",
+            "_name": "Air_Temp_PL",
             "location": "PortLavaca",
             "source": "LIGHTHOUSE",
             "series": "dAirTmp",
@@ -113,7 +113,7 @@
             }
         },
         {
-            "_name": "Air Temp_SD",
+            "_name": "Air_Temp_SD",
             "location": "Seadrift",
             "source": "LIGHTHOUSE",
             "series": "dAirTmp",
@@ -132,7 +132,7 @@
             }
         },
         {
-            "_name": "Air Temp_PO",
+            "_name": "Air_Temp_PO",
             "location": "PortOConnor",
             "source": "LIGHTHOUSE",
             "series": "dAirTmp",
@@ -171,7 +171,7 @@
         },
         {
             "_name": "Predicted Air Temp",
-            "location": "EsperituSantoBay",
+            "location": "EspirituSantoBay",
             "source": "NDFD_JSON",
             "series": "pAirTemp",
             "unit": "celsius",
@@ -199,10 +199,10 @@
                 "processMissingValues": "dropSeries",
                 "dropOutlierSeries": false,
                 "targetSeries": [
-                    "Air_Temp_AWR",
-                    "Air_Temp_PO",
-                    "Air_Temp_SD",
-                    "Air_Temp_PL"
+                    "Aransas-Wildlife-Refuge_air-temp_25",
+                    "Port-OConnor_air-temp_25",
+                    "Seadrift_air-temp_25",
+                    "Port-Lavaca_air-temp_25"
                 ],
                 "outKey": "Espiritu-Santo-Bay_air-temp_25"    
             }
@@ -214,10 +214,10 @@
                 "dropOutlierSeries": true,
                 "thresholdDeviationFromMean": 3.5,
                 "targetSeries": [
-                    "Water_Temp_AWR",
-                    "Water_Temp_PO",
-                    "Water_Temp_SD",
-                    "Water_Temp_PL"
+                    "Aransas-Wildlife-Refuge_water-temp_25",
+                    "Port-OConnor_water-temp_25",
+                    "Seadrift_water-temp_25",
+                    "Port-Lavaca_water-temp_25"
                 ],
                 "outKey": "Espiritu-Santo-Bay_water-temp_25"    
             }
