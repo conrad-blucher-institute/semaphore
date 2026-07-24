@@ -915,7 +915,15 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         # the series_storage_factory() singleton rather than recreated per call), connections
         # can sit idle in the pool long enough to be dropped by Postgres or the network, so this
         # is needed to avoid surfacing that as a "connection refused" error.
-        self._engine = sqlalchemy_create_engine(parmaString, echo=echo, pool_pre_ping=True)
+        #
+        # application_name lets us identify Semaphore's connections in pg_stat_activity
+        # (previously blank, since psycopg2/SQLAlchemy don't set this by default).
+        self._engine = sqlalchemy_create_engine(
+            parmaString,
+            echo=echo,
+            pool_pre_ping=True,
+            connect_args={"application_name": "semaphore-api"}
+        )
 
     
     def __get_engine(self) -> Engine:
