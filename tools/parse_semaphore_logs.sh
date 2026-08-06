@@ -24,7 +24,13 @@ OUTPUT_DIR="${SEMAPHORE_ROOT}/tools/parsed_semaphore_logs"
 # Create output directory if it doesn't exist
 mkdir -p "$OUTPUT_DIR"
 
-OUTPUT_CSV="${OUTPUT_DIR}/semaphore_dev_stats_$(date +%Y%m%d_%H%M%S).csv"
+HOSTNAME_SHORT=$(hostname -s)
+if [[ "$HOSTNAME_SHORT" == *prod* ]]; then
+    ENV_LABEL="prod"
+else
+    ENV_LABEL="dev"
+fi
+OUTPUT_CSV="${OUTPUT_DIR}/semaphore_${ENV_LABEL}_stats_$(date +%Y%m%d_%H%M%S).csv"
 
 # --- Date utilities ---
 
