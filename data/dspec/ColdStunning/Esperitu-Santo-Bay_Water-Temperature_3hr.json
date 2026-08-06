@@ -6,7 +6,7 @@
     "modelFileName": "./ColdStunning/Espiritu-Santo-Bay_Water-Temperature_3hr",
     "timingInfo": {
         "active": true,
-        "offset": 1200,
+        "offset": 1500,
         "interval": 3600
     },
     "outputInfo": {
@@ -226,6 +226,6 @@
     "vectorOrder": [
         { "key": "Espiritu-Santo-Bay_water-temp_25"       , "dType": "float", "indexes": [2, 26] },
         { "key": "Espiritu-Santo-Bay_air-temp_25"         , "dType": "float", "indexes": [2, 26] },
-        { "key": "Espiritu-Santo-Bay_predicted_air-temp_9", "dType": "float", "indexes": [0, 2] }
+        { "key": "Espiritu-Santo-Bay_predicted_air-temp_9", "dType": "float", "indexes": [0, 8] }
     ]
 }
