@@ -211,7 +211,7 @@
             "call": "ComputeMean",
             "args": {
                 "dropOutlierSeries": true,
-                "thresholdDeviationFromMean": 3.5,
+                "thresholdDeviationFromMedian": 3.5,
                 "sentinel_value": 10000,
                 "targetSeries": [
                     "Aransas-Wildlife-Refuge_water-temp_25",
