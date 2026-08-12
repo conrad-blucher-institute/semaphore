@@ -1,0 +1,231 @@
+{
+    "dspecVersion": "2.0",
+    "modelName": "Espiritu-Santo-Bay_Water-Temperature_6hr",
+    "modelVersion": "1.0.0",
+    "author": "Ayesha Khan",
+    "modelFileName": "./ColdStunning/Espiritu-Santo-Bay_Water-Temperature_6hr",
+    "timingInfo": {
+        "active": true,
+        "offset": 1500,
+        "interval": 3600
+    },
+    "outputInfo": {
+        "outputMethod": "DefaultOutputHandler",
+        "leadTime": 21600,
+        "series": "pWaterTmp",
+        "location": "EspirituSantoBay",
+        "unit": "celsius"
+    },
+    "dependentSeries": [
+        {
+            "_name": "Water Temp_PL",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                1,
+                -26
+            ],
+            "outKey": "Port-Lavaca_water-temp_25",
+            "dataIntegrityCall": {
+                "call": "ReplaceMissingValues",
+                "args": {
+                    "sentinel_value": 10000
+                }
+            }
+        },
+         {
+            "_name": "Water_Temp_SD",
+            "location": "Seadrift",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                1,
+                -26
+            ],
+            "outKey": "Seadrift_water-temp_25",
+            "dataIntegrityCall": {
+                "call": "ReplaceMissingValues",
+                "args": {
+                    "sentinel_value": 10000
+                }
+            }
+        },
+        {
+            "_name": "Water_Temp_PO",
+            "location": "PortOConnor",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                1,
+                -26
+            ],
+            "outKey": "Port-OConnor_water-temp_25",
+            "dataIntegrityCall": {
+                "call": "ReplaceMissingValues",
+                "args": {
+                    "sentinel_value": 10000
+                }
+            }
+        },
+        {
+            "_name": "Water_Temp_AWR",
+            "location": "AransasWildlifeRefuge",
+            "source": "LIGHTHOUSE",
+            "series": "dWaterTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                1,
+                -26
+            ],
+            "outKey": "Aransas-Wildlife-Refuge_water-temp_25",
+            "dataIntegrityCall": {
+                "call": "ReplaceMissingValues",
+                "args": {
+                    "sentinel_value": 10000
+                }
+            }
+        },
+        {
+            "_name": "Air_Temp_PL",
+            "location": "PortLavaca",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                1,
+                -26
+            ],
+            "outKey": "Port-Lavaca_air-temp_25",
+            "dataIntegrityCall": {
+                "call": "ReplaceMissingValues",
+                "args": {
+                    "sentinel_value": 10000
+                }
+            }
+        },
+        {
+            "_name": "Air_Temp_SD",
+            "location": "Seadrift",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                1,
+                -26
+            ],
+            "outKey": "Seadrift_air-temp_25",
+            "dataIntegrityCall": {
+                "call": "ReplaceMissingValues",
+                "args": {
+                    "sentinel_value": 10000
+                }
+            }
+        },
+        {
+            "_name": "Air_Temp_PO",
+            "location": "PortOConnor",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                1,
+                -26
+            ],
+            "outKey": "Port-OConnor_air-temp_25",
+            "dataIntegrityCall": {
+                "call": "ReplaceMissingValues",
+                "args": {
+                    "sentinel_value": 10000
+                }
+            }
+        },
+        {
+            "_name": "Air_Temp_AWR",
+            "location": "AransasWildlifeRefuge",
+            "source": "LIGHTHOUSE",
+            "series": "dAirTmp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                1,
+                -26
+            ],
+            "outKey": "Aransas-Wildlife-Refuge_air-temp_25",
+            "dataIntegrityCall": {
+                "call": "ReplaceMissingValues",
+                "args": {
+                    "sentinel_value": 10000
+                }
+            }
+        },
+        {
+            "_name": "Predicted Air Temp",
+            "location": "EspirituSantoBay",
+            "source": "NDFD_JSON",
+            "series": "pAirTemp",
+            "unit": "celsius",
+            "interval": 3600,
+            "range": [
+                12,
+                1
+            ],
+            "outKey": "Espiritu-Santo-Bay_predicted_air-temp_12",
+            "stalenessOffset": 45000,
+            "dataIntegrityCall": {
+                "call": "PandasInterpolation",
+                "args": {
+                    "limit": "21600",
+                    "method": "linear",
+                    "limit_area": "inside"
+                }
+            }
+        }
+    ],
+    "postProcessCall": [
+        {
+            "call": "ComputeMean",
+            "args": {
+                "dropOutlierSeries": false,
+                "sentinel_value": 10000,
+                "targetSeries": [
+                    "Aransas-Wildlife-Refuge_air-temp_25",
+                    "Port-OConnor_air-temp_25",
+                    "Seadrift_air-temp_25",
+                    "Port-Lavaca_air-temp_25"
+                ],
+                "outKey": "Espiritu-Santo-Bay_air-temp_25"
+            }
+        },
+        {
+            "call": "ComputeMean",
+            "args": {
+                "dropOutlierSeries": true,
+                "thresholdDeviationFromMedian": 3.5,
+                "sentinel_value": 10000,
+                "targetSeries": [
+                    "Aransas-Wildlife-Refuge_water-temp_25",
+                    "Port-OConnor_water-temp_25",
+                    "Seadrift_water-temp_25",
+                    "Port-Lavaca_water-temp_25"
+                ],
+                "outKey": "Espiritu-Santo-Bay_water-temp_25"
+            }
+        }
+    ],
+    "vectorOrder": [
+        { "key": "Espiritu-Santo-Bay_water-temp_25"        , "dType": "float", "indexes": [2, 26] },
+        { "key": "Espiritu-Santo-Bay_air-temp_25"          , "dType": "float", "indexes": [2, 26] },
+        { "key": "Espiritu-Santo-Bay_predicted_air-temp_12", "dType": "float", "indexes": [0, 11] }
+    ]
+}
