@@ -58,14 +58,14 @@ class ReplaceMissingValues(IDataIntegrity):
     
         # If there is only one Input (only one data point) then we do not interpolate
         if(len(inSeries.dataFrame) <= 1):
-            log(f'''Interpolation error,
+            log(f'''ReplaceMissingValues error,
                 Reason: Only one Input found in series.
             ''')
             return inSeries
         
         sentinel_value = dataIntegrityDescription.args.get('sentinel_value', None)
         if sentinel_value is None or sentinel_value == 0:
-            error_message = f'''Interpolation error,
+            error_message = f'''ReplaceMissingValues error,
                 Reason: Sentinel value is either not set in the Data Integrity Description or is invalid.
                 dataIntegrityDescription:
                 {dataIntegrityDescription}
