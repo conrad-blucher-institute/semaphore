@@ -146,7 +146,7 @@ class Series():
         return self.__sentinelValue
 
     @sentinelValue.setter
-    def sentinelValue(self, sentinelValue: int) -> None:
+    def sentinelValue(self, sentinelValue: int | str) -> None:
         self.__sentinelValue = sentinelValue
 
 
