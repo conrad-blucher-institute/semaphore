@@ -71,6 +71,12 @@ original_df.loc[2] = ['0.69', 'test', datetime(2024, 1, 1, hour=2, tzinfo=timezo
 original_df.loc[3] = ['0.72', 'test', datetime(2024, 1, 1, hour=6, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 original_df.loc[4] = ['0.76', 'test', datetime(2024, 1, 1, hour=7, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 
+none_df = get_input_dataFrame()
+none_df.loc[0] = ['None', 'test', datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+none_df.loc[1] = ['0.66', 'test', datetime(2024, 1, 1, hour=1, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+none_df.loc[2] = ['0.69', 'test', datetime(2024, 1, 1, hour=2, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+none_df.loc[3] = ['0.72', 'test', datetime(2024, 1, 1, hour=6, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+none_df.loc[4] = ['None', 'test', datetime(2024, 1, 1, hour=7, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 
 expected_df = get_input_dataFrame()
 expected_df.loc[0] = ['0.6', 'test', datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
@@ -98,9 +104,24 @@ expected_string_df.loc[8] = ['missing', 'test', datetime(2024, 1, 1, hour=8, tzi
 expected_string_df.loc[9] = ['missing', 'test', datetime(2024, 1, 1, hour=9, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 expected_string_df.loc[10] = ['missing', 'test', datetime(2024, 1, 1, hour=10, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
 
+expected_none_df = get_input_dataFrame()
+expected_none_df.loc[0] = ['missing', 'test', datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+expected_none_df.loc[1] = ['0.66', 'test', datetime(2024, 1, 1, hour=1, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+expected_none_df.loc[2] = ['0.69', 'test', datetime(2024, 1, 1, hour=2, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+expected_none_df.loc[3] = ['missing', 'test', datetime(2024, 1, 1, hour=3, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+expected_none_df.loc[4] = ['missing', 'test', datetime(2024, 1, 1, hour=4, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+expected_none_df.loc[5] = ['missing', 'test', datetime(2024, 1, 1, hour=5, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+expected_none_df.loc[6] = ['0.72', 'test', datetime(2024, 1, 1, hour=6, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+expected_none_df.loc[7] = ['missing', 'test', datetime(2024, 1, 1, hour=7, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+expected_none_df.loc[8] = ['missing', 'test', datetime(2024, 1, 1, hour=8, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+expected_none_df.loc[9] = ['missing', 'test', datetime(2024, 1, 1, hour=9, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+expected_none_df.loc[10] = ['missing', 'test', datetime(2024, 1, 1, hour=10, tzinfo=timezone.utc), datetime(2024, 1, 1, hour=0, tzinfo=timezone.utc), None, None]
+
+
 @pytest.mark.parametrize("dependent_series, timeDescription, inputs, expected_df", [
-    (dependent_series, testTimeDescription, original_df, expected_df), # One value missing, expects len of 7, no NaNs
-    (dependent_series_string, testTimeDescription, original_df, expected_string_df), # String value, expects len of 7, no NaNs
+    (dependent_series, testTimeDescription, original_df, expected_df), # Numeric value, expects len of 11, no NaNs
+    (dependent_series_string, testTimeDescription, original_df, expected_string_df), # String value, expects len of 11, no NaNs
+    (dependent_series_string, testTimeDescription, none_df, expected_none_df) # String value, expects len of 11, no NaNs
 ])
 def test_replace_missing_values(dependent_series: list, timeDescription: TimeDescription, inputs: DataFrame, expected_df: DataFrame):
     seriesDescription = SeriesDescription(
@@ -127,13 +148,13 @@ def test_replace_missing_values(dependent_series: list, timeDescription: TimeDes
 
     actual_length_of_data = len(outSeries.dataFrame)
 
-    print(f'inSeries.dataFrame: {inSeries.dataFrame}')
-    print(f'outSeries.dataFrame: {outSeries.dataFrame}')
+    # print(f'inSeries.dataFrame: {inSeries.dataFrame}')
+    # print(f'outSeries.dataFrame: {outSeries.dataFrame}')
 
-    print(f'actual_length_of_data: {actual_length_of_data}')
+    # print(f'actual_length_of_data: {actual_length_of_data}')
 
-    print(f'outSeries.dataFrame dataValue List: {outSeries.dataFrame["dataValue"].values.tolist()}')
-    print(f'expected_df dataValue List: {expected_df["dataValue"].values.tolist()}')
+    # print(f'outSeries.dataFrame dataValue List: {outSeries.dataFrame["dataValue"].values.tolist()}')
+    # print(f'expected_df dataValue List: {expected_df["dataValue"].values.tolist()}')
 
     assert actual_length_of_data == 11
     assert outSeries.dataFrame['dataValue'].values.tolist() == expected_df['dataValue'].values.tolist()
