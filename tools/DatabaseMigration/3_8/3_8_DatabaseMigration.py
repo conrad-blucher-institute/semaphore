@@ -88,8 +88,8 @@ class Migrator(IDatabaseMigration):
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
            :return: bool indicating successful update
         """
-        fileNames = ['dataLocation.csv', 'dataMapping.csv']
-        fileTypes = [KeywordType.DATA_LOCATION, KeywordType.DATA_SOURCE]
+        fileNames = ['dataLocation.csv']
+        fileTypes = [KeywordType.DATA_LOCATION]
 
         # Using the utility helper class to delete any data dependent on the rows added in the 3.8 Migration
         helper = DatabaseDeletionHelper(databaseEngine)
