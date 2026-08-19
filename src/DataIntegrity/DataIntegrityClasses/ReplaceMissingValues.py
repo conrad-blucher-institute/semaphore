@@ -14,7 +14,6 @@
 import pandas as pd
 from DataIntegrity.IDataIntegrity import IDataIntegrity
 from DataClasses import Series
-from utility import log
 
 from exceptions import Semaphore_Data_Exception
 
@@ -35,9 +34,6 @@ class ReplaceMissingValues(IDataIntegrity):
         }
     }
     """
-
-    # Find rows that have values that are set to None or NaN
-    # Replace those values with given sentinel value
 
     def exec(self, inSeries: Series) -> Series: 
         """This method will insert sentinel values for missing data
@@ -65,25 +61,35 @@ class ReplaceMissingValues(IDataIntegrity):
         
         input_df.set_index('timeVerified', inplace=True)
         
-        # Add the missing timeVerified datetimes and fill the remaining columns with NaNs/NaTs
+        # Add the missing timeVerified datetimes
         all_dates = pd.date_range(start=timeDescription.fromDateTime, end=timeDescription.toDateTime, freq=timeDescription.interval, name="timeVerified")
     
-        
-        filled_input_df = input_df.reindex(all_dates)
+        # Identify timestamps missing from the input
+        missing_dates = all_dates.difference(input_df.index)
 
-        # Convert numeric strings to numbers and nonnumeric strings to NaN, so that we can replace them with the sentinel value
-        filled_input_df["dataValue"] = pd.to_numeric(
-            filled_input_df["dataValue"],
-            errors="coerce",
+        # Create rows for the missing timestamps with the sentinel already assigned
+        missing_rows = pd.DataFrame(
+            {
+                "timeVerified": missing_dates,
+                "dataValue": sentinel_value,
+            }
+        ).set_index("timeVerified")
+
+        # Add the new rows to the existing data
+        filled_input_df = pd.concat([input_df, missing_rows]).reindex(all_dates)
+
+        # Identify actual missing values: None, NaN, pd.NA, "None", "none" , or "  NONE ".
+        missing_values = (
+            filled_input_df["dataValue"].isna()
+            | filled_input_df["dataValue"]
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                .eq("none")
         )
 
-        # Replace NaN with the sentinel value
-        filled_input_df["dataValue"] = (
-            filled_input_df["dataValue"].fillna(sentinel_value)
-        )
-
-        # Convert dataValue back to string
-        filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(str)
+        # Replace only missing values with the sentinel
+        filled_input_df.loc[missing_values, "dataValue"] = sentinel_value
 
         # Reset the index to make timeVerified a normal column again
         filled_input_df.reset_index(inplace=True)
