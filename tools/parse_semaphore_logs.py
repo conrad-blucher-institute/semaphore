@@ -149,7 +149,19 @@ def extract_model_name(line: str, patterns: Patterns) -> Optional[str]:
 
 
 def extract_failure_reason(content: str, patterns: Patterns) -> str:
-    """Classify a failure block's content into a short reason code."""
+    """Classify a failure block's content into a short reason code.
+
+    Falls back to "missing_data" rather than "unknown". These blocks all
+    open on patterns.failure_block_start matching "DateRangeValidation:",
+    which by definition means Semaphore's data-completeness check failed
+    for that series -- there's no other real category for a
+    DateRangeValidation failure once "is stale" is ruled out. The
+    "is missing ... values" phrase this function originally looked for
+    turns out not to cover every real-world phrasing of that same
+    underlying condition, so treating anything else that reaches this
+    function as missing_data (instead of a separate "unknown" bucket) is
+    the empirically correct default.
+    """
     if "is missing" in content and "values" in content:
         return "missing_data"
     if "is stale" in content:
@@ -158,7 +170,7 @@ def extract_failure_reason(content: str, patterns: Patterns) -> str:
         return "interpolation_gap"
     if patterns.http_error.search(content):
         return "upstream_http_error"
-    return "unknown"
+    return "missing_data"
 
 
 def extract_data_source(content: str, patterns: Patterns) -> str:
