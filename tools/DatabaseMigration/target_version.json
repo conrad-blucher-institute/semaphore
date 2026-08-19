@@ -1,4 +1,4 @@
 {
-    "Target Version" : "3.7",
-    "Description" : "Adds the new output_statistics table."
+    "Target Version" : "3.8",
+    "Description" : "Adds Aransas Wildlife Refuge and Seadrift to the reference tables and adds the mapping to the data mapping table."
 }

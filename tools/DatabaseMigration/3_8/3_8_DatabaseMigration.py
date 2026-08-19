@@ -1,26 +1,27 @@
 # -*- coding: utf-8 -*-
-#3_8_DatabaseMigration.py
-#----------------------------------
+# 3_8_DatabaseMigration.py
+# ----------------------------------
 # Created By: Anointiyae Beasley
 # Created Date: 08/19/2026
 # Version 1.0
-#----------------------------------
-"""This is a database migration script that will initialize version
-    3.8 of the database. The change from version 3.7 to 3.8 is that
-    we are adding rows to the locations reference table and the data
-    source reference table. 
- """ 
-#----------------------------------
+# ----------------------------------
+"""
+This is a database migration script that will initialize version
+3.8 of the database. The change from version 3.7 to 3.8 is that
+we are adding rows to the locations reference table and the data
+source reference table. 
+""" 
+# ----------------------------------
 # 
 #
-#Imports
+# Imports
 from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
 from DatabaseMigration.databaseMigrationUtility import KeywordType, DatabaseDeletionHelper
 from sqlalchemy import Engine, MetaData, Table, delete, select
 from sqlalchemy.dialects.postgresql import insert
 import csv
 
-#Constants
+# Constants
 CSV_FILE_PATHS = './tools/DatabaseMigration/3_8/init_data'
 
 
