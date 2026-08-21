@@ -5,17 +5,18 @@
 # Created Date: 08/19/2026
 # -------------------------------
 
-"""Test the ComputeMean post-processing class.
+"""Tests for the ComputeMean post-processing class.
 
 Run:
-    docker exec semaphore-core python3 -m pytest -s src/tests/UnitTests/test_ComputeMean.py
+    docker exec semaphore-core python3 -m pytest -s \
+        src/tests/UnitTests/test_ComputeMean.py
 """
 
 import sys
 from datetime import datetime, timedelta, timezone
-from math import isclose
 
 import pandas as pd
+import pytest
 
 sys.path.append("/app/src")
 
@@ -26,10 +27,23 @@ from src.DataClasses import (
     get_input_dataFrame,
 )
 from src.ModelExecution.dspecParser import PostProcessCall
-from src.PostProcessing.IPostProcessing import post_processing_factory
+from src.PostProcessing.IPostProcessing import (
+    post_processing_factory,
+)
 
 
-START = datetime(2024, 1, 1, tzinfo=timezone.utc)
+START = datetime(
+    2024,
+    1,
+    1,
+    tzinfo=timezone.utc,
+)
+
+EXPECTED_TIMESTAMPS = [
+    START,
+    START + timedelta(hours=1),
+    START + timedelta(hours=2),
+]
 
 TIME_DESCRIPTION = TimeDescription(
     START,
@@ -38,60 +52,106 @@ TIME_DESCRIPTION = TimeDescription(
 )
 
 
-def build_series_obj(data: list[object],sentinel_value: object,) -> Series:
-    """Build one station Series with hourly timestamps."""
-    test_series = Series(SeriesDescription("Test", "water-temp", "Test",),TIME_DESCRIPTION,)
+@pytest.fixture
+def compute_mean():
+    """Return an instance of the ComputeMean class."""
+    return post_processing_factory("ComputeMean")
+
+
+def build_series_obj(
+    data: list[object],
+    sentinel_value: int | str,
+) -> Series:
+    """Build one station Series with hourly data."""
+    series = Series(
+        SeriesDescription(
+            "Test",
+            "water-temp",
+            "Test",
+        ),
+        TIME_DESCRIPTION,
+    )
 
     data_frame = get_input_dataFrame()
 
     for index, value in enumerate(data):
-        verification_time = (
-            START + timedelta(hours=index)
-        )
-
         data_frame.loc[index] = [
             str(value),
             "degrees_C",
-            verification_time,
+            EXPECTED_TIMESTAMPS[index],
             START,
             None,
             None,
         ]
 
-    test_series.dataFrame = data_frame
-    test_series.sentinelValue = sentinel_value
+    series.dataFrame = data_frame
+    series.sentinelValue = sentinel_value
 
-    return test_series
+    return series
 
 
-def test_compute_mean_for_timestamp():
-    """Calculate one timestamp's mean and remove an outlier."""
-    compute_mean = post_processing_factory(
-        "ComputeMean"
+@pytest.mark.parametrize(
+    (
+        "station_values",
+        "drop_outliers",
+        "threshold",
+        "expected_mean",
+    ),
+    [
+        (
+            [10.0, 12.0, 14.0],
+            False,
+            None,
+            12.0,
+        ),
+        (
+            [10.0, 12.0, 50.0],
+            True,
+            3.5,
+            11.0,
+        ),
+        (
+            [10.0, float("nan"), 14.0],
+            False,
+            None,
+            12.0,
+        ),
+    ],
+)
+def test_compute_mean_for_timestamp(
+    compute_mean,
+    station_values,
+    drop_outliers,
+    threshold,
+    expected_mean,
+):
+    """
+    Calculate the mean for one timestamp.
+
+    This verifies that ComputeMean can calculate a regular mean,
+    remove an outlier, and ignore NaN values.
+    """
+    values = pd.Series(station_values)
+
+    actual_mean = (
+        compute_mean.compute_mean_for_timestamp(
+            values,
+            drop_outliers=drop_outliers,
+            threshold=threshold,
+        )
     )
 
-    station_values = pd.Series(
-        [10.0, 12.0, 50.0]
+    assert actual_mean == pytest.approx(
+        expected_mean
     )
 
-    result = compute_mean.compute_mean_for_timestamp(
-        station_values,
-        drop_outliers=True,
-        threshold=3.5,
-    )
 
-    # Median: 12
-    # Deviations: 2, 0, and 38
-    # 50 is removed, so the mean is (10 + 12) / 2.
-    assert isclose(result, 11.0, abs_tol=1e-5)
-
-
-def test_get_station_values_replaces_sentinel():
-    """Replace one station's sentinel with pandas NaN."""
-    compute_mean = post_processing_factory(
-        "ComputeMean"
-    )
-
+def test_get_station_values_replaces_sentinel(
+    compute_mean,
+):
+    """
+    Convert station values to numeric and replace the sentinel with NaN.
+    """
     station_series = build_series_obj(
         ["10", "1000", "14"],
         sentinel_value=1000,
@@ -103,19 +163,46 @@ def test_get_station_values_replaces_sentinel():
     )
 
     assert result.name == "station-one"
-    assert result.iloc[0] == 10
+
+    assert result.index.tolist() == (
+        EXPECTED_TIMESTAMPS
+    )
+
+    assert result.iloc[0] == pytest.approx(10.0)
     assert pd.isna(result.iloc[1])
-    assert result.iloc[2] == 14
-
-    assert result.index.tolist() == [
-        START,
-        START + timedelta(hours=1),
-        START + timedelta(hours=2),
-    ]
+    assert result.iloc[2] == pytest.approx(14.0)
 
 
-def test_post_process_data():
-    """Combine multiple station series into one mean series."""
+@pytest.mark.parametrize(
+    (
+        "drop_outliers",
+        "expected_values",
+    ),
+    [
+        (
+            True,
+            [12.0, 12.0, 11.0],
+        ),
+        (
+            False,
+            [12.0, 12.0, 24.0],
+        ),
+    ],
+    ids=[
+        "with-outlier-removal",
+        "without-outlier-removal",
+    ],
+)
+def test_post_process_data_combines_multiple_series(
+    compute_mean,
+    drop_outliers,
+    expected_values,
+):
+    """
+    Combine multiple station series and calculate a mean per timestamp.
+
+    The test runs once with outlier removal and once without it.
+    """
     preprocessed_data = {
         "station-one": build_series_obj(
             ["10", "10", "10"],
@@ -139,21 +226,31 @@ def test_post_process_data():
             "station-two",
             "station-three",
         ],
-        "dropOutlierValues": True,
-        "thresholdDeviationFromMedian": 3.5,
+        "dropOutlierValues": drop_outliers,
         "outKey": "combined-water-temp",
     }
 
-    compute_mean = post_processing_factory(
-        post_process_call.call
-    )
+    if drop_outliers:
+        post_process_call.args[
+            "thresholdDeviationFromMedian"
+        ] = 3.5
 
     result = compute_mean.post_process_data(
         preprocessed_data,
         post_process_call,
     )
 
-    output_series = result["combined-water-temp"]
+    # The original series should remain in the dictionary.
+    assert "station-one" in result
+    assert "station-two" in result
+    assert "station-three" in result
+
+    # The combined series should be added to the dictionary.
+    assert "combined-water-temp" in result
+
+    output_series = result[
+        "combined-water-temp"
+    ]
     output_df = output_series.dataFrame
 
     actual_values = (
@@ -162,29 +259,13 @@ def test_post_process_data():
         .tolist()
     )
 
-    expected_values = [
-        12.0,  # Mean of 10, 12, and 14
-        12.0,  # Sentinel removed; mean of 10 and 14
-        11.0,  # Outlier 50 removed; mean of 10 and 12
-    ]
+    assert actual_values == pytest.approx(
+        expected_values
+    )
 
-    assert len(actual_values) == 3
-
-    for actual, expected in zip(
-        actual_values,
-        expected_values,
-    ):
-        assert isclose(
-            actual,
-            expected,
-            abs_tol=1e-5,
-        )
-
-    assert output_df["timeVerified"].tolist() == [
-        START,
-        START + timedelta(hours=1),
-        START + timedelta(hours=2),
-    ]
+    assert output_df[
+        "timeVerified"
+    ].tolist() == EXPECTED_TIMESTAMPS
 
     assert output_df["dataUnit"].tolist() == [
         "degrees_C",
@@ -192,4 +273,14 @@ def test_post_process_data():
         "degrees_C",
     ]
 
-    assert output_series.sentinelValue == 1000
+    assert (
+        output_series.description.dataSeries
+        == "combined-water-temp"
+    )
+
+    assert (
+        output_series.sentinelValue
+        == preprocessed_data[
+            "station-one"
+        ].sentinelValue
+    )
