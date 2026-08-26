@@ -6,10 +6,9 @@
 # Version 1.0
 # ----------------------------------
 """
-This is a database migration script that will initialize version
-3.8 of the database. The change from version 3.7 to 3.8 is that
-we are adding rows to the locations reference table and the data
-source reference table. 
+This db migration script adds entries for Seadrift and Aransas Wildlife Refuge
+to the ref_dataLocation table and dataLocation_dataSource_mapping
+table for the operation of cold stunning models for Espiritu Santo Bay.
 """ 
 # ----------------------------------
 # 
@@ -28,11 +27,14 @@ CSV_FILE_PATHS = './tools/DatabaseMigration/3_8/init_data'
 class Migrator(IDatabaseMigration):
 
     def update(self, databaseEngine: Engine) -> bool:
-        """This function updates the database to version 3.8 which adds rows to the locations reference 
-           table.
+        """
+        This function updates the database to version 3.8 which adds row for
+        Seadrift and Aransas Wildlife Refuge to the ref_dataLocation table
+        and the dataLocation_dataSource_mapping table. 
 
-           :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
-           :return: bool indicating successful update
+        :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
+
+        :return: bool indicating successful update
         """
         # Setting engine
         self.__engine = databaseEngine
@@ -51,11 +53,13 @@ class Migrator(IDatabaseMigration):
         return True
     
     def readInitCSV(self, csvFileName: str) -> list:
-        """This function reads in a CSV file with the data needed for the initialization 
-            of the database
-            :param csvFileName: str - CSV file name
+        """
+        This function reads in a CSV file with the data needed for the initialization 
+        of the database
+
+        :param csvFileName: str - CSV file name
             
-            :return: list of dictionaries
+        :return: list of dictionaries
         """
         csvFilePath = f'{CSV_FILE_PATHS}/{csvFileName}'
         dictionaryList = []
@@ -67,10 +71,28 @@ class Migrator(IDatabaseMigration):
         return dictionaryList
     
     def insert_ref_data(self, rows: list[dict], table: Table) -> list[tuple]:
-        """This method inserts reference rows
-            :param rows: A list of dictionaries. The dict can be found in NOTE 1
-            :return Series - SQLALCHEMY tupleish rows
-            NOTE:: {"code": None, "displayName": None, "notes": None, "latitude": None, "longitude": None}
+        """
+        This method inserts rows into a table in the database.
+
+        :param rows: A list of dictionaries to insert into a table.
+            for the ref_dataLocation table, the dictionaries have the format:
+                {
+                    "code": None,
+                    "displayName": None,
+                    "notes": None,
+                    "latitude": None,
+                    "longitude": None
+                }
+            
+            for the dataLocation_dataSource_mapping table, the dictionaries have the format:
+                {
+                    "dataLocationCode": None,
+                    "dataSourceCode": None,
+                    "dataSourceLocationCode": None,
+                    "priorityOrder": None
+                }
+        
+        :return Series - SQLALCHEMY tupleish rows
         """
         with self.__engine.connect() as conn:
             cursor = conn.execute(insert(table)
@@ -82,11 +104,14 @@ class Migrator(IDatabaseMigration):
             return result
 
     def rollback(self, databaseEngine: Engine) -> bool:
-        """This function rolls the database back to version 3.7 which involves removing the changes 
-           associated with version 3.8 
+        """
+        This function rolls the database back to version 3.7 which involves removing the changes 
+        associated with version 3.8. The added rows for the ref_dataLocation table and the
+        dataLocation_dataSource_mapping table will be removed.
 
-           :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
-           :return: bool indicating successful update
+        :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
+
+        :return: bool indicating successful update
         """
         fileNames = ['dataLocation.csv']
         fileTypes = [KeywordType.DATA_LOCATION]
