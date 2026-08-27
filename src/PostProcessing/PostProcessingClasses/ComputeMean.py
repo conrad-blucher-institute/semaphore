@@ -19,6 +19,7 @@ from ModelExecution.dspecParser import PostProcessCall
 class ComputeMean(IPostProcessing):
     """
     Compute one mean value per timestamp using multiple input series.
+    The first series shared will be used as the template for the time and series description.
 
     Processing for each timestamp:
 
