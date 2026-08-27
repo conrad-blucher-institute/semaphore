@@ -17,6 +17,7 @@ and deserialized back to ndarrays after selection from the database.
 # 
 #
 #Imports
+from threading import Lock
 from itertools import groupby
 from sqlalchemy import create_engine as sqlalchemy_create_engine
 from sqlalchemy import String, MetaData, Engine, CursorResult, Select, select, distinct, text, bindparam
@@ -38,14 +39,27 @@ from utility import log
 
 
 class SQLAlchemyORM_Postgres(ISeriesStorage):
+    """
+    This class implements the ISeriesStorage interface using SQLAlchemy ORM for PostgreSQL
+
+    Class Attributes:
+        _engine (dict[str, Engine]) - A dictionary that maps database connection strings to
+            an SQLAlchemy Engine object. This is to ensure that each unique database connection
+            string has its own Engine, and that the created engine is reused for repeated
+            connections to the same db
+        
+        _lock (Lock) - A lock to ensure that all reads and writes to the engine dictionary are thread safe
+    """
+    _engine_mapping: dict[str, Engine] = {}
+    _engine_mapping_lock = Lock()
  
     def __init__(self) -> None:
         """Constructor generates an a db schema. Automatically creates the 
             metadata object holding the defined schema.
         """
-        self.__create_engine(getenv('DB_LOCATION_STRING'), False)
+        self.__engine = SQLAlchemyORM_Postgres.__get_engine(getenv('DB_LOCATION_STRING'), False)
         self.__metadata = MetaData()
-        self.__metadata.reflect(bind=self.__get_engine())
+        self.__metadata.reflect(bind=self.__engine)
 
     #############################################################################################
     ################################################################################## Public methods
@@ -601,7 +615,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         for batch in batched_rows:
             # Insert the rows into the inputs table returning what is inserted as a sanity check
             # On conflict we update the acquired time to now
-            with self.__get_engine().connect() as conn:
+            with self.__engine.connect() as conn:
                 cursor = conn.execute(insert(self.__metadata.tables['inputs'])
                                         .values(batch)
                                         .on_conflict_do_update(constraint='inputs_AK00', set_={"acquiredTime": now})
@@ -669,7 +683,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         }
         stmt = stmt.bindparams(**bind_params)
 
-        with self.__get_engine().connect() as conn:
+        with self.__engine.connect() as conn:
             cursor = conn.execute(stmt)
             model_run_result = cursor.fetchone()
             conn.commit()
@@ -755,7 +769,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         stmt = stmt.bindparams(**bind_params)
 
         # insert the row into the outputs table returning what is inserted as a sanity check
-        with self.__get_engine().connect() as conn:
+        with self.__engine.connect() as conn:
             cursor = conn.execute(stmt)
             result = cursor.fetchone()
             conn.commit()
@@ -863,7 +877,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         stmt = stmt.bindparams(**bind_params)
 
         # insert the row into the statistics table returning what is inserted as a sanity check
-        with self.__get_engine().connect() as conn:
+        with self.__engine.connect() as conn:
             cursor = conn.execute(stmt)
             result = cursor.fetchone()
             conn.commit()
@@ -994,43 +1008,41 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
     ################################################################################## DB Managment Methods
     #############################################################################################
 
-    def __create_engine(self, parmaString: str, echo: bool ) -> None: #"sqlite+pysqlite:///:memory:"
-        """Creates an engine object and tethers it to this interface class as an atribute
+    @staticmethod
+    def __get_engine(db_conn_string: str | None = None, echo: bool = False) -> Engine:
+        """
+        This function checks the _engine_mapping_dictionary for an existing engine for the
+        given database location string. If an engine already exists, it is returned, else
+        an engine is created for that location string, stored in the mapping, then returned.
 
         Parameters:
-            permaString: str - An sqlalchemy string that defines the location the engine should point to: (e.g. "sqlite+pysqlite:///:memory:")
-            echo: str - Weather or not the engine should echo to stdout
+            db_conn_string: str | None - An sqlalchemy string that defines the location
+                the engine should point to: (e.g. "sqlite+pysqlite:///:memory:")
+            
+            echo: bool - whether or not the engine should echo to stdout
+        
+        Returns:
+            Engine - An SQLAlchemy engine for the provided database location string
+        
+        NOTE: pool_pre_ping does a small "SELECT 1" query to ping the db to ensure a pooled
+        connection is still alive before being handed out. This is because idle connections
+        can be dropped by Postgres or the network, so this ensures closed connections aren't
+        given out.
         """
-        # pool_pre_ping tests each pooled connection with a cheap "SELECT 1" before handing it
-        # out, and transparently reconnects if it's gone stale/dead, instead of returning a
-        # broken connection to the caller. Now that engines/pools are long-lived (reused via
-        # the series_storage_factory() singleton rather than recreated per call), connections
-        # can sit idle in the pool long enough to be dropped by Postgres or the network, so this
-        # is needed to avoid surfacing that as a "connection refused" error.
-        #
-        # application_name lets us identify Semaphore's connections in pg_stat_activity
-        # (previously blank, since psycopg2/SQLAlchemy don't set this by default).
-        self._engine = sqlalchemy_create_engine(
-            parmaString,
-            echo=echo,
-            pool_pre_ping=True,
-            connect_args={"application_name": "semaphore-api"}
-        )
+        if db_conn_string is None:
+            raise Exception("An engine was requested from the ORM, but the db connection string is None.")
 
-    
-    def __get_engine(self) -> Engine:
-        """Fetches the engine attribute. Requires the engine attribute to be created.
-        See: DBManager.create_engine()
-        """
+        with SQLAlchemyORM_Postgres._engine_mapping_lock:
+            # if the engine hasn't been created for this location string, create and store it
+            if db_conn_string not in SQLAlchemyORM_Postgres._engine_mapping:
+                SQLAlchemyORM_Postgres._engine_mapping[db_conn_string] = sqlalchemy_create_engine(
+                    db_conn_string,
+                    echo=echo,
+                    pool_pre_ping=True,
+                    connect_args={"application_name": "semaphore"}
+                )
+            return SQLAlchemyORM_Postgres._engine_mapping[db_conn_string]
 
-        if not hasattr(self, '_engine') or self._engine == None:
-            raise Exception("An engine was requested from DBManager, but no engine has been created. See DBManager.create_engine()")
-        else:
-            return self._engine
-
-    #############################################################################################
-    ################################################################################## DB Interaction private methods
-    #############################################################################################
 
     def __dbSelection(self, stmt: Select) -> CursorResult:
         """Runs a selection statement 
@@ -1040,7 +1052,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             SQLAlchemy CursorResult
         """
 
-        with self.__get_engine().connect() as conn:
+        with self.__engine.connect() as conn:
             result = conn.execute(stmt)
 
         return result
@@ -1216,7 +1228,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         #Construct DB row to insert
         insertionValueRow = {"code": code, "displayName": displayName, "notes": notes, "latitude": latitude, "longitude": longitude}
         
-        with self.__get_engine().connect() as conn:
+        with self.__engine.connect() as conn:
             conn.execute(insert(self.__metadata.tables['ref_dataLocation'])
                         .values(insertionValueRow))
             conn.commit()
@@ -1227,7 +1239,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         #Construct DB row to insert
         insertionValueRow = {"dataLocationCode": dataLocationCode, "dataSourceCode": dataSourceCode, "dataSourceLocationCode": dataSourceLocationCode, "priorityOrder": priorityOrder}
         
-        with self.__get_engine().connect() as conn:
+        with self.__engine.connect() as conn:
             conn.execute(insert(self.__metadata.tables['dataLocation_dataSource_mapping'])
                         .values(insertionValueRow))
             conn.commit()

@@ -26,6 +26,7 @@ sys.path.append("/app/src")
 from datetime import datetime, timezone, timedelta, date, time
 from os import getenv
 from pathlib import Path
+from threading import Lock
 
 import pandas as pd
 import pytest
@@ -725,3 +726,33 @@ def test_select_output_statistics_range(test_specific_data, test_expected_result
         # ensure the tuple splicing matches the expected result
         assert len(result) == len(test_expected_result)
         assert result == test_expected_result
+
+
+def test_engine_singleton():
+    """
+    Test that the SQLAlchemy engine is a singleton and returns the same instance
+
+    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_engine_singleton -s
+    """
+
+    # the constructor call will create the engine or return the existing one if it exists already
+    ss1 = SQLAlchemyORM_Postgres()
+    ss2 = SQLAlchemyORM_Postgres()
+
+    # retrieve the engine from both instances
+    engine1 = ss1._SQLAlchemyORM_Postgres__engine
+    engine2 = ss2._SQLAlchemyORM_Postgres__engine
+
+    # engines should be the same since they point to the same location string
+    assert engine1 is engine2, "get engine function did not return the same engine for the same location"
+
+    # the engine mapping should only have one entry for the same location string
+    assert len(SQLAlchemyORM_Postgres._engine_mapping) == 1, "Engine mapping has more than one entry"
+
+    # call the __get_engine function directly with a different location string
+    test_location_string = "sqlite+pysqlite:///:memory:"
+    test_engine = SQLAlchemyORM_Postgres._SQLAlchemyORM_Postgres__get_engine(test_location_string)
+
+    assert test_engine is not engine1, "get engine function did not create a new engine for a different location string"
+    assert test_engine is SQLAlchemyORM_Postgres._SQLAlchemyORM_Postgres__get_engine(test_location_string), "get engine function did not return the same engine for the same location"
+    assert len(SQLAlchemyORM_Postgres._engine_mapping) == 2, "Engine mapping should have two entries"
