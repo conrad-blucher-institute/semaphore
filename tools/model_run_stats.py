@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # model_run_stats.py
 # -------------------------------
-# Created By: Savannah Stephenson and Clause AI
+# Created By: Savannah Stephenson and Claude AI
 # -------------------------------
 """
 Walks Semaphore log files for a given date range, pulls out "success" and
@@ -20,6 +20,7 @@ themselves (e.g. "08/07/26 15:31:26: ...").
 """
 # -------------------------------
 import argparse                        
+import html                            
 import re                              
 import socket                          
 import sys                             
@@ -61,6 +62,13 @@ MODEL_FAMILIES = [
 # Fallback family name for any model whose name doesn't contain any of
 # the strings in MODEL_FAMILIES above.
 UNMAPPED_FAMILY = "unmapped"
+
+# Fallback model name for a failure block that never sees a "Model X"
+# line on its FAILED line (and has no filename to infer from, or the
+# filename doesn't match the expected shape) -- an explicit sentinel
+# instead of "", so it reads as an intentional "couldn't determine this"
+# value in the CSV and report tables rather than a blank data gap.
+MISSING_MODEL = "unknown_model"
 
 # How many rows the per-family "investigator notes" table shows.
 # If a family has more failures than this, the table shows the worst
@@ -440,7 +448,7 @@ def resolve_output_dir(semaphore_root):
     never collide.
     """
     tools_dir = semaphore_root / "tools" / "parsed_semaphore_logs"
-    env_label = "prod" if "prod" in socket.gethostname() else "dev"
+    env_label = "prod" if "prod" in socket.gethostname().lower() else "dev"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = tools_dir / f"semaphore_{env_label}_report_{timestamp}"
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -478,14 +486,14 @@ def make_event(timestamp, model, status, reason, source, details, series, log_fi
     pd.DataFrame(events) turn the whole list into a clean table with no
     missing columns.
     """
-    model_name = model or ""
+    model_name = model or MISSING_MODEL
     return {
         "timestamp": timestamp,
         "model_name": model_name,
         # Every event gets a family looked up right here, so nothing
         # downstream (charts, tables) ever has to think about the
         # model->family mapping again.
-        "model_family": family_for_model(model_name) if model_name else UNMAPPED_FAMILY,
+        "model_family": family_for_model(model_name),
         "status": status,
         "failure_reason": reason,
         "data_source": source,
@@ -652,8 +660,21 @@ def parse_log_file(log_file, start_int, end_int, patterns):
                 mm, dd, yy = date_part.split("/")
                 date_int = int(f"{yy}{mm}{dd}")
 
-                if not (start_int <= date_int <= end_int):
-                    # Outside the requested range -- ignore this event
+                if date_int > end_int:
+                    # Past the requested range. Any pending block was
+                    # already flushed above, so there's nothing left to
+                    # do with this line -- and since Semaphore logs are
+                    # written chronologically within a file, every line
+                    # after this one will also be past end_int, so stop
+                    # reading the rest of the file instead of scanning to
+                    # EOF. (This assumes strict chronological order; a
+                    # log with an out-of-order line after this point --
+                    # e.g. a delayed flush -- would have that line
+                    # silently skipped rather than read.)
+                    break
+
+                if date_int < start_int:
+                    # Before the requested range -- ignore this event
                     # entirely and stop tracking any block that might
                     # have been open (it belongs to a date we don't want
                     # anyway).
@@ -662,12 +683,11 @@ def parse_log_file(log_file, start_int, end_int, patterns):
 
                 if "completed successfully" in line:
                     model = extract_model_name(line, patterns)
-                    if model:
-                        last_known_model = model
-                        events.append(make_event(
-                            current_timestamp, model, "success", "", "", "", "",
-                            log_file, line_num,
-                        ))
+                    last_known_model = model or last_known_model
+                    events.append(make_event(
+                        current_timestamp, model, "success", "", "", "", "",
+                        log_file, line_num,
+                    ))
 
                 elif patterns["failure_block_start"].search(line):
                     # Open a new failure block and start accumulating.
@@ -708,6 +728,16 @@ def parse_log_file(log_file, start_int, end_int, patterns):
                     if model:
                         pending_failure_model = model
                     pending_failure_content += "\n" + line
+                elif connection_failure_pending:
+                    # Not expected in practice -- a connection-failure
+                    # block ends in a crash, not a "FAILED - Null result
+                    # inserted" line -- but if it ever does happen, treat
+                    # it as a continuation line of the block that's
+                    # actually open instead of silently dropping it. This
+                    # file's philosophy is "never silently guess or drop,
+                    # always show it as unknown," so an unexpected line
+                    # still has to land somewhere.
+                    connection_failure_content += "\n" + line
 
             elif pending_failure:
                 # Continuation line -- could be inside the original
@@ -777,6 +807,15 @@ def parse_all_logs(log_files, start_int, end_int, patterns):
         all_events.extend(parse_log_file(log_file, start_int, end_int, patterns))
 
     df = pd.DataFrame(all_events)
+
+    if df.empty:
+        # No events fell in the requested range. pd.DataFrame([]) has NO
+        # columns at all (not even "timestamp"), so touching df["timestamp"]
+        # below would raise a KeyError before main() ever gets a chance to
+        # print its friendly "No events found" message. Bail out here with
+        # the same empty-but-columnless DataFrame; callers already check
+        # df.empty before doing anything else with it.
+        return df
 
     # Convert the timestamp column from a raw "MM/DD/YY HH:MM:SS" string
     # into an actual pandas Timestamp -- everything downstream (sorting,
@@ -1144,6 +1183,16 @@ def chart_runs_over_time(df):
                                   colors=["#4C9F70", "#C1554B"])
 
 
+def full_date_index(df):
+    """Every calendar date from the overall dataset's min to max date,
+    inclusive -- used to reindex "over time" charts so days with zero
+    events still show up on the x-axis instead of being skipped, which
+    would otherwise make the chart look like a continuous trend across
+    what were actually long silent gaps.
+    """
+    return pd.date_range(df["date"].min(), df["date"].max(), freq="D").date
+
+
 def chart_failures_by_family_over_time(df, top_n=OVERALL_CHART_FAMILY_LIMIT):
     """One line per family, capped to the top_n worst families so the
     legend stays readable even with many families defined.
@@ -1152,6 +1201,7 @@ def chart_failures_by_family_over_time(df, top_n=OVERALL_CHART_FAMILY_LIMIT):
     top_families = failed["model_family"].value_counts().head(top_n).index
     daily_by_family = failed.groupby(["date", "model_family"]).size().unstack(fill_value=0)
     daily_by_family = daily_by_family.reindex(columns=top_families, fill_value=0)
+    daily_by_family = daily_by_family.reindex(index=full_date_index(df), fill_value=0)
     x_labels = [d.strftime("%m/%d") for d in daily_by_family.index]
     series = {fam: daily_by_family[fam].tolist() for fam in daily_by_family.columns}
     return svg_multi_line_chart(x_labels, series, title=f"Failures by Model Family Over Time (Top {top_n} Families)")
@@ -1174,7 +1224,7 @@ def chart_family_over_time(df, family):
     family's report section.
     """
     family_failed = df[(df["model_family"] == family) & (df["status"] == "failed")]
-    daily = family_failed.groupby("date").size()
+    daily = family_failed.groupby("date").size().reindex(full_date_index(df), fill_value=0)
     x_labels = [d.strftime("%m/%d") for d in daily.index]
     return svg_multi_line_chart(x_labels, {family: daily.tolist()}, title=f"{family}: Failures Over Time")
 
@@ -1186,9 +1236,12 @@ def chart_family_over_time(df, family):
 def series_to_html_table(series, col_names):
     """Turn a pandas Series (e.g. value_counts() output) into a small
     HTML table."""
-    rows = "".join(f"<tr><td>{index}</td><td>{value}</td></tr>" for index, value in series.items())
+    rows = "".join(
+        f"<tr><td>{html.escape(str(index))}</td><td>{html.escape(str(value))}</td></tr>"
+        for index, value in series.items()
+    )
     return (
-        f"<table><thead><tr><th>{col_names[0]}</th><th>{col_names[1]}</th></tr></thead>"
+        f"<table><thead><tr><th>{html.escape(col_names[0])}</th><th>{html.escape(col_names[1])}</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
     )
 
@@ -1198,10 +1251,12 @@ def dataframe_to_html_table(df):
     used for the top-failing-models table and the investigator-notes
     tables.
     """
-    header = "".join(f"<th>{col}</th>" for col in df.columns)
+    header = "".join(f"<th>{html.escape(str(col))}</th>" for col in df.columns)
     rows = ""
     for _, row in df.iterrows():
-        cells = "".join(f"<td>{'' if pd.isna(v) else v}</td>" for v in row)
+        cells = "".join(
+            f"<td>{'' if pd.isna(v) else html.escape(str(v))}</td>" for v in row
+        )
         rows += f"<tr>{cells}</tr>"
     return f"<table><thead><tr>{header}</tr></thead><tbody>{rows}</tbody></table>"
 
@@ -1211,8 +1266,8 @@ def render_overall_section(stats, charts, top_reasons, top_models):
     summary numbers, the four whole-dataset charts, and the two overall
     top-N tables.
     """
-    html = "<h2>Summary</h2>"
-    html += (
+    html_str = "<h2>Summary</h2>"
+    html_str += (
         "<table><tbody>"
         f"<tr><td>Total runs</td><td>{stats['total']}</td></tr>"
         f"<tr><td>Successful</td><td>{stats['success_count']}</td></tr>"
@@ -1220,29 +1275,29 @@ def render_overall_section(stats, charts, top_reasons, top_models):
         f"<tr><td>Success rate</td><td>{stats['success_rate']:.2f}%</td></tr>"
         "</tbody></table>"
     )
-    html += f'<div class="chart">{charts["success_vs_failure"]}</div>'
+    html_str += f'<div class="chart">{charts["success_vs_failure"]}</div>'
 
-    html += "<h2>Runs Over Time</h2>"
-    html += f'<div class="chart">{charts["runs_over_time"]}</div>'
+    html_str += "<h2>Runs Over Time</h2>"
+    html_str += f'<div class="chart">{charts["runs_over_time"]}</div>'
 
-    html += "<h2>Failures by Model Family Over Time</h2>"
-    html += (
+    html_str += "<h2>Failures by Model Family Over Time</h2>"
+    html_str += (
         f"<p class='note'>Top {OVERALL_CHART_FAMILY_LIMIT} families by total failure count. "
         "Family grouping comes from the hardcoded <code>MODEL_FAMILIES</code> list at the "
         "top of this script.</p>"
     )
-    html += f'<div class="chart">{charts["failures_by_family_over_time"]}</div>'
+    html_str += f'<div class="chart">{charts["failures_by_family_over_time"]}</div>'
 
-    html += "<h2>Failure Reasons by Family</h2>"
-    html += f'<div class="chart">{charts["failure_reasons_by_family"]}</div>'
+    html_str += "<h2>Failure Reasons by Family</h2>"
+    html_str += f'<div class="chart">{charts["failure_reasons_by_family"]}</div>'
 
-    html += "<h2>Top Failure Reasons (Overall)</h2>"
-    html += series_to_html_table(top_reasons, ("Reason", "Count"))
+    html_str += "<h2>Top Failure Reasons (Overall)</h2>"
+    html_str += series_to_html_table(top_reasons, ("Reason", "Count"))
 
-    html += "<h2>Models with Most Failures (Overall)</h2>"
-    html += dataframe_to_html_table(top_models)
+    html_str += "<h2>Models with Most Failures (Overall)</h2>"
+    html_str += dataframe_to_html_table(top_models)
 
-    return html
+    return html_str
 
 
 def render_family_section(df, family):
@@ -1259,29 +1314,29 @@ def render_family_section(df, family):
     reason_counts = family_df[family_df["status"] == "failed"]["failure_reason"].value_counts()
     notes_table, true_total = build_notes_table(df, family)
 
-    html = f"<h2>Family: {family}</h2>"
-    html += (
+    html_str = f"<h2>Family: {html.escape(str(family))}</h2>"
+    html_str += (
         "<p class='family-stats'>"
         f"Runs: {family_stats['total']} &nbsp;|&nbsp; "
         f"Failures: {family_stats['failed_count']} &nbsp;|&nbsp; "
         f"Success rate: {family_stats['success_rate']:.2f}%"
         "</p>"
     )
-    html += f'<div class="chart">{chart_svg}</div>'
+    html_str += f'<div class="chart">{chart_svg}</div>'
 
-    html += "<h3>Failure reasons in this family</h3>"
-    html += series_to_html_table(reason_counts, ("Reason", "Count"))
+    html_str += "<h3>Failure reasons in this family</h3>"
+    html_str += series_to_html_table(reason_counts, ("Reason", "Count"))
 
-    html += "<h3>Investigator notes</h3>"
+    html_str += "<h3>Investigator notes</h3>"
     if true_total > NOTES_TABLE_CAP:
-        html += (
+        html_str += (
             f"<p class='note'>Showing top {NOTES_TABLE_CAP} of {true_total} failures, "
             "grouped by most-common reason then most recent. "
             "See the CSV for the full list.</p>"
         )
-    html += dataframe_to_html_table(notes_table)
+    html_str += dataframe_to_html_table(notes_table)
 
-    return html
+    return html_str
 
 
 # =============================================================================
@@ -1350,10 +1405,10 @@ def build_report(df, output_dir):
     for family in families_with_failures_worst_first(df):
         body += render_family_section(df, family)
 
-    html = f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>Semaphore Model Run Report</title><style>{REPORT_CSS}</style></head><body>{body}</body></html>"
+    html_doc = f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>Semaphore Model Run Report</title><style>{REPORT_CSS}</style></head><body>{body}</body></html>"
 
     report_path = output_dir / "report.html"
-    report_path.write_text(html)
+    report_path.write_text(html_doc)
     return report_path
 
 

@@ -73,6 +73,16 @@ docker compose -f ./docker-compose.yml up -d
 # Update the cron file on the VM
 python3 tools/init_cron.py -r ./data/dspec -i ./schedule
 
+# Re-append the weekly model-run report job (Friday mornings, last 7
+# days) -- init_cron.py replaces the whole crontab every deploy, so this
+# can't live in ./schedule; it has to be added back on AFTER init_cron.py
+# runs. Checked first so repeated deploys don't pile up duplicate lines.
+SEMAPHORE_ROOT="$(pwd)"
+WEEKLY_REPORT_CRON="0 6 * * 5 $SEMAPHORE_ROOT/tools/run_weekly_model_report.sh >> $SEMAPHORE_ROOT/tools/parsed_semaphore_logs/weekly_report.log 2>&1"
+if ! crontab -l 2>/dev/null | grep -qF "run_weekly_model_report.sh"; then
+    (crontab -l 2>/dev/null; echo "$WEEKLY_REPORT_CRON") | crontab -
+fi
+
 # initialize the db in the containers
 docker exec semaphore-core python3 tools/migrate_db.py 
 
