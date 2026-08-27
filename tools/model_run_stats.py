@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # model_run_stats.py
 # -------------------------------
-# Created By: Savannah Stephenson and Claude AI
+# Created By: Savannah Stephenson
 # -------------------------------
 """
 Walks Semaphore log files for a given date range, pulls out "success" and
