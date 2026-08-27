@@ -43,12 +43,12 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
     This class implements the ISeriesStorage interface using SQLAlchemy ORM for PostgreSQL
 
     Class Attributes:
-        _engine (dict[str, Engine]) - A dictionary that maps database connection strings to
+        _engine_mapping (dict[str, Engine]) - A dictionary that maps database connection strings to
             an SQLAlchemy Engine object. This is to ensure that each unique database connection
             string has its own Engine, and that the created engine is reused for repeated
             connections to the same db
         
-        _lock (Lock) - A lock to ensure that all reads and writes to the engine dictionary are thread safe
+        _engine_mapping_lock (Lock) - A lock to ensure that all reads and writes to the engine dictionary are thread safe
     """
     _engine_mapping: dict[str, Engine] = {}
     _engine_mapping_lock = Lock()
