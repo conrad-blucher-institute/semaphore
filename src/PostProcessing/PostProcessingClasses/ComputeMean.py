@@ -175,7 +175,7 @@ class ComputeMean(IPostProcessing):
                 "thresholdDeviationFromMedian must be numeric."
             ) from error
 
-        if threshold < 0:
+        if threshold <= 0:
             raise ValueError(
                 "thresholdDeviationFromMedian cannot be negative."
             )
