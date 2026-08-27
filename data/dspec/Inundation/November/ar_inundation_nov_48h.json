@@ -5,7 +5,7 @@
     "author": "Marina VicensMiquel",
     "modelFileName": "./inundation/November/november_48h",
     "timingInfo":{
-        "active": true,
+        "active": false,
         "offset": 1800,
         "interval": 3600
     },

@@ -5,7 +5,7 @@
     "author": "Marina VicensMiquel",
     "modelFileName": "./inundation/September/september_24h",
     "timingInfo":{
-        "active": true,
+        "active": false,
         "offset": 2040,
         "interval": 3600
     },
