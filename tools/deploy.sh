@@ -73,20 +73,6 @@ docker compose -f ./docker-compose.yml up -d
 # Update the cron file on the VM
 python3 tools/init_cron.py -r ./data/dspec -i ./schedule
 
-# Ensure weekly report cron job and log file is installed 
-LOG_FILE="/home/semaphore.svc/semaphore/logs/weekly_report.log"
-CRON_CMD="cd /home/semaphore.svc/semaphore && /usr/bin/python3 ./tools/run_weekly_report.py >> ${LOG_FILE} 2>&1"
-CRON_LINE="0 6 * * 5 ${CRON_CMD}"
-
-touch "$LOG_FILE"
-
-if ! crontab -l 2>/dev/null | grep -qF "run_weekly_report.py"; then
-    echo "Installing weekly report cron job..."
-    (crontab -l 2>/dev/null; echo "$CRON_LINE") | crontab -
-else
-    echo "Weekly report cron job already present, skipping."
-fi
-
 # initialize the db in the containers
 docker exec semaphore-core python3 tools/migrate_db.py 
 
