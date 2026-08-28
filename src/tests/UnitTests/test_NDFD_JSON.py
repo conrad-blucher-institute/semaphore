@@ -1008,3 +1008,85 @@ class TestNDFDJSON:
         pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
         
 #endregion
+
+
+def test_ingest_series_skips_null_data_values(monkeypatch):
+    """NDFD entries containing JSON null values should not create rows."""
+
+    ingestion = NDFD_JSON()
+
+    series_description = SeriesDescription(
+        "NDFD",
+        "TestLocation",
+        "pAirTemp",
+    )
+
+    time_description = TimeDescription(
+        datetime(2026, 8, 28, 0, 0, tzinfo=timezone.utc),
+        datetime(2026, 8, 28, 3, 0, tzinfo=timezone.utc),
+    )
+
+    api_data = {
+        "properties": {
+            "updateTime": "2026-08-28T00:00:00+00:00",
+            "temperature": {
+                "uom": "wmoUnit:degC",
+                "values": [
+                    {
+                        "validTime": "2026-08-28T00:00:00+00:00/PT1H",
+                        "value": 24.0,
+                    },
+                    {
+                        "validTime": "2026-08-28T01:00:00+00:00/PT1H",
+                        "value": None,
+                    },
+                    {
+                        "validTime": "2026-08-28T02:00:00+00:00/PT1H",
+                        "value": 26.0,
+                    },
+                ],
+            },
+        }
+    }
+
+    mock_response = MagicMock()
+    mock_response.json.return_value = api_data
+
+    monkeypatch.setattr(
+        ingestion,
+        "_get_lat_lon_from_location_code",
+        lambda location_code: (28.28, -96.71),
+    )
+    monkeypatch.setattr(
+        ingestion,
+        "_get_forecast_url",
+        lambda lat, lon: "https://example.com/forecast",
+    )
+    monkeypatch.setattr(
+        ingestion,
+        "_make_api_request",
+        lambda url: mock_response,
+    )
+
+    result = ingestion.ingest_series(
+        series_description,
+        time_description,
+    )
+
+    output_df = result.dataFrame
+
+    # The null value at 01:00 should not create a row.
+    assert len(output_df) == 2
+
+    assert output_df["timeVerified"].tolist() == [
+        datetime(2026, 8, 28, 0, 0, tzinfo=timezone.utc),
+        datetime(2026, 8, 28, 2, 0, tzinfo=timezone.utc),
+    ]
+
+    assert output_df["dataValue"].tolist() == [
+        "24.0",
+        "26.0",
+    ]
+
+    # Confirm that None was not converted into a string.
+    assert "None" not in output_df["dataValue"].tolist()

@@ -76,7 +76,11 @@ class NDFD_JSON(IDataIngestion):
         for item in prediction_values:
             # the validTime comes with a duration appended to it (e.g, PT4H: P means this is a duration, T means it's a time (not a date) and 3H means 3 hours including the start time)
             # we need to use the duration to add potentially missing data. For example, if the duration is PT4H, we need to ensure we have data for the next 4 hours, as the next entry in the values dictionary will be for 4 hours from the current prediction. It gets a little complicated for wind components as we could theoritically have non-aligned start time and durations, however, it looks like the wind dir and speed are always aligned in the response.
-            
+            value = item.get("value")
+            # Skip this row if datavalue is null
+            if value is None or pandas.isna(value):
+                continue
+
             verification_time, duration = self._get_start_time_and_duration(item['validTime'])
 
             # filter out data that is outside the requested time range
