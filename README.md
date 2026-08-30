@@ -2,7 +2,7 @@
 
 ## Description
 
-Semaphore is a student-built and maintained Python application that semi-automates the process of operationalizing AI models. Semaphore downloads and postprocess' data, runs models, and saves the output to our database. Semaphore currently takes model data in the form of .H5, .keras file. Input specifications for each model are located in the DSPEC JSON. Examples are included in this repository.
+Semaphore is a student-built and maintained Python application that semi-automates the process of operationalizing AI models. Semaphore downloads and postprocess' data, runs models, and saves the output to our database. Semaphore currently takes model data in the form of .H5 or .keras file. Input specifications for each model are located in the DSPEC JSON. Examples are included in this repository.
 
 ## Dependency
 - Python version >= 3.10
