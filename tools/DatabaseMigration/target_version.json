@@ -1,4 +1,4 @@
 {
-    "Target Version" : "3.7",
-    "Description" : "Adds the new output_statistics table."
+    "Target Version" : "3.8",
+    "Description" : "Adds new rows to the ref_dataLocation table and the dataLocation_dataSource_mapping table for the operation of the ESB model."
 }
