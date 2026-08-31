@@ -1,4 +1,4 @@
 {
     "Target Version" : "3.8",
-    "Description" : "Adds Port Lavaca, Seadrift, Aransas Wildlife Refuge, and Espiritu Santo Bay to the ref_dataLocation table and the dataLocation_dataSource_mapping table for the operation of the ESB model."
+    "Description" : "Adds new rows to the ref_dataLocation table and the dataLocation_dataSource_mapping table for the operation of the ESB model."
 }

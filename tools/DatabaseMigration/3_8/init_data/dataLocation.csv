@@ -1,5 +1,4 @@
 code,displayName,notes,latitude,longitude
-PLavaca,Port Lavaca,Port Lavaca TX using NOAATANDC,28.640,-96.610
-Seadrift,Seadrift,Seadrift TX using NOAATANDC,28.407,-96.712
-AransasWildlifeRefuge,Aransas Wildlife Refuge,Aransas Wildlife Refuge TX using NOAATANDC,28.228,-96.795
-EspirituSantoBay,Espiritu Santo Bay,Espiritu Santo Bay,28.355062,-96.511947
+Seadrift,Seadrift,lat/lon shown in DD converted from NOAA's original DDM format,28.407,-96.712
+AransasWildlifeRefuge,Aransas Wildlife Refuge,lat/lon shown in DD converted from NOAA's original DDM format,28.228,-96.795
+EspirituSantoBay,Espiritu Santo Bay,lat/lon points chosen by us,28.355062,-96.511947
