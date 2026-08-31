@@ -131,7 +131,7 @@ class Migrator(IDatabaseMigration):
 
         :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
 
-        :return: bool indicating successful update
+        :return: bool indicating successful rollback
         """
 
         location_rows, mapping_rows = self._read_rows()
