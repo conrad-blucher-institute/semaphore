@@ -16,7 +16,6 @@ for the operation of the ESB cold stunning model.
 # Imports
 from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
 from sqlalchemy import Engine
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.sql import text
 import csv
 
