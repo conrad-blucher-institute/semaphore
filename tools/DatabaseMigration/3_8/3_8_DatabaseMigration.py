@@ -9,6 +9,12 @@
 This db migration script adds Seadrift, Aransas Wildlife Refuge, and ESB to the ref_dataLocation table
 and adds Port Lavaca, Seadrift, and Aransas Wildlife Refuge to the dataLocation_dataSource_mapping table
 for the operation of the ESB cold stunning model.
+
+NOTE: The ref_dataLocation table depends on the mapping table, inputs table, and the outputs table.
+The rows in the location csv and mapping csv are not the same, so the rollback
+will first delete rows from the inputs and outputs table based on the dataLocation csv,
+then delete the rows from the mapping table based on the dataMapping csv, then finally
+delete the rows from the ref_dataLocation table based on the dataLocation csv.
 """ 
 # ----------------------------------
 # 
@@ -22,6 +28,7 @@ import csv
 # Constants
 MAPPING_CSV = './tools/DatabaseMigration/3_8/init_data/dataMapping.csv'
 LOCATION_CSV = './tools/DatabaseMigration/3_8/init_data/dataLocation.csv'
+DELETE_DUMP = 'deletion_dump.txt'
 
 
 class Migrator(IDatabaseMigration):
@@ -139,7 +146,22 @@ class Migrator(IDatabaseMigration):
             # conn.begin() will commit a single transaction at the end of the with block
             with conn.begin():
 
-                # delete rows from the mapping table first
+                # delete rows from the inputs and outputs table that reference the ref_dataLocation table
+                for table in ('inputs', 'outputs'):
+                    for row in location_rows:
+                        stmt = text(f"""
+                            DELETE FROM "{table}"
+                            WHERE "dataLocation" = :code
+                        """)
+
+                        bind_params = {
+                            "code": row["code"]
+                        }
+
+                        stmt = stmt.bindparams(**bind_params)
+                        conn.execute(stmt)
+
+                # delete rows from the mapping table based on the dataMapping csv
                 for row in mapping_rows:
                     stmt = text("""
                         DELETE FROM "dataLocation_dataSource_mapping"
@@ -155,7 +177,7 @@ class Migrator(IDatabaseMigration):
                     stmt = stmt.bindparams(**bind_params)
                     conn.execute(stmt)
 
-                # then delete rows from the location table
+                # lastly delete rows from the location table
                 for row in location_rows:
                     stmt = text("""
                         DELETE FROM "ref_dataLocation"
