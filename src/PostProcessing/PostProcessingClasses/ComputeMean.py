@@ -106,7 +106,7 @@ class ComputeMean(IPostProcessing):
         template_series = target_series[0]
 
         # get only the series values for each input series
-        # rename is called to ensure each series is uniquely identified by their outKey
+        # rename is called to ensure each series is uniquely identified by their inKey
         # instead of duplicating "dataValue" for each series
         series_values_list = [
             self._get_series_values(series).rename(key)
