@@ -78,8 +78,8 @@
         { 
             "_name": "Harmonic Predictions",
             "location": "PortLavaca",
-            "source": "LIGHTHOUSE",
-            "series": "pHarm",
+            "source": "NOAATANDC",
+            "series": "pWl",
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
@@ -89,8 +89,8 @@
         { 
             "_name": "Harmonic Predictions POC",
             "location": "PortOConnor",
-            "source": "LIGHTHOUSE",
-            "series": "pHarm",
+            "source": "NOAATANDC",
+            "series": "pWl",
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,

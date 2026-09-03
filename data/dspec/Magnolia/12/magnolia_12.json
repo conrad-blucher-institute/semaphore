@@ -47,7 +47,7 @@
             }
         },
         {
-            "_name": "Primary Water Level",
+            "_name": "Water Level",
             "location": "PortOConnor",
             "source": "NOAATANDC",
             "series": "dWl",
