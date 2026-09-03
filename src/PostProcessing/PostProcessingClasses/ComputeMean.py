@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 
 from PostProcessing.IPostProcessing import IPostProcessing
-from DataClasses import Series, get_input_dataFrame
+from DataClasses import Series, TimeDescription, get_input_dataFrame
 from ModelExecution.dspecParser import PostProcessCall
 
 
@@ -100,17 +100,15 @@ class ComputeMean(IPostProcessing):
         # validate and cast the thresholdDeviationFromMedian argument if drop_outliers is true
         threshold = self._get_outlier_threshold(args=args, drop_outliers=drop_outliers)
 
-        target_series = [preprocessedData[key] for key in target_keys]
-
         # use the first series as a template for general series metadata
-        template_series = target_series[0]
+        template_series = preprocessedData[target_keys[0]]
 
         # get only the series values for each input series
         # rename is called to ensure each series is uniquely identified by their inKey
         # instead of duplicating "dataValue" for each series
         series_values_list = [
-            self._get_series_values(series).rename(key)
-            for key, series in zip(target_keys, target_series)
+            self._get_series_values(preprocessedData[key]).rename(key)
+            for key in target_keys
         ]
 
         # Each column represents one series and each row represents
@@ -140,7 +138,7 @@ class ComputeMean(IPostProcessing):
         # The computed series is identified by its outKey. 
         series_description.dataSeries = out_key
 
-        # It does not inherit it's datum
+        # the output series will not contain a datum
         if hasattr(series_description,"dataDatum",):
             series_description.dataDatum = None
 
@@ -240,13 +238,13 @@ class ComputeMean(IPostProcessing):
         Returns:
             float | None: The mean value for the row, or None if no valid values exist in the row
 
-        NOTE:Sentinel values have already been converted to
+        NOTE: Sentinel values have already been converted to
         NaN before this method is called.
         """
         valid_values = row.dropna()
 
         if valid_values.empty:
-            return None
+            raise ValueError("Cannot compute mean for a row with no valid values.")
 
         if drop_outliers:
             if threshold is None:
@@ -260,7 +258,7 @@ class ComputeMean(IPostProcessing):
             valid_values = valid_values[deviation_from_median < threshold]
 
         if valid_values.empty:
-            return None
+            raise ValueError("Cannot compute mean for a row with no valid values.")
 
         return valid_values.mean()
 

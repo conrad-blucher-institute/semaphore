@@ -35,6 +35,7 @@ from src.ModelExecution.dspecParser import PostProcessCall
 from src.PostProcessing.IPostProcessing import post_processing_factory
 
 import pandas as pd
+import numpy as np
 import pytest
 
 START = datetime(
@@ -270,7 +271,7 @@ def test_get_series_values_replaces_string_sentinel(compute_mean):
 
 def test_post_process_data_uses_union_of_timestamps(compute_mean):
         """
-        Tests that the output series does not drop any timstamps present in any of the input series.
+        Tests that the output series does not drop any timestamps present in any of the input series.
 
         EX: a timestamp that only appears in 1 series should still be present in the output
         """
@@ -537,3 +538,103 @@ def test_post_process_data_does_not_modify_input_series(compute_mean):
                 preprocessed_data[key].dataFrame,
                 expected_df
             )
+
+
+@pytest.mark.parametrize(
+    "preprocessed_data",
+    [
+        {
+            # empty lists
+            "station-one": build_series_obj(
+                [],
+                sentinel_value=1000
+            ),
+            "station-two": build_series_obj(
+                [],
+                sentinel_value=1000
+            )
+        },
+        {
+            # lists of None
+            "station-one": build_series_obj(
+                [None, None, None],
+                sentinel_value=1000
+            ),
+            "station-two": build_series_obj(
+                [None, None, None],
+                sentinel_value=1000
+            ) 
+        },
+        {
+            # lists of np.nan
+            "station-one": build_series_obj(
+                [np.nan, np.nan, np.nan],
+                sentinel_value=1000
+            ),
+            "station-two": build_series_obj(
+                [np.nan, np.nan, np.nan],
+                sentinel_value=1000
+            ) 
+        },
+        {
+            # lists of "nan" strings
+            "station-one": build_series_obj(
+                ['nan', 'nan', 'nan'],
+                sentinel_value=1000
+            ),
+            "station-two": build_series_obj(
+                ['nan', 'nan', 'nan'],
+                sentinel_value=1000
+            ) 
+        },
+        {
+            # mix of None, np.nan, and "nan" strings
+            "station-one": build_series_obj(
+                [None, np.nan, 'nan'],
+                sentinel_value=1000
+            ),
+            "station-two": build_series_obj(
+                [np.nan, 'None', 'nan'],
+                sentinel_value=1000
+            )
+        },
+        {
+            # all values are dropped by sentinel value
+            "station-one": build_series_obj(
+                [1000, 1000, 1000],
+                sentinel_value=1000
+            ),
+            "station-two": build_series_obj(
+                [1000, 1000, 1000],
+                sentinel_value=1000
+            )
+        }
+    ],
+    ids=[
+        "empty-lists",
+        "lists-of-None",
+        "lists-of-nan",
+        "lists-of-string-nan",
+        "mixed-None-np.nan-string-nan",
+        "all-dropped-values"
+    ]
+)
+def test_post_process_data_handles_empty_series(compute_mean, preprocessed_data):
+    """
+    tests that ComputeMean can handle various cases of empty/invalid inputs.
+    """
+    #preprocessed_data["station-one"].dataFrame['dataValue']
+
+    post_process_call = PostProcessCall()
+    post_process_call.call = "ComputeMean"
+    post_process_call.args = {
+        "target_inKeys": [
+            "station-one",
+            "station-two"
+        ],
+        "dropOutlierValues": False,
+        "outKey": "ESB-combined-water-temp"
+    }
+
+    with pytest.raises(ValueError):
+        result = compute_mean.post_process_data(preprocessed_data, post_process_call)
