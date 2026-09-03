@@ -177,10 +177,10 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                30,
+                24,
                 1
             ],
-            "outKey": "Espiritu-Santo-Bay_predicted_air-temp_30",
+            "outKey": "Espiritu-Santo-Bay_predicted_air-temp_24",
             "stalenessOffset": 45000,
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -241,11 +241,11 @@
             ]
         },
         {
-            "key": "Espiritu-Santo-Bay_predicted_air-temp_30",
+            "key": "Espiritu-Santo-Bay_predicted_air-temp_24",
             "dType": "float",
             "indexes": [
                 0,
-                29
+                23
             ]
         }
     ]

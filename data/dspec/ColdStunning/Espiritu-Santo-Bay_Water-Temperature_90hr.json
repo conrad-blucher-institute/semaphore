@@ -1,9 +1,9 @@
 {
     "dspecVersion": "2.0",
-    "modelName": "Espiritu-Santo-Bay_Water-Temperature_6hr",
+    "modelName": "Espiritu-Santo-Bay_Water-Temperature_90hr",
     "modelVersion": "1.0.0",
     "author": "Ayesha Khan",
-    "modelFileName": "./ColdStunning/Espiritu-Santo-Bay_Water-Temperature_6hr",
+    "modelFileName": "./ColdStunning/Espiritu-Santo-Bay_Water-Temperature_90hr",
     "timingInfo": {
         "active": true,
         "offset": 1500,
@@ -11,7 +11,7 @@
     },
     "outputInfo": {
         "outputMethod": "DefaultOutputHandler",
-        "leadTime": 21600,
+        "leadTime": 324000,
         "series": "pWaterTmp",
         "location": "EspirituSantoBay",
         "unit": "celsius"
@@ -36,7 +36,7 @@
                 }
             }
         },
-         {
+        {
             "_name": "Water_Temp_SD",
             "location": "Seadrift",
             "source": "LIGHTHOUSE",
@@ -177,10 +177,10 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                12,
+                90,
                 1
             ],
-            "outKey": "Espiritu-Santo-Bay_predicted_air-temp_12",
+            "outKey": "Espiritu-Santo-Bay_predicted_air-temp_90",
             "stalenessOffset": 45000,
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -224,8 +224,29 @@
         }
     ],
     "vectorOrder": [
-        { "key": "Espiritu-Santo-Bay_water-temp_25"        , "dType": "float", "indexes": [2, 26] },
-        { "key": "Espiritu-Santo-Bay_air-temp_25"          , "dType": "float", "indexes": [2, 26] },
-        { "key": "Espiritu-Santo-Bay_predicted_air-temp_12", "dType": "float", "indexes": [0, 11] }
+        {
+            "key": "Espiritu-Santo-Bay_water-temp_25",
+            "dType": "float",
+            "indexes": [
+                2,
+                26
+            ]
+        },
+        {
+            "key": "Espiritu-Santo-Bay_air-temp_25",
+            "dType": "float",
+            "indexes": [
+                2,
+                26
+            ]
+        },
+        {
+            "key": "Espiritu-Santo-Bay_predicted_air-temp_90",
+            "dType": "float",
+            "indexes": [
+                0,
+                89
+            ]
+        }
     ]
 }

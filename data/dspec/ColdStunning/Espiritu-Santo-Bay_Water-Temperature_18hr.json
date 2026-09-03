@@ -1,9 +1,9 @@
 {
     "dspecVersion": "2.0",
-    "modelName": "Espiritu-Santo-Bay_Water-Temperature_3hr",
+    "modelName": "Espiritu-Santo-Bay_Water-Temperature_18hr",
     "modelVersion": "1.0.0",
     "author": "Ayesha Khan",
-    "modelFileName": "./ColdStunning/Espiritu-Santo-Bay_Water-Temperature_3hr",
+    "modelFileName": "./ColdStunning/Espiritu-Santo-Bay_Water-Temperature_18hr",
     "timingInfo": {
         "active": true,
         "offset": 1500,
@@ -11,7 +11,7 @@
     },
     "outputInfo": {
         "outputMethod": "DefaultOutputHandler",
-        "leadTime": 10800,
+        "leadTime": 64800,
         "series": "pWaterTmp",
         "location": "EspirituSantoBay",
         "unit": "celsius"
@@ -36,7 +36,7 @@
                 }
             }
         },
-         {
+        {
             "_name": "Water_Temp_SD",
             "location": "Seadrift",
             "source": "LIGHTHOUSE",
@@ -54,7 +54,7 @@
                     "sentinel_value": 10000
                 }
             }
-        },        
+        },
         {
             "_name": "Water_Temp_PO",
             "location": "PortOConnor",
@@ -73,7 +73,7 @@
                     "sentinel_value": 10000
                 }
             }
-        },       
+        },
         {
             "_name": "Water_Temp_AWR",
             "location": "AransasWildlifeRefuge",
@@ -92,7 +92,7 @@
                     "sentinel_value": 10000
                 }
             }
-        },       
+        },
         {
             "_name": "Air_Temp_PL",
             "location": "PortLavaca",
@@ -177,10 +177,10 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                9,
+                18,
                 1
             ],
-            "outKey": "Espiritu-Santo-Bay_predicted_air-temp_9",
+            "outKey": "Espiritu-Santo-Bay_predicted_air-temp_18",
             "stalenessOffset": 45000,
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -197,14 +197,14 @@
             "call": "ComputeMean",
             "args": {
                 "dropOutlierSeries": false,
-                "sentinel_value": 10000,                
+                "sentinel_value": 10000,
                 "targetSeries": [
                     "Aransas-Wildlife-Refuge_air-temp_25",
                     "Port-OConnor_air-temp_25",
                     "Seadrift_air-temp_25",
                     "Port-Lavaca_air-temp_25"
                 ],
-                "outKey": "Espiritu-Santo-Bay_air-temp_25"    
+                "outKey": "Espiritu-Santo-Bay_air-temp_25"
             }
         },
         {
@@ -219,13 +219,34 @@
                     "Seadrift_water-temp_25",
                     "Port-Lavaca_water-temp_25"
                 ],
-                "outKey": "Espiritu-Santo-Bay_water-temp_25"    
+                "outKey": "Espiritu-Santo-Bay_water-temp_25"
             }
         }
     ],
     "vectorOrder": [
-        { "key": "Espiritu-Santo-Bay_water-temp_25"       , "dType": "float", "indexes": [2, 26] },
-        { "key": "Espiritu-Santo-Bay_air-temp_25"         , "dType": "float", "indexes": [2, 26] },
-        { "key": "Espiritu-Santo-Bay_predicted_air-temp_9", "dType": "float", "indexes": [0, 8] }
+        {
+            "key": "Espiritu-Santo-Bay_water-temp_25",
+            "dType": "float",
+            "indexes": [
+                2,
+                26
+            ]
+        },
+        {
+            "key": "Espiritu-Santo-Bay_air-temp_25",
+            "dType": "float",
+            "indexes": [
+                2,
+                26
+            ]
+        },
+        {
+            "key": "Espiritu-Santo-Bay_predicted_air-temp_18",
+            "dType": "float",
+            "indexes": [
+                0,
+                17
+            ]
+        }
     ]
 }
