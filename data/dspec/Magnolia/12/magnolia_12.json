@@ -18,15 +18,15 @@
     },
     "dependentSeries": [
         {
-            "_name": "Primary Water Level",
+            "_name": "Water Level",
             "location": "PortLavaca",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dWl",
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
-            "range": [1, -26],
-            "outKey": "PL_PWL_25",
+            "range": [0, -24],
+            "outKey": "PL_WL_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
@@ -35,11 +35,11 @@
         {
             "_name": "Surge",
             "location": "PortLavaca",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dSurge",
             "unit": "meter",
             "interval": 3600,
-            "range": [1, -26],
+            "range": [0, -24],
             "outKey": "PL_Surge_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -49,13 +49,13 @@
         {
             "_name": "Primary Water Level",
             "location": "PortOConnor",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dWl",
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
-            "range": [1, -26],
-            "outKey": "POC_PWL_25",
+            "range": [0, -24],
+            "outKey": "POC_WL_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
@@ -64,11 +64,11 @@
         {
             "_name": "Surge",
             "location": "PortOConnor",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dSurge",
             "unit": "meter",
             "interval": 3600,
-            "range": [1, -26],
+            "range": [0, -24],
             "outKey": "POC_Surge_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -78,11 +78,11 @@
         {
             "_name": "Wind Direction",
             "location": "PortLavaca",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dWnDir",
             "unit": "degrees",
             "interval": 3600,
-            "range": [1, -26],
+            "range": [0, -24],
             "outKey": "PL_WNDIR_25",
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
@@ -92,11 +92,11 @@
         {
             "_name": "Wind Speed",
             "location": "PortLavaca",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dWnSpd",
             "unit": "mps",
             "interval": 3600,
-            "range": [1, -26],
+            "range": [0, -24],
             "outKey": "PL_WNSPD_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -158,9 +158,9 @@
         {
             "call": "Average",
             "args": {
-                "targetAvgFirst_inKey": "PL_PWL_25",
-                "targetAvgSecond_inKey": "POC_PWL_25",
-                "avg_outKey": "AVG_PWL_25"
+                "targetAvgFirst_inKey": "PL_WL_25",
+                "targetAvgSecond_inKey": "POC_WL_25",
+                "avg_outKey": "AVG_WL_25"
             }
         },
         {
@@ -173,15 +173,15 @@
         }
     ],
     "vectorOrder": [
-        { "key": "PL_PWL_25"      , "dType": "float", "indexes": [2, 26] },
-        { "key": "PL_Surge_25"    , "dType": "float", "indexes": [2, 26] },
-        { "key": "POC_PWL_25"     , "dType": "float", "indexes": [2, 26] },
-        { "key": "POC_Surge_25"   , "dType": "float", "indexes": [2, 26] },
-        { "key": "AVG_PWL_25"     , "dType": "float", "indexes": [2, 26] },
-        { "key": "AVG_Surge_25"   , "dType": "float", "indexes": [2, 26] },
-        { "key": "x_PL_PWNDCMP_25", "dType": "float", "indexes": [2, 26] },
-        { "key": "y_PL_PWNDCMP_25", "dType": "float", "indexes": [2, 26] },
-        { "key": "x_PL_PWNDCMP_F7", "dType": "float" },
-        { "key": "y_PL_PWNDCMP_F7", "dType": "float" }
+        { "key": "PL_WL_25"         , "dType": "float"},
+        { "key": "PL_Surge_25"      , "dType": "float"},
+        { "key": "POC_WL_25"        , "dType": "float"},
+        { "key": "POC_Surge_25"     , "dType": "float"},
+        { "key": "AVG_WL_25"        , "dType": "float"},
+        { "key": "AVG_Surge_25"     , "dType": "float"},
+        { "key": "x_PL_PWNDCMP_25"  , "dType": "float"},
+        { "key": "y_PL_PWNDCMP_25"  , "dType": "float"},
+        { "key": "x_PL_PWNDCMP_F7"  , "dType": "float"},
+        { "key": "y_PL_PWNDCMP_F7"  , "dType": "float"}
     ]
 }
