@@ -1,9 +1,9 @@
 {
     "dspecVersion": "2.0",
-    "modelName": "Espiritu-Santo-Bay_Water-Temperature_120hr",
+    "modelName": "Espiritu-Santo-Bay_Water-Temperature_66hr",
     "modelVersion": "1.0.0",
     "author": "Ayesha Khan",
-    "modelFileName": "./ColdStunning/Espiritu-Santo-Bay_Water-Temperature_120hr",
+    "modelFileName": "./ColdStunning/Espiritu-Santo-Bay_Water-Temperature_66hr",
     "timingInfo": {
         "active": true,
         "offset": 1500,
@@ -11,7 +11,7 @@
     },
     "outputInfo": {
         "outputMethod": "DefaultOutputHandler",
-        "leadTime": 432000,
+        "leadTime": 237600,
         "series": "pWaterTmp",
         "location": "EspirituSantoBay",
         "unit": "celsius"
@@ -177,10 +177,10 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                126,
+                66,
                 1
             ],
-            "outKey": "Espiritu-Santo-Bay_predicted_air-temp_126",
+            "outKey": "Espiritu-Santo-Bay_predicted_air-temp_66",
             "stalenessOffset": 45000,
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
@@ -241,11 +241,11 @@
             ]
         },
         {
-            "key": "Espiritu-Santo-Bay_predicted_air-temp_126",
+            "key": "Espiritu-Santo-Bay_predicted_air-temp_66",
             "dType": "float",
             "indexes": [
                 0,
-                125
+                65
             ]
         }
     ]
