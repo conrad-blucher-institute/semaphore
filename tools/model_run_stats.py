@@ -136,11 +136,15 @@ def build_patterns():
         # Pulls the data source name out of "... source: NOAA_CO_OPS, ..."
         "data_source": re.compile(r"source: ([^,]+)"),
 
-        # Pulls DataSeries + Location out of the "Failed results:" trailer
-        # that Semaphore prints AFTER the "FAILED - Null result inserted"
-        # line for some failure types (interpolation_gap in particular).
-        # This is the only place those blocks carry any source info at all.
-        "data_series_location": re.compile(r"DataSeries:\s*([^,]+),\s*Location:\s*([^,]+)"),
+        # Pulls the ACTUAL missing/failing input series out of the
+        # "[SeriesDescription] -> source: X, series: Y, location: Z, ..."
+        # block that DateRangeValidation failures print in their
+        # traceback -- this is lowercase "series:"/"location:", distinct
+        # from the trailer's capitalized "DataSeries:"/"Location:" (which
+        # names the model's own OUTPUT/prediction series, not what was
+        # missing). Only missing_data/stale_data failures print this;
+        # other failure types don't name an input series at all.
+        "input_series_location": re.compile(r"\bseries:\s*([^,]+),\s*location:\s*([^,]+)"),
 
         # Marks the start of a database-connection-outage block.
         "connection_failure_start": re.compile(r"Prediction failed due to \S+ Exception"),
@@ -202,10 +206,23 @@ def classify_failure_reason(content, type_patterns):
 
 
 def extract_series(content, patterns):
-    """Pulls the DataSeries + Location trailer (e.g. 'pInundation
-    (Aransas)') when present. It goes in its own 'series' column.
+    """Pulls the MISSING input series -- the SeriesDescription block's
+    own `series` + `location` fields (e.g. 'dWl (PortOConnor)') -- when
+    present. This is the series Semaphore was trying to fetch that
+    caused the failure, NOT the model's own output series. (The
+    "Failed results:" trailer names the latter via capitalized
+    DataSeries:/Location: -- e.g. 'pSurge (EstMagnoliaBeach)' for a
+    magnolia_12 failure whose actual missing input was dWl at
+    PortOConnor. Pulling that trailer here would show the wrong series
+    entirely, which is the bug this replaces.)
+
+    Only failures that go through DateRangeValidation (missing_data,
+    stale_data) print this SeriesDescription block at all. Other
+    failure types (interpolation_gap, db/coopsapi/http errors) never
+    name an input series in the log, so this returns "" for those
+    rather than guessing or falling back to the output series.
     """
-    match = patterns["data_series_location"].search(content)
+    match = patterns["input_series_location"].search(content)
     if match:
         return f"{match.group(1).strip()} ({match.group(2).strip()})"
     return ""
