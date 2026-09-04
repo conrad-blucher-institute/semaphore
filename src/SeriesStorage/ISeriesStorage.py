@@ -5,8 +5,7 @@
 # Created Date: 8/20/2023
 # version 2.0
 #----------------------------------
-"""This is an interface for Presistant Storage
- """ 
+"""This is an interface for Presistant Storage""" 
 #----------------------------------
 # 
 #
@@ -74,14 +73,12 @@ class ISeriesStorage(ABC):
 
 
 def series_storage_factory() -> ISeriesStorage:
-    """Imports the series storage class from the environment variable ISERIESSTORAGE_INSTANCE
-    ------
+    """
+    Imports the series storage class from the environment variable ISERIESSTORAGE_INSTANCE
+
     Returns
         ISeriesStorage - An child of the ISeriesStorage interface.
     """
 
     ss = getenv('ISERIESSTORAGE_INSTANCE')
-   
-
     return getattr(import_module(f'.SS_Classes.{ss}', 'SeriesStorage'), f'{ss}')()
-    
