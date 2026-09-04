@@ -78,19 +78,19 @@
         { 
             "_name": "Harmonic Predictions",
             "location": "PortLavaca",
-            "source": "LIGHTHOUSE",
-            "series": "pHarm",
+            "source": "NOAATANDC",
+            "series": "pWl",
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
             "range":  [19, 7],
-            "outKey": "PL_pHarm_12"
+            "outKey": "PL_pWl_12"
         },
         { 
             "_name": "Harmonic Predictions POC",
             "location": "PortOConnor",
-            "source": "LIGHTHOUSE",
-            "series": "pHarm",
+            "source": "NOAATANDC",
+            "series": "pWl",
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
@@ -113,8 +113,8 @@
         {
             "call": "MagnoliaPredictionsPostProcess",
             "args": {
-                "predHarmFirst_inKey":"PL_pHarm_12",
-                "predHarmSecond_inKey":"POC_pHarm_12",
+                "predHarmFirst_inKey":"PL_pWl_12",
+                "predHarmSecond_inKey":"POC_pWl_12",
                 "magnolia_Pred_inKey":"MG_24_output_12",
                 "Magnolia_WL_outKey": "MG_WL_F12"        
             }

@@ -84,7 +84,7 @@
             "datum": "MLLW",
             "interval": 3600,
             "range":  [7, -5],
-            "outKey": "PL_pHarm_12"
+            "outKey": "PL_pWl_12"
         },
         { 
             "_name": "Harmonic Predictions POC",
@@ -95,7 +95,7 @@
             "datum": "MLLW",
             "interval": 3600,
             "range":  [7, -5],
-            "outKey": "POC_pHarm_12"
+            "outKey": "POC_pWl_12"
         }
 
     ],
@@ -113,8 +113,8 @@
         {
             "call": "MagnoliaPredictionsPostProcess",
             "args": {
-                "predHarmFirst_inKey":"PL_pHarm_12",
-                "predHarmSecond_inKey":"POC_pHarm_12",
+                "predHarmFirst_inKey":"PL_pWl_12",
+                "predHarmSecond_inKey":"POC_pWl_12",
                 "magnolia_Pred_inKey":"MG_12_output_12",
                 "Magnolia_WL_outKey": "MG_WL_F12"        
             }
