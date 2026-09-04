@@ -20,7 +20,7 @@
         {
             "_name": "Water Temp_PL",
             "location": "PortLavaca",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dWaterTmp",
             "unit": "celsius",
             "interval": 3600,
@@ -39,7 +39,7 @@
         {
             "_name": "Water_Temp_SD",
             "location": "Seadrift",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dWaterTmp",
             "unit": "celsius",
             "interval": 3600,
@@ -58,7 +58,7 @@
         {
             "_name": "Water_Temp_PO",
             "location": "PortOConnor",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dWaterTmp",
             "unit": "celsius",
             "interval": 3600,
@@ -77,7 +77,7 @@
         {
             "_name": "Water_Temp_AWR",
             "location": "AransasWildlifeRefuge",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dWaterTmp",
             "unit": "celsius",
             "interval": 3600,
@@ -96,7 +96,7 @@
         {
             "_name": "Air_Temp_PL",
             "location": "PortLavaca",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dAirTmp",
             "unit": "celsius",
             "interval": 3600,
@@ -115,7 +115,7 @@
         {
             "_name": "Air_Temp_SD",
             "location": "Seadrift",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dAirTmp",
             "unit": "celsius",
             "interval": 3600,
@@ -134,7 +134,7 @@
         {
             "_name": "Air_Temp_PO",
             "location": "PortOConnor",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dAirTmp",
             "unit": "celsius",
             "interval": 3600,
@@ -153,7 +153,7 @@
         {
             "_name": "Air_Temp_AWR",
             "location": "AransasWildlifeRefuge",
-            "source": "LIGHTHOUSE",
+            "source": "NOAATANDC",
             "series": "dAirTmp",
             "unit": "celsius",
             "interval": 3600,
