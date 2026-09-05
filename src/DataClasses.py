@@ -131,7 +131,6 @@ class Series():
         self.timeDescription = timeDescription
         self.__dataFrame = None
 
-
     @property
     def dataFrame(self):
         return self.__dataFrame
@@ -140,7 +139,6 @@ class Series():
     def dataFrame(self, dataFrame: DataFrame) -> None:
         self.__dataFrame = dataFrame
 
-    
     def __str__(self) -> str:
         return f'\n[Series] -> description: {self.description}, timeDescription: {self.timeDescription}'
     
