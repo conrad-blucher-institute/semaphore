@@ -21,6 +21,7 @@ delete the rows from the ref_dataLocation table based on the dataLocation csv.
 #
 # Imports
 from DatabaseMigration.IDatabaseMigration import IDatabaseMigration
+from DatabaseMigration.databaseMigrationUtility import KeywordType, DatabaseDeletionHelper
 from sqlalchemy import Engine
 from sqlalchemy.sql import text
 import csv
@@ -53,59 +54,64 @@ class Migrator(IDatabaseMigration):
             # conn.begin() will commit a single transaction at the end of the with block
             with conn.begin():
 
-                # insert rows into the location table
-                for row in location_rows:
-                    stmt = text("""
-                    INSERT INTO "ref_dataLocation" (
-                        "code",
-                        "displayName",
-                        "notes",
-                        "latitude",
-                        "longitude"
-                    ) 
-                    VALUES (
-                        :code,
-                        :displayName,
-                        :notes,
-                        :latitude,
-                        :longitude
-                    )
-                    """)
-                    bind_params = {
-                        "code": row["code"],
-                        "displayName": row["displayName"],
-                        "notes": row["notes"],
-                        "latitude": row["latitude"],
-                        "longitude": row["longitude"]
-                    }
-                    stmt = stmt.bindparams(**bind_params)
-                    conn.execute(stmt)
+                # this creates many VALUES clauses to insert all rows in a single statement such as:
+                # (:code0, :displayName0, :notes0, :latitude0, :longitude0),
+                # (:code1, :displayName1, :notes1, :latitude1, :longitude1), ...
+                values_clause = ", ".join(
+                    f"(:code{i}, :displayName{i}, :notes{i}, :latitude{i}, :longitude{i})"
+                    for i in range(len(location_rows))
+                )
 
-                # insert rows into the mapping table
-                for row in mapping_rows:
-                    stmt = text("""
-                    INSERT INTO "dataLocation_dataSource_mapping" (
-                        "dataLocationCode",
-                        "dataSourceCode",
-                        "dataSourceLocationCode",
-                        "priorityOrder"
-                    ) 
-                    VALUES (
-                        :dataLocationCode,
-                        :dataSourceCode,
-                        :dataSourceLocationCode,
-                        :priorityOrder
-                    )
-                    """)
-                    bind_params = {
-                        "dataLocationCode": row["dataLocationCode"],
-                        "dataSourceCode": row["dataSourceCode"],
-                        "dataSourceLocationCode": row["dataSourceLocationCode"],
-                        "priorityOrder": int(row["priorityOrder"])
-                    }
-                    stmt = stmt.bindparams(**bind_params)
-                    conn.execute(stmt)
-        
+                stmt = text(f"""
+                INSERT INTO "ref_dataLocation" (
+                    "code",
+                    "displayName",
+                    "notes",
+                    "latitude",
+                    "longitude"
+                )
+                VALUES {values_clause}
+                """)
+
+                bind_params = {}
+                for i, row in enumerate(location_rows):
+                    bind_params[f"code{i}"] = row["code"]
+                    bind_params[f"displayName{i}"] = row["displayName"]
+                    bind_params[f"notes{i}"] = row["notes"]
+                    bind_params[f"latitude{i}"] = row["latitude"]
+                    bind_params[f"longitude{i}"] = row["longitude"]
+
+                # perform a single insert statement for all rows
+                stmt = stmt.bindparams(**bind_params)
+                conn.execute(stmt)
+
+                # dynamically create the values clause for the mapping table
+                values_clause = ", ".join(
+                    f"(:dataLocationCode{i}, :dataSourceCode{i}, :dataSourceLocationCode{i}, :priorityOrder{i})"
+                    for i in range(len(mapping_rows))
+                )
+
+                stmt = text(f"""
+                INSERT INTO "dataLocation_dataSource_mapping" (
+                    "dataLocationCode",
+                    "dataSourceCode",
+                    "dataSourceLocationCode",
+                    "priorityOrder"
+                )
+                VALUES {values_clause}
+                """)
+
+                bind_params = {}
+                for i, row in enumerate(mapping_rows):
+                    bind_params[f"dataLocationCode{i}"] = row["dataLocationCode"]
+                    bind_params[f"dataSourceCode{i}"] = row["dataSourceCode"]
+                    bind_params[f"dataSourceLocationCode{i}"] = row["dataSourceLocationCode"]
+                    bind_params[f"priorityOrder{i}"] = int(row["priorityOrder"])
+
+                # perform a single insert statement for all rows
+                stmt = stmt.bindparams(**bind_params)
+                conn.execute(stmt)
+
         return True
     
     def _read_rows(self) -> tuple[list[dict], list[dict]]:
@@ -132,63 +138,35 @@ class Migrator(IDatabaseMigration):
     def rollback(self, databaseEngine: Engine) -> bool:
         """
         This function rolls the database back to version 3.7 which involves removing the changes 
-        associated with version 3.8. The added rows for the ref_dataLocation table and the
-        dataLocation_dataSource_mapping table will be removed.
+        associated with version 3.8. The rollback will delete rows from the inputs, outputs, mapping,
+        and location tables based on the dataLocation.csv file.
 
         :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
 
-        :return: bool indicating successful rollback
+        :return: bool indicating successful update
+
+        NOTE: In the future we should update our helper functions to perform a single
+        commit for all deletions instead of committing after each deletion.
         """
+        # Note that we only explicitly include the locations csv here
+        # because a part of the deep_delete protocol of the data locations
+        # table is to delete the location from the mapping table. 
+        fileNames = ['dataLocation.csv']
+        fileTypes = [KeywordType.DATA_LOCATION]
 
-        location_rows, mapping_rows = self._read_rows()
+        location_rows, _ = self._read_rows()
 
-        with databaseEngine.connect() as conn:
-            # conn.begin() will commit a single transaction at the end of the with block
-            with conn.begin():
+        # Using the utility helper class to delete any data dependent on the rows added in the 3.7 Migration
+        helper = DatabaseDeletionHelper(databaseEngine)
 
-                # delete rows from the inputs and outputs table that reference the ref_dataLocation table
-                for table in ('inputs', 'outputs'):
-                    for row in location_rows:
-                        stmt = text(f"""
-                            DELETE FROM "{table}"
-                            WHERE "dataLocation" = :code
-                        """)
+        for file, type in zip(fileNames, fileTypes):
+            for rowDict in location_rows:
+                helper.deep_delete_keyword(rowDict["code"], type)
 
-                        bind_params = {
-                            "code": row["code"]
-                        }
-
-                        stmt = stmt.bindparams(**bind_params)
-                        conn.execute(stmt)
-
-                # delete rows from the mapping table based on the dataMapping csv
-                for row in mapping_rows:
-                    stmt = text("""
-                        DELETE FROM "dataLocation_dataSource_mapping"
-                        WHERE "dataLocationCode" = :code
-                        AND "dataSourceCode" = :source
-                    """)
-
-                    bind_params = {
-                        "code": row["dataLocationCode"],
-                        "source": row["dataSourceCode"]
-                    }
-
-                    stmt = stmt.bindparams(**bind_params)
-                    conn.execute(stmt)
-
-                # lastly delete rows from the location table
-                for row in location_rows:
-                    stmt = text("""
-                        DELETE FROM "ref_dataLocation"
-                        WHERE "code" = :code
-                    """)
-
-                    bind_params = {
-                        "code": row["code"]
-                    }
-
-                    stmt = stmt.bindparams(**bind_params)
-                    conn.execute(stmt)
+        # since Port Lavaca and Port O Connor were added to the mapping table
+        # but not the location table, we need to delete them individually from the mapping table
+        # NOTE: This doesn't remove entries in the inputs table that use these mappings
+        helper.delete_mapping_row('PortLavaca', 'NOAATANDC')
+        helper.delete_mapping_row('PortOConnor', 'NOAATANDC')
 
         return True
