@@ -15,14 +15,22 @@ Most logging in Semaphore is done through a custom set of logging functions that
 
 # Logging requirements
 
-## Target logging and exception handling behavior
+## Target logging behavior
 
 1. a centralize logger that consistantly logs the following information:
 * timestamp in UTC time, formatted to make it clear that it is UTC
 * the name of the module that requested the logging
 * when available, the name of the model that is being executed 
 * when available, the name of the series that is being manipulated/for which code is being executed (e.g., ingestion, data integrity and post processing classes should provide a list of series with their roles - e.g., in vs out)
-2. 
+Ideally the logger uses contextvars or something similar to let the executing code pass in some of these data points
+2. a consitent approach based on best practices for all modules to use for logging: when to log, at what level, when not to log. information to provide in log messages, etc.
+3. Logging from any module should be easy and straightforward and as standard as we can make it
+
+Let's not reinvent the wheel on that one. We should use the build-in logging module and wrap it with some extra functionality that satisfy the above requirement
+
+## Target Exception raising and handling behavior
+
+1. The key task of Semaphoer is to execute a Model Run.  Hence exception raising should all happen around that one step.  
 
 
 # notes - to be deleted
