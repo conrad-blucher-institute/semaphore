@@ -29,7 +29,6 @@ import csv
 # Constants
 MAPPING_CSV = './tools/DatabaseMigration/3_8/init_data/dataMapping.csv'
 LOCATION_CSV = './tools/DatabaseMigration/3_8/init_data/dataLocation.csv'
-DELETE_DUMP = 'deletion_dump.txt'
 
 
 class Migrator(IDatabaseMigration):
