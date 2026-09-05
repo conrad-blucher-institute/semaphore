@@ -139,10 +139,3 @@ quality worth flagging:
   the file write — instead of being combined into a single `if` block, even though both branches
   execute under the identical condition.
 
-# Target logging behavior
-
-1. a centralize logger that consistantly logs the following information:
-a. timestamp in UTC time, formatted to make it clear that it is UTC
-b. the name of the module that requested the logging
-c. when available, the name of the model that is being executed 
-d. when available, the name of the series that is being manipulated/for which code is being executed (e.g., ingestion, data integrity and post processing classes should provide a list of series with their roles - e.g., in vs out)

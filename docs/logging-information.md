@@ -5,24 +5,27 @@ This file documents how logging is currently implemented in Semaphore for the pu
 
 # Current logging pattern
 
-Most logging in Semaphore is done through a custom set of logging functions that are defined in the `src/utility.py` module. This module provides a main logging function 
-
-
-
-
-
-
-
-There is no use of Python's built-in `logging` module and no 3rd-party logging library
-(no `loguru`, `structlog`, etc.) anywhere in `src`. All logging goes through a small
-hand-rolled utility in **`src/utility.py`**:
+Most logging in Semaphore is done through a custom set of logging functions that are defined in the `src/utility.py` module. This module provides a main logging function called - approriately enough - "log" and a couple of other methods to log things explicitely as errors or success. There is no defined log levels and the specific methods for error and success do not log a level when logging. The is_error flag drives (among other things) whether a message to logged to a file or just to stdoutput.
 
 - `log(text, is_error=False, force_log=False)` — the core function. Prints to stdout and
   (conditionally) appends to a log file.
 - `log_error(text)` — convenience wrapper: `log(text, is_error=True, force_log=True)`. Always written.
 - `log_success(text)` — convenience wrapper: `log(text, is_error=False, force_log=True)`. Always written.
 
-There are no other log levels (no debug/info/warning as distinct mechanisms — see below).
+
+# Logging requirements
+
+## Target logging and exception handling behavior
+
+1. a centralize logger that consistantly logs the following information:
+* timestamp in UTC time, formatted to make it clear that it is UTC
+* the name of the module that requested the logging
+* when available, the name of the model that is being executed 
+* when available, the name of the series that is being manipulated/for which code is being executed (e.g., ingestion, data integrity and post processing classes should provide a list of series with their roles - e.g., in vs out)
+2. 
+
+
+# notes - to be deleted
 
 **Usage is widespread** — the custom logger is used in ~20 files across `DataIngestion`,
 `DataIntegrity`, `DataValidation`, `ModelExecution`, `PostProcessing`, `SeriesProvider`,
