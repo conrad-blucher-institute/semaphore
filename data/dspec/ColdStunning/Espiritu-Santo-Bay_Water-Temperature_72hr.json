@@ -25,8 +25,8 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                1,
-                -26
+                0,
+                -24
             ],
             "outKey": "Port-Lavaca_water-temp_25",
             "dataIntegrityCall": {
@@ -44,8 +44,8 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                1,
-                -26
+                0,
+                -24
             ],
             "outKey": "Seadrift_water-temp_25",
             "dataIntegrityCall": {
@@ -63,8 +63,8 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                1,
-                -26
+                0,
+                -24
             ],
             "outKey": "Port-OConnor_water-temp_25",
             "dataIntegrityCall": {
@@ -82,8 +82,8 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                1,
-                -26
+                0,
+                -24
             ],
             "outKey": "Aransas-Wildlife-Refuge_water-temp_25",
             "dataIntegrityCall": {
@@ -101,8 +101,8 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                1,
-                -26
+                0,
+                -24
             ],
             "outKey": "Port-Lavaca_air-temp_25",
             "dataIntegrityCall": {
@@ -120,8 +120,8 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                1,
-                -26
+                0,
+                -24
             ],
             "outKey": "Seadrift_air-temp_25",
             "dataIntegrityCall": {
@@ -139,8 +139,8 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                1,
-                -26
+                0,
+                -24
             ],
             "outKey": "Port-OConnor_air-temp_25",
             "dataIntegrityCall": {
@@ -158,8 +158,8 @@
             "unit": "celsius",
             "interval": 3600,
             "range": [
-                1,
-                -26
+                0,
+                -24
             ],
             "outKey": "Aransas-Wildlife-Refuge_air-temp_25",
             "dataIntegrityCall": {
@@ -226,27 +226,15 @@
     "vectorOrder": [
         {
             "key": "Espiritu-Santo-Bay_water-temp_25",
-            "dType": "float",
-            "indexes": [
-                2,
-                26
-            ]
+            "dType": "float"
         },
         {
             "key": "Espiritu-Santo-Bay_air-temp_25",
-            "dType": "float",
-            "indexes": [
-                2,
-                26
-            ]
+            "dType": "float"
         },
         {
             "key": "Espiritu-Santo-Bay_predicted_air-temp_72",
-            "dType": "float",
-            "indexes": [
-                0,
-                71
-            ]
+            "dType": "float"
         }
     ]
 }
