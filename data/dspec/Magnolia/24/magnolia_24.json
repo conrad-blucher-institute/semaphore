@@ -158,9 +158,9 @@
         {
             "call": "Average",
             "args": {
-                "targetAvgFirst_inKey": "PL_PWL_25",
-                "targetAvgSecond_inKey": "POC_PWL_25",
-                "avg_outKey": "AVG_PWL_25"
+                "targetAvgFirst_inKey": "PL_WL_25",
+                "targetAvgSecond_inKey": "POC_WL_25",
+                "avg_outKey": "AVG_WL_25"
             }
         },
         {
@@ -173,11 +173,11 @@
         }
     ],
     "vectorOrder": [
-        { "key": "PL_PWL_25"       , "dType": "float" },
+        { "key": "PL_WL_25"       , "dType": "float" },
         { "key": "PL_Surge_25"     , "dType": "float" },
-        { "key": "POC_PWL_25"      , "dType": "float" },
+        { "key": "POC_WL_25"      , "dType": "float" },
         { "key": "POC_Surge_25"    , "dType": "float" },
-        { "key": "AVG_PWL_25"      , "dType": "float" },
+        { "key": "AVG_WL_25"      , "dType": "float" },
         { "key": "AVG_Surge_25"    , "dType": "float" },
         { "key": "x_PL_PWNDCMP_25" , "dType": "float" },
         { "key": "y_PL_PWNDCMP_25" , "dType": "float" },

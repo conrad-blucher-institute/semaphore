@@ -95,7 +95,7 @@
             "datum": "MLLW",
             "interval": 3600,
             "range":  [19, 7],
-            "outKey": "POC_pHarm_12"
+            "outKey": "POC_pWl_12"
         }
 
     ],
