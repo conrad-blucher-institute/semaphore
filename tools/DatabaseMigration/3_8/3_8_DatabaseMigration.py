@@ -145,7 +145,9 @@ class Migrator(IDatabaseMigration):
         :return: bool indicating successful update
 
         NOTE: In the future we should update our helper functions to perform a single
-        commit for all deletions instead of committing after each deletion.
+        commit for all deletions instead of committing after each deletion. It is
+        NOT RECOMMENDED to continue using deep_delete_keyword from the helper
+        until it can be refactored.
         """
         # Note that we only explicitly include the locations csv here
         # because a part of the deep_delete protocol of the data locations
