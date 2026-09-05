@@ -5,7 +5,7 @@
     "author": "Jacob Alonzo",
     "modelFileName": "./Magnolia/24hr_leadtime_2ndANN",
     "timingInfo":{
-        "active": true,
+        "active": false,
         "offset": 1860,
         "interval": 3600
     },
