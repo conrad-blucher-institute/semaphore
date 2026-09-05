@@ -130,7 +130,6 @@ class Series():
         self.description = description
         self.timeDescription = timeDescription
         self.__dataFrame = None
-        self.__sentinelValue = None
 
 
     @property
@@ -141,15 +140,7 @@ class Series():
     def dataFrame(self, dataFrame: DataFrame) -> None:
         self.__dataFrame = dataFrame
 
-    @property
-    def sentinelValue(self):
-        return self.__sentinelValue
-
-    @sentinelValue.setter
-    def sentinelValue(self, sentinelValue: int | str) -> None:
-        self.__sentinelValue = sentinelValue
-
-
+    
     def __str__(self) -> str:
         return f'\n[Series] -> description: {self.description}, timeDescription: {self.timeDescription}'
     
