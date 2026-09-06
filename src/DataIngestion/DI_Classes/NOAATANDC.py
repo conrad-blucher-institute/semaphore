@@ -302,7 +302,7 @@ class NOAATANDC(IDataIngestion):
         df['dataValue'] = df['dataValue'].astype(str)
 
         # Surge is datum-less. A datum is required for ingesting water level but we remove it here
-        seriesDescription.dataDatum = 'NA'
+        seriesDescription.dataDatum = None
 
         series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
