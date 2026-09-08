@@ -61,9 +61,15 @@ class PandasInterpolation(IDataIntegrity):
                 Reason: Only one Input found in series.
             ''')
             return inSeries
-        
-        # Will hard fail if one or both doesn't exist
+
+        # we force the interpolation method to be time if linear was asked for because when interpolating time series, linear interpolation is not appropriate
+        # here because we are not guaranteed that our data is evenly spaced time-wise. If we get some consecutive rows missing at 6 min intervals, the gap could 
+        # then be 12 minutes instead of 6 min.  By using the 'time' method, pandas will use the datetime index it finds to truly interpolate with the correct 
+        # gaps being taking into account.
         method = dataIntegrityDescription.args['method']
+        method = 'time' if method == 'linear' else method
+
+        # Will hard fail if one or both doesn't exist
         limit = int(dataIntegrityDescription.args['limit'])
         limit_area = dataIntegrityDescription.args['limit_area']
         limit_area = None if limit_area == 'None' else limit_area
@@ -72,15 +78,11 @@ class PandasInterpolation(IDataIntegrity):
     
         input_df = inSeries.dataFrame
         
-        input_df.set_index('timeVerified', inplace=True)
-        
-        # Add the missing timeVerified datetimes and fill the remaining columns with NaNs/NaTs
-        filled_input_df = self.__fill_in_date_gaps(input_df, timeDescription.fromDateTime, timeDescription.toDateTime, timeDescription.interval)
-        
-        # Rename the index back to 'timeVerified' after filling in date gaps
-        filled_input_df.index = filled_input_df.index.rename('timeVerified')
+        # get a DF that has all the requested time verified timestamps/rows in addition to what is already there and indexed on timeVerified
+        filled_input_df = self.__get_full_dataframe(input_df, timeDescription.fromDateTime, timeDescription.toDateTime, timeDescription.interval)
 
-        largerThanLimit = self.__check_gap_distance(filled_input_df, limit, timeDescription.interval)
+        # don't interpolate if there are gaps larger than the limit
+        largerThanLimit = self.__has_prohibited_gap(filled_input_df, limit, timeDescription.interval)
         if largerThanLimit:
             error_message = f'''Interpolation error,
                 Reason: There are gaps in the data that are larger than the interpolation limit parameter.
@@ -98,7 +100,8 @@ class PandasInterpolation(IDataIntegrity):
         # Area limited to 'inside' to avoid extrapolation
         filled_input_df['dataValue'] = filled_input_df['dataValue'].interpolate(method = method, limit_area = limit_area)
 
-        # Drop rows where 'dataValue' is NaN
+        # Drop rows where 'dataValue' is NaN -- these couldn't be interpolated
+        # TODO:  should we be doing this here? that does not seem the responsibility of the interpolater to do this -- move to data gatherer?
         filled_input_df = filled_input_df.dropna(subset=['dataValue'])
 
         # Convert dataValue back to string
@@ -107,26 +110,16 @@ class PandasInterpolation(IDataIntegrity):
         # Reset the index to make timeVerified a normal column again
         filled_input_df.reset_index(inplace=True)
 
-        # Convert timeGenerated to object from datetime64[ns] such that it can be converted to None
-        filled_input_df['timeGenerated'] = filled_input_df['timeGenerated'].astype('object')
-
-        # Set NaT timeGenerated to None
-        filled_input_df.loc[filled_input_df['timeGenerated'].isnull(), 'timeGenerated'] = None
-
-        # Forward-fill the remaining columns that are NaN.
+        # Forward-fill the remaining columns that are NaN in case we added rows when creating the full DF above (added rows have no values but the index)
         filled_input_df = filled_input_df.ffill()
 
-        # Reset the index on the DF
-        filled_input_df.reset_index(inplace=True)
-    
         outSeries = Series(seriesDescription, timeDescription)
         outSeries.dataFrame = filled_input_df
 
         return outSeries
      
-    def  __check_gap_distance(self, df: pd.DataFrame, limit: timedelta, interval: timedelta) -> bool:
-        """This method will remove all non-NaN rows from the DataFrame leaving just the NaN rows. 
-        It will then check to see if there is a group of consecutive NaNs that are larger than the limit.
+    def  __has_prohibited_gap(self, df: pd.DataFrame, limit: timedelta, interval: timedelta) -> bool:
+        """This method checks if there are any gaps in the DataFrame that are larger than the specified limit.
 
         Args:
             df (pd.DataFrame): The DataFrame of data
@@ -134,50 +127,55 @@ class PandasInterpolation(IDataIntegrity):
             interval (timedelta): The time step separating the data points in order
 
         Returns:
-            bool: Determines if a gap is larger than the limit
+            bool: Returns true if there is a gap larger than the specified limit, otherwise false.
         """
+
+        # A gap is measured between the two valid rows that bracket a run of NaNs, because those are the
+        #  two values the interpolation will actually draw from. Any valid row ends a run, so an off grid
+        #  sample sitting between two missing grid slots correctly splits what would otherwise look like
+        #  one long gap. One interval is subtracted from that distance so the measure counts the missing
+        #  steps rather than the span between the surviving values, which keeps the limit in the dspecs
+        #  meaning what it has always meant.
+
         # Find any rows where dataValue is NaN
-        nan_mask = df['dataValue'].isna()
+        is_nan = df['dataValue'].isna().to_numpy()
+        row_count = len(df)
 
-        # Extract only rows with NaNs
-        rows_with_nan = df[nan_mask]
+        position = 0
+        while position < row_count:
 
-        previous_date = None
-        nan_gap_size = 1
-        for current_date in rows_with_nan.index:
-
-            # If first date, set the previous date to the current date and then continue
-            if previous_date is None:
-
-                previous_date = current_date
-
+            # Walk forward until we land on a NaN, that is the start of a run
+            if not is_nan[position]:
+                position += 1
                 continue
 
-            time_difference = current_date - previous_date
+            run_start = position
 
-            # Since there are only rows with NaNs present, if the time difference between the previous date and the current date is 
-            # greater than the interval then there is a prediction/data present between the values
-            if (time_difference > interval):
-                # Reset the counter
-                nan_gap_size = 1
+            # Walk to the end of this run of consecutive NaNs
+            while position < row_count and is_nan[position]:
+                position += 1
+            run_end = position - 1
 
+            if run_start > 0 and run_end < row_count - 1:
+                # The run is bracketed by a valid row on both sides, so measure between them
+                gap = (df.index[run_end + 1] - df.index[run_start - 1]) - interval
             else:
-                nan_gap_size += 1
+                # A run at the start or the end of the series only has a valid row on one side. Measure
+                #  its own span instead, which is what the previous implementation reported for these.
+                gap = (df.index[run_end] - df.index[run_start]) + interval
 
-            # If the NaN gap is greater than the limit, return True
-            if(nan_gap_size * interval > limit):
+            if gap > limit:
                 return True
 
-            previous_date = current_date
-
-        # If no NaN gap was greater than the limit
+        # If no gap was greater than the limit
         return False
              
-    def __fill_in_date_gaps(self, df : pd.DataFrame , start_date : datetime , end_date : datetime , interval : timedelta ) -> pd.DataFrame:
-        """Fills in missing date gaps with NaNs based on given interval. The DataFrame index must be of type datetime
+    def __get_full_dataframe(self, df : pd.DataFrame , start_date : datetime , end_date : datetime , interval : timedelta ) -> pd.DataFrame:
+        """Fills in missing date gaps with NaNs based on given interval and sets the index to the timeVerified column. The passed in 
+                DataFrame index must have a timeVerified column
 
             Args:
-                df [DataFrame]: pandas DataFrame
+                df [DataFrame]: pandas DataFrame expected to have a 'timeVerified' column
 
                 start_date (datetime): Date to start at
 
@@ -186,13 +184,19 @@ class PandasInterpolation(IDataIntegrity):
                 interval (timedelta): The time step separating the data points in order
 
             Returns:
-                [DataFrame]: pandas DataFrame containing desired data
+                [DataFrame]: pandas DataFrame containing desired data indexed by 'timeVerified'
             """
 
-        all_dates = pd.date_range(start=start_date, end=end_date, freq=interval)
+        #get all the timestamps that wwere requested for the series and name our column properly
+        all_dates = pd.date_range(start=start_date, end=end_date, freq=interval, name='timeVerified')
 
+        # create a DataFrame with all requested timestamps and empty values for these timestamps
+        # make sure both DFs have are indexed on the timestamps so we can merge them correctly
         all_dates_df = pd.DataFrame(index=all_dates)
+        input_df = df.set_index('timeVerified')
 
-        merged_df = pd.merge(all_dates_df, df, left_index=True, right_index=True, how='left')
+        # this creates a DF with the union of all requested timestamps and the existing timestamps in the original DataFrame
+        # values not present for certain timestamps will be filled with NaNs
+        merged_df = pd.merge(all_dates_df, input_df, left_index=True, right_index=True, how='outer')
 
         return merged_df

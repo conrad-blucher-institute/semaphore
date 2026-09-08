@@ -157,6 +157,15 @@ class NOAATANDC(IDataIngestion):
         try:
             station = Station(id=stationID)
             lat_lon = (station.lat_lon['lat'], station.lat_lon['lon'])
+            debug_url = station._build_request_url(
+                begin_date= fromTime.strftime("%Y%m%d %H:%M"),
+                end_date= toTime.strftime("%Y%m%d %H:%M"),
+                product= NOAAProduct,
+                units= 'metric',
+                time_zone= 'gmt',
+                datum= seriesDescription.dataDatum
+            )
+            log(f'Fetching {NOAAProduct} data from NOAA COOPS. Request URL: {debug_url}')
             data = station.get_data(
                 begin_date= fromTime.strftime("%Y%m%d %H:%M"),
                 end_date= toTime.strftime("%Y%m%d %H:%M"),
@@ -171,6 +180,10 @@ class NOAATANDC(IDataIngestion):
 
         if isSinglePoint: # Select only the single point we want
             data = data.loc[[fromTime.replace(tzinfo=None)]]
+
+        # log the last timestamp fetched
+        if not data.empty:
+            log(f'Last data point fetched: {data.index[-1]} of requested time range {fromTime} to {toTime}')
 
         return data, lat_lon
 
