@@ -64,21 +64,38 @@ def compute_mean():
     return post_processing_factory("ComputeMean")
 
 
-def build_series_obj(data: list[object], sentinel_value: int | str) -> Series:
-    """Build one Series with hourly data."""
+def build_timestamps(length: int, interval: timedelta = timedelta(hours=1), start: datetime = START) -> list[datetime]:
+    """Generate [length] timestamps spaced [interval] apart, starting at [start]"""
+    return [start + (interval * i) for i in range(length)]
 
-    series = Series(SeriesDescription("Test", "water-temp", "Test"), TIME_DESCRIPTION)
+
+def build_time_description(length: int, interval: timedelta = timedelta(hours=1), start: datetime = START) -> TimeDescription:
+    """Build a TimeDescription whose fromDateTime/toDateTime match exactly [length] timestamps"""
+    timestamps = build_timestamps(length, interval, start)
+    return TimeDescription(fromDateTime=timestamps[0], toDateTime=timestamps[-1], interval=interval)
+
+
+def build_series_obj(
+    data: list[object],
+    sentinel_value: int | str | None,
+    interval: timedelta = timedelta(hours=1),
+    start: datetime = START,
+) -> Series:
+    """Build one Series whose timestamps/time description match len(data)"""
+    timestamps = build_timestamps(len(data), interval, start)
+    time_description = build_time_description(len(data), interval, start)
+
+    series = Series(SeriesDescription("Test", "water-temp", "Test"), time_description)
 
     data_frame = get_input_dataFrame()
-
     for index, value in enumerate(data):
         data_frame.loc[index] = [
             str(value),
             "degrees_C",
-            EXPECTED_TIMESTAMPS[index],
-            START,
+            timestamps[index],
+            start,
             None,
-            None
+            None,
         ]
 
     series.dataFrame = data_frame
@@ -90,44 +107,159 @@ def build_series_obj(data: list[object], sentinel_value: int | str) -> Series:
 @pytest.mark.parametrize(
     (
         "drop_outliers",
+        "threshold",
+        "input_lists",
+        "sentinel_values",
         "expected_values"
     ),
-    [
-        (
-            True,
-            [12.0, 12.0, 11.0]
-        ),
+    [   # test with no sentinel values and no outlier removal
         (
             False,
-            [12.0, 12.0, 24.0]
+            None,
+            [
+                [1, 2, 3],  # series 1's values
+                [4, 5, 6],  # series 2's values
+                [7, 8, 9]   # series 3's values
+            ],
+            [1000, 2000, 3000],  # 1000 is sentinel for series 1, 2000 for series 2, 3000 for series 3
+            [4.0, 5.0, 6.0]  # expected mean values
+        ),
+        # test with a sentinel value, but no outlier removal
+        (
+            False,
+            None,
+            [
+                [1, 2, 3],      # series 1's values
+                [4, 5, 6],      # series 2's values
+                [7, 8, 3000]     # series 3's values, 3000 is a sentinel
+            ],
+            [1000, 2000, 3000],
+            # expected mean values, the sentinel should not affect the mean calculation
+            # so the mean for row 3 should be (3 + 6) / 2 = 4.5
+            [4.0, 5.0, 4.5]  
+        ),
+        # test with more sentinel values, but no outlier removal
+        (
+            False,
+            None,
+            [
+                [1, 'missing', 3],
+                [2000, 5, 6],
+                [7, 8, 'sentinel']
+            ],
+            ['missing', 2000, 'sentinel'],
+            # sentinels shouldn't affect the mean calculations
+            [4.0, 6.5, 4.5]
+        ),
+        # test with outlier removal, but no sentinel values
+        (
+            True,
+            3.5,
+            [
+                [1, 50, 3],
+                [40, 5, 6],
+                [3, 4, 100]
+            ],
+            [1000, 2000, 3000], # no values are removed due to sentinels
+            # expected mean values, the outliers should be removed before calculating the mean
+            [2.0, 4.5, 4.5]
+        ),
+        # test with both sentinel values and outlier removal
+        # also tests for longer series beyond 3 timestamps
+        (
+            True,
+            25,
+            [
+                # sentinel = 999 and outliers = 1000 and -1000
+                [10, 999, 10, 10, 10, 1000, 10, 999, -1000, 40],
+
+                # sentinel = 'missing' and outliers = 1000
+                [20, 20, 'missing', 20, 20, 20, 1000, 'missing', 30, 50],
+
+                # sentinel = -1 and outliers = 1000
+                [30, 30, 30, -1, 1000, 30, 30, 30, 1000, -1],
+            ],
+            [999, 'missing', -1],
+            [
+                20.0,  # timestamp 0: 20 from (10 + 20 + 30) / 3
+                25.0,  # timestamp 1: (20 + 30) / 2; 999 sentinel is ignored
+                20.0,  # timestamp 2: (10 + 30) / 2; 'missing' sentinel is ignored
+                15.0,  # timestamp 3: (10 + 20) / 2; -1 sentinel is ignored
+                15.0,  # timestamp 4: (10 + 20) / 2; 1000 outlier is ignored
+                25.0,  # timestamp 5: (20 + 30) / 2; 1000 outlier is ignored
+                20.0,  # timestamp 6: (10 + 30) / 2; 1000 outlier is ignored
+                30.0,  # timestamp 7: 30; 999 and 'missing' sentinels are ignored
+                30.0,  # timestamp 8: 30; -1000 and 1000 outliers are ignored
+                45.0,  # timestamp 9: (40 + 50) / 2; -1 sentinel is ignored
+            ]
+        ),
+        # tests that when only 1 series has values for a timestamp, the mean is just that value
+        (
+            False,
+            None,
+            [
+                [1,    1000, 1000, 4,    1000, 1000, 7,    1000, 1000, 10,   1000, 1000],
+                [1000, 2,    1000, 1000, 5,    1000, 1000, 8,    1000, 1000, 11,   1000],
+                [1000, 1000, 3,    1000, 1000, 6,    1000, 1000, 9,    1000, 1000, 12]
+            ],
+            [1000, 1000, 1000],
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        ),
+        # tests that values exactly equal to the threshold are dropped
+        (
+            True,
+            5,
+            [
+                [10, 20, 30, 40, 50],
+                [15, 25, 35, 45, 55],
+                [20, 30, 40, 50, 60]
+            ],
+            [1000, 1000, 1000],
+            [
+                15.0, # 10 and 20 are both exactly 5 away from the median of 15, so both are dropped, leaving only 15
+                25.0,
+                35.0,
+                45.0,
+                55.0
+            ]
         )
     ],
     ids=[
-        "with-outlier-removal",
-        "without-outlier-removal"
+        "basic-test",
+        "sentinel-no-outliers",
+        "multiple-sentinels-no-outliers",
+        "no-sentinels-with-outliers",
+        "sentinels-with-outliers-long-series",
+        "single-value-per-timestamp",
+        "values-equal-to-threshold"
     ]
 )
-def test_post_process_data_combines_multiple_series(compute_mean, drop_outliers, expected_values):
+def test_post_process_data_combines_multiple_series(
+    compute_mean,
+    drop_outliers,
+    threshold, 
+    input_lists,
+    sentinel_values,
+    expected_values
+):
     """
     Tests that the overall post_process_data function works as intended
-
-    The test runs once with outlier removal and once without it.
     """
     preprocessed_data = {
         "station-one": build_series_obj(
-            ["10", "10", "10"],
-            sentinel_value=1000,
+            input_lists[0],
+            sentinel_value=sentinel_values[0],
         ),
         "station-two": build_series_obj(
-            ["12", "1000", "12"],
-            sentinel_value=1000,
+            input_lists[1],
+            sentinel_value=sentinel_values[1],
         ),
         "station-three": build_series_obj(
-            ["14", "14", "50"],
-            sentinel_value="missing",
+            input_lists[2],
+            sentinel_value=sentinel_values[2],
         )
     }
-
+ 
     post_process_call = PostProcessCall()
     post_process_call.call = "ComputeMean"
     post_process_call.args = {
@@ -137,42 +269,56 @@ def test_post_process_data_combines_multiple_series(compute_mean, drop_outliers,
             "station-three",
         ],
         "dropOutlierValues": drop_outliers,
+        "thresholdDeviationFromMedian": threshold,
         "outKey": "combined-water-temp",
     }
-
-    if drop_outliers:
-        post_process_call.args[
-            "thresholdDeviationFromMedian"
-        ] = 3.5
-
+ 
     result = compute_mean.post_process_data(
         preprocessed_data,
         post_process_call
     )
-
+ 
     # The original series should remain in the dictionary.
     assert "station-one" in result
     assert "station-two" in result
     assert "station-three" in result
-
+ 
     # The combined series should be added to the dictionary.
     assert "combined-water-temp" in result
-
+ 
     # get the resulting df and the actual values after the mean has been computed
     output_series = result["combined-water-temp"]
     output_df = output_series.dataFrame
     actual_values = (output_df["dataValue"].astype(float).tolist())
 
+    # check for overall correctness of the ComputeMean class
+
+    # ensure correct values were computed
     assert actual_values == pytest.approx(expected_values)
 
-    assert output_df["timeVerified"].tolist() == EXPECTED_TIMESTAMPS
+    # ensure outkey was used in description          
+    assert output_series.description.dataSeries == "combined-water-temp"
 
+    # the output series should have been added to the data repository
+    assert output_series.description.dataSeries in preprocessed_data
+
+    # the output series should have the same number of timestamps as the input series
+    # and all input series have the same timestamps
+    assert output_df["timeVerified"].tolist() == preprocessed_data["station-one"].dataFrame["timeVerified"].tolist()
+
+    # check dataframe metadata is null since the computed series' metadata
+    # may not represent the metadata of all the input series
     assert output_df["dataUnit"].isna().all()
+    assert output_df["timeGenerated"].isna().all()
+    assert output_df["latitude"].isna().all()
+    assert output_df["longitude"].isna().all()
 
-    assert (output_series.description.dataSeries == "combined-water-temp")
-
-    # The computed series should not inherit an input series' sentinel value
+    # check series object metadata
     assert output_series.sentinelValue is None
+    assert output_series.description.dataSource is None
+    assert output_series.description.dataLocation is None
+    assert output_series.description.dataDatum is None
+    assert output_series.timeDescription.stalenessOffset is None
 
 
 @pytest.mark.parametrize(
@@ -599,6 +745,34 @@ def test_post_process_data_does_not_modify_input_series(compute_mean):
                 expected_df
             )
 
+
+def test_post_process_data_ignores_unrelated_series_in_preprocessed_data(compute_mean):
+    """
+    Tests that ComputeMean ignores any series in the preprocessed_data repository that
+    is not used as a target_inKey. The unrelated series should remain in the repository after the post-processing is complete
+    and should not be modified in any way.
+    """
+    preprocessed_data = {
+        "station-one": build_series_obj(["10", "12", "14"], sentinel_value=1000),
+        "station-two": build_series_obj(["20", "22", "24"], sentinel_value=1000),
+        "unrelated-series": build_series_obj(["1", "2", "3", "4", "5"], sentinel_value=1000),
+    }
+
+    post_process_call = PostProcessCall()
+    post_process_call.call = "ComputeMean"
+    post_process_call.args = {
+        "target_inKeys": ["station-one", "station-two"],
+        "dropOutlierValues": False,
+        "outKey": "combined-water-temp",
+    }
+
+    # check the regular result got added
+    result = compute_mean.post_process_data(preprocessed_data, post_process_call)
+    assert "combined-water-temp" in result
+
+    # check the unrelated series is still present in the result and was not modified
+    assert "unrelated-series" in result
+    assert result["unrelated-series"].dataFrame.equals(preprocessed_data["unrelated-series"].dataFrame)
 
 @pytest.mark.parametrize(
     "series_values",
