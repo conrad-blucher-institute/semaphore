@@ -3,7 +3,7 @@
     "modelName": "Espiritu-Santo-Bay_Water-Temperature_108hr",
     "modelVersion": "1.0.0",
     "author": "Ayesha Khan",
-    "modelFileName": "./ColdStunning/Espiritu-Santo-Bay_Water-Temperature_108hr",
+    "modelFileName": "./ColdStunning/Espiritu-Santo-Bay_Water-Temperature_108hr.keras",
     "timingInfo": {
         "active": true,
         "offset": 1500,
@@ -18,7 +18,7 @@
     },
     "dependentSeries": [
         {
-            "_name": "Water Temp_PL",
+            "_name": "Water Temp PL",
             "location": "PortLavaca",
             "source": "NOAATANDC",
             "series": "dWaterTmp",
@@ -37,7 +37,7 @@
             }
         },
         {
-            "_name": "Water_Temp_SD",
+            "_name": "Water Temp SD",
             "location": "Seadrift",
             "source": "NOAATANDC",
             "series": "dWaterTmp",
@@ -56,7 +56,7 @@
             }
         },
         {
-            "_name": "Water_Temp_PO",
+            "_name": "Water Temp PO",
             "location": "PortOConnor",
             "source": "NOAATANDC",
             "series": "dWaterTmp",
@@ -75,7 +75,7 @@
             }
         },
         {
-            "_name": "Water_Temp_AWR",
+            "_name": "Water Temp AWR",
             "location": "AransasWildlifeRefuge",
             "source": "NOAATANDC",
             "series": "dWaterTmp",
@@ -94,7 +94,7 @@
             }
         },
         {
-            "_name": "Air_Temp_PL",
+            "_name": "Air Temp PL",
             "location": "PortLavaca",
             "source": "NOAATANDC",
             "series": "dAirTmp",
@@ -113,7 +113,7 @@
             }
         },
         {
-            "_name": "Air_Temp_SD",
+            "_name": "Air Temp SD",
             "location": "Seadrift",
             "source": "NOAATANDC",
             "series": "dAirTmp",
@@ -132,7 +132,7 @@
             }
         },
         {
-            "_name": "Air_Temp_PO",
+            "_name": "Air Temp PO",
             "location": "PortOConnor",
             "source": "NOAATANDC",
             "series": "dAirTmp",
@@ -151,7 +151,7 @@
             }
         },
         {
-            "_name": "Air_Temp_AWR",
+            "_name": "Air Temp AWR",
             "location": "AransasWildlifeRefuge",
             "source": "NOAATANDC",
             "series": "dAirTmp",
