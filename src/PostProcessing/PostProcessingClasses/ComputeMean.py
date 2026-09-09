@@ -4,25 +4,22 @@
 # Created By: Anointiyae Beasley
 # Created Date: 08/14/2026
 # -------------------------------
-
 """Combine multiple station series into one mean series."""
-
-from copy import deepcopy
-
-import pandas as pd
-import numpy as np
 
 from PostProcessing.IPostProcessing import IPostProcessing
 from DataClasses import Series, TimeDescription, get_input_dataFrame, SeriesDescription
 from ModelExecution.dspecParser import PostProcessCall
 from exceptions import Semaphore_Data_Exception
 
+import pandas as pd
+import numpy as np
+
 
 class ComputeMean(IPostProcessing):
     """
     Compute one mean value per timestamp using multiple input series.
     
-    NOTE: The first series shared will be used as the template for the time and series description.
+    NOTE: The first series shared will be used as the template for the time description
 
     Processing for each timestamp:
 
@@ -179,8 +176,8 @@ class ComputeMean(IPostProcessing):
 
         # ensure all series have the same number of timestamps and the same time description
         template_series = preprocessed_data[target_keys[0]]
-        for key, series in preprocessed_data.items():
-
+        for key in target_keys:
+            series = preprocessed_data[key]
             # check df lengths
             if len(series.dataFrame) != len(template_series.dataFrame):
                raise ValueError(f"ComputeMean: Series: {key} has a different number of timestamps than the other series.")
