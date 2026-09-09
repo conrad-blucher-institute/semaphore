@@ -21,8 +21,7 @@ Retrieve the newly created Series
 Assert that its DataFrame is correct
 
 Run:
-    docker exec semaphore-core python3 -m pytest -s \
-src/tests/UnitTests/test_ComputeMean.py
+    docker exec semaphore-core python3 -m pytest -s src/tests/UnitTests/test_ComputeMean.py
 """
 
 import sys
