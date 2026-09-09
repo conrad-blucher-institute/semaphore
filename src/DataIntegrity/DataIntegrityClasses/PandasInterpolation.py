@@ -55,19 +55,28 @@ class PandasInterpolation(IDataIntegrity):
         seriesDescription = inSeries.description
         dataIntegrityDescription = seriesDescription.dataIntegrityDescription
 
-        # we force the interpolation method to be time if linear was asked for because we can't guarantee that our timestamps are evenly spaced.  
-        # If we have some consecutive rows missing at 6 min intervals, the gap could be 12 minutes instead of 6 min.  By using the 'time' method, 
+        # The dspecs specify 'time' rather than 'linear' because we can't guarantee that our timestamps are evenly spaced.
+        # If we have some consecutive rows missing at 6 min intervals, the gap could be 12 minutes instead of 6 min.  By using the 'time' method,
         #  pandas will use the datetime index it finds to truly interpolate with the correct gaps being taken into account.
 
-        # we force the use of time here so that we don't have to change all of the dspecs but we probably should change the dspecs eventually
-        method = dataIntegrityDescription.args['method']
-        method = 'time' if method == 'linear' else method
-
-        #TODO:  decide what we should do here once we have a structured approached to logging and error handling. 
+        #TODO:  decide what we should do here once we have a structured approached to logging and error handling. Hard fail
+        # might not be what we want
         # Will hard fail if one or both doesn't exist
+        method = dataIntegrityDescription.args['method']
         limit = int(dataIntegrityDescription.args['limit'])
         limit_area = dataIntegrityDescription.args['limit_area']
         limit_area = None if limit_area == 'None' else limit_area
+
+        # Every dspec should be asking for 'time'. Anything else (e.g., 'linear') could ignore the datetime index and
+        # treat the rows as evenly spaced, which is wrong for us because the merged index is irregular by design.
+        # We don't override it here, the dspec is the source of truth, but a misconfigured dspec should be visible.
+        if method != 'time':
+            log(f'''Warning: Interpolation method is not 'time'. The interpolated values will treat the rows as evenly
+                spaced and will be wrong wherever the timestamps are not. Check this dspec's dataIntegrityCall args.
+                series: {seriesDescription.dataSeries}
+                dataSource: {seriesDescription.dataSource}
+                method: {method}
+            ''', force_log = True)
 
         log(f'''INFO - Beginning interpolation. Interpolation parameters:
             series: {seriesDescription.dataSeries}
@@ -115,7 +124,8 @@ class PandasInterpolation(IDataIntegrity):
 
         # Drop rows where 'dataValue' is NaN -- these couldn't be interpolated
         # TODO:  should we be doing this here? that does not seem the responsibility of the interpolater to do this -- move to data gatherer?
-        filled_input_df = filled_input_df.dropna(subset=['dataValue'])
+        # we should not be doing that. we can have NaN values! these will be dropped by clipping if necessary
+        # filled_input_df = filled_input_df.dropna(subset=['dataValue'])
 
         # Convert dataValue back to string
         filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(str)
