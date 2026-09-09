@@ -157,15 +157,6 @@ class NOAATANDC(IDataIngestion):
         try:
             station = Station(id=stationID)
             lat_lon = (station.lat_lon['lat'], station.lat_lon['lon'])
-            debug_url = station._build_request_url(
-                begin_date= fromTime.strftime("%Y%m%d %H:%M"),
-                end_date= toTime.strftime("%Y%m%d %H:%M"),
-                product= NOAAProduct,
-                units= 'metric',
-                time_zone= 'gmt',
-                datum= seriesDescription.dataDatum
-            )
-            log(f'Fetching {NOAAProduct} data from NOAA COOPS. Request URL: {debug_url}')
             data = station.get_data(
                 begin_date= fromTime.strftime("%Y%m%d %H:%M"),
                 end_date= toTime.strftime("%Y%m%d %H:%M"),
