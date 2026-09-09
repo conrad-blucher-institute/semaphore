@@ -210,7 +210,7 @@ def test_data_integrity_call(data_gatherer, mock_dspec, mock_integrity_factory):
         call= 'PandasInterpolation',
         args= {
             'limit': 3600,
-            'method': 'linear',
+            'method': 'time',
             'limit_area': 'inside'
         }
     )

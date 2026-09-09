@@ -36,7 +36,7 @@ dependent_series = {
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
-                    "method": "linear",
+                    "method": "time",
                     "limit": '7200',
                     "limit_area":"inside" 
                 }

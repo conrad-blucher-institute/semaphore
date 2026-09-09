@@ -75,8 +75,8 @@
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
-                    "limit": "21600",
-                    "method": "linear",
+                    "limit": "25200",
+                    "method": "time",
                     "limit_area": "inside"
                 }
             }

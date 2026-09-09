@@ -63,7 +63,7 @@
                 "call": "PandasInterpolation",
                 "args": {
                     "limit":"3600",
-                    "method":"linear",
+                    "method":"time",
                     "limit_area":"None"    
                 }
             }
