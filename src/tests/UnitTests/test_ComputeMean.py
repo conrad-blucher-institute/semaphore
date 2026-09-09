@@ -830,10 +830,6 @@ def test_compute_mean_function_raises_semaphore_data_exception(compute_mean, row
     """
     tests that _compute_mean() raises a Semaphore Data Exception when the row is
     empty after dropping nans. 
-    
-    NOTE: It is impossible to have an empty row by dropping all outliers since
-    the median deviates 0 from the median, and 0 will always be less than any
-    positive threshold set.
     """
-    with pytest.raises(Semaphore_Data_Exception):
+    with pytest.raises(Semaphore_Data_Exception, match="were dropped due to being NaN."):
         result = compute_mean._compute_mean(row, drop_outliers, threshold)

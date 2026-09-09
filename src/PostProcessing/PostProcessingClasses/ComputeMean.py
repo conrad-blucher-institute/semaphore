@@ -254,7 +254,7 @@ class ComputeMean(IPostProcessing):
         output_df["timeVerified"] = (mean_values.index)
         output_df["dataValue"] = (mean_values.astype(float).astype(str).to_numpy())
         output_df["dataUnit"] = None
-        output_df["timeGenerated"] = pd.NaT
+        output_df["timeGenerated"] = None
         output_df["latitude"] = None
         output_df["longitude"] = None
 
