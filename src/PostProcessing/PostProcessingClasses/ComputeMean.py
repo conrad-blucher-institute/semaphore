@@ -13,8 +13,9 @@ import pandas as pd
 import numpy as np
 
 from PostProcessing.IPostProcessing import IPostProcessing
-from DataClasses import Series, TimeDescription, get_input_dataFrame
+from DataClasses import Series, TimeDescription, get_input_dataFrame, SeriesDescription
 from ModelExecution.dspecParser import PostProcessCall
+from exceptions import Semaphore_Data_Exception
 
 
 class ComputeMean(IPostProcessing):
@@ -100,9 +101,6 @@ class ComputeMean(IPostProcessing):
         # validate and cast the thresholdDeviationFromMedian argument if drop_outliers is true
         threshold = self._get_outlier_threshold(args=args, drop_outliers=drop_outliers)
 
-        # use the first series as a template for general series metadata
-        template_series = preprocessedData[target_keys[0]]
-
         # get only the series values for each input series
         # rename is called to ensure each series is uniquely identified by their inKey
         # instead of duplicating "dataValue" for each series
@@ -133,16 +131,24 @@ class ComputeMean(IPostProcessing):
 
         output_df = self._build_output_dataframe(mean_values)
 
-        series_description = deepcopy(template_series.description)
+        # most metadata is left null because the computed series' metadata
+        # may not represent the metadata of all the input series
+        series_description = SeriesDescription(
+            dataSource=None,
+            dataSeries=out_key, # the computed series is identified by its outKey,
+            dataLocation=None,
+            dataDatum=None
+        )
 
-        # The computed series is identified by its outKey. 
-        series_description.dataSeries = out_key
-
-        # the output series will not contain a datum
-        if hasattr(series_description,"dataDatum",):
-            series_description.dataDatum = None
-
-        time_description = deepcopy(template_series.timeDescription)
+        # after validation, all input series will have the same fromDateTime, toDateTime, and interval,
+        # so we can use the first series' time description as the template for the computed series
+        time_template = preprocessedData[target_keys[0]].timeDescription
+        time_description = TimeDescription(
+            fromDateTime=time_template.fromDateTime,
+            toDateTime=time_template.toDateTime,
+            interval=time_template.interval,
+            stalenessOffset=None
+        )
 
         output_series = Series(series_description, time_description)
 
@@ -154,22 +160,53 @@ class ComputeMean(IPostProcessing):
 
     def _validate_arguments(self, target_keys: list[str] | None, out_key: str | None, drop_outliers: bool, preprocessed_data: dict[str, Series]) -> None:
         """Validate the ComputeMean configuration."""
+
         if not target_keys:
             raise ValueError("ComputeMean requires at least one target input series.")
 
         if not out_key:
-            raise ValueError("ComputeMean requires an outKey.")
+            raise ValueError("ComputeMean requires an outKey to identify the computed series.")
 
         if not isinstance(drop_outliers, bool):
-            raise TypeError("dropOutlierValues must be true or false.")
+            raise TypeError("dropOutlierValues must be a boolean.")
 
         missing_keys = [key for key in target_keys if key not in preprocessed_data]
-
         if missing_keys:
             raise KeyError(
                 "ComputeMean could not find these target series: "
                 f"{missing_keys}"
             )
+
+        # ensure all series have the same number of timestamps and the same time description
+        template_series = preprocessed_data[target_keys[0]]
+        for key, series in preprocessed_data.items():
+
+            # check df lengths
+            if len(series.dataFrame) != len(template_series.dataFrame):
+               raise ValueError(f"ComputeMean: Series: {key} has a different number of timestamps than the other series.")
+
+            # check time descriptions
+            if not self._compare_time_descriptions(series.timeDescription, template_series.timeDescription):
+                raise ValueError(f"ComputeMean: Series: {key} has a different time description than the other series.")
+
+
+    def _compare_time_descriptions(self, td1: TimeDescription, td2: TimeDescription) -> bool:
+        """
+        compares 2 time descriptions while ignoring the staleness offset since we specifically check
+        equality for fromDateTime, toDateTime, and interval.
+
+        Args:
+            td1 (TimeDescription): The first time description to compare.
+            td2 (TimeDescription): The second time description to compare.
+
+        Returns:
+            bool: True if the time descriptions are equal, False otherwise.
+        """
+        return (
+            td1.fromDateTime == td2.fromDateTime and
+            td1.toDateTime == td2.toDateTime and
+            td1.interval == td2.interval
+        )
 
     def _get_outlier_threshold(self, args: dict, drop_outliers: bool) -> float | None:
         """
@@ -228,7 +265,7 @@ class ComputeMean(IPostProcessing):
 
     def _compute_mean(self, row: pd.Series, drop_outliers: bool, threshold: float | None) -> float | None:
         """
-        Computes the mean value for a specific row
+        Computes the mean value for a specific row. Raises an exception if all values are dropped due to being NaN or outliers.
 
         Args:
             row (pd.Series): A row of values from a dataframe where each column represents a different series
@@ -244,7 +281,7 @@ class ComputeMean(IPostProcessing):
         valid_values = row.dropna()
 
         if valid_values.empty:
-            raise ValueError("Cannot compute mean for a row with no valid values.")
+            raise Semaphore_Data_Exception(f"ComputeMean: all values for timestamp: {row.name} were dropped due to being NaN.")
 
         if drop_outliers:
             if threshold is None:
@@ -258,7 +295,7 @@ class ComputeMean(IPostProcessing):
             valid_values = valid_values[deviation_from_median < threshold]
 
         if valid_values.empty:
-            raise ValueError("Cannot compute mean for a row with no valid values.")
+            raise Semaphore_Data_Exception(f"ComputeMean: all values for timestamp: {row.name} were dropped due to being outliers or NaN.")
 
         return valid_values.mean()
 
@@ -277,15 +314,18 @@ class ComputeMean(IPostProcessing):
         # index by verified time and get all values for this series
         series_values = series.dataFrame.set_index("timeVerified")["dataValue"]
 
-        # convert sentinel to string
-        # sentinel values that are already strings will not be affected
-        sentinel_value = str(series.sentinelValue)
+        # if the sentinel is None, we skip the nan masking and 
+        # replacement step and just return the series values as numeric
+        if series.sentinelValue is not None:
+            # convert sentinel to string
+            # sentinel values that are already strings will not be affected
+            sentinel_value = str(series.sentinelValue)
 
-        # replaces sentinel values with NaN so that they are ignored in the mean calculation
-        series_values = series_values.mask(
-            series_values.astype(str) == sentinel_value,
-            np.nan,
-        )
+            # replaces sentinel values with NaN so that they are ignored in the mean calculation
+            series_values = series_values.mask(
+                series_values.astype(str) == sentinel_value,
+                np.nan,
+            )
 
         # cast the series values to numeric
         # nan is considered a float, so to_numeric will leave nan values as nan

@@ -33,6 +33,7 @@ sys.path.append("/app/src")
 from src.DataClasses import Series, SeriesDescription, TimeDescription, get_input_dataFrame
 from src.ModelExecution.dspecParser import PostProcessCall
 from src.PostProcessing.IPostProcessing import post_processing_factory
+from src.PostProcessing.PostProcessingClasses.ComputeMean import Semaphore_Data_Exception
 
 import pandas as pd
 import numpy as np
@@ -84,69 +85,6 @@ def build_series_obj(data: list[object], sentinel_value: int | str) -> Series:
     series.sentinelValue = sentinel_value
 
     return series
-
-
-@pytest.mark.parametrize(
-    (
-        "station_values",
-        "drop_outliers",
-        "threshold",
-        "expected_mean"
-    ),
-    [
-        (
-            [10.0, 12.0, 14.0],
-            False,
-            None,
-            12.0
-        ),
-        (
-            [10.0, 12.0, 50.0],
-            True,
-            3.5,
-            11.0
-        ),
-        (
-            [10.0, float("nan"), 14.0],
-            False,
-            None,
-            12.0
-        )
-    ]
-)
-def test_compute_mean(compute_mean, station_values, drop_outliers, threshold, expected_mean):
-    """
-    Calculate the mean for one timestamp.
-
-    This verifies that ComputeMean can calculate a regular mean,
-    remove an outlier, and ignore NaN values.
-    """
-    values = pd.Series(station_values)
-
-    actual_mean = (
-        compute_mean._compute_mean(
-            values,
-            drop_outliers=drop_outliers,
-            threshold=threshold,
-        )
-    )
-
-    assert actual_mean == pytest.approx(expected_mean)
-
-
-def test_get_series_values_replaces_sentinel(compute_mean):
-    """
-    tests that the sentinel value in a series is replaced with NaN when calling _get_series_values
-    """
-
-    station_series = build_series_obj(["10", "1000", "14"], sentinel_value=1000)
-
-    result = compute_mean._get_series_values(station_series)
-
-    assert result.index.tolist() == (EXPECTED_TIMESTAMPS)
-    assert result.iloc[0] == pytest.approx(10.0)
-    assert pd.isna(result.iloc[1])
-    assert result.iloc[2] == pytest.approx(14.0)
 
 
 @pytest.mark.parametrize(
@@ -237,6 +175,69 @@ def test_post_process_data_combines_multiple_series(compute_mean, drop_outliers,
     assert output_series.sentinelValue is None
 
 
+@pytest.mark.parametrize(
+    (
+        "station_values",
+        "drop_outliers",
+        "threshold",
+        "expected_mean"
+    ),
+    [
+        (
+            [10.0, 12.0, 14.0],
+            False,
+            None,
+            12.0
+        ),
+        (
+            [10.0, 12.0, 50.0],
+            True,
+            3.5,
+            11.0
+        ),
+        (
+            [10.0, float("nan"), 14.0],
+            False,
+            None,
+            12.0
+        )
+    ]
+)
+def test_compute_mean(compute_mean, station_values, drop_outliers, threshold, expected_mean):
+    """
+    Calculate the mean for one timestamp.
+
+    This verifies that ComputeMean can calculate a regular mean,
+    remove an outlier, and ignore NaN values.
+    """
+    values = pd.Series(station_values)
+
+    actual_mean = (
+        compute_mean._compute_mean(
+            values,
+            drop_outliers=drop_outliers,
+            threshold=threshold,
+        )
+    )
+
+    assert actual_mean == pytest.approx(expected_mean)
+
+
+def test_get_series_values_replaces_sentinel(compute_mean):
+    """
+    tests that the sentinel value in a series is replaced with NaN when calling _get_series_values
+    """
+
+    station_series = build_series_obj(["10", "1000", "14"], sentinel_value=1000)
+
+    result = compute_mean._get_series_values(station_series)
+
+    assert result.index.tolist() == (EXPECTED_TIMESTAMPS)
+    assert result.iloc[0] == pytest.approx(10.0)
+    assert pd.isna(result.iloc[1])
+    assert result.iloc[2] == pytest.approx(14.0)
+
+
 def test_get_series_values_rejects_non_numeric_non_sentinel(compute_mean):
     """Tests a nonnumeric value that is not the sentinel should raise an error."""
 
@@ -269,11 +270,13 @@ def test_get_series_values_replaces_string_sentinel(compute_mean):
     assert result.iloc[2] == pytest.approx(14.0)
 
 
-def test_post_process_data_uses_union_of_timestamps(compute_mean):
+def test_post_process_data_raises_for_missing_timestamp(compute_mean):
         """
-        Tests that the output series does not drop any timestamps present in any of the input series.
-
-        EX: a timestamp that only appears in 1 series should still be present in the output
+        Tests that ComputeMean raises a ValueError when an input series that is missing
+        a timestamp. This is checked by comparing the number of timestamps in each series,
+        not the actual timestamp values. 
+        
+        See test_post_process_data_raises_for_mismatched_time_description() for testing mismatched timestamp values.
         """
         station_one = build_series_obj(
             ["10", "12", "14"],
@@ -285,7 +288,7 @@ def test_post_process_data_uses_union_of_timestamps(compute_mean):
             sentinel_value=1000
         )
 
-        # Remove station two's first timestamp.
+        # remove station two's first timestamp
         station_two.dataFrame = (
             station_two.dataFrame.iloc[1:]
             .reset_index(drop=True)
@@ -307,13 +310,75 @@ def test_post_process_data_uses_union_of_timestamps(compute_mean):
             "outKey": "ESB-combined-water-temp"
         }
 
-        result = compute_mean.post_process_data(preprocessed_data, post_process_call)
+        with pytest.raises(ValueError, match="has a different number of timestamps"):
+            compute_mean.post_process_data(preprocessed_data, post_process_call)
 
-        output_df = result["ESB-combined-water-temp"].dataFrame
 
-        assert output_df["timeVerified"].tolist() == (EXPECTED_TIMESTAMPS)
+@pytest.mark.parametrize(
+    "mismatched_time_description",
+    [
+        # test with a series that has a different fromDateTime
+        TimeDescription(
+            START + timedelta(hours=1),
+            START + timedelta(hours=3),
+            timedelta(hours=1),
+        ),
+        # test with a series that has a different toDateTime
+        TimeDescription(
+            START,
+            START + timedelta(hours=3),
+            timedelta(hours=1),
+        ),
+        # test with a series that has a different interval
+        TimeDescription(
+            START,
+            START + timedelta(hours=2),
+            timedelta(hours=2),
+        )
+    ],
+    ids=[
+        "different-fromDateTime",
+        "different-toDateTime",
+        "different-interval",
+    ]
+)
+def test_post_process_data_raises_for_mismatched_time_description(compute_mean, mismatched_time_description):
+        """
+        Tests that ComputeMean raises a ValueError when an input series' time description
+        (fromDateTime, toDateTime, or interval) does not match the other input series' time
+        description, even when both series have the same number of timestamps.
+        """
+        station_one = build_series_obj(
+            ["10", "12", "14"],
+            sentinel_value=1000
+        )
 
-        assert output_df["dataValue"].astype(float).tolist() == (pytest.approx([10.0, 17.0, 19.0]))
+        station_two = build_series_obj(
+            ["20", "22", "24"],
+            sentinel_value=1000
+        )
+
+        # set station two's time description to a mismatched one
+        station_two.timeDescription = mismatched_time_description
+
+        preprocessed_data = {
+            "station-one": station_one,
+            "station-two": station_two
+        }
+
+        post_process_call = PostProcessCall()
+        post_process_call.call = "ComputeMean"
+        post_process_call.args = {
+            "target_inKeys": [
+                "station-one",
+                "station-two",
+            ],
+            "dropOutlierValues": False,
+            "outKey": "ESB-combined-water-temp"
+        }
+
+        with pytest.raises(ValueError, match="has a different time description"):
+            compute_mean.post_process_data(preprocessed_data, post_process_call)
 
 
 def test_post_process_data_raises_for_missing_input_key(compute_mean):
@@ -480,23 +545,18 @@ def test_post_process_data_sets_unused_metadata_to_null(compute_mean):
     output_series = result["ESB-combined-water-temp"]
     output_df = output_series.dataFrame
 
+    # the output dataSeries should match the outKey specified in the post_process_call
     assert (output_series.description.dataSeries == "ESB-combined-water-temp")
 
-    # dataLocation is required and comes from the template series.
-    assert output_series.description.dataLocation == "Test"
-
-    # The computed series does not have its own datum.
+    # check other metadata was set to None
+    assert output_series.description.dataSource is None
+    assert output_series.description.dataLocation is None
     assert output_series.description.dataDatum is None
+    assert output_series.sentinelValue is None      # output shouldn't have a sentinel value since it is a computed series
 
-    for column in [
-        "dataUnit",
-        "timeGenerated",
-        "latitude",
-        "longitude",
-    ]:
+    # metadata in the dataframe should be null
+    for column in ["dataUnit", "timeGenerated", "latitude", "longitude"]:
         assert output_df[column].isna().all()
-
-    assert output_series.sentinelValue is None
 
 
 def test_post_process_data_does_not_modify_input_series(compute_mean):
@@ -541,100 +601,65 @@ def test_post_process_data_does_not_modify_input_series(compute_mean):
 
 
 @pytest.mark.parametrize(
-    "preprocessed_data",
+    "series_values",
     [
-        {
-            # empty lists
-            "station-one": build_series_obj(
-                [],
-                sentinel_value=1000
-            ),
-            "station-two": build_series_obj(
-                [],
-                sentinel_value=1000
-            )
-        },
-        {
-            # lists of None
-            "station-one": build_series_obj(
-                [None, None, None],
-                sentinel_value=1000
-            ),
-            "station-two": build_series_obj(
-                [None, None, None],
-                sentinel_value=1000
-            ) 
-        },
-        {
-            # lists of np.nan
-            "station-one": build_series_obj(
-                [np.nan, np.nan, np.nan],
-                sentinel_value=1000
-            ),
-            "station-two": build_series_obj(
-                [np.nan, np.nan, np.nan],
-                sentinel_value=1000
-            ) 
-        },
-        {
-            # lists of "nan" strings
-            "station-one": build_series_obj(
-                ['nan', 'nan', 'nan'],
-                sentinel_value=1000
-            ),
-            "station-two": build_series_obj(
-                ['nan', 'nan', 'nan'],
-                sentinel_value=1000
-            ) 
-        },
-        {
-            # mix of None, np.nan, and "nan" strings
-            "station-one": build_series_obj(
-                [None, np.nan, 'nan'],
-                sentinel_value=1000
-            ),
-            "station-two": build_series_obj(
-                [np.nan, 'None', 'nan'],
-                sentinel_value=1000
-            )
-        },
-        {
-            # all values are dropped by sentinel value
-            "station-one": build_series_obj(
-                [1000, 1000, 1000],
-                sentinel_value=1000
-            ),
-            "station-two": build_series_obj(
-                [1000, 1000, 1000],
-                sentinel_value=1000
-            )
-        }
+        (
+            [None, None, None]
+        ),
+        (
+            [np.nan, np.nan, np.nan]
+        ),
+        (
+            ['nan', 'nan', 'nan']
+        ),
+        (
+            [None, np.nan, 'nan']
+        )
     ],
     ids=[
-        "empty-lists",
-        "lists-of-None",
-        "lists-of-nan",
-        "lists-of-string-nan",
-        "mixed-None-np.nan-string-nan",
-        "all-dropped-values"
+        "list-of-None",
+        "list-of-nan",
+        "list-of-string-nan",
+        "mixed",
     ]
 )
-def test_post_process_data_handles_empty_series(compute_mean, preprocessed_data):
+def test_get_series_values_raises_value_error(compute_mean, series_values):
     """
-    tests that ComputeMean can handle various cases of empty/invalid inputs.
+    tests that _get_series_values() raises a ValueError when the dataValue column cannot be converted to numeric
     """
-    #preprocessed_data["station-one"].dataFrame['dataValue']
 
-    post_process_call = PostProcessCall()
-    post_process_call.call = "ComputeMean"
-    post_process_call.args = {
-        "target_inKeys": [
-            "station-one",
-            "station-two"
-        ],
-        "dropOutlierValues": False,
-        "outKey": "ESB-combined-water-temp"
-    }
+    series = build_series_obj(series_values, sentinel_value=1000)
 
-    with pytest.raises(ValueError):
-        result = compute_mean.post_process_data(preprocessed_data, post_process_call)
+    # all of these cases should fail since the dataValue column cannot be converted to numeric
+    with pytest.raises(ValueError, match="dataValue column to numeric. Ensure the series contains only numeric values or the series' sentinel value."):
+        result = compute_mean._get_series_values(series)
+
+
+@pytest.mark.parametrize(
+    "row, drop_outliers, threshold",
+    [   
+        # this test means that 3 series all have None for a specific timestamp, so the mean cannot be computed
+        (
+            pd.Series([None, None, None]), False, None
+        ),
+        # should raise since nans are dropped and the row becomes empty
+        (
+            pd.Series([np.nan, np.nan, np.nan]), False, None
+        ),
+        # empty list
+        (
+            pd.Series([]), False, None
+        )
+    ]
+)
+def test_compute_mean_function_raises_semaphore_data_exception(compute_mean, row, drop_outliers, threshold):
+    """
+    tests that _compute_mean() raises a Semaphore Data Exception when the row is
+    empty after dropping nans. 
+    
+    NOTE: It is impossible to have an empty row by dropping all outliers since
+    the median deviates 0 from the median, and 0 will always be less than any
+    positive threshold set.
+    """
+    with pytest.raises(Semaphore_Data_Exception):
+        result = compute_mean._compute_mean(row, drop_outliers, threshold)
