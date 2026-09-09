@@ -50,13 +50,13 @@
             "dataIntegrityCall": {
                 "call": "AngleInterpolation",
                 "args": {
-                    "limit":"10800",
+                    "limit":"3600",
                     "method":"linear",
-                    "limit_area":"inside"    
+                    "limit_area":"inside"
                 }
             }
         },
-        { 
+        {
             "_name": "Wind Speed Prediction",
             "location": "PortLavaca",
             "source": "NDFD_JSON",
@@ -69,33 +69,33 @@
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
-                    "limit":"10800",
+                    "limit":"3600",
                     "method":"linear",
-                    "limit_area":"inside"    
+                    "limit_area":"inside"
                 }
             }
         },
-        { 
+        {
             "_name": "Harmonic Predictions",
             "location": "PortLavaca",
-            "source": "LIGHTHOUSE",
-            "series": "pHarm",
+            "source": "NOAATANDC",
+            "series": "pWl",
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
             "range":  [43, 31],
-            "outKey": "PL_pHarm_48"
+            "outKey": "PL_pWl_48"
         },
-        { 
+        {
             "_name": "Harmonic Predictions POC",
             "location": "PortOConnor",
-            "source": "LIGHTHOUSE",
-            "series": "pHarm",
+            "source": "NOAATANDC",
+            "series": "pWl",
             "unit": "meter",
             "datum": "MLLW",
             "interval": 3600,
             "range":  [43, 31],
-            "outKey": "POC_pHarm_48"
+            "outKey": "POC_pWl_48"
         }
 
     ],
@@ -113,8 +113,8 @@
         {
             "call": "MagnoliaPredictionsPostProcess",
             "args": {
-                "predHarmFirst_inKey":"PL_pHarm_48",
-                "predHarmSecond_inKey":"POC_pHarm_48",
+                "predHarmFirst_inKey":"PL_pWl_48",
+                "predHarmSecond_inKey":"POC_pWl_48",
                 "magnolia_Pred_inKey":"MG_48_output_48",
                 "Magnolia_WL_outKey": "MG_WL_F48"        
             }
