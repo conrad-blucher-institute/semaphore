@@ -39,7 +39,7 @@ class ComputeMean(IPostProcessing):
         "call": "ComputeMean",
         "args": {
             "dropOutlierValues": false,
-            "target_inKeys": [
+            "targetSeries": [
                 "series-one_air-temp_25",
                 "series-two_air-temp_25",
                 "series-three_air-temp_25",
@@ -56,7 +56,7 @@ class ComputeMean(IPostProcessing):
         "args": {
             "dropOutlierValues": true,
             "thresholdDeviationFromMedian": 3.5,
-            "target_inKeys": [
+            "targetSeries": [
                 "Aransas-Wildlife-Refuge_water-temp_25",
                 "Port-OConnor_water-temp_25",
                 "Seadrift_water-temp_25",
@@ -84,7 +84,7 @@ class ComputeMean(IPostProcessing):
         """
         args = postProcessCall.args
 
-        target_keys = args.get("target_inKeys")
+        target_keys = args.get("targetSeries")
         out_key = args.get("outKey")
         drop_outliers = args.get("dropOutlierValues", False)
 
@@ -260,7 +260,7 @@ class ComputeMean(IPostProcessing):
 
         return output_df
 
-    def _compute_mean(self, row: pd.Series, drop_outliers: bool, threshold: float | None) -> float | None:
+    def _compute_mean(self, row: pd.Series, drop_outliers: bool, threshold: float | None) -> float:
         """
         Computes the mean value for a specific row. Raises an exception if all values are dropped due to being NaN or outliers.
 
@@ -270,7 +270,7 @@ class ComputeMean(IPostProcessing):
             threshold (float | None): The threshold value for outlier detection if drop_outliers is true, otherwise None
         
         Returns:
-            float | None: The mean value for the row, or None if no valid values exist in the row
+            float: The mean value for the row
 
         NOTE: Sentinel values have already been converted to
         NaN before this method is called.

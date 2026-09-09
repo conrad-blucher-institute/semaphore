@@ -262,7 +262,7 @@ def test_post_process_data_combines_multiple_series(
     post_process_call = PostProcessCall()
     post_process_call.call = "ComputeMean"
     post_process_call.args = {
-        "target_inKeys": [
+        "targetSeries": [
             "station-one",
             "station-two",
             "station-three",
@@ -447,7 +447,7 @@ def test_post_process_data_raises_for_missing_timestamp(compute_mean):
         post_process_call = PostProcessCall()
         post_process_call.call = "ComputeMean"
         post_process_call.args = {
-            "target_inKeys": [
+            "targetSeries": [
                 "station-one",
                 "station-two",
             ],
@@ -514,7 +514,7 @@ def test_post_process_data_raises_for_mismatched_time_description(compute_mean, 
         post_process_call = PostProcessCall()
         post_process_call.call = "ComputeMean"
         post_process_call.args = {
-            "target_inKeys": [
+            "targetSeries": [
                 "station-one",
                 "station-two",
             ],
@@ -528,7 +528,7 @@ def test_post_process_data_raises_for_mismatched_time_description(compute_mean, 
 
 def test_post_process_data_raises_for_missing_input_key(compute_mean):
         """
-        Asserts that ComputeMean will raise a KeyError if a target_inKey is not present in the
+        Asserts that ComputeMean will raise a KeyError if a targetSeries is not present in the
         preprocessed_data repository.
         """
 
@@ -542,7 +542,7 @@ def test_post_process_data_raises_for_missing_input_key(compute_mean):
         post_process_call = PostProcessCall()
         post_process_call.call = "ComputeMean"
         post_process_call.args = {
-            "target_inKeys": [
+            "targetSeries": [
                 "station-one",
                 "missing-station",
             ],
@@ -557,13 +557,13 @@ def test_post_process_data_raises_for_missing_input_key(compute_mean):
 
 def test_post_process_data_raises_for_empty_target_keys(compute_mean):
         """
-        tests that ComputeMean raises an exception if the target_inKeys list is empty
+        tests that ComputeMean raises an exception if the targetSeries list is empty
         """
 
         post_process_call = PostProcessCall()
         post_process_call.call = "ComputeMean"
         post_process_call.args = {
-            "target_inKeys": [],
+            "targetSeries": [],
             "dropOutlierValues": False,
             "outKey": "ESB-combined-water-temp"
         }
@@ -600,7 +600,7 @@ def test_post_process_data_rejects_invalid_outlier_threshold(compute_mean, thres
         post_process_call = PostProcessCall()
         post_process_call.call = "ComputeMean"
         post_process_call.args = {
-            "target_inKeys": [
+            "targetSeries": [
                 "station-one",
                 "station-two"
             ],
@@ -637,7 +637,7 @@ def test_post_process_data_handles_different_series_sentinels(compute_mean):
         post_process_call = PostProcessCall()
         post_process_call.call = "ComputeMean"
         post_process_call.args = {
-            "target_inKeys": [
+            "targetSeries": [
                 "station-one",
                 "station-two",
                 "station-three",
@@ -677,7 +677,7 @@ def test_post_process_data_sets_unused_metadata_to_null(compute_mean):
     post_process_call = PostProcessCall()
     post_process_call.call = "ComputeMean"
     post_process_call.args = {
-        "target_inKeys": [
+        "targetSeries": [
             "station-one",
             "station-two",
         ],
@@ -728,7 +728,7 @@ def test_post_process_data_does_not_modify_input_series(compute_mean):
         post_process_call = PostProcessCall()
         post_process_call.call = "ComputeMean"
         post_process_call.args = {
-            "target_inKeys": [
+            "targetSeries": [
                 "station-one",
                 "station-two"
             ],
@@ -748,7 +748,7 @@ def test_post_process_data_does_not_modify_input_series(compute_mean):
 def test_post_process_data_ignores_unrelated_series_in_preprocessed_data(compute_mean):
     """
     Tests that ComputeMean ignores any series in the preprocessed_data repository that
-    is not used as a target_inKey. The unrelated series should remain in the repository after the post-processing is complete
+    is not used as a targetSeries. The unrelated series should remain in the repository after the post-processing is complete
     and should not be modified in any way.
     """
     preprocessed_data = {
@@ -760,7 +760,7 @@ def test_post_process_data_ignores_unrelated_series_in_preprocessed_data(compute
     post_process_call = PostProcessCall()
     post_process_call.call = "ComputeMean"
     post_process_call.args = {
-        "target_inKeys": ["station-one", "station-two"],
+        "targetSeries": ["station-one", "station-two"],
         "dropOutlierValues": False,
         "outKey": "combined-water-temp",
     }
