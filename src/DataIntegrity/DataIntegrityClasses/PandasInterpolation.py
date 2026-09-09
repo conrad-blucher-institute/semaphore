@@ -124,8 +124,9 @@ class PandasInterpolation(IDataIntegrity):
 
         # Drop rows where 'dataValue' is NaN -- these couldn't be interpolated
         # TODO:  should we be doing this here? that does not seem the responsibility of the interpolater to do this -- move to data gatherer?
-        # we should not be doing that. we can have NaN values! these will be dropped by clipping if necessary
-        # filled_input_df = filled_input_df.dropna(subset=['dataValue'])
+        # we should not be doing that. we can have NaN values! these will be dropped by clipping if necessary. leaving it for now 
+        # until a larger refactor
+        filled_input_df = filled_input_df.dropna(subset=['dataValue'])
 
         # Convert dataValue back to string
         filled_input_df['dataValue'] = filled_input_df['dataValue'].astype(str)
