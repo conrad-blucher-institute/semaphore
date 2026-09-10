@@ -26,7 +26,6 @@ sys.path.append("/app/src")
 from datetime import datetime, timezone, timedelta, date, time
 from os import getenv
 from pathlib import Path
-from threading import Lock
 
 import pandas as pd
 import pytest

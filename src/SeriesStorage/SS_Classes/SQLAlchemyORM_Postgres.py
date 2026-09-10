@@ -54,8 +54,9 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
     _engine_mapping_lock = Lock()
  
     def __init__(self) -> None:
-        """Constructor generates an a db schema. Automatically creates the 
-            metadata object holding the defined schema.
+        """
+        Constructor generates a db schema. Automatically creates the 
+        metadata object holding the defined schema.
         """
         self.__engine = SQLAlchemyORM_Postgres.__get_engine(getenv('DB_LOCATION_STRING'), False)
         self.__metadata = MetaData()
@@ -612,17 +613,18 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         batch_size = 999  # Set your desired batch size
         batched_rows = [insertionRows[i:i + batch_size] for i in range(0, len(insertionRows), batch_size)]
         
-        for batch in batched_rows:
-            # Insert the rows into the inputs table returning what is inserted as a sanity check
-            # On conflict we update the acquired time to now
-            with self.__engine.connect() as conn:
+        result = []
+        with self.__engine.connect() as conn:
+            for batch in batched_rows:
+                # Insert the rows into the inputs table returning what is inserted as a sanity check
+                # On conflict we update the acquired time to now
                 cursor = conn.execute(insert(self.__metadata.tables['inputs'])
                                         .values(batch)
                                         .on_conflict_do_update(constraint='inputs_AK00', set_={"acquiredTime": now})
                                         .returning(self.__metadata.tables['inputs'])
                                     )
-                result = cursor.fetchall()
-                conn.commit()
+                result.extend(cursor.fetchall())
+            conn.commit()
         
         # Create a series object to return with the inserted data
         resultSeries = Series(series.description, series.timeDescription)
@@ -1030,7 +1032,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         given out.
         """
         if db_conn_string is None:
-            raise Exception("An engine was requested from the ORM, but the db connection string is None.")
+            raise ValueError("DB connection string is required (got None). Set DB_LOCATION_STRING.")
 
         with SQLAlchemyORM_Postgres._engine_mapping_lock:
             # if the engine hasn't been created for this location string, create and store it
