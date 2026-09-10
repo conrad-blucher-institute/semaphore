@@ -29,7 +29,7 @@
             "outKey": "PL_WL_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
+                "args": { "limit": "7200", "method": "time", "limit_area": "inside" }
             }
         },
         {
@@ -44,7 +44,7 @@
             "outKey": "PL_Surge_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
+                "args": { "limit": "7200", "method": "time", "limit_area": "inside" }
             }
         },
         {
@@ -59,7 +59,7 @@
             "outKey": "POC_WL_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
+                "args": { "limit": "7200", "method": "time", "limit_area": "inside" }
             }
         },
         {
@@ -74,7 +74,7 @@
             "outKey": "POC_Surge_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
+                "args": { "limit": "7200", "method": "time", "limit_area": "inside" }
             }
         },
         {
@@ -102,7 +102,7 @@
             "outKey": "PL_WNSPD_25",
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
+                "args": { "limit": "7200", "method": "time", "limit_area": "inside" }
             }
         },
         {
@@ -132,7 +132,7 @@
             "stalenessOffset": 45000,
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
-                "args": { "limit": "3600", "method": "linear", "limit_area": "inside" }
+                "args": { "limit": "7200", "method": "time", "limit_area": "inside" }
             }
         }
     ],

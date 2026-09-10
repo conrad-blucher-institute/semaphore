@@ -172,6 +172,10 @@ class NOAATANDC(IDataIngestion):
         if isSinglePoint: # Select only the single point we want
             data = data.loc[[fromTime.replace(tzinfo=None)]]
 
+        # log the last timestamp fetched
+        if not data.empty:
+            log(f'Last data point fetched: {data.index[-1]} of requested time range {fromTime} to {toTime}')
+
         return data, lat_lon
 
 

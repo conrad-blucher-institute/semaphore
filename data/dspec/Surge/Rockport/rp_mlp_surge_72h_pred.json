@@ -114,7 +114,7 @@
                 "call": "PandasInterpolation",
                 "args": {
                     "limit":"36000",
-                    "method":"linear",
+                    "method":"time",
                     "limit_area":"inside"    
                 }
             },
@@ -133,7 +133,7 @@
                 "call": "PandasInterpolation",
                 "args": {
                     "limit":"36000",
-                    "method":"linear",
+                    "method":"time",
                     "limit_area":"inside"    
                 }
             },
