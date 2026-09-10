@@ -132,7 +132,6 @@ class Series():
         self.__dataFrame = None
         self.__sentinelValue = None
 
-
     @property
     def dataFrame(self):
         return self.__dataFrame
