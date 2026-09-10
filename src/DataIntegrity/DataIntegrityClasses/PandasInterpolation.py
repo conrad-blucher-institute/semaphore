@@ -104,10 +104,13 @@ class PandasInterpolation(IDataIntegrity):
         filled_input_df = self.__get_full_dataframe(input_df, timeDescription.fromDateTime, timeDescription.toDateTime, timeDescription.interval)
 
         # don't interpolate if there are gaps larger than the limit
+        # TODO: we shouldn't raise an exeption here we should log the issue and return the series as is without doing anything
         largerThanLimit = self.__has_prohibited_gap(filled_input_df, limit, limit_area, timeDescription.interval)
         if largerThanLimit:
             error_message = f'''Interpolation error,
-                Reason: There are gaps in the data that are larger than the interpolation limit parameter.
+                reason: There are gaps in the data that are larger than the interpolation limit parameter.
+                series: {seriesDescription.dataSeries}
+                source: {seriesDescription.dataSource}
                 limit: {limit}
                 interval: {timeDescription.interval}
                 df:
@@ -209,9 +212,9 @@ class PandasInterpolation(IDataIntegrity):
                         limitArea: {limitArea}
                         gap: {gap}
                         bookend_start: {bookend_start}
-                        run_start: {run_start}
+                        run_start_index: {run_start}
                         bookend_end: {bookend_end}
-                        run_end: {run_end}
+                        run_end_index: {run_end}
                     ''')
                     return True
 
