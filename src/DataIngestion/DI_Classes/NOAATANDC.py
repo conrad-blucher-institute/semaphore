@@ -22,7 +22,7 @@ Documentation: https://api.tidesandcurrents.noaa.gov/api/prod/
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
-from utility import log
+from utility import log, log_error
 from math import cos, sin
 from noaa_coops import Station
 import re
@@ -172,7 +172,10 @@ class NOAATANDC(IDataIngestion):
         if isSinglePoint: # Select only the single point we want
             data = data.loc[[fromTime.replace(tzinfo=None)]]
 
-        return data, lat_lon
+        # drop timestamps with missing values
+        filtered_data = self.__filter_NOAA_data(seriesDescription, NOAAProduct, data)
+
+        return filtered_data, lat_lon
 
 
     def __fetch_dWl(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
@@ -580,3 +583,48 @@ class NOAATANDC(IDataIngestion):
         series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
         return series
+
+
+    def __filter_NOAA_data(self, desc: SeriesDescription, product: str, df: DataFrame) -> DataFrame:
+        """
+        This function filters out any timestamps with missing values from a NOAA dataframe.
+        Each product requested from NOAA may have different columns returned,
+        so this function maps the product to the value column to filter on.
+
+        NOTE: This function filters based on the NOAA products you can request and not
+        semaphore's internal series names like 'dWl' or 'pWl'.
+
+        The documentation for returned data for each NOAA product can be found here:
+        https://api.tidesandcurrents.noaa.gov/api/prod/responseHelp.html
+
+        Args:
+            desc (SeriesDescription): The series description for the requested series
+            product (str): The NOAA product requested
+                ('water_level', 'predictions', 'wind', 'air_temperature', 'water_temperature')
+            df (DataFrame): The NOAA dataframe to filter
+        
+        Returns:
+            DataFrame: The filtered NOAA dataframe with missing values removed
+        """
+        # replace empty strings with None
+        df_to_filter = df.replace('', None)
+
+        match product:
+            # water level measurements/predictions, water temperatures, and air temperatures
+            # all use v as the value column. If v is missing, drop the row.
+            case 'water_level' | 'predictions' | 'water_temperature' | 'air_temperature':
+                return df_to_filter.dropna(subset=['v'])
+
+            # wind has s = speed and d = direction. If either is missing, drop the row.
+            case 'wind':
+                return df_to_filter.dropna(subset=['s', 'd'])
+
+            case _:
+                msg = f'''
+                NOAA filtering warning: NOAA Product: {product} is not recognized for filtering. No filtering
+                will be performed and there may be timestamps with missing values in the returned dataframe.
+                data series: {desc.dataSeries} 
+                data location: {desc.dataLocation}
+                '''
+                log_error(msg)
+                return df   # do nothing

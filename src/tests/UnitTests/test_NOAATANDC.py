@@ -7,6 +7,8 @@
 """
 Unit tests for the NOAATANDC ingestion class.
 Tests individual methods with mocked dependencies.
+
+docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py
 """
 #----------------------------------
 
@@ -32,7 +34,7 @@ class TestNOAATANDCUnit:
         self.sample_lat_lon = (29.3108, -94.7933)  # Sample coordinates
         
         # Create sample NOAA API response DataFrame
-        timestamps = pd.date_range(self.from_date, self.to_date, freq='1H')
+        timestamps = pd.date_range(self.from_date, self.to_date, freq='1h')
         self.sample_data = pd.DataFrame({
             'v': [1.5, 1.6, 1.4, 1.7, 1.3, 1.8, 1.2, 1.9, 2.0, 1.1, 1.0],
             's': [5.2, 6.1, 4.8, 7.3, 3.9, 8.1, 2.7, 9.2, 10.1, 1.8, 0.9],  # wind speed
@@ -237,7 +239,7 @@ class TestNOAATANDCUnit:
             
             assert result is not None
             assert isinstance(result, Series)
-            assert result.description.dataDatum == 'NA'
+            assert result.description.dataDatum == None
             assert all(result.dataFrame['dataUnit'] == 'meter')
             assert mock_fetch.call_count == 2
     
@@ -272,4 +274,130 @@ class TestNOAATANDCUnit:
             assert not result.dataFrame.empty
             assert all(result.dataFrame['dataUnit'] == 'mps')
             mock_fetch.assert_called_once_with(series_desc, time_desc, 'wind')
+
+
+    @pytest.mark.parametrize(
+        "product, data, expected_len",
+        [
+            # test each product is matched correctly and filtered properly
+            # the function should remove rows with NaN, None, or empty string values
+            (
+                'water_level',
+                {
+                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
+                }, 
+                7
+            ),
+            (
+                'water_temperature',
+                {
+                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
+                },
+                7
+            ),
+            (
+                'predictions',
+                {
+                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
+                }, 
+                7
+            ),
+            (
+                'air_temperature',
+                {
+                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
+                }, 
+                7
+            ),
+
+            # wind products
+            # test that the filtering works properly when only speed is missing values
+            (
+                'wind',
+                {
+                    's': [None, np.nan, '', 4, 5, 6, 7, 8, 9, 10],
+                    'd': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                7
+            ),
+            # test filtering happens when only direction is missing values
+            (
+                'wind',
+                {
+                    's': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    'd': [1, 2, 3, 4, 5, 6, None, None, None, None]
+                },
+                6
+            ),
+            # test filtering happens when both speed and direction are missing values
+            (
+                'wind',
+                {
+                    's': [1, 2, 3, 4, 5, None, 7, 8, 9, 10],
+                    'd': [1, 2, 3, 4, 5, 6, 7, None, 9, 10]
+                },
+                8
+            ),
+            # test nothing happens when there are no missing values
+            (
+                'wind',
+                {
+                    's': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    'd': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                10
+            ),
+            # test that filtering works when all values are missing
+            # the random column should be ignored
+            (
+                'predictions',
+                {
+                    'v': [None, None, None, None, None, None, None, None, None, None],
+                    'random_col': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                0
+            ),
+        ]
+    )
+    def test_data_filtering(self, product, data, expected_len):
+        """
+        tests that the filtering function works properly by removing rows with missing values
+
+        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_data_filtering
+        """
+
+        desc = SeriesDescription("NOAATANDC", "test_series", "test_location")
+        timestamps = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 9), freq='1h')
+        df = pd.DataFrame(data, index=timestamps)
+
+        noaa = NOAATANDC()
+        result = noaa._NOAATANDC__filter_NOAA_data(desc, product, df)
+
+        assert np.nan not in result.values, "Filtered DataFrame should not contain NaN values"
+        assert None not in result.values, "Filtered DataFrame should not contain None values"
+        assert '' not in result.values, "Filtered DataFrame should not contain empty strings"
+        assert len(result) == expected_len, f"Filtered DataFrame should have {expected_len} rows, but got {len(result)}"
+
+
+    def test_data_filtering_bad_product(self):
+        """
+        tests that when a bad product is passed to the filtering function, the original
+        df is returned with nothing done to it
+
+        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_data_filtering_bad_product
+        """
+        desc = SeriesDescription("NOAATANDC", "test_series", "test_location")
+        timestamps = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 9), freq='1h')
+        data = {
+            'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
+        }
+        df = pd.DataFrame(data, index=timestamps)
+
+        noaa = NOAATANDC()
+        result = noaa._NOAATANDC__filter_NOAA_data(desc, 'bad_product', df)
+
+        assert len(result) == len(df), f"Filtered DataFrame should have {len(df)} rows, but got {len(result)}"
+        assert result.equals(df), "Filtered DataFrame should be equal to the original DataFrame when product is bad"
+        assert result is df, "Filtered DataFrame should be the same object as the original DataFrame when product is bad"
+
     
