@@ -175,6 +175,14 @@ class NOAATANDC(IDataIngestion):
         # drop timestamps with missing values
         filtered_data = self.__filter_NOAA_data(seriesDescription, NOAAProduct, data)
 
+        if filtered_data.empty:
+            msg = f'''
+            NOAA filtering warning: all timestamps for series: {seriesDescription.dataSeries}
+            and location: {seriesDescription.dataLocation} were dropped due to missing values.
+            '''
+            log_error(msg)
+            return None, None
+
         return filtered_data, lat_lon
 
 
@@ -284,8 +292,13 @@ class NOAATANDC(IDataIngestion):
         if pData is None: return None
         if wlData is None: return None
 
+        # since the 2 series are fetched and filtered separately, we can only compute
+        # surge values for timestamps that exist in both series. So we find the intersection of the two series
+        # then iterate over the common timestamps to compute surge values
+        common_idx = wlData.index.intersection(pData.index)
+
         df = get_input_dataFrame()
-        for idx in wlData.index:
+        for idx in common_idx:
 
             # parse
             dt = idx.to_pydatetime().replace(tzinfo=timezone.utc)
@@ -486,8 +499,7 @@ class NOAATANDC(IDataIngestion):
         if data is None: return None
 
         data = data['v'].values
-        input_data = list(filter(lambda item: item is not None, data)) # Removing any Nones from the list
-        four_highest = sorted(input_data)[-4:]
+        four_highest = sorted(data)[-4:]
         mean_four_max = sum(four_highest) / 4.0
 
 
