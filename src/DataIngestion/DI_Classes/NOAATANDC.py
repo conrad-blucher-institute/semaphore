@@ -69,6 +69,18 @@ class NOAATANDC(IDataIngestion):
             - dAirTmp: Air temperature
             - dWaterTmp: Water temperature
         """
+        series_map = {
+            'dWl': self.__fetch_dWl,
+            'pWl': self.__fetch_pWl,
+            'd_48h_4mm_wl': self.__fetch_4_max_mean_dWl,
+            'd_24h_4mm_wl': self.__fetch_4_max_mean_dWl,
+            'd_12h_4mm_wl': self.__fetch_4_max_mean_dWl,
+            'dSurge': self.__fetch_dSurge,
+            'dWnSpd': self.__fetch_WnSpd,
+            'dWnDir': self.__fetch_WnDir,
+            'dAirTmp': self.__fetch_dAirTmp,
+            'dWaterTmp': self.__fetch_dWaterTmp
+        }
 
         # Remove digits 
         processed_series = re.sub(r'\d', '', seriesDescription.dataSeries)
@@ -78,27 +90,12 @@ class NOAATANDC(IDataIngestion):
             case 'dYWnCmpD':
                 return self.__fetch_WnCmp(seriesDescription, timeDescription, False)
 
+        fetch_method = series_map.get(seriesDescription.dataSeries, None)
+        if fetch_method is None:
+            log(f'Data series: {seriesDescription.dataSeries}, not found for NOAAT&C for request: {seriesDescription}')
+            return None
 
-        match seriesDescription.dataSeries:
-            case 'dWl':
-                return self.__fetch_dWl(seriesDescription, timeDescription)
-            case 'pWl':
-                return self.__fetch_pWl(seriesDescription, timeDescription)
-            case 'd_48h_4mm_wl'|'d_24h_4mm_wl'|'d_12h_4mm_wl':
-                return self.__fetch_4_max_mean_dWl(seriesDescription, timeDescription)
-            case 'dSurge':
-                return self.__fetch_dSurge(seriesDescription, timeDescription)
-            case 'dWnSpd':
-                return self.__fetch_WnSpd(seriesDescription, timeDescription)
-            case 'dWnDir':
-                return self.__fetch_WnDir(seriesDescription, timeDescription)
-            case 'dAirTmp':
-                return self.__fetch_dAirTmp(seriesDescription, timeDescription)
-            case 'dWaterTmp':
-                return self.__fetch_dWaterTmp(seriesDescription, timeDescription)
-            case _:
-                log(f'Data series: {seriesDescription.dataSeries}, not found for NOAAT&C for request: {seriesDescription}')
-                return None
+        return fetch_method(seriesDescription, timeDescription)
 
 
     def __get_station_number(self, location: str) -> str | None:
@@ -173,7 +170,7 @@ class NOAATANDC(IDataIngestion):
             data = data.loc[[fromTime.replace(tzinfo=None)]]
 
         # drop timestamps with missing values
-        filtered_data = self.__filter_NOAA_data(seriesDescription, NOAAProduct, data)
+        filtered_data = self.__filter_NOAA_data(seriesDescription, data)
 
         if filtered_data.empty:
             msg = f'''
@@ -597,46 +594,52 @@ class NOAATANDC(IDataIngestion):
         return series
 
 
-    def __filter_NOAA_data(self, desc: SeriesDescription, product: str, df: DataFrame) -> DataFrame:
+    def __filter_NOAA_data(self, desc: SeriesDescription, df: DataFrame) -> DataFrame:
         """
         This function filters out any timestamps with missing values from a NOAA dataframe.
         Each product requested from NOAA may have different columns returned,
-        so this function maps the product to the value column to filter on.
-
-        NOTE: This function filters based on the NOAA products you can request and not
-        semaphore's internal series names like 'dWl' or 'pWl'.
+        so this function maps the series to the value column to filter on.
 
         The documentation for returned data for each NOAA product can be found here:
         https://api.tidesandcurrents.noaa.gov/api/prod/responseHelp.html
 
+        NOTE: surge makes 2 calls: 1 for dWl and 1 for pWl so it doesn't need to be
+        in the dict here. Wind components build their own description and call
+        with a dataSeries of 'dWind' and require both speed and direction
+        to calculate the components so they filter on both columns.
+
         Args:
             desc (SeriesDescription): The series description for the requested series
-            product (str): The NOAA product requested
-                ('water_level', 'predictions', 'wind', 'air_temperature', 'water_temperature')
             df (DataFrame): The NOAA dataframe to filter
         
         Returns:
             DataFrame: The filtered NOAA dataframe with missing values removed
         """
+        value_columns = {
+            'dWl': ['v'],
+            'pWl': ['v'],
+            'd_48h_4mm_wl': ['v'],
+            'd_24h_4mm_wl': ['v'],
+            'd_12h_4mm_wl': ['v'],
+            'dWnSpd': ['s'],
+            'dWnDir': ['d'],
+            'dAirTmp': ['v'],
+            'dWaterTmp': ['v'],
+            'dWind': ['s', 'd'] # used by WnCmp; requires both speed and direction to calculate components
+        }
+
         # replace empty strings with None
         df_to_filter = df.replace('', None)
 
-        match product:
-            # water level measurements/predictions, water temperatures, and air temperatures
-            # all use v as the value column. If v is missing, drop the row.
-            case 'water_level' | 'predictions' | 'water_temperature' | 'air_temperature':
-                return df_to_filter.dropna(subset=['v'])
+        filter_columns = value_columns.get(desc.dataSeries, None)
+        if filter_columns is None:
+            msg = f'''
+            NOAA filtering warning: Unknown series. No filtering
+            will be performed and there may be timestamps with missing values in the returned dataframe.
+            data series: {desc.dataSeries} 
+            data location: {desc.dataLocation}
+            '''
+            log_error(msg)
+            return df   # do nothing
 
-            # wind has s = speed and d = direction. If either is missing, drop the row.
-            case 'wind':
-                return df_to_filter.dropna(subset=['s', 'd'])
-
-            case _:
-                msg = f'''
-                NOAA filtering warning: NOAA Product: {product} is not recognized for filtering. No filtering
-                will be performed and there may be timestamps with missing values in the returned dataframe.
-                data series: {desc.dataSeries} 
-                data location: {desc.dataLocation}
-                '''
-                log_error(msg)
-                return df   # do nothing
+        return df_to_filter.dropna(subset=filter_columns)

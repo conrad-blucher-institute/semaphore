@@ -277,61 +277,64 @@ class TestNOAATANDCUnit:
 
 
     @pytest.mark.parametrize(
-        "product, data, expected_len",
+        "data_series, data, expected_len",
         [
-            # test each product is matched correctly and filtered properly
+            # test each series maps to its correct value column and filters properly
             # the function should remove rows with NaN, None, or empty string values
             (
-                'water_level',
-                {
-                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
-                }, 
-                7
-            ),
-            (
-                'water_temperature',
+                'dWl',
                 {
                     'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
                 },
                 7
             ),
             (
-                'predictions',
+                'pWl',
                 {
                     'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
-                }, 
+                },
                 7
             ),
             (
-                'air_temperature',
-                {
-                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
-                }, 
-                7
-            ),
-
-            # wind products
-            # test that the filtering works properly when only speed is missing values
-            (
-                'wind',
+                'dWnSpd',
                 {
                     's': [None, np.nan, '', 4, 5, 6, 7, 8, 9, 10],
                     'd': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 },
                 7
             ),
-            # test filtering happens when only direction is missing values
             (
-                'wind',
+                'dWnDir',
                 {
-                    's': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                     'd': [1, 2, 3, 4, 5, 6, None, None, None, None]
                 },
                 6
             ),
-            # test filtering happens when both speed and direction are missing values
             (
-                'wind',
+                'dAirTmp',
+                {
+                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
+                },
+                7
+            ),
+            (
+                'dWaterTmp',
+                {
+                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
+                },
+                7
+            ),
+            (
+                'd_48h_4mm_wl',
+                {
+                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
+                },
+                7
+            ),
+            # dWind (wind components) requires both speed and direction, so a row
+            # missing either column is dropped
+            (
+                'dWind',
                 {
                     's': [1, 2, 3, 4, 5, None, 7, 8, 9, 10],
                     'd': [1, 2, 3, 4, 5, 6, 7, None, 9, 10]
@@ -340,7 +343,7 @@ class TestNOAATANDCUnit:
             ),
             # test nothing happens when there are no missing values
             (
-                'wind',
+                'dWind',
                 {
                     's': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                     'd': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -348,30 +351,29 @@ class TestNOAATANDCUnit:
                 10
             ),
             # test that filtering works when all values are missing
-            # the random column should be ignored
             (
-                'predictions',
+                'pWl',
                 {
-                    'v': [None, None, None, None, None, None, None, None, None, None],
-                    'random_col': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                    'v': [None, None, None, None, None, None, None, None, None, None]
                 },
                 0
             ),
         ]
     )
-    def test_data_filtering(self, product, data, expected_len):
+    def test_data_filtering(self, data_series, data, expected_len):
         """
-        tests that the filtering function works properly by removing rows with missing values
+        tests that the filtering function works properly by removing rows with missing values,
+        using the correct value column(s) for each internal data series
 
         docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_data_filtering
         """
 
-        desc = SeriesDescription("NOAATANDC", "test_series", "test_location")
+        desc = SeriesDescription("NOAATANDC", data_series, "test_location")
         timestamps = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 9), freq='1h')
         df = pd.DataFrame(data, index=timestamps)
 
         noaa = NOAATANDC()
-        result = noaa._NOAATANDC__filter_NOAA_data(desc, product, df)
+        result = noaa._NOAATANDC__filter_NOAA_data(desc, df)
 
         assert np.nan not in result.values, "Filtered DataFrame should not contain NaN values"
         assert None not in result.values, "Filtered DataFrame should not contain None values"
@@ -379,14 +381,14 @@ class TestNOAATANDCUnit:
         assert len(result) == expected_len, f"Filtered DataFrame should have {expected_len} rows, but got {len(result)}"
 
 
-    def test_data_filtering_bad_product(self):
+    def test_data_filtering_unknown_series(self):
         """
-        tests that when a bad product is passed to the filtering function, the original
-        df is returned with nothing done to it
+        tests that when an unrecognized dataSeries is passed to the filtering function,
+        the original df is returned with nothing done to it
 
-        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_data_filtering_bad_product
+        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_data_filtering_unknown_series
         """
-        desc = SeriesDescription("NOAATANDC", "test_series", "test_location")
+        desc = SeriesDescription("NOAATANDC", "not_a_real_series", "test_location")
         timestamps = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 9), freq='1h')
         data = {
             'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
@@ -394,10 +396,10 @@ class TestNOAATANDCUnit:
         df = pd.DataFrame(data, index=timestamps)
 
         noaa = NOAATANDC()
-        result = noaa._NOAATANDC__filter_NOAA_data(desc, 'bad_product', df)
+        result = noaa._NOAATANDC__filter_NOAA_data(desc, df)
 
         assert len(result) == len(df), f"Filtered DataFrame should have {len(df)} rows, but got {len(result)}"
-        assert result.equals(df), "Filtered DataFrame should be equal to the original DataFrame when product is bad"
-        assert result is df, "Filtered DataFrame should be the same object as the original DataFrame when product is bad"
+        assert result.equals(df), "Filtered DataFrame should be equal to the original DataFrame when series is unrecognized"
+        assert result is df, "Filtered DataFrame should be the same object as the original DataFrame when series is unrecognized"
 
     
