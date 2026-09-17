@@ -493,7 +493,8 @@ class NOAATANDC(IDataIngestion):
         """
 
         data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'water_level')
-        if data is None: return None
+        if data is None or len(data) < 4:  # Need at least 4 data points to calculate mean of four highest
+            return None
 
         data = data['v'].values
         four_highest = sorted(data)[-4:]
