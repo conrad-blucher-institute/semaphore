@@ -402,4 +402,36 @@ class TestNOAATANDCUnit:
         assert result.equals(df), "Filtered DataFrame should be equal to the original DataFrame when series is unrecognized"
         assert result is df, "Filtered DataFrame should be the same object as the original DataFrame when series is unrecognized"
 
-    
+
+    def test_surge_intersection_of_timestamps(self):
+        """
+        surge makes 2 calls: 1 for dWl and 1 for pWl then performs an intersection
+        of the timestamps since you need both values for a timestamp to compute surge.
+        This test ensures the intersection is performed correctly
+        """
+        pwl_data = {
+            'v': [1, 2, 3, 4, 5, 6, 7, 8, None, None]
+        }
+        pwl_desc = SeriesDescription("NOAATANDC", "pWl", "test_location")
+
+        dwl_data = {
+            'v': [None, None, 3, 4, 5, 6, 7, 8, 9, 10]
+        }
+        dwl_desc = SeriesDescription("NOAATANDC", "dWl", "test_location")
+
+        timestamps = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 9), freq='1h')
+        pwl = pd.DataFrame(pwl_data, index=timestamps)
+        dwl = pd.DataFrame(dwl_data, index=timestamps)
+
+        expected_timestamps = pd.date_range(datetime(2026, 1, 1, 2), datetime(2026, 1, 1, 7), freq='1h')
+
+        noaa = NOAATANDC()
+        pwl_filtered = noaa._NOAATANDC__filter_NOAA_data(pwl_desc, pwl)
+        dwl_filtered = noaa._NOAATANDC__filter_NOAA_data(dwl_desc, dwl)
+
+        # check the intersection logic
+        common_timestamps = pwl_filtered.index.intersection(dwl_filtered.index)
+        
+        assert common_timestamps.equals(expected_timestamps), f"Expected common timestamps {expected_timestamps}, but got {common_timestamps.tolist()}"
+        assert len(pwl_filtered) == 8, f"Expected 8 rows after filtering pWl, but got {len(pwl_filtered)}"
+        assert len(dwl_filtered) == 8, f"Expected 8 rows after filtering dWl, but got {len(dwl_filtered)}"
