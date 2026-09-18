@@ -24,7 +24,7 @@ Documentation:
 from SeriesStorage.ISeriesStorage import series_storage_factory
 from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from DataIngestion.IDataIngestion import IDataIngestion
-from utility import log, log_error
+from utility import log
 from math import cos, sin
 from noaa_coops import Station
 import re
