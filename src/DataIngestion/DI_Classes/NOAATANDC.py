@@ -172,6 +172,10 @@ class NOAATANDC(IDataIngestion):
         if isSinglePoint: # Select only the single point we want
             data = data.loc[[fromTime.replace(tzinfo=None)]]
 
+        # log the last timestamp fetched
+        if not data.empty:
+            log(f'Last data point fetched: {data.index[-1]} of requested time range {fromTime} to {toTime}')
+
         return data, lat_lon
 
 
@@ -302,7 +306,7 @@ class NOAATANDC(IDataIngestion):
         df['dataValue'] = df['dataValue'].astype(str)
 
         # Surge is datum-less. A datum is required for ingesting water level but we remove it here
-        seriesDescription.dataDatum = 'NA'
+        seriesDescription.dataDatum = None
 
         series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
