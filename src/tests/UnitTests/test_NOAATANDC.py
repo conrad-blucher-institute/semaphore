@@ -17,11 +17,12 @@ sys.path.append('/app/src')
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta, time, date, timezone
-import pandas as pd
-import numpy as np
-from DataClasses import Series, TimeDescription, SeriesDescription
+
+from DataClasses import Series, TimeDescription, SeriesDescription, get_input_dataFrame
 from src.DataIngestion.DI_Classes.NOAATANDC import NOAATANDC
 
+import pandas as pd
+import numpy as np
 
 class TestNOAATANDCUnit:
     """Unit tests for NOAATANDC class with mocked dependencies."""
@@ -72,8 +73,6 @@ class TestNOAATANDCUnit:
                 result = self.noaa_ingester._NOAATANDC__get_station_number('invalidLocation')
                 
                 assert result is None
-                mock_log.assert_called_once()
-                assert 'Empty dataSource Location mapping received' in mock_log.call_args[0][0]
     
     @patch('src.DataIngestion.DI_Classes.NOAATANDC.Station')
     def test_fetch_NOAA_data_success(self, mock_station_class):
@@ -277,161 +276,134 @@ class TestNOAATANDCUnit:
 
 
     @pytest.mark.parametrize(
-        "data_series, data, expected_len",
+        "data, timestamps, expected_timestamps, expected_len",
         [
-            # test each series maps to its correct value column and filters properly
-            # the function should remove rows with NaN, None, or empty string values
+            # test that the filtering function removes timestamps with missing values
             (
-                'dWl',
-                {
-                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
-                },
+                # 10 timestamps with 3 missing values
+                [1, 2, np.nan, '', None, 6, 7, 8, 9, 10],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 9), freq='1h'),
+                [
+                    # the 3 missing value rows should be removed so their
+                    # timestamps should not be expected in the result
+                    datetime(2026, 1, 1, 0),
+                    datetime(2026, 1, 1, 1),
+                    datetime(2026, 1, 1, 5),
+                    datetime(2026, 1, 1, 6),
+                    datetime(2026, 1, 1, 7),
+                    datetime(2026, 1, 1, 8),
+                    datetime(2026, 1, 1, 9)
+                ],
                 7
             ),
             (
-                'pWl',
-                {
-                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
-                },
-                7
-            ),
-            (
-                'dWnSpd',
-                {
-                    's': [None, np.nan, '', 4, 5, 6, 7, 8, 9, 10],
-                    'd': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                },
-                7
-            ),
-            (
-                'dWnDir',
-                {
-                    'd': [1, 2, 3, 4, 5, 6, None, None, None, None]
-                },
-                6
-            ),
-            (
-                'dAirTmp',
-                {
-                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
-                },
-                7
-            ),
-            (
-                'dWaterTmp',
-                {
-                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
-                },
-                7
-            ),
-            (
-                'd_48h_4mm_wl',
-                {
-                    'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
-                },
-                7
-            ),
-            # dWind (wind components) requires both speed and direction, so a row
-            # missing either column is dropped
-            (
-                'dWind',
-                {
-                    's': [1, 2, 3, 4, 5, None, 7, 8, 9, 10],
-                    'd': [1, 2, 3, 4, 5, 6, 7, None, 9, 10]
-                },
-                8
-            ),
-            # test nothing happens when there are no missing values
-            (
-                'dWind',
-                {
-                    's': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                    'd': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                },
-                10
-            ),
-            # test that filtering works when all values are missing
-            (
-                'pWl',
-                {
-                    'v': [None, None, None, None, None, None, None, None, None, None]
-                },
+                # all empty values so there should be no timestamps in the result
+                [None, None, None],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 2), freq='1h'),
+                [],
                 0
             ),
+            (
+                [1, '', '', '', '', '', '', '', '', '', '', ''],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 11), freq='1h'),
+                [
+                    datetime(2026, 1, 1, 0)
+                ],
+                1
+            ),
+            (
+                # no filtering
+                [1, 2, 3, 4, 5],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 4), freq='1h'),
+                [
+                    # all timestamps should remain
+                    datetime(2026, 1, 1, 0),
+                    datetime(2026, 1, 1, 1),
+                    datetime(2026, 1, 1, 2),
+                    datetime(2026, 1, 1, 3),
+                    datetime(2026, 1, 1, 4)
+                ],
+                5
+            ),
+            # test that all timestamps remain and that string values are not filtered out
+            (
+                ['1', '2', '3', '4', '5'],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 4), freq='1h'),
+                [
+                    datetime(2026, 1, 1, 0),
+                    datetime(2026, 1, 1, 1),
+                    datetime(2026, 1, 1, 2),
+                    datetime(2026, 1, 1, 3),
+                    datetime(2026, 1, 1, 4)
+                ],
+                5
+            ),
+            # test the filtering works with string data values, and removes None, nan, and empty strings
+            (
+                ['1', '2', '', '4', '5', '', '', '', np.nan, np.nan, None, None, ''],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 12), freq='1h'),
+                [
+                    datetime(2026, 1, 1, 0),
+                    datetime(2026, 1, 1, 1),
+                    datetime(2026, 1, 1, 3),
+                    datetime(2026, 1, 1, 4)
+                ],
+                4
+            )
         ]
     )
-    def test_data_filtering(self, data_series, data, expected_len):
+    def test_data_filtering(self, data, timestamps, expected_timestamps, expected_len):
         """
         tests that the filtering function works properly by removing rows with missing values,
         using the correct value column(s) for each internal data series
 
         docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_data_filtering
         """
-
-        desc = SeriesDescription("NOAATANDC", data_series, "test_location")
-        timestamps = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 9), freq='1h')
-        df = pd.DataFrame(data, index=timestamps)
+        df = get_input_dataFrame()
+        df['timeVerified'] = timestamps
+        df['dataValue'] = data
 
         noaa = NOAATANDC()
-        result = noaa._NOAATANDC__filter_NOAA_data(desc, df)
+        result = noaa._NOAATANDC__filter_input_df(df)
 
-        assert np.nan not in result.values, "Filtered DataFrame should not contain NaN values"
-        assert None not in result.values, "Filtered DataFrame should not contain None values"
+        assert result['dataValue'].isna().values.any() == 0, "Filtered DataFrame should not contain NaN or None values"
         assert '' not in result.values, "Filtered DataFrame should not contain empty strings"
         assert len(result) == expected_len, f"Filtered DataFrame should have {expected_len} rows, but got {len(result)}"
+        assert expected_timestamps == list(result['timeVerified']), f"Filtered timestamps do not match expected timestamps. Expected: {expected_timestamps}, Got: {list(result['timeVerified'])}"
 
 
-    def test_data_filtering_unknown_series(self):
+    def test_filtering_doesnt_affect_other_columns(self):
         """
-        tests that when an unrecognized dataSeries is passed to the filtering function,
-        the original df is returned with nothing done to it
+        tests that the filtering function does not remove or modify values in other columns
 
-        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_data_filtering_unknown_series
+        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_filtering_doesnt_affect_other_columns
         """
-        desc = SeriesDescription("NOAATANDC", "not_a_real_series", "test_location")
-        timestamps = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 9), freq='1h')
-        data = {
-            'v': [1, 2, np.nan, '', None, 6, 7, 8, 9, 10]
-        }
-        df = pd.DataFrame(data, index=timestamps)
+        df = get_input_dataFrame()
+        df['timeVerified'] = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 4), freq='1h')
+        df['timeGenerated'] = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 4), freq='1h')
+        df['dataValue'] = ['1', '', None, '4', '5']
+        df['dataUnit'] = ['unit1', 'unit2', 'unit3', 'unit4', 'unit5']
+        df['latitude'] = ['lat1', 'lat2', 'lat3', 'lat4', 'lat5']
+        df['longitude'] = ['lon1', 'lon2', 'lon3', 'lon4', 'lon5']
+
+        expected_df = get_input_dataFrame()
+        expected_df['timeVerified'] = [
+            datetime(2026, 1, 1, 0),
+            datetime(2026, 1, 1, 3),
+            datetime(2026, 1, 1, 4)
+        ]
+        expected_df['timeGenerated'] = [
+            datetime(2026, 1, 1, 0),
+            datetime(2026, 1, 1, 3),
+            datetime(2026, 1, 1, 4)
+        ]
+        expected_df['dataValue'] = ['1', '4', '5']
+        expected_df['dataUnit'] = ['unit1', 'unit4', 'unit5']
+        expected_df['latitude'] = ['lat1', 'lat4', 'lat5']
+        expected_df['longitude'] = ['lon1', 'lon4', 'lon5']
 
         noaa = NOAATANDC()
-        result = noaa._NOAATANDC__filter_NOAA_data(desc, df)
+        result = noaa._NOAATANDC__filter_input_df(df)
 
-        assert len(result) == len(df), f"Filtered DataFrame should have {len(df)} rows, but got {len(result)}"
-        assert result.equals(df), "Filtered DataFrame should be equal to the original DataFrame when series is unrecognized"
-        assert result is df, "Filtered DataFrame should be the same object as the original DataFrame when series is unrecognized"
-
-
-    def test_surge_intersection_of_timestamps(self):
-        """
-        surge makes 2 calls: 1 for dWl and 1 for pWl then performs an intersection
-        of the timestamps since you need both values for a timestamp to compute surge.
-        This test ensures the intersection is performed correctly
-        """
-        pwl_data = {
-            'v': [1, 2, 3, 4, 5, 6, 7, 8, None, None]
-        }
-        pwl_desc = SeriesDescription("NOAATANDC", "pWl", "test_location")
-
-        dwl_data = {
-            'v': [None, None, 3, 4, 5, 6, 7, 8, 9, 10]
-        }
-        dwl_desc = SeriesDescription("NOAATANDC", "dWl", "test_location")
-
-        timestamps = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 9), freq='1h')
-        pwl = pd.DataFrame(pwl_data, index=timestamps)
-        dwl = pd.DataFrame(dwl_data, index=timestamps)
-
-        expected_timestamps = pd.date_range(datetime(2026, 1, 1, 2), datetime(2026, 1, 1, 7), freq='1h')
-
-        noaa = NOAATANDC()
-        pwl_filtered = noaa._NOAATANDC__filter_NOAA_data(pwl_desc, pwl)
-        dwl_filtered = noaa._NOAATANDC__filter_NOAA_data(dwl_desc, dwl)
-
-        # check the intersection logic
-        common_timestamps = pwl_filtered.index.intersection(dwl_filtered.index)
-        
-        assert common_timestamps.equals(expected_timestamps), f"Expected common timestamps {expected_timestamps}, but got {common_timestamps.tolist()}"
-        assert len(pwl_filtered) == 8, f"Expected 8 rows after filtering pWl, but got {len(pwl_filtered)}"
-        assert len(dwl_filtered) == 8, f"Expected 8 rows after filtering dWl, but got {len(dwl_filtered)}"
+        # Check that the other columns remain unchanged for the rows that are kept
+        assert result.equals(expected_df), f"Filtered DataFrame does not match expected DataFrame. Expected:\n{expected_df}\nGot:\n{result}"
