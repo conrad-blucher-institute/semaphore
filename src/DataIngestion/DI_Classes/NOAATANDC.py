@@ -166,7 +166,7 @@ class NOAATANDC(IDataIngestion):
                 time_zone= 'gmt',
                 datum= seriesDescription.dataDatum
             )
-        except ValueError as e:
+        except Exception as e:
             log(f'NOAA COOPS invalid request error: {e}')
             return None, None
 
