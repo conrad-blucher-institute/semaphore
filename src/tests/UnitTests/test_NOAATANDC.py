@@ -7,6 +7,8 @@
 """
 Unit tests for the NOAATANDC ingestion class.
 Tests individual methods with mocked dependencies.
+
+docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py
 """
 #----------------------------------
 
@@ -15,11 +17,12 @@ sys.path.append('/app/src')
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta, time, date, timezone
-import pandas as pd
-import numpy as np
-from DataClasses import Series, TimeDescription, SeriesDescription
+
+from DataClasses import Series, TimeDescription, SeriesDescription, get_input_dataFrame
 from src.DataIngestion.DI_Classes.NOAATANDC import NOAATANDC
 
+import pandas as pd
+import numpy as np
 
 class TestNOAATANDCUnit:
     """Unit tests for NOAATANDC class with mocked dependencies."""
@@ -32,7 +35,7 @@ class TestNOAATANDCUnit:
         self.sample_lat_lon = (29.3108, -94.7933)  # Sample coordinates
         
         # Create sample NOAA API response DataFrame
-        timestamps = pd.date_range(self.from_date, self.to_date, freq='1H')
+        timestamps = pd.date_range(self.from_date, self.to_date, freq='1h')
         self.sample_data = pd.DataFrame({
             'v': [1.5, 1.6, 1.4, 1.7, 1.3, 1.8, 1.2, 1.9, 2.0, 1.1, 1.0],
             's': [5.2, 6.1, 4.8, 7.3, 3.9, 8.1, 2.7, 9.2, 10.1, 1.8, 0.9],  # wind speed
@@ -70,8 +73,6 @@ class TestNOAATANDCUnit:
                 result = self.noaa_ingester._NOAATANDC__get_station_number('invalidLocation')
                 
                 assert result is None
-                mock_log.assert_called_once()
-                assert 'Empty dataSource Location mapping received' in mock_log.call_args[0][0]
     
     @patch('src.DataIngestion.DI_Classes.NOAATANDC.Station')
     def test_fetch_NOAA_data_success(self, mock_station_class):
@@ -237,7 +238,7 @@ class TestNOAATANDCUnit:
             
             assert result is not None
             assert isinstance(result, Series)
-            assert result.description.dataDatum == 'NA'
+            assert result.description.dataDatum == None
             assert all(result.dataFrame['dataUnit'] == 'meter')
             assert mock_fetch.call_count == 2
     
@@ -272,4 +273,137 @@ class TestNOAATANDCUnit:
             assert not result.dataFrame.empty
             assert all(result.dataFrame['dataUnit'] == 'mps')
             mock_fetch.assert_called_once_with(series_desc, time_desc, 'wind')
-    
+
+
+    @pytest.mark.parametrize(
+        "data, timestamps, expected_timestamps, expected_len",
+        [
+            # test that the filtering function removes timestamps with missing values
+            (
+                # 10 timestamps with 3 missing values
+                [1, 2, np.nan, '', None, 6, 7, 8, 9, 10],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 9), freq='1h'),
+                [
+                    # the 3 missing value rows should be removed so their
+                    # timestamps should not be expected in the result
+                    datetime(2026, 1, 1, 0),
+                    datetime(2026, 1, 1, 1),
+                    datetime(2026, 1, 1, 5),
+                    datetime(2026, 1, 1, 6),
+                    datetime(2026, 1, 1, 7),
+                    datetime(2026, 1, 1, 8),
+                    datetime(2026, 1, 1, 9)
+                ],
+                7
+            ),
+            (
+                # all empty values so there should be no timestamps in the result
+                [None, None, None],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 2), freq='1h'),
+                [],
+                0
+            ),
+            (
+                [1, '', '', '', '', '', '', '', '', '', '', ''],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 11), freq='1h'),
+                [
+                    datetime(2026, 1, 1, 0)
+                ],
+                1
+            ),
+            (
+                # no filtering
+                [1, 2, 3, 4, 5],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 4), freq='1h'),
+                [
+                    # all timestamps should remain
+                    datetime(2026, 1, 1, 0),
+                    datetime(2026, 1, 1, 1),
+                    datetime(2026, 1, 1, 2),
+                    datetime(2026, 1, 1, 3),
+                    datetime(2026, 1, 1, 4)
+                ],
+                5
+            ),
+            # test that all timestamps remain and that string values are not filtered out
+            (
+                ['1', '2', '3', '4', '5'],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 4), freq='1h'),
+                [
+                    datetime(2026, 1, 1, 0),
+                    datetime(2026, 1, 1, 1),
+                    datetime(2026, 1, 1, 2),
+                    datetime(2026, 1, 1, 3),
+                    datetime(2026, 1, 1, 4)
+                ],
+                5
+            ),
+            # test the filtering works with string data values, and removes None, nan, and empty strings
+            (
+                ['1', '2', '', '4', '5', '', '', '', np.nan, np.nan, None, None, ''],
+                pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 12), freq='1h'),
+                [
+                    datetime(2026, 1, 1, 0),
+                    datetime(2026, 1, 1, 1),
+                    datetime(2026, 1, 1, 3),
+                    datetime(2026, 1, 1, 4)
+                ],
+                4
+            )
+        ]
+    )
+    def test_data_filtering(self, data, timestamps, expected_timestamps, expected_len):
+        """
+        tests that the filtering function works properly by removing rows with missing values,
+        using the correct value column(s) for each internal data series
+
+        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_data_filtering
+        """
+        df = get_input_dataFrame()
+        df['timeVerified'] = timestamps
+        df['dataValue'] = data
+
+        noaa = NOAATANDC()
+        result = noaa._NOAATANDC__filter_input_df(df)
+
+        assert result['dataValue'].isna().values.any() == 0, "Filtered DataFrame should not contain NaN or None values"
+        assert '' not in result.values, "Filtered DataFrame should not contain empty strings"
+        assert len(result) == expected_len, f"Filtered DataFrame should have {expected_len} rows, but got {len(result)}"
+        assert expected_timestamps == list(result['timeVerified']), f"Filtered timestamps do not match expected timestamps. Expected: {expected_timestamps}, Got: {list(result['timeVerified'])}"
+
+
+    def test_filtering_doesnt_affect_other_columns(self):
+        """
+        tests that the filtering function does not remove or modify values in other columns
+
+        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_filtering_doesnt_affect_other_columns
+        """
+        df = get_input_dataFrame()
+        df['timeVerified'] = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 4), freq='1h')
+        df['timeGenerated'] = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 4), freq='1h')
+        df['dataValue'] = ['1', '', None, '4', '5']
+        df['dataUnit'] = ['unit1', 'unit2', 'unit3', 'unit4', 'unit5']
+        df['latitude'] = ['lat1', 'lat2', 'lat3', 'lat4', 'lat5']
+        df['longitude'] = ['lon1', 'lon2', 'lon3', 'lon4', 'lon5']
+
+        expected_df = get_input_dataFrame()
+        expected_df['timeVerified'] = [
+            datetime(2026, 1, 1, 0),
+            datetime(2026, 1, 1, 3),
+            datetime(2026, 1, 1, 4)
+        ]
+        expected_df['timeGenerated'] = [
+            datetime(2026, 1, 1, 0),
+            datetime(2026, 1, 1, 3),
+            datetime(2026, 1, 1, 4)
+        ]
+        expected_df['dataValue'] = ['1', '4', '5']
+        expected_df['dataUnit'] = ['unit1', 'unit4', 'unit5']
+        expected_df['latitude'] = ['lat1', 'lat4', 'lat5']
+        expected_df['longitude'] = ['lon1', 'lon4', 'lon5']
+
+        noaa = NOAATANDC()
+        result = noaa._NOAATANDC__filter_input_df(df)
+
+        # Check that the other columns remain unchanged for the rows that are kept
+        assert result.equals(expected_df), f"Filtered DataFrame does not match expected DataFrame. Expected:\n{expected_df}\nGot:\n{result}"

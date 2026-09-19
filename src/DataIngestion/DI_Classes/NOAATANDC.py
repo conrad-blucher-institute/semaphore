@@ -13,7 +13,9 @@ NOAA predictions are "calculated 'on-the-fly'" and Predictions are a (relatively
 predictions, no stored database table of these values. So because no relevant generatedTime can be calculated we're going to have both generatedTime and 
 verifiedTime be the given verifiedTime that NOAA's API provides.
 
-Documentation: https://api.tidesandcurrents.noaa.gov/api/prod/
+Documentation: 
+    https://api.tidesandcurrents.noaa.gov/api/prod/
+    https://api.tidesandcurrents.noaa.gov/api/prod/responseHelp.html
 """ 
 #----------------------------------
 # 
@@ -50,6 +52,10 @@ class NOAATANDC(IDataIngestion):
         Ingest a data series from NOAA Tides and Currents API.
         
         Main entry point that routes requests to appropriate fetch methods based on series type.
+
+        TODO: 
+        Remove support for computing the 4 max mean water level in this ingestion class.
+        This should be handled in post processing, not ingestion.
         
         Args:
             seriesDescription (SeriesDescription): Contains data series type, location, datum, and source information
@@ -69,8 +75,22 @@ class NOAATANDC(IDataIngestion):
             - dAirTmp: Air temperature
             - dWaterTmp: Water temperature
         """
+        series_map = {
+            'dWl': self.__fetch_dWl,
+            'pWl': self.__fetch_pWl,
+            'd_48h_4mm_wl': self.__fetch_4_max_mean_dWl,
+            'd_24h_4mm_wl': self.__fetch_4_max_mean_dWl,
+            'd_12h_4mm_wl': self.__fetch_4_max_mean_dWl,
+            'dSurge': self.__fetch_dSurge,
+            'dWnSpd': self.__fetch_WnSpd,
+            'dWnDir': self.__fetch_WnDir,
+            'dAirTmp': self.__fetch_dAirTmp,
+            'dWaterTmp': self.__fetch_dWaterTmp
+        }
 
-        # Remove digits 
+        # Remove digits from the series to handle wind components
+        # the digits removed represent the offset for the wind component calculation
+        # which is extracted in the __fetch_WnCmp method
         processed_series = re.sub(r'\d', '', seriesDescription.dataSeries)
         match processed_series:
             case 'dXWnCmpD':
@@ -78,27 +98,12 @@ class NOAATANDC(IDataIngestion):
             case 'dYWnCmpD':
                 return self.__fetch_WnCmp(seriesDescription, timeDescription, False)
 
+        fetch_method = series_map.get(seriesDescription.dataSeries, None)
+        if fetch_method is None:
+            log(f'Data series: {seriesDescription.dataSeries}, not found for NOAAT&C for request: {seriesDescription}')
+            return None
 
-        match seriesDescription.dataSeries:
-            case 'dWl':
-                return self.__fetch_dWl(seriesDescription, timeDescription)
-            case 'pWl':
-                return self.__fetch_pWl(seriesDescription, timeDescription)
-            case 'd_48h_4mm_wl'|'d_24h_4mm_wl'|'d_12h_4mm_wl':
-                return self.__fetch_4_max_mean_dWl(seriesDescription, timeDescription)
-            case 'dSurge':
-                return self.__fetch_dSurge(seriesDescription, timeDescription)
-            case 'dWnSpd':
-                return self.__fetch_WnSpd(seriesDescription, timeDescription)
-            case 'dWnDir':
-                return self.__fetch_WnDir(seriesDescription, timeDescription)
-            case 'dAirTmp':
-                return self.__fetch_dAirTmp(seriesDescription, timeDescription)
-            case 'dWaterTmp':
-                return self.__fetch_dWaterTmp(seriesDescription, timeDescription)
-            case _:
-                log(f'Data series: {seriesDescription.dataSeries}, not found for NOAAT&C for request: {seriesDescription}')
-                return None
+        return fetch_method(seriesDescription, timeDescription)
 
 
     def __get_station_number(self, location: str) -> str | None:
@@ -116,11 +121,7 @@ class NOAATANDC(IDataIngestion):
         """
 
         dbResult = self.__seriesStorage.find_external_location_code(self.sourceCode, location)
-        if dbResult:
-            return dbResult
-        else:
-            log(f'Empty dataSource Location mapping received in NOAATidesAndCurrents for sourceCode: {self.sourceCode} AND locations: {location}')
-            return None
+        return dbResult if dbResult else None
 
     
     def __fetch_NOAA_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, NOAAProduct: str) -> None | DataFrame:
@@ -165,12 +166,16 @@ class NOAATANDC(IDataIngestion):
                 time_zone= 'gmt',
                 datum= seriesDescription.dataDatum
             )
-        except ValueError as e:
+        except Exception as e:
             log(f'NOAA COOPS invalid request error: {e}')
             return None, None
 
         if isSinglePoint: # Select only the single point we want
             data = data.loc[[fromTime.replace(tzinfo=None)]]
+
+        # log the last timestamp fetched
+        if not data.empty:
+            log(f'Last data point fetched: {data.index[-1]} of requested time range {fromTime} to {toTime}')
 
         return data, lat_lon
 
@@ -209,6 +214,8 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[0]      # latitude
             ]
 
+        # filter out any timestamps with missing values
+        df = self.__filter_input_df(df)
         df['dataValue'] = df['dataValue'].astype(str)
 
         series = Series(seriesDescription, timeDescription)
@@ -249,6 +256,8 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[0]              # Latitude
             ]
 
+        # filter out any timestamps with missing values
+        df = self.__filter_input_df(df)
         df['dataValue'] = df['dataValue'].astype(str)
 
         series = Series(seriesDescription, timeDescription)
@@ -299,6 +308,8 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[0]              # latitude
             ]
 
+        # filter out any timestamps with missing values
+        df = self.__filter_input_df(df)
         df['dataValue'] = df['dataValue'].astype(str)
 
         # Surge is datum-less. A datum is required for ingesting water level but we remove it here
@@ -342,6 +353,8 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[0]      # latitude
             ]
 
+        # filter out any timestamps with missing values
+        df = self.__filter_input_df(df)
         df['dataValue'] = df['dataValue'].astype(str)
 
         wnDir_series = Series(seriesDescription, timeDescription)
@@ -374,14 +387,16 @@ class NOAATANDC(IDataIngestion):
             wind_spd = data['s'][idx]
 
             df.loc[len(df)] = [
-                wind_spd,          # dataValue
-                'mps',           # dataUnit
+                wind_spd,       # dataValue
+                'mps',          # dataUnit
                 dt,             # timeVerified
                 dt,             # timeGenerated
                 lat_lon[1],     # longitude
                 lat_lon[0]      # latitude
             ]
 
+        # filter out any timestamps with missing values
+        df = self.__filter_input_df(df)
         df['dataValue'] = df['dataValue'].astype(str)
 
         wnSpd_series = Series(seriesDescription, timeDescription)
@@ -450,6 +465,9 @@ class NOAATANDC(IDataIngestion):
         xCompDesc = SeriesDescription(seriesDescription.dataSource, f'dXWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
         yCompDesc = SeriesDescription(seriesDescription.dataSource, f'dYWnCmp{str(int(offset)).zfill(3)}D', seriesDescription.dataLocation, seriesDescription.dataDatum)
 
+        # filter out any timestamps with missing values
+        x_df = self.__filter_input_df(x_df)
+        y_df = self.__filter_input_df(y_df)
         x_df['dataValue'] = x_df['dataValue'].astype(str)
         y_df['dataValue'] = y_df['dataValue'].astype(str)
 
@@ -469,6 +487,10 @@ class NOAATANDC(IDataIngestion):
         
         Fetches all water level data in the specified time range, filters out None values,
         finds the four highest values, and returns their arithmetic mean.
+
+        TODO: Remove this method from the ingestion class and refactor the
+        upstream pipeline to use post processing to compute the 4 max mean
+        instead.
         
         Args:
             seriesDescription (SeriesDescription): Series specification
@@ -498,7 +520,10 @@ class NOAATANDC(IDataIngestion):
             lat_lon[0]                      # latitude
         ]
 
+        # filter out any timestamps with missing values
+        df = self.__filter_input_df(df)
         df['dataValue'] = df['dataValue'].astype(str)
+
         series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
 
@@ -536,7 +561,10 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[0]              # latitude
             ]
 
+        # filter out any timestamps with missing values
+        df = self.__filter_input_df(df)
         df['dataValue'] = df['dataValue'].astype(str)
+
         series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
 
@@ -575,8 +603,30 @@ class NOAATANDC(IDataIngestion):
                 lat_lon[0]              # latitude
             ]
 
+        # filter out any timestamps with missing values
+        df = self.__filter_input_df(df)
         df['dataValue'] = df['dataValue'].astype(str)
 
         series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
         return series
+
+
+    def __filter_input_df(self, df: DataFrame) -> DataFrame:
+        """
+        This function filters out any timestamps with missing values from an input dataframe.
+
+        Args:
+            df (DataFrame): An input dataframe with 
+                ['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude']
+        
+        Returns:
+            DataFrame: An input dataframe with only timestamps that have a data value for that timestamp.
+                Timestamps without a value will be removed from the dataframe.
+        """
+        # replace empty strings in the dataValue column with None
+        df_to_filter = df.copy()
+        df_to_filter['dataValue'] = df_to_filter['dataValue'].replace('', None)
+
+        # drop rows that are missing a datavalue
+        return df_to_filter.dropna(subset=['dataValue']).reset_index(drop=True)
