@@ -238,7 +238,7 @@ class TestNOAATANDCUnit:
             
             assert result is not None
             assert isinstance(result, Series)
-            assert result.description.dataDatum == None
+            assert result.description.dataDatum is None
             assert all(result.dataFrame['dataUnit'] == 'meter')
             assert mock_fetch.call_count == 2
     

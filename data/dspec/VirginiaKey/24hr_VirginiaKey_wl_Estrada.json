@@ -63,8 +63,8 @@
             "dataIntegrityCall": {
                 "call": "PandasInterpolation",
                 "args": {
-                    "limit":"3600",
-                    "method":"linear",
+                    "limit":"7200",
+                    "method":"time",
                     "limit_area":"None"    
                 }
             }
