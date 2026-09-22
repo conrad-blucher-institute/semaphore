@@ -147,7 +147,7 @@ def get_dspec_paths(model_group):
         for path in folder.rglob("*.json")
     )
 
-
+@pytest.mark.slow
 @pytest.mark.parametrize("model_group", MODEL_GROUPS)
 def test_model_group_runs(model_group):
 

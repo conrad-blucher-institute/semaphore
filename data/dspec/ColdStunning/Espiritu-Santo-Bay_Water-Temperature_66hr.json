@@ -236,8 +236,7 @@
         },
         {
             "key": "Espiritu-Santo-Bay_predicted_air-temp_66",
-            "dType": "float",
-            "indexes": [2, 26]
+            "dType": "float"
         }
     ]
 }

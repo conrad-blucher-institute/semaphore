@@ -160,7 +160,8 @@ class TestNOAATANDCUnit:
         ]
         
         for series_name, expected_method in test_cases:
-            with patch.object(self.noaa_ingester, f'_NOAATANDC{expected_method}') as mock_method:
+            with patch.object(self.noaa_ingester, f'_NOAATANDC{expected_method}') as mock_method, \
+            patch.object(self.noaa_ingester, '_NOAATANDC__filter_input_df'):
                 mock_method.return_value = Mock(spec=Series)
                 
                 series_desc = SeriesDescription("NOAATANDC", series_name, "packChan", "MHHW")
@@ -184,7 +185,7 @@ class TestNOAATANDCUnit:
             
             assert result is None
             mock_log.assert_called_once()
-            assert 'not found for NOAAT&C' in mock_log.call_args[0][0]
+            assert 'not found for NOAATANDC' in mock_log.call_args[0][0]
     
     def test_fetch_dWl(self):
         """Test water level data fetching."""

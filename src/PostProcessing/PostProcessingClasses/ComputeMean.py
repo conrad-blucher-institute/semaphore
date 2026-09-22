@@ -186,6 +186,10 @@ class ComputeMean(IPostProcessing):
             if not self._compare_time_descriptions(series.timeDescription, template_series.timeDescription):
                 raise ValueError(f"ComputeMean: Series: {key} has a different time description than the other series.")
 
+            # check verified times
+            if series.dataFrame['timeVerified'].tolist() != template_series.dataFrame['timeVerified'].tolist():
+                raise ValueError(f"ComputeMean: Series: {key} has different verified timestamps than the other series.")
+
 
     def _compare_time_descriptions(self, td1: TimeDescription, td2: TimeDescription) -> bool:
         """
