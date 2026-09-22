@@ -612,9 +612,9 @@ class NOAATANDC(IDataIngestion):
             DataFrame: An input dataframe with only timestamps that have a data value for that timestamp.
                 Timestamps without a value will be removed from the dataframe.
         """
-        # replace empty strings in the dataValue column with None
+        # replace empty values in the dataValue column with None
         df_to_filter = df.copy()
-        df_to_filter['dataValue'] = df_to_filter['dataValue'].replace('', None)
+        df_to_filter['dataValue'] = df_to_filter['dataValue'].replace(['', 'None', 'nan'], None)
 
         # drop rows that are missing a datavalue
         return df_to_filter.dropna(subset=['dataValue']).reset_index(drop=True)
