@@ -196,7 +196,7 @@
         {
             "call": "ComputeMean",
             "args": {
-                "dropOutlierSeries": false,
+                "dropOutlierValues": false,
                 "sentinel_value": 10000,
                 "targetSeries": [
                     "Aransas-Wildlife-Refuge_air-temp_25",
@@ -210,7 +210,7 @@
         {
             "call": "ComputeMean",
             "args": {
-                "dropOutlierSeries": true,
+                "dropOutlierValues": true,
                 "thresholdDeviationFromMedian": 3.5,
                 "sentinel_value": 10000,
                 "targetSeries": [
