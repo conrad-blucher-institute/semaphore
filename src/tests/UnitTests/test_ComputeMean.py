@@ -455,7 +455,7 @@ def test_post_process_data_raises_for_missing_timestamp(compute_mean):
             "outKey": "ESB-combined-water-temp"
         }
 
-        with pytest.raises(ValueError, match="has a different number of timestamps"):
+        with pytest.raises(ValueError, match="has different verified times than the other series"):
             compute_mean.post_process_data(preprocessed_data, post_process_call)
 
 

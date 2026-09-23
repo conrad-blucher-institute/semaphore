@@ -178,17 +178,13 @@ class ComputeMean(IPostProcessing):
         template_series = preprocessed_data[target_keys[0]]
         for key in target_keys:
             series = preprocessed_data[key]
-            # check df lengths
-            if len(series.dataFrame) != len(template_series.dataFrame):
-               raise ValueError(f"ComputeMean: Series: {key} has a different number of timestamps than the other series.")
-
             # check time descriptions
             if not self._compare_time_descriptions(series.timeDescription, template_series.timeDescription):
                 raise ValueError(f"ComputeMean: Series: {key} has a different time description than the other series.")
 
-            # check verified times
-            if series.dataFrame['timeVerified'].tolist() != template_series.dataFrame['timeVerified'].tolist():
-                raise ValueError(f"ComputeMean: Series: {key} has different verified timestamps than the other series.")
+            # check verified time columns are equal
+            if not series.dataFrame['timeVerified'].equals(template_series.dataFrame['timeVerified']):
+                raise ValueError(f"ComputeMean: Series: {key} has different verified times than the other series.")
 
 
     def _compare_time_descriptions(self, td1: TimeDescription, td2: TimeDescription) -> bool:
