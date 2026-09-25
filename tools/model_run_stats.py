@@ -47,6 +47,7 @@ import pandas as pd
 # purpose, so MRE-prefixed logs get their own family instead of being
 # swallowed into "Bird-Island_Water-Temperature".
 MODEL_FAMILIES = [
+    "Espiritu-Santo-Bay",
     "MRE",                              # must come before "Bird-Island_Water-Temperature" -- see note above
     "VirginiaKey_wl",
     "Bird-Island_Water-Temperature",
