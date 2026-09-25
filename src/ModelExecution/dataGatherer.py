@@ -147,7 +147,7 @@ class DataGatherer:
         call (i.e. not in vectorOrder directly), walks the post-process args to find the
         outKey that this key feeds into, then returns that outKey's indexes.
 
-        Relies on the convention that post-process args use '_inKey' and '_outKey' suffixes.
+        Relies on the convention that post-process args use 'inKey' and 'outKey' suffixes.
 
         :param key: str - The outKey of the dependent series to resolve indexes for
         :param key_to_index: dict - The vectorOrder key -> indexes mapping
@@ -163,14 +163,18 @@ class DataGatherer:
         if key in key_to_index:
             return key_to_index[key]
 
-        # Key is not in vectorOrder — search post-process calls for one that
-        # consumes this key as an inKey, then return the indexes of its outKey
+        # Key is not in vectorOrder: search post-process calls for one that consumes
+        # this key (either an inKey arg or targetSeries list), then return its outKey's indexes
         for call in postProcessCalls:
-            in_keys  = [v for k, v in call.args.items() if k.lower().endswith('_inkey')]
-            out_keys = [v for k, v in call.args.items() if k.lower().endswith('_outkey')]
+            in_keys  = [v for k, v in call.args.items() if k.lower().endswith('inkey')] + call.args.get('targetSeries', [])
+            out_keys = [v for k, v in call.args.items() if k.lower().endswith('outkey')]
             if key in in_keys:
                 for out_key in out_keys:
                     if out_key in key_to_index:
+                        log(f'''[DataGatherer] Resolved dependent series key: {key} to a post processing outKey: {out_key}.
+                            Indexes for {out_key} will be used to clip the series before validation.
+                            Indexes: {key_to_index[out_key]}
+                        ''')
                         return key_to_index[out_key]
 
         return None
