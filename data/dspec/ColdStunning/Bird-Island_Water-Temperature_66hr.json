@@ -19,8 +19,8 @@
     "dependentSeries": [
         {
             "_name": "Water Temp",
-            "location": "SouthBirdIsland",
-            "source": "LIGHTHOUSE",
+            "location": "SBI",
+            "source": "NOAATANDC",
             "series": "dWaterTmp",
             "unit": "celsius",
             "interval": 3600,
@@ -40,8 +40,8 @@
         },
         {
             "_name": "Air Temp",
-            "location": "SouthBirdIsland",
-            "source": "LIGHTHOUSE",
+            "location": "SBI",
+            "source": "NOAATANDC",
             "series": "dAirTmp",
             "unit": "celsius",
             "interval": 3600,
