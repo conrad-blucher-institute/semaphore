@@ -4,7 +4,11 @@
 # Created by: Matthew Kastl
 # Adapted from: Beto Estrada Jr's & Brian Colburn's, work
 #---------------------------------------------
-""" This script fetches and scrapes NDBC wave data from their webpage. 
+"""
+This script fetches and scrapes NDBC wave data from their webpage. 
+
+A full list of responses can be found at https://www.ndbc.noaa.gov/data/realtime2/
+An example response for a station can be found at https://www.ndbc.noaa.gov/data/realtime2/32ST0.txt
 """ 
 #---------------------------------------------
 # 
@@ -31,11 +35,6 @@ class NDBC(IDataIngestion):
             'sec' : 'seconds',
             'm/s': 'mps'
         }
-        self.NDBC_SeriesDict = {
-            'WVHT' : 'WVHT',
-            'DPD' : 'DPD',
-            'APD' : 'APD'
-        }
         self.fourMaxMeanConversionDict = {
             'd_48h_4mm_WVHT' : 'WVHT',
             'd_24h_4mm_WVHT' : 'WVHT',
@@ -50,14 +49,42 @@ class NDBC(IDataIngestion):
 
 
     def ingest_series(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
+        """
+        Ingest a data series from the NDBC API.
+
+        Args:
+            seriesDescription (SeriesDescription): the series description object for this data request
+            timeDescription (TimeDescription): the time description object for this data request
+            
+        Returns:
+            Series | None: Successfully fetched and processed data series, or None if unsupported/failed
+        """
+        series_dispatch = {
+            'WVHT' : self.__get_NDBC,
+            'DPD' : self.__get_NDBC,
+            'APD' : self.__get_NDBC,
+            'd_48h_4mm_WVHT' : self.__get_mean_four_max,
+            'd_24h_4mm_WVHT' : self.__get_mean_four_max,
+            'd_12h_4mm_WVHT' : self.__get_mean_four_max,
+            'd_48h_4mm_DPD' : self.__get_mean_four_max,
+            'd_24h_4mm_DPD' : self.__get_mean_four_max,
+            'd_12h_4mm_DPD' : self.__get_mean_four_max,
+            'd_48h_4mm_APD' : self.__get_mean_four_max,
+            'd_24h_4mm_APD' : self.__get_mean_four_max,
+            'd_12h_4mm_APD' : self.__get_mean_four_max
+        }
         
-        if seriesDescription.dataSeries in self.NDBC_SeriesDict.keys():
-            return self.__get_NDBC(seriesDescription, timeDescription)
-        # Detects if this is a regular NDBC series or the engineered feature  
-        elif seriesDescription.dataSeries in self.fourMaxMeanConversionDict.keys():
-            return self.__get_mean_four_max(seriesDescription, timeDescription)
-        else: 
-            raise NotImplementedError(f'NDBC has not implemented request: {seriesDescription}')
+        fetch_method = series_dispatch.get(seriesDescription.dataSeries, None)
+        if fetch_method is None:
+            log(f'Data series: {seriesDescription.dataSeries}, not found for NDBC for request: {seriesDescription}')
+            return None
+
+        series = fetch_method(seriesDescription, timeDescription)
+        if series is None:
+            log(f'Failed to fetch data for series: {seriesDescription.dataSeries} for request: {seriesDescription}')
+            return None
+
+        return series
     
 
     def __fetch(self, url):
@@ -119,10 +146,19 @@ class NDBC(IDataIngestion):
         
 
     def __get_NDBC(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
-        """This function pulls NDBC data
-        :param seriesDescription: SeriesDescription - A data SeriesDescription object with the information to pull 
-        :param timeDescription: TimeDescription - A data TimeDescription object with the information to pull 
-        :param Series | None: A series containing the imported data or none if something went wrong
+        """
+        This function pulls NDBC data
+
+        Args:
+            seriesDescription (SeriesDescription): A data SeriesDescription object with the information to pull 
+            timeDescription (TimeDescription): A data TimeDescription object with the information to pull 
+
+        Returns:
+            Series | None: A series containing the imported data or none if something went wrong
+
+        NOTE: NDBC uses 'MM' for missing values and the loop here already skips
+        missing values, so this class only returns timestamps that have values
+        so no extra filtering is required.
         """
         NDBC_location_code = self.seriesStorage.find_external_location_code(seriesDescription.dataSource, seriesDescription.dataLocation)
 
@@ -154,13 +190,20 @@ class NDBC(IDataIngestion):
     
 
     def __get_mean_four_max(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> Series | None:
-        """This function calculates the engineered feature of 4max__mean_XXXX
-        NOTE::XXXX can be any series that NDBC has as long as its in the fourMaxMeanConversionDict in the constructor for this class
-        NOTE:: The seriesDescirption object will have a series like 4max__mean_XXXX which will need to be overwritten when the data
-                is requested, but it will be changed back in the series returned by this method
-        :param seriesDescription: SeriesDescription - A data SeriesDescription object with the information to pull 
-        :param timeDescription: TimeDescription - A data TimeDescription object with the information to pull 
-        :param Series | None: A series containing the imported data or none if something went wrong
+        """
+        This function calculates the engineered feature of 4max__mean_XXXX
+
+        Args:
+            seriesDescription (SeriesDescription): A data SeriesDescription object with the information to pull 
+            timeDescription (TimeDescription): A data TimeDescription object with the information to pull 
+
+        Returns:
+            Series | None: A series containing the imported data or none if something went wrong
+
+        NOTE: XXXX can be any series that NDBC has as long as its in the fourMaxMeanConversionDict in the constructor for this class
+
+        NOTE: The seriesDescription object will have a series like 4max__mean_XXXX which will need to be overwritten when the data
+            is requested, but it will be changed back in the series returned by this method
         """
 
         # We expoct the lower method __get_NDBC to save the data in ingests into the database. Then we use that data
@@ -202,6 +245,3 @@ class NDBC(IDataIngestion):
         series = Series(seriesDescription, timeDescription)
         series.dataFrame = one_row_df
         return series
-
-
-
