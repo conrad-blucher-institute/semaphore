@@ -161,7 +161,7 @@ class TestNOAATANDCUnit:
         
         for series_name, expected_method in test_cases:
             with patch.object(self.noaa_ingester, f'_NOAATANDC{expected_method}') as mock_method, \
-            patch.object(self.noaa_ingester, '_NOAATANDC__filter_input_df'):
+            patch.object(self.noaa_ingester, 'filter_input_df'):
                 mock_method.return_value = Mock(spec=Series)
                 
                 series_desc = SeriesDescription("NOAATANDC", series_name, "packChan", "MHHW")
@@ -365,7 +365,7 @@ class TestNOAATANDCUnit:
         df['dataValue'] = data
 
         noaa = NOAATANDC()
-        result = noaa._NOAATANDC__filter_input_df(df)
+        result = noaa.filter_input_df(df)
 
         assert result['dataValue'].isna().values.any() == 0, "Filtered DataFrame should not contain NaN or None values"
         assert '' not in result.values, "Filtered DataFrame should not contain empty strings"
@@ -404,7 +404,7 @@ class TestNOAATANDCUnit:
         expected_df['longitude'] = ['lon1', 'lon4', 'lon5']
 
         noaa = NOAATANDC()
-        result = noaa._NOAATANDC__filter_input_df(df)
+        result = noaa.filter_input_df(df)
 
         # Check that the other columns remain unchanged for the rows that are kept
         assert result.equals(expected_df), f"Filtered DataFrame does not match expected DataFrame. Expected:\n{expected_df}\nGot:\n{result}"

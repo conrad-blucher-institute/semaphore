@@ -55,7 +55,8 @@ class SEMAPHORE(IDataIngestion):
 
         # Repack the data with the original series description and return
         return_series = Series(seriesDescription, timeDescription)
-        return_series.dataFrame = self.__convert_output_to_input(result.dataFrame) # Cast output frame to input frame
+        return_series.dataFrame = self.__convert_output_to_input(result.dataFrame)  # Cast output frame to input frame
+        return_series.dataFrame = self.filter_input_df(return_series.dataFrame)     # Filter out timestamps with missing values
         return return_series
     
 
