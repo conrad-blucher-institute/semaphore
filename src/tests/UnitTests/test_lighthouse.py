@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# test_lighthouse.py
+# test_Lighthouse.py
 #----------------------------------
 # Created By: CJ Quintero
 # Created On: 09/30/2026
@@ -8,7 +8,7 @@
 """ 
 This file provides unit tests for lighthouse
 
-docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_lighthouse.py
+docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_Lighthouse.py
 """ 
 #----------------------------------
 import json
@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 from DataClasses import TimeDescription, SeriesDescription
 from src.DataIngestion.DI_Classes.LIGHTHOUSE import LIGHTHOUSE
 
-FILE = Path(__file__).parent / "data" / "lighthouse_missing_values_response.json"
+FILE = Path(__file__).parent / "data" / "lighthouse_response.json"
 MISSING_VALUES = [None, '', '   ', 'nan', 'NaN', 'null', 'NULL', 'none', 'None']
 
 class TestLighthouse():
@@ -32,7 +32,7 @@ class TestLighthouse():
 
         the file has 240 total data points and 33 timestamps are null
 
-        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_lighthouse.py::TestLighthouse::test_missing_values
+        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_Lighthouse.py::TestLighthouse::test_missing_values
         """
 
         # the time description is set to match the saved response in the json file
