@@ -108,7 +108,7 @@ class NOAATANDC(IDataIngestion):
             log(f'Failed to fetch data for series: {seriesDescription.dataSeries} for request: {seriesDescription}')
             return None
 
-        series.dataFrame = self.filter_input_df(series.dataFrame)
+        series.dataFrame = self.__filter_input_df(series.dataFrame)
 
         return series
 
@@ -598,3 +598,23 @@ class NOAATANDC(IDataIngestion):
         series = Series(seriesDescription, timeDescription)
         series.dataFrame = df
         return series
+
+
+    def __filter_input_df(self, df: DataFrame) -> DataFrame:
+        """
+        This function filters out any timestamps with missing values from an input dataframe.
+
+        Args:
+            df (DataFrame): An input dataframe with 
+                ['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude']
+        
+        Returns:
+            DataFrame: An input dataframe with only timestamps that have a data value for that timestamp.
+                Timestamps without a value will be removed from the dataframe.
+        """
+        # replace empty values in the dataValue column with None
+        df_to_filter = df.copy()
+        df_to_filter['dataValue'] = df_to_filter['dataValue'].replace(['', 'None', 'nan'], None)
+
+        # drop rows that are missing a datavalue
+        return df_to_filter.dropna(subset=['dataValue']).reset_index(drop=True)
