@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
-#SEMAPHORE.py
+# SEMAPHORE.py
 #----------------------------------
 # Created By: Matthew Kastl
 # Created Date: 5/8/2024
 # version 1.0
 #----------------------------------
-""" This file ingests data from the Semaphore output table.
-    The Series Description HAS to be written a certain way as the
-    SemaphoreSeriesDescription holds other information.
+""" 
+This file ingests data from the Semaphore output table.
+The Series Description HAS to be written a certain way as the
+SemaphoreSeriesDescription holds other information.
 
-    To properly utilize this class, the request series should be formatted like:
-        modelName|modelVersion|seriesName
+To properly utilize this class, the request series should be formatted like:
+    modelName|modelVersion|seriesName
 
-    The modelName, Version and Series Name are separated as pipes 
- """ 
+The modelName, Version and Series Name are separated as pipes 
+""" 
 #----------------------------------
 # 
 #
@@ -66,4 +67,29 @@ class SEMAPHORE(IDataIngestion):
         df_inputs['dataUnit'] = df_outputs['dataUnit'] 
         df_inputs['timeVerified'] = df_outputs['timeGenerated'] + df_outputs['leadTime']
         df_inputs['timeGenerated'] = df_outputs['timeGenerated']
+        df_inputs = self.__filter_input_df(df_inputs)
         return df_inputs
+
+
+    def __filter_input_df(self, df: DataFrame) -> DataFrame:
+        """
+        This function filters out any timestamps with missing values from an input dataframe.
+
+        NOTE: This function is a copy of the filtering function from the NOAATANDC ingestion class.
+        Semaphore as an ingestion class does return timestamps with missing values where
+        missing values appear as the stringified "None".
+
+        Args:
+            df (DataFrame): An input dataframe with 
+                ['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude']
+        
+        Returns:
+            DataFrame: An input dataframe with only timestamps that have a data value for that timestamp.
+                Timestamps without a value will be removed from the dataframe.
+        """
+        # replace empty values in the dataValue column with None
+        df_to_filter = df.copy()
+        df_to_filter['dataValue'] = df_to_filter['dataValue'].replace(['', 'None', 'nan'], None)
+
+        # drop rows that are missing a datavalue
+        return df_to_filter.dropna(subset=['dataValue']).reset_index(drop=True)
