@@ -75,8 +75,7 @@ class SEMAPHORE(IDataIngestion):
         """
         This function filters out any timestamps with missing values from an input dataframe.
 
-        NOTE: This function is a copy of the filtering function from the NOAATANDC ingestion class.
-        Semaphore as an ingestion class does return timestamps with missing values where
+        NOTE: Semaphore as an ingestion class does return timestamps with missing values where
         missing values appear as the stringified "None".
 
         Args:
@@ -87,9 +86,11 @@ class SEMAPHORE(IDataIngestion):
             DataFrame: An input dataframe with only timestamps that have a data value for that timestamp.
                 Timestamps without a value will be removed from the dataframe.
         """
-        # replace empty values in the dataValue column with None
-        df_to_filter = df.copy()
-        df_to_filter['dataValue'] = df_to_filter['dataValue'].replace(['', 'None', 'nan'], None)
+        missing_strings = ['', 'none', 'nan', 'null']
 
-        # drop rows that are missing a datavalue
-        return df_to_filter.dropna(subset=['dataValue']).reset_index(drop=True)
+        # normalize the data value column to stripped lowercase strings
+        normalized = df['dataValue'].astype(str).str.strip().str.lower()
+        is_missing = df['dataValue'].isna() | normalized.isin(missing_strings)
+
+        # drop rows whose dataValue is missing
+        return df.loc[~is_missing].reset_index(drop=True)
