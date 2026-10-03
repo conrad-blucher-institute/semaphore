@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
-#SEMAPHORE.py
+# SEMAPHORE.py
 #----------------------------------
 # Created By: Matthew Kastl
 # Created Date: 5/8/2024
 # version 1.0
 #----------------------------------
-""" This file ingests data from the Semaphore output table.
-    The Series Description HAS to be written a certain way as the
-    SemaphoreSeriesDescription holds other information.
+""" 
+This file ingests data from the Semaphore output table.
+The Series Description HAS to be written a certain way as the
+SemaphoreSeriesDescription holds other information.
 
-    To properly utilize this class, the request series should be formatted like:
-        modelName|modelVersion|seriesName
+To properly utilize this class, the request series should be formatted like:
+    modelName|modelVersion|seriesName
 
-    The modelName, Version and Series Name are separated as pipes 
- """ 
+The modelName, Version and Series Name are separated as pipes 
+""" 
 #----------------------------------
 # 
 #
@@ -66,4 +67,30 @@ class SEMAPHORE(IDataIngestion):
         df_inputs['dataUnit'] = df_outputs['dataUnit'] 
         df_inputs['timeVerified'] = df_outputs['timeGenerated'] + df_outputs['leadTime']
         df_inputs['timeGenerated'] = df_outputs['timeGenerated']
+        df_inputs = self.__filter_input_df(df_inputs)
         return df_inputs
+
+
+    def __filter_input_df(self, df: DataFrame) -> DataFrame:
+        """
+        This function filters out any timestamps with missing values from an input dataframe.
+
+        NOTE: Semaphore as an ingestion class does return timestamps with missing values where
+        missing values appear as the stringified "None".
+
+        Args:
+            df (DataFrame): An input dataframe with 
+                ['dataValue', 'dataUnit', 'timeVerified', 'timeGenerated', 'longitude', 'latitude']
+        
+        Returns:
+            DataFrame: An input dataframe with only timestamps that have a data value for that timestamp.
+                Timestamps without a value will be removed from the dataframe.
+        """
+        missing_strings = ['', 'none', 'nan', 'null']
+
+        # normalize the data value column to stripped lowercase strings
+        normalized = df['dataValue'].astype(str).str.strip().str.lower()
+        is_missing = df['dataValue'].isna() | normalized.isin(missing_strings)
+
+        # drop rows whose dataValue is missing
+        return df.loc[~is_missing].reset_index(drop=True)
