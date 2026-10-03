@@ -206,7 +206,7 @@ class NDBC(IDataIngestion):
             is requested, but it will be changed back in the series returned by this method
         """
 
-        # We expoct the lower method __get_NDBC to save the data in ingests into the database. Then we use that data
+        # We expect the lower method __get_NDBC to save the data in ingests into the database. Then we use that data
         # to compute the four max mean. The issue is the seriesDescription is loaded with the series name as 4mm_XXX
         # and we dont want the lower method to store its data into the db under that name. That would be false.
         # Thus the lines below switch the name in the seriesDescription, then switch it back after the lower method has run
