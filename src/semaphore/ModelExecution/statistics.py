@@ -12,8 +12,8 @@ a given dataset.
 """ 
 #----------------------------------
 import numpy as np
-from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataClasses import Series, TimeDescription
+from semaphore.SeriesStorage.ISeriesStorage import series_storage_factory
+from semaphore.DataClasses import Series, TimeDescription
 from datetime import datetime
 
 

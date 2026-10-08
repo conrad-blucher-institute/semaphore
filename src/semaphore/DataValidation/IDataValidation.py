@@ -14,7 +14,7 @@ and a factory for generating instances of the interface.
 #Imports
 from abc import ABC, abstractmethod
 from importlib import import_module
-from DataClasses import Series
+from semaphore.DataClasses import Series
 
 class IDataValidation(ABC):
     """ An interface that defines a method for validating a Series object.
@@ -35,6 +35,7 @@ def data_validation_factory(dataValidationRequest: str, **kwargs) -> IDataValida
     """
     try:
         MODULE_NAME = 'DataValidationClasses'
-        return getattr(import_module(f'.{MODULE_NAME}.{dataValidationRequest}', 'DataValidation'), dataValidationRequest)(**kwargs)
+        # __package__ instead of a hard-coded package name, so this keeps working if the package is moved or renamed.
+        return getattr(import_module(f'.{MODULE_NAME}.{dataValidationRequest}', __package__), dataValidationRequest)(**kwargs)
     except (ModuleNotFoundError, AttributeError) as e:
         raise ImportError(f'Error importing post-processing class {dataValidationRequest}: {e}')

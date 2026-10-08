@@ -15,10 +15,10 @@ from datetime import datetime, timezone
 import requests
 import re
 
-from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
-from DataIngestion.IDataIngestion import IDataIngestion
-from utility import log
+from semaphore.SeriesStorage.ISeriesStorage import series_storage_factory
+from semaphore.DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
+from semaphore.DataIngestion.IDataIngestion import IDataIngestion
+from semaphore.utility import log
 
 
 class NDBC(IDataIngestion):

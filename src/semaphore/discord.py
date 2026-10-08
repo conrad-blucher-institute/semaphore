@@ -15,7 +15,7 @@
 #Imports
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from datetime import datetime
-from utility import log
+from semaphore.utility import log
 from os import getenv
 
 class Discord_Notify:

@@ -10,7 +10,7 @@
 # 
 #
 #Imports
-from DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
+from semaphore.DataClasses import Series, SemaphoreSeriesDescription, SeriesDescription, TimeDescription
 from datetime import datetime
 
 from abc import ABC, abstractmethod
@@ -81,4 +81,5 @@ def series_storage_factory() -> ISeriesStorage:
     """
 
     ss = getenv('ISERIESSTORAGE_INSTANCE')
-    return getattr(import_module(f'.SS_Classes.{ss}', 'SeriesStorage'), f'{ss}')()
+    # __package__ instead of a hard-coded package name, so this keeps working if the package is moved or renamed.
+    return getattr(import_module(f'.SS_Classes.{ss}', __package__), f'{ss}')()

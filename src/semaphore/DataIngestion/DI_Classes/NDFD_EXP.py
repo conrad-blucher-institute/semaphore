@@ -30,11 +30,11 @@ import urllib.parse
 from lxml import etree # type: ignore
                        # since lxml has no type hints
 
-from DataIngestion.IDataIngestion import IDataIngestion
-from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
-from SeriesStorage.ISeriesStorage import series_storage_factory
-from utility import log
-from exceptions import Semaphore_Ingestion_Exception
+from semaphore.DataIngestion.IDataIngestion import IDataIngestion
+from semaphore.DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
+from semaphore.SeriesStorage.ISeriesStorage import series_storage_factory
+from semaphore.utility import log
+from semaphore.exceptions import Semaphore_Ingestion_Exception
 import re
 import traceback
 import os

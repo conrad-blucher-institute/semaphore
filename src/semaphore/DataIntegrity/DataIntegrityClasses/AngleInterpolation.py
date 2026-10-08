@@ -15,9 +15,9 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 
-from DataIntegrity.IDataIntegrity import IDataIntegrity
-from DataClasses import Series
-from utility import log
+from semaphore.DataIntegrity.IDataIntegrity import IDataIntegrity
+from semaphore.DataClasses import Series
+from semaphore.utility import log
 
 
 

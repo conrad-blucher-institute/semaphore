@@ -19,10 +19,10 @@
 #
 #Input
 
-from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription, SemaphoreSeriesDescription
-from DataIngestion.IDataIngestion import IDataIngestion
-from utility import log
+from semaphore.SeriesStorage.ISeriesStorage import series_storage_factory
+from semaphore.DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription, SemaphoreSeriesDescription
+from semaphore.DataIngestion.IDataIngestion import IDataIngestion
+from semaphore.utility import log
 from pandas import DataFrame
 
 class SEMAPHORE(IDataIngestion):

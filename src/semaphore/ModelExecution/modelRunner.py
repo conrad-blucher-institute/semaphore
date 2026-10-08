@@ -12,11 +12,11 @@ Tenserflow related actions allowing us to run models from .H5
 # 
 #
 #Imports
-from .IOutputHandler import output_handler_factory
-from DataClasses import SemaphoreSeriesDescription, Series
-from utility import log, construct_true_path
-from exceptions import Semaphore_Exception
-from ModelExecution.dspecParser import Dspec
+from semaphore.ModelExecution.IOutputHandler import output_handler_factory
+from semaphore.DataClasses import SemaphoreSeriesDescription, Series
+from semaphore.utility import log, construct_true_path
+from semaphore.exceptions import Semaphore_Exception
+from semaphore.ModelExecution.dspecParser import Dspec
 import re
 import datetime
 from os import getenv

@@ -12,11 +12,11 @@ The post processing in this file Computes the mean of the 4 highest values in a 
 # 
 #
 #Imports
-from PostProcessing.IPostProcessing import IPostProcessing
-from DataClasses import Series, get_input_dataFrame
-from ModelExecution.dspecParser import PostProcessCall
+from semaphore.PostProcessing.IPostProcessing import IPostProcessing
+from semaphore.DataClasses import Series, get_input_dataFrame
+from semaphore.ModelExecution.dspecParser import PostProcessCall
 from copy import deepcopy
-from utility import log
+from semaphore.utility import log
 import pandas as pd
 
 class FourMaxMean(IPostProcessing):

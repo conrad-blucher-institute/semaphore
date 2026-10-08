@@ -24,11 +24,11 @@ from urllib.error import HTTPError
 import re
 import pandas
 
-from DataIngestion.IDataIngestion import IDataIngestion
-from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
-from SeriesStorage.ISeriesStorage import series_storage_factory
-from utility import log
-from exceptions import Semaphore_Ingestion_Exception
+from semaphore.DataIngestion.IDataIngestion import IDataIngestion
+from semaphore.DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
+from semaphore.SeriesStorage.ISeriesStorage import series_storage_factory
+from semaphore.utility import log
+from semaphore.exceptions import Semaphore_Ingestion_Exception
 
 class NDFD_JSON(IDataIngestion):
 

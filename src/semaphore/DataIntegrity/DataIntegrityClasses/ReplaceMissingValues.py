@@ -12,10 +12,10 @@
 #
 #Imports
 import pandas as pd
-from DataIntegrity.IDataIntegrity import IDataIntegrity
-from DataClasses import Series
+from semaphore.DataIntegrity.IDataIntegrity import IDataIntegrity
+from semaphore.DataClasses import Series
 
-from exceptions import Semaphore_Data_Exception
+from semaphore.exceptions import Semaphore_Data_Exception
 
 
 

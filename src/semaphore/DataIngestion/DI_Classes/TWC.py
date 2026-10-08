@@ -13,10 +13,10 @@
 # 
 #
 #Imports
-from SeriesStorage.ISeriesStorage import series_storage_factory
-from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
-from DataIngestion.IDataIngestion import IDataIngestion
-from exceptions import Semaphore_Ingestion_Exception
+from semaphore.SeriesStorage.ISeriesStorage import series_storage_factory
+from semaphore.DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
+from semaphore.DataIngestion.IDataIngestion import IDataIngestion
+from semaphore.exceptions import Semaphore_Ingestion_Exception
 from numpy import ndarray
 import numpy as np
 

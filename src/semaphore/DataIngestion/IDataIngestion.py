@@ -12,7 +12,7 @@ Methods. As well as the factory to generate the instance of the interface
 # 
 #
 #Imports
-from DataClasses import SeriesDescription, Series, TimeDescription
+from semaphore.DataClasses import SeriesDescription, Series, TimeDescription
 
 from abc import ABC, abstractmethod
 from importlib import import_module
@@ -31,7 +31,8 @@ def data_ingestion_factory(seriesRequest: SeriesDescription) -> IDataIngestion:
         :param seriesRequest: SeriesDescription - A data SeriesDescription object with the information to pull (src/DataManagment/DataClasses>SeriesDescription)
     """
     try:
-        return getattr(import_module(f'.DI_Classes.{seriesRequest.dataSource}', 'DataIngestion'), f'{seriesRequest.dataSource}')()
+        # __package__ instead of a hard-coded package name, so this keeps working if the package is moved or renamed.
+        return getattr(import_module(f'.DI_Classes.{seriesRequest.dataSource}', __package__), f'{seriesRequest.dataSource}')()
     except ModuleNotFoundError:
         raise ModuleNotFoundError(f'No module named {seriesRequest.dataSource} in DI_Classes!')
     

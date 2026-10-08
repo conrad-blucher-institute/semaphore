@@ -13,7 +13,7 @@ Methods. And Factory to get instance
 #
 #Imports
 
-from .dspecParser import Dspec
+from semaphore.ModelExecution.dspecParser import Dspec
 
 from abc import ABC, abstractmethod
 from importlib import import_module
@@ -37,7 +37,8 @@ def output_handler_factory(method: str) -> IOutputHandler:
         IOutputHandler - An child of the IOutputHandler interface.
     """
     try:
-        return getattr(import_module(f'.OH_Classes.{method}', 'ModelExecution'), f'{method}')()
+        # __package__ instead of a hard-coded package name, so this keeps working if the package is moved or renamed.
+        return getattr(import_module(f'.OH_Classes.{method}', __package__), f'{method}')()
     except Exception:
         raise ModuleNotFoundError(f'Failed to import {method} from OH_Classes! Does it exist in the directory?')
     

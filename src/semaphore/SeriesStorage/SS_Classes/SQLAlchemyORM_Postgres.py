@@ -32,10 +32,10 @@ import numpy as np
 from io import BytesIO
 from numpy import ndarray
 
-from SeriesStorage.ISeriesStorage import ISeriesStorage
+from semaphore.SeriesStorage.ISeriesStorage import ISeriesStorage
 
-from DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, TimeDescription, get_input_dataFrame, get_output_dataFrame
-from utility import log
+from semaphore.DataClasses import Series, SeriesDescription, SemaphoreSeriesDescription, TimeDescription, get_input_dataFrame, get_output_dataFrame
+from semaphore.utility import log
 
 
 class SQLAlchemyORM_Postgres(ISeriesStorage):

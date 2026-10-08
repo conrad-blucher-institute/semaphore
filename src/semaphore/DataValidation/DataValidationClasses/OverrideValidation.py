@@ -12,10 +12,10 @@
 # 
 #
 #Imports
-from DataClasses import Series
-from DataValidation.IDataValidation import IDataValidation
-from utility import log
-from exceptions import Semaphore_Exception 
+from semaphore.DataClasses import Series
+from semaphore.DataValidation.IDataValidation import IDataValidation
+from semaphore.utility import log
+from semaphore.exceptions import Semaphore_Exception 
 
 
 class OverrideValidation(IDataValidation):

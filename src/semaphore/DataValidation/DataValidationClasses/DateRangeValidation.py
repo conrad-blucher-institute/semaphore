@@ -12,9 +12,9 @@ determines the expected date range via the timeDescription and checks for missin
 # 
 #
 #Imports
-from DataClasses import Series
-from DataValidation.IDataValidation import IDataValidation
-from utility import log_error
+from semaphore.DataClasses import Series
+from semaphore.DataValidation.IDataValidation import IDataValidation
+from semaphore.utility import log_error
 from datetime import timedelta, datetime
 from pandas import date_range
 

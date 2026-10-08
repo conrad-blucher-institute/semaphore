@@ -14,7 +14,7 @@
 #Imports
 from abc import ABC, abstractmethod
 from importlib import import_module
-from DataClasses import Series
+from semaphore.DataClasses import Series
 
 class IDataIntegrity(ABC):
     @abstractmethod
@@ -48,7 +48,8 @@ def data_integrity_factory(DataIntegrityRequest: str) -> IDataIntegrity :
     """
     try:
         MODULE_NAME = 'DataIntegrityClasses'
-        return getattr(import_module(f'.{MODULE_NAME}.{DataIntegrityRequest}', 'DataIntegrity'), DataIntegrityRequest)()
+        # __package__ instead of a hard-coded package name, so this keeps working if the package is moved or renamed.
+        return getattr(import_module(f'.{MODULE_NAME}.{DataIntegrityRequest}', __package__), DataIntegrityRequest)()
     except (ModuleNotFoundError, AttributeError) as e:
         raise ImportError(f'Error importing data integrity class {DataIntegrityRequest}: {e}')
         

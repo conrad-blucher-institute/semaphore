@@ -15,10 +15,10 @@ This file is responsible for generating batches of input vectors. It is responsi
 # 
 #
 #Imports
-from DataClasses import Series
-from .dspecParser import VectorOrder, Dspec, ExpectedOutputShape
-from utility import log
-from exceptions import Semaphore_Exception
+from semaphore.DataClasses import Series
+from semaphore.ModelExecution.dspecParser import VectorOrder, Dspec, ExpectedOutputShape
+from semaphore.utility import log
+from semaphore.exceptions import Semaphore_Exception
 from typing import Generator
 
 class InputVectorBuilder:

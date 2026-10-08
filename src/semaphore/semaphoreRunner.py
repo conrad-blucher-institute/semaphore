@@ -15,8 +15,8 @@
 import argparse
 from dotenv import load_dotenv
 from datetime import datetime, timezone
-from orchestrator import Orchestrator
-from utility import VerbosityController
+from semaphore.orchestrator import Orchestrator
+from semaphore.utility import VerbosityController
 
 load_dotenv()
 

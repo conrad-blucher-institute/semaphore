@@ -12,9 +12,9 @@ The post processing in this file averages two series.
 # 
 #
 #Imports
-from PostProcessing.IPostProcessing import IPostProcessing
-from DataClasses import Series
-from ModelExecution.dspecParser import PostProcessCall
+from semaphore.PostProcessing.IPostProcessing import IPostProcessing
+from semaphore.DataClasses import Series
+from semaphore.ModelExecution.dspecParser import PostProcessCall
 
 class Average(IPostProcessing):
     """

@@ -6,10 +6,10 @@
 # -------------------------------
 """Combine multiple station series into one mean series."""
 
-from PostProcessing.IPostProcessing import IPostProcessing
-from DataClasses import Series, TimeDescription, get_input_dataFrame, SeriesDescription
-from ModelExecution.dspecParser import PostProcessCall
-from exceptions import Semaphore_Data_Exception
+from semaphore.PostProcessing.IPostProcessing import IPostProcessing
+from semaphore.DataClasses import Series, TimeDescription, get_input_dataFrame, SeriesDescription
+from semaphore.ModelExecution.dspecParser import PostProcessCall
+from semaphore.exceptions import Semaphore_Data_Exception
 
 import pandas as pd
 import numpy as np

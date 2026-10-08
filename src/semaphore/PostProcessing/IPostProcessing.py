@@ -14,7 +14,7 @@ and a factory for generating instances of the interface.
 #Imports
 from abc import ABC, abstractmethod
 from importlib import import_module
-from DataClasses import Series
+from semaphore.DataClasses import Series
 
 class IPostProcessing(ABC):
     @abstractmethod
@@ -48,7 +48,8 @@ def post_processing_factory(postProcessingRequest: str) -> IPostProcessing :
     """
     try:
         MODULE_NAME = 'PostProcessingClasses'
-        return getattr(import_module(f'.{MODULE_NAME}.{postProcessingRequest}', 'PostProcessing'), postProcessingRequest)()
+        # __package__ instead of a hard-coded package name, so this keeps working if the package is moved or renamed.
+        return getattr(import_module(f'.{MODULE_NAME}.{postProcessingRequest}', __package__), postProcessingRequest)()
     except (ModuleNotFoundError, AttributeError) as e:
         raise ImportError(f'Error importing post-processing class {postProcessingRequest}: {e}')
         

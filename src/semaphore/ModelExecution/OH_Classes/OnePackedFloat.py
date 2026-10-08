@@ -13,9 +13,9 @@ and initiates the saving process.
 # 
 #
 #Imports
-from DataClasses import get_output_dataFrame
-from ModelExecution.IOutputHandler import IOutputHandler
-from ..dspecParser import Dspec
+from semaphore.DataClasses import get_output_dataFrame
+from semaphore.ModelExecution.IOutputHandler import IOutputHandler
+from semaphore.ModelExecution.dspecParser import Dspec
 
 from datetime import datetime, timedelta
 from pandas import DataFrame

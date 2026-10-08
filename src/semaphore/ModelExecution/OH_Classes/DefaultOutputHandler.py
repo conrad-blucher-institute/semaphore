@@ -12,13 +12,13 @@ of (members, input_vectors, outputs) and store the predictions in an output data
 # 
 #
 #Imports
-from DataClasses import get_output_dataFrame
-from ModelExecution.IOutputHandler import IOutputHandler
-from ..dspecParser import Dspec,ExpectedOutputShape
+from semaphore.DataClasses import get_output_dataFrame
+from semaphore.ModelExecution.IOutputHandler import IOutputHandler
+from semaphore.ModelExecution.dspecParser import Dspec,ExpectedOutputShape
 
 from datetime import datetime, timedelta
 from pandas import DataFrame
-from exceptions import Semaphore_Exception
+from semaphore.exceptions import Semaphore_Exception
 import numpy as np
 
 class DefaultOutputHandler(IOutputHandler):
