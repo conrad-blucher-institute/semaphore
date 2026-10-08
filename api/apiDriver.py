@@ -13,9 +13,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 
 from datetime import datetime, timedelta, timezone
-from DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription, Series
-from SeriesProvider.SeriesProvider import SeriesProvider
-from ModelExecution.statistics import Statistics
+from semaphore.DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription, Series
+from semaphore.SeriesProvider.SeriesProvider import SeriesProvider
+from semaphore.ModelExecution.statistics import Statistics
 from fastapi.encoders import jsonable_encoder
 import pandas as pd
 import numpy as np

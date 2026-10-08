@@ -38,10 +38,11 @@ services:
       - "host.docker.internal:host-gateway"
   api:
     command: [
-      "uvicorn", "API.apiDriver:app",
+      "uvicorn", "apiDriver:app",
+      "--app-dir", "/app/api",
       "--host", "0.0.0.0",
       "--port", "8000",
-      "--log-config", "./API/semaphore_api_log_config.json",
+      "--log-config", "./api/semaphore_api_log_config.json",
       "--workers", "8"
     ]
     container_name: semaphore-api

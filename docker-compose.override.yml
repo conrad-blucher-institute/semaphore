@@ -13,11 +13,14 @@ services:
 
   api:
     command: [
-      "uvicorn", "API.apiDriver:app",
+      "uvicorn", "apiDriver:app",
+      "--app-dir", "/app/api",
       "--host", "0.0.0.0",
       "--port", "8000",
-      "--log-config", "./API/semaphore_api_log_config.json",
-      "--reload"
+      "--log-config", "./api/semaphore_api_log_config.json",
+      "--reload",
+      "--reload-dir", "/app/src",
+      "--reload-dir", "/app/api"
     ]
     develop:
       watch:

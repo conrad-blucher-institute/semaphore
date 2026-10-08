@@ -3,7 +3,7 @@
   "disable_existing_loggers": false,
   "filters": {
     "process_time": {
-      "()": "API.apiDriver.ProcessTimeFilter"
+      "()": "apiDriver.ProcessTimeFilter"
     }
   },
   "formatters": {

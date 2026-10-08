@@ -45,5 +45,5 @@ RUN chown -R ${SERVICE_ACCOUNT_USERNAME}:${SERVICE_ACCOUNT_USERNAME} /app
 # Set the user to the service account user
 USER ${SERVICE_ACCOUNT_USERNAME}
 
-# Set the work directory to SRC such that imports work correctly
-WORKDIR /app/src
+# Run from the repo root; the semaphore package is installed, and uvicorn finds apiDriver via --app-dir
+WORKDIR /app
