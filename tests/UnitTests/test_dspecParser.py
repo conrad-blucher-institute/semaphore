@@ -7,17 +7,15 @@
 #----------------------------------
 """This file tests the dspec parsing parsing a 1.0 and 2.0 dspec
 
-docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_dspecParser.py
+docker exec semaphore-core python3 -m pytest tests/UnitTests/test_dspecParser.py
  """ 
 #----------------------------------
 # 
 #
-import sys
-sys.path.append('/app/src')
 
 from json import load
 import pytest
-from src.ModelExecution.dspecParser import DSPEC_Parser
+from semaphore.ModelExecution.dspecParser import DSPEC_Parser
 
 @pytest.mark.parametrize("dspecFilePath", [
      ('./data/dspec/TestModels/test_dspec-2-0.json'),

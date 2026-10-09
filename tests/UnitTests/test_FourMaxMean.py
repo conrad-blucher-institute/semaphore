@@ -7,19 +7,17 @@
 #----------------------------------
 """This file tests the Four Max Mean PPC 
 
-run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_FourMaxMean.py
+run: docker exec semaphore-core python3 -m pytest tests/UnitTests/test_FourMaxMean.py
  """ 
 #----------------------------------
 # 
 #
-import sys
-sys.path.append('/app/src')
 
 from datetime import datetime, timedelta, timezone
 
-from src.PostProcessing.IPostProcessing import post_processing_factory
-from src.ModelExecution.dspecParser import PostProcessCall
-from src.DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
+from semaphore.PostProcessing.IPostProcessing import post_processing_factory
+from semaphore.ModelExecution.dspecParser import PostProcessCall
+from semaphore.DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
 from math import isclose
 
 

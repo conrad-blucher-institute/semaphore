@@ -16,12 +16,10 @@ High-level flow:
 5) Compare the returned DataFrame to an expected DataFrame.
 6) Cleanup: delete only the rows inserted by this test module.
 
-docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py
+docker exec semaphore-core python3 -m pytest tests/UnitTests/test_unit_sqlAlchemy.py
 """
 # -------------------------------
 
-import sys
-sys.path.append("/app/src")
 
 from datetime import datetime, timezone, timedelta, date, time
 from os import getenv
@@ -33,10 +31,10 @@ import numpy as np
 from sqlalchemy import MetaData, create_engine, delete, insert, select
 from sqlalchemy.engine import Engine
 
-from SeriesProvider import SeriesProvider
-from SeriesStorage.SS_Classes.SQLAlchemyORM_Postgres import SQLAlchemyORM_Postgres
+from semaphore.SeriesProvider.SeriesProvider import SeriesProvider
+from semaphore.SeriesStorage.SS_Classes.SQLAlchemyORM_Postgres import SQLAlchemyORM_Postgres
 from unittest.mock import patch, MagicMock
-from DataClasses import SeriesDescription, TimeDescription
+from semaphore.DataClasses import SeriesDescription, TimeDescription
 
 
 # -------------------------------
@@ -385,7 +383,7 @@ def test_serialize(data_array):
     """
     This test checks that the __serialize_data method correctly converts an ndarray into bytes
 
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize -s
+    docker exec semaphore-core python3 -m pytest tests/UnitTests/test_unit_sqlAlchemy.py::test_serialize -s
     """
 
     # skip the db connection by replacing the __init__ method
@@ -510,7 +508,7 @@ def test_deserialize(data_array):
     This test checks that the __deserialize_data method correctly converts bytes in a 
     single data_array back to the original array
 
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_deserialize -s
+    docker exec semaphore-core python3 -m pytest tests/UnitTests/test_unit_sqlAlchemy.py::test_deserialize -s
     """
 
     # skip the db connection by replacing the __init__ method
@@ -629,7 +627,7 @@ def test_select_latest_output_statistics(test_data, expected_result):
     When requesting a model that does not compute statistics, no dictionary should be returned
     for that model in the dictionary list.
 
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_select_latest_output_statistics -s
+    docker exec semaphore-core python3 -m pytest tests/UnitTests/test_unit_sqlAlchemy.py::test_select_latest_output_statistics -s
     '''
 
     # skip the db connection by replacing the __init__ method
@@ -709,7 +707,7 @@ def test_select_output_statistics_range(test_specific_data, test_expected_result
     When requesting a model that does not compute statistics, no dictionary should be returned
     for that model in the dictionary list.
 
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_select_output_statistics_range -s
+    docker exec semaphore-core python3 -m pytest tests/UnitTests/test_unit_sqlAlchemy.py::test_select_output_statistics_range -s
     '''
 
     # skip the db connection by replacing the __init__ method
@@ -731,7 +729,7 @@ def test_engine_singleton():
     """
     Test that the SQLAlchemy engine is a singleton and returns the same instance
 
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_sqlAlchemy.py::test_engine_singleton -s
+    docker exec semaphore-core python3 -m pytest tests/UnitTests/test_unit_sqlAlchemy.py::test_engine_singleton -s
     """
 
     # the constructor call will create the engine or return the existing one if it exists already

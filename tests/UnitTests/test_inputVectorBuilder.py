@@ -6,18 +6,15 @@
 #----------------------------------
 """ Tests the InputVectorBuilder class
 
-run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_inputVectorBuilder.py
+run: docker exec semaphore-core python3 -m pytest tests/UnitTests/test_inputVectorBuilder.py
  """ 
 #----------------------------------
 # 
 #
-import sys
-sys.path.append('/app/src')
-import sys
 from unittest.mock import MagicMock
-from src.ModelExecution.InputVectorBuilder import InputVectorBuilder
-from src.ModelExecution.dspecParser import Dspec, VectorOrder, ExpectedOutputShape
-from src.DataClasses import Series, get_input_dataFrame
+from semaphore.ModelExecution.InputVectorBuilder import InputVectorBuilder
+from semaphore.ModelExecution.dspecParser import Dspec, VectorOrder, ExpectedOutputShape
+from semaphore.DataClasses import Series, get_input_dataFrame
 
 
 ## Mocks

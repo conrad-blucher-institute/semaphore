@@ -8,25 +8,23 @@
 
 Run:
     docker exec semaphore-core python3 -m pytest \
-        src/tests/UnitTests/test_ReplaceMissingValues.py
+        tests/UnitTests/test_ReplaceMissingValues.py
 """
 
-import sys
 from datetime import datetime, timedelta, timezone
 
-sys.path.append("/app/src")
 
 import pytest
 from pandas import DataFrame
 
-from src.DataClasses import (
+from semaphore.DataClasses import (
     DataIntegrityDescription,
     Series,
     SeriesDescription,
     TimeDescription,
     get_input_dataFrame,
 )
-from src.DataIntegrity.IDataIntegrity import data_integrity_factory
+from semaphore.DataIntegrity.IDataIntegrity import data_integrity_factory
 
 
 UTC = timezone.utc

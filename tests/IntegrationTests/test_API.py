@@ -10,13 +10,11 @@
 #----------------------------------
 # 
 #
-import sys
-sys.path.append('/app/src')
 
 import pytest
 from fastapi.testclient import TestClient
 
-from src.API.apiDriver import app
+from apiDriver import app
 
 client = TestClient(app)
 

@@ -7,21 +7,19 @@
 #----------------------------------
 """This file tests the Interpolation method and the other methods within it
 
-run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_PandasInterpolation.py
+run: docker exec semaphore-core python3 -m pytest tests/UnitTests/test_PandasInterpolation.py
  """ 
 #----------------------------------
 # 
 #Imports
-import sys
-sys.path.append('/app/src')
 
 import pytest
 from datetime import datetime, timedelta, timezone
 
-from src.DataClasses import get_input_dataFrame, Series, SeriesDescription, TimeDescription, DataIntegrityDescription
-from src.DataIntegrity.IDataIntegrity import data_integrity_factory
+from semaphore.DataClasses import get_input_dataFrame, Series, SeriesDescription, TimeDescription, DataIntegrityDescription
+from semaphore.DataIntegrity.IDataIntegrity import data_integrity_factory
 from pandas import DataFrame
-from exceptions import Semaphore_Data_Exception
+from semaphore.exceptions import Semaphore_Data_Exception
 
 
 dependent_series = {

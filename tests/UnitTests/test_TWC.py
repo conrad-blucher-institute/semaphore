@@ -6,20 +6,19 @@
 #----------------------------------
 """ This provides unit tests for the The weather company ingestion class
 
-docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_TWC.py 
+docker exec semaphore-core python3 -m pytest tests/UnitTests/test_TWC.py 
  """ 
 #----------------------------------
 # 
 #
-import sys
-sys.path.append('/app/src')
 
 import pytest
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta, timezone
-from DataIngestion.DI_Classes.TWC import TWC
-from DataClasses import SeriesDescription, TimeDescription
-from exceptions import Semaphore_Ingestion_Exception
+from semaphore.DataIngestion.DI_Classes.TWC import TWC
+import semaphore.DataIngestion.DI_Classes.TWC as TWC_module
+from semaphore.DataClasses import SeriesDescription, TimeDescription
+from semaphore.exceptions import Semaphore_Ingestion_Exception
 
 @pytest.fixture
 def mock_series_description():
@@ -36,8 +35,8 @@ def mock_time_description():
     return mock_td
 
 
-@patch('DataIngestion.DI_Classes.TWC.series_storage_factory')
-@patch('DataIngestion.DI_Classes.TWC.urlopen')
+@patch.object(TWC_module, 'series_storage_factory')
+@patch.object(TWC_module, 'urlopen')
 def test_ingest_series_success(mock_urlopen, mock_series_storage_factory, mock_series_description, mock_time_description):
     # Mock the series storage to return latitude and longitude
     mock_series_storage = MagicMock()
@@ -89,8 +88,8 @@ def test_ingest_series_success(mock_urlopen, mock_series_storage_factory, mock_s
     mock_urlopen.assert_called_once()
 
 
-@patch('DataIngestion.DI_Classes.TWC.series_storage_factory')
-@patch('DataIngestion.DI_Classes.TWC.urlopen')
+@patch.object(TWC_module, 'series_storage_factory')
+@patch.object(TWC_module, 'urlopen')
 def test_ingest_series_api_error(mock_urlopen, mock_series_storage_factory, mock_series_description, mock_time_description):
     # Mock the series storage to return latitude and longitude
     mock_series_storage = MagicMock()

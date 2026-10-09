@@ -6,13 +6,11 @@
 #----------------------------------
 """ This provides unit tests for the modelRunner class
 
-run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_modelRunner.py
+run: docker exec semaphore-core python3 -m pytest tests/UnitTests/test_modelRunner.py
  """ 
 #----------------------------------
 # 
 #
-import sys
-sys.path.append('/app/src')
 
 from datetime import datetime, timezone
 import pytest
@@ -20,9 +18,10 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 from numpy import float32
 import tensorflow as tf
-from src.ModelExecution.modelRunner import ModelRunner
-from src.ModelExecution.dspecParser import Dspec, OutputInfo, ExpectedOutputShape
-from src.DataClasses import Series, SemaphoreSeriesDescription
+from semaphore.ModelExecution.modelRunner import ModelRunner
+import semaphore.ModelExecution.modelRunner as modelRunner_module
+from semaphore.ModelExecution.dspecParser import Dspec, OutputInfo, ExpectedOutputShape
+from semaphore.DataClasses import Series, SemaphoreSeriesDescription
 from types import SimpleNamespace
 
 
@@ -139,7 +138,7 @@ def test_make_predictions(multi, input_vectors, expected_shape):
     OH_MOCK = MagicMock()
     OH_MOCK.post_process_prediction.return_value = RESULT_DATA
 
-    with patch('src.ModelExecution.modelRunner.output_handler_factory',
+    with patch.object(modelRunner_module, 'output_handler_factory',
                mock_outputHandlerFactory(OH_MOCK)):
 
         with patch.object(ModelRunner, "_ModelRunner__load_models") as mock_loader:
@@ -187,7 +186,7 @@ def test_model_loading_order():
     OH_MOCK = MagicMock()
     OH_MOCK.post_process_prediction.return_value = RESULT_DATA
 
-    with patch('src.ModelExecution.modelRunner.output_handler_factory',
+    with patch.object(modelRunner_module, 'output_handler_factory',
                mock_outputHandlerFactory(OH_MOCK)):
 
         with patch.object(ModelRunner, "_ModelRunner__load_models") as mock_loader:
@@ -210,8 +209,8 @@ def test_model_loading_order():
 # __load_models Tests
 # -------------------------------
 
-@patch('src.ModelExecution.modelRunner.glob.glob')
-@patch('src.ModelExecution.modelRunner.load_model')
+@patch.object(modelRunner_module.glob, 'glob')
+@patch.object(modelRunner_module, 'load_model')
 def test_load_models_sorted(mock_load_model, mock_glob):
 
     mock_glob.return_value = [
@@ -234,8 +233,8 @@ def test_load_models_sorted(mock_load_model, mock_glob):
     ]
 
 
-@patch('src.ModelExecution.modelRunner.load_model')
-@patch('src.ModelExecution.modelRunner.glob.glob')
+@patch.object(modelRunner_module, 'load_model')
+@patch.object(modelRunner_module.glob, 'glob')
 def test_load_models_from_pattern(mock_glob, mock_load_model):
 
     mock_glob.return_value = [

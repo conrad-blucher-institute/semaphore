@@ -6,21 +6,18 @@
 #----------------------------------
 """ This tests the MultiPackedFloat output handler class
 
-run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_MultiPackedFloat.py
+run: docker exec semaphore-core python3 -m pytest tests/UnitTests/test_MultiPackedFloat.py
  """ 
 #----------------------------------
 # 
 #
-import sys
-sys.path.append('/app/src')
 
 from datetime import datetime, timedelta
-import sys
 import pytest
-from src.ModelExecution.dspecParser import Dspec, OutputInfo
-from src.DataClasses import get_output_dataFrame
+from semaphore.ModelExecution.dspecParser import Dspec, OutputInfo
+from semaphore.DataClasses import get_output_dataFrame
 from numpy import array, float32
-from src.ModelExecution.IOutputHandler import output_handler_factory
+from semaphore.ModelExecution.IOutputHandler import output_handler_factory
 from pandas import DataFrame
 from pandas.testing import assert_frame_equal
 
@@ -41,7 +38,7 @@ EXPECTED_RESULT.loc[0] = [
     timedelta(seconds=3600)         # leadtime
 ]
 
-# docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_MultiPackedFloat.py
+# docker exec semaphore-core python3 -m pytest tests/UnitTests/test_MultiPackedFloat.py
 @pytest.mark.parametrize("predictions, dspec, referenceTime, expected_result", [
     (MULTI_PREDICTION_RESULT, TEST_DSPEC, TEST_REF_TIME, EXPECTED_RESULT)
 ])

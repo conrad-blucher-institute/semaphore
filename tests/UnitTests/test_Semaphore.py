@@ -10,8 +10,6 @@ Unit tests to test a successful run of each model group.
 
 """
 
-import sys
-sys.path.append("/app/src")
 
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -21,8 +19,8 @@ import pytest
 import random
 from unittest.mock import MagicMock, patch
 
-from src.orchestrator import Orchestrator
-from src.DataClasses import (
+from semaphore.orchestrator import Orchestrator
+from semaphore.DataClasses import (
     Series,
     SeriesDescription,
     TimeDescription,

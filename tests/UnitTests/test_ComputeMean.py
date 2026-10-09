@@ -21,18 +21,16 @@ Retrieve the newly created Series
 Assert that its DataFrame is correct
 
 Run:
-    docker exec semaphore-core python3 -m pytest -s src/tests/UnitTests/test_ComputeMean.py
+    docker exec semaphore-core python3 -m pytest -s tests/UnitTests/test_ComputeMean.py
 """
 
-import sys
 from datetime import datetime, timedelta, timezone
 
-sys.path.append("/app/src")
 
-from src.DataClasses import Series, SeriesDescription, TimeDescription, get_input_dataFrame
-from src.ModelExecution.dspecParser import PostProcessCall
-from src.PostProcessing.IPostProcessing import post_processing_factory
-from src.PostProcessing.PostProcessingClasses.ComputeMean import Semaphore_Data_Exception
+from semaphore.DataClasses import Series, SeriesDescription, TimeDescription, get_input_dataFrame
+from semaphore.ModelExecution.dspecParser import PostProcessCall
+from semaphore.PostProcessing.IPostProcessing import post_processing_factory
+from semaphore.PostProcessing.PostProcessingClasses.ComputeMean import Semaphore_Data_Exception
 
 import pandas as pd
 import numpy as np

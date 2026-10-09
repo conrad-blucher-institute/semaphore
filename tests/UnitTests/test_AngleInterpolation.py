@@ -7,20 +7,18 @@
 #----------------------------------
 """This file tests the AngleInterpolation Data Integrity Class
 
-run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_AngleInterpolation.py
+run: docker exec semaphore-core python3 -m pytest tests/UnitTests/test_AngleInterpolation.py
 
  """ 
 #----------------------------------
 # 
 #Imports
-import sys
-sys.path.append('/app/src')
 
 import pytest
 from datetime import datetime, timedelta, timezone
 
-from src.DataClasses import get_input_dataFrame, Series, SeriesDescription, TimeDescription, DataIntegrityDescription
-from src.DataIntegrity.IDataIntegrity import data_integrity_factory
+from semaphore.DataClasses import get_input_dataFrame, Series, SeriesDescription, TimeDescription, DataIntegrityDescription
+from semaphore.DataIntegrity.IDataIntegrity import data_integrity_factory
 
 
 dependent_series = {

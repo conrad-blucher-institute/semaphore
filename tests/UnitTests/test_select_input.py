@@ -19,8 +19,6 @@ High-level flow:
 """
 # -------------------------------
 
-import sys
-sys.path.append("/app/src")
 
 from datetime import datetime, timezone
 from os import getenv
@@ -33,7 +31,7 @@ from sqlalchemy import MetaData, create_engine, delete, insert, select
 from sqlalchemy.engine import Engine
 
 
-from DataClasses import SeriesDescription, TimeDescription, get_input_dataFrame
+from semaphore.DataClasses import SeriesDescription, TimeDescription, get_input_dataFrame
 
 
 # -------------------------------
@@ -296,7 +294,7 @@ def seed_inputs_once(engine: Engine, metadata: MetaData, inputs_table):
     ids=["NOAATANDC", "NDFD_EXP", "TWC", "LIGHTHOUSE"],
 )
 def test_select_input_with_mock_db(engine, series_kwargs, from_str, to_str, expected_values):
-    from SeriesStorage.ISeriesStorage import series_storage_factory
+    from semaphore.SeriesStorage.ISeriesStorage import series_storage_factory
 
     series_desc = SeriesDescription(**series_kwargs)
     from_dt = datetime.strptime(from_str, "%Y%m%d%H").replace(tzinfo=timezone.utc)

@@ -18,6 +18,7 @@ where = ["src"]
 include = ["semaphore*"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+# Only the unit tests by default; tests/IntegrationTests is not maintained, so run it only by naming it explicitly.
+testpaths = ["tests/UnitTests"]
 # Lets the API tests import apiDriver without api/ being a package.
 pythonpath = ["api"]

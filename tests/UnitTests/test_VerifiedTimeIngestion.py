@@ -8,20 +8,19 @@
 """
 This provides unit tests for Series Provider
 
-docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_VerifiedTimeIngestion.py
+docker exec semaphore-core python3 -m pytest tests/UnitTests/test_VerifiedTimeIngestion.py
 """ 
 #----------------------------------
 # 
 #
-import sys
-sys.path.append('/app/src')
 
 import pytest
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
-from SeriesProvider.SeriesProvider import SeriesProvider
-from DataClasses import SeriesDescription, TimeDescription
+from semaphore.SeriesProvider.SeriesProvider import SeriesProvider
+import semaphore.SeriesProvider.SeriesProvider as SeriesProvider_module
+from semaphore.DataClasses import SeriesDescription, TimeDescription
 
 
 @pytest.mark.parametrize(
@@ -71,7 +70,7 @@ from DataClasses import SeriesDescription, TimeDescription
         "test_no_data"
     ]
 )
-@patch('SeriesProvider.SeriesProvider.series_storage_factory')
+@patch.object(SeriesProvider_module, 'series_storage_factory')
 def test_check_verified_time_for_ingestion(
     mock_storage_factory,
     verified_time,
@@ -143,7 +142,7 @@ def test_check_verified_time_for_ingestion(
 
     assert should_ingest == expected_result
 
-@patch('SeriesProvider.SeriesProvider.series_storage_factory')
+@patch.object(SeriesProvider_module, 'series_storage_factory')
 def test_check_verified_time_for_ingestion_default_threshold(
     mock_storage_factory,
 ):

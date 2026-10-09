@@ -8,18 +8,17 @@
 Unit tests for the NOAATANDC ingestion class.
 Tests individual methods with mocked dependencies.
 
-docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py
+docker exec semaphore-core python3 -m pytest -s  ./tests/UnitTests/test_NOAATANDC.py
 """
 #----------------------------------
 
-import sys
-sys.path.append('/app/src')
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta, time, date, timezone
 
-from DataClasses import Series, TimeDescription, SeriesDescription, get_input_dataFrame
-from src.DataIngestion.DI_Classes.NOAATANDC import NOAATANDC
+from semaphore.DataClasses import Series, TimeDescription, SeriesDescription, get_input_dataFrame
+from semaphore.DataIngestion.DI_Classes.NOAATANDC import NOAATANDC
+import semaphore.DataIngestion.DI_Classes.NOAATANDC as NOAATANDC_module
 
 import pandas as pd
 import numpy as np
@@ -42,7 +41,7 @@ class TestNOAATANDCUnit:
             'd': [45, 50, 40, 55, 35, 60, 30, 65, 70, 25, 20]  # wind direction
         }, index=timestamps)
     
-    @patch('src.DataIngestion.DI_Classes.NOAATANDC.series_storage_factory')
+    @patch.object(NOAATANDC_module, 'series_storage_factory')
     def test_init(self, mock_factory):
         """Test NOAATANDC initialization."""
         mock_storage = Mock()
@@ -69,12 +68,12 @@ class TestNOAATANDCUnit:
         with patch.object(self.noaa_ingester, '_NOAATANDC__seriesStorage') as mock_storage:
             mock_storage.find_external_location_code.return_value = None
             
-            with patch('src.DataIngestion.DI_Classes.NOAATANDC.log') as mock_log:
+            with patch.object(NOAATANDC_module, 'log') as mock_log:
                 result = self.noaa_ingester._NOAATANDC__get_station_number('invalidLocation')
                 
                 assert result is None
     
-    @patch('src.DataIngestion.DI_Classes.NOAATANDC.Station')
+    @patch.object(NOAATANDC_module, 'Station')
     def test_fetch_NOAA_data_success(self, mock_station_class):
         """Test successful NOAA API data fetch."""
         # Setup mocks
@@ -98,7 +97,7 @@ class TestNOAATANDCUnit:
             mock_station_class.assert_called_once_with(id='8775792')
             mock_station.get_data.assert_called_once()
     
-    @patch('src.DataIngestion.DI_Classes.NOAATANDC.Station')
+    @patch.object(NOAATANDC_module, 'Station')
     def test_fetch_NOAA_data_single_point(self, mock_station_class):
         """Test NOAA API data fetch for single point in time."""
         # Setup for single point request
@@ -123,7 +122,7 @@ class TestNOAATANDCUnit:
             assert result_data is not None
             assert len(result_data) == 1
     
-    @patch('src.DataIngestion.DI_Classes.NOAATANDC.Station')
+    @patch.object(NOAATANDC_module, 'Station')
     def test_fetch_NOAA_data_api_error(self, mock_station_class):
         """Test NOAA API data fetch with API error."""
         mock_station_class.side_effect = ValueError("Invalid station ID")
@@ -131,7 +130,7 @@ class TestNOAATANDCUnit:
         with patch.object(self.noaa_ingester, '_NOAATANDC__get_station_number') as mock_get_station:
             mock_get_station.return_value = '8775792'
             
-            with patch('src.DataIngestion.DI_Classes.NOAATANDC.log') as mock_log:
+            with patch.object(NOAATANDC_module, 'log') as mock_log:
                 series_desc = SeriesDescription("NOAATANDC", "dWl", "packChan", "MHHW")
                 time_desc = TimeDescription(self.from_date, self.to_date, timedelta(hours=1))
                 
@@ -177,7 +176,7 @@ class TestNOAATANDCUnit:
     
     def test_ingest_series_unsupported(self):
         """Test ingest_series with unsupported series type."""
-        with patch('src.DataIngestion.DI_Classes.NOAATANDC.log') as mock_log:
+        with patch.object(NOAATANDC_module, 'log') as mock_log:
             series_desc = SeriesDescription("NOAATANDC", "unsupportedSeries", "packChan", "MHHW")
             time_desc = TimeDescription(self.from_date, self.to_date, timedelta(hours=1))
             
@@ -358,7 +357,7 @@ class TestNOAATANDCUnit:
         tests that the filtering function works properly by removing rows with missing values,
         using the correct value column(s) for each internal data series
 
-        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_data_filtering
+        docker exec semaphore-core python3 -m pytest -s  ./tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_data_filtering
         """
         df = get_input_dataFrame()
         df['timeVerified'] = timestamps
@@ -377,7 +376,7 @@ class TestNOAATANDCUnit:
         """
         tests that the filtering function does not remove or modify values in other columns
 
-        docker exec semaphore-core python3 -m pytest -s  ./src/tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_filtering_doesnt_affect_other_columns
+        docker exec semaphore-core python3 -m pytest -s  ./tests/UnitTests/test_NOAATANDC.py::TestNOAATANDCUnit::test_filtering_doesnt_affect_other_columns
         """
         df = get_input_dataFrame()
         df['timeVerified'] = pd.date_range(datetime(2026, 1, 1, 0), datetime(2026, 1, 1, 4), freq='1h')

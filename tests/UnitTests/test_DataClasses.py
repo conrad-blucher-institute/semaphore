@@ -7,17 +7,15 @@
 #----------------------------------
 """This file tests the DataClasses module
 
-docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_DataClasses.py
+docker exec semaphore-core python3 -m pytest tests/UnitTests/test_DataClasses.py
  """ 
 #----------------------------------
 # 
 #
 
-import sys
-sys.path.append('/app/src')
 import unittest
 from datetime import datetime, timedelta, timezone
-from DataClasses import (DataIntegrityDescription, 
+from semaphore.DataClasses import (DataIntegrityDescription, 
                         TimeDescription, SeriesDescription, 
                         SemaphoreSeriesDescription, Series)
 from pandas import DataFrame

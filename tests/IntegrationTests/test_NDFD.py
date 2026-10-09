@@ -11,16 +11,13 @@
 # 
 #
 #Imports
-import sys
-import sys
-sys.path.append('/app/src')
 
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import pytest
 
-from DataClasses import TimeDescription, SeriesDescription
-from DataIngestion.DI_Classes.NDFD import NDFD
+from semaphore.DataClasses import TimeDescription, SeriesDescription
+from semaphore.DataIngestion.DI_Classes.NDFD import NDFD
 
 load_dotenv()
 @pytest.mark.parametrize("data_dictionary, toDateTime", [

@@ -7,21 +7,19 @@
 #----------------------------------
 """This file tests the LIGHTHOUSE ingestion class and its functions. 
 
-run: docker exec semaphore-core python3 -m pytest src/tests/IntegrationTests/test_LIGHTHOUSE.py
+run: docker exec semaphore-core python3 -m pytest tests/IntegrationTests/test_LIGHTHOUSE.py
  """ 
 #----------------------------------
 # 
 #
 #Imports
-import sys
-sys.path.append('/app/src')
 
 import pytest
 
 from datetime import datetime, timedelta, time, date, timezone
-from src.DataClasses import TimeDescription, SeriesDescription, Series
-from src.DataIngestion.IDataIngestion import data_ingestion_factory
-from src.DataIngestion.DI_Classes.LIGHTHOUSE import LIGHTHOUSE
+from semaphore.DataClasses import TimeDescription, SeriesDescription, Series
+from semaphore.DataIngestion.IDataIngestion import data_ingestion_factory
+from semaphore.DataIngestion.DI_Classes.LIGHTHOUSE import LIGHTHOUSE
 from dotenv import load_dotenv
 
 @pytest.mark.slow

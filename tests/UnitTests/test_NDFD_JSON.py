@@ -8,7 +8,7 @@
 """ 
 This provides unit tests for the NDFD_JSON ingestion class
 
-Run with: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_NDFD_JSON.py or just python3 -m pytest src/tests/UnitTests/test_NDFD_JSON.py to execute locally
+Run with: docker exec semaphore-core python3 -m pytest tests/UnitTests/test_NDFD_JSON.py or just python3 -m pytest tests/UnitTests/test_NDFD_JSON.py to execute locally
 
 """ 
 #----------------------------------
@@ -18,9 +18,10 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 import json
 import pandas
-from DataIngestion.DI_Classes.NDFD_JSON import NDFD_JSON
-from DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
-from exceptions import Semaphore_Ingestion_Exception
+from semaphore.DataIngestion.DI_Classes.NDFD_JSON import NDFD_JSON
+import semaphore.DataIngestion.DI_Classes.NDFD_JSON as NDFD_JSON_module
+from semaphore.DataClasses import Series, SeriesDescription, get_input_dataFrame, TimeDescription
+from semaphore.exceptions import Semaphore_Ingestion_Exception
 
 
 #region: mock objects and other constants shared across tests
@@ -60,7 +61,7 @@ class TestNDFDJSON:
 
 #region: -get_lat_lon_from_location_code tests
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.series_storage_factory')
+    @patch.object(NDFD_JSON_module, 'series_storage_factory')
     def test_get_lat_lon_from_location_code_success(self, mock_series_storage_factory):
         """Test successful retrieval of lat/lon coordinates"""
         mock_series_storage = MagicMock()
@@ -74,7 +75,7 @@ class TestNDFDJSON:
         assert lon == -97.3183
         mock_series_storage.find_lat_lon_coordinates.assert_called_once_with("SBirdIsland")
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.series_storage_factory')
+    @patch.object(NDFD_JSON_module, 'series_storage_factory')
     def test_get_lat_lon_from_location_code_failure(self, mock_series_storage_factory):
         """Test failure when retrieving lat/lon coordinates"""
         mock_series_storage = MagicMock()
@@ -89,7 +90,7 @@ class TestNDFDJSON:
 
 #region: _make_api_request tests
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.requests.get')
+    @patch.object(NDFD_JSON_module.requests, 'get')
     def test_api_request_success(self, mock_get):
         """Test successful API request"""
         mock_response = MagicMock()
@@ -103,8 +104,8 @@ class TestNDFDJSON:
         mock_get.assert_called_once_with("https://example.com")
 
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.requests.get')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.log')
+    @patch.object(NDFD_JSON_module.requests, 'get')
+    @patch.object(NDFD_JSON_module, 'log')
     def test_api_request_http_error(self, mock_log, mock_get):
         """Test API request with HTTP error"""
         from urllib.error import HTTPError
@@ -120,8 +121,8 @@ class TestNDFDJSON:
         assert "Fetch failed, HTTPError of code:" in args[0]
 
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.requests.get')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.log')
+    @patch.object(NDFD_JSON_module.requests, 'get')
+    @patch.object(NDFD_JSON_module, 'log')
     def test_api_request_general_exception(self, mock_log, mock_get):
         """Test API request with general exception"""
         mock_get.side_effect = Exception("Connection error")
@@ -139,7 +140,7 @@ class TestNDFDJSON:
 
 #region: _get_forecast_url tests
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch.object(NDFD_JSON, '_make_api_request')
     def test_get_forecast_url_success(self, mock_api_request):
         """Test successful forecast URL retrieval"""
         mock_response = MagicMock()
@@ -158,7 +159,7 @@ class TestNDFDJSON:
         mock_api_request.assert_called_once_with("https://api.weather.gov/points/27.485,-97.3183")
 
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
+    @patch.object(NDFD_JSON, '_make_api_request')
     def test_get_forecast_url_invalid_response(self, mock_api_request):
         """Test forecast URL retrieval with invalid response"""
         mock_response = MagicMock()
@@ -261,7 +262,7 @@ class TestNDFDJSON:
         assert prediction_values[1]['value'] == 6.0
         assert prediction_values[1]['validTime'] == '2025-08-27T15:00:00+00:00/PT1H'
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._calculate_wind_component_values')
+    @patch.object(NDFD_JSON, '_calculate_wind_component_values')
     def test_extract_prediction_values_wind_component_x(self, mock_calculate_wind_component):
         """Test extracting prediction values for X wind component series"""
         mock_ndfd_data = {
@@ -298,7 +299,7 @@ class TestNDFDJSON:
             offset=90
         )
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._calculate_wind_component_values')
+    @patch.object(NDFD_JSON, '_calculate_wind_component_values')
     def test_extract_prediction_values_wind_component_y(self, mock_calculate_wind_component):
         """Test extracting prediction values for Y wind component series"""
         mock_ndfd_data = {
@@ -625,10 +626,10 @@ class TestNDFDJSON:
 
 #region: ingest_series tests
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    @patch.object(NDFD_JSON, '_get_lat_lon_from_location_code')
+    @patch.object(NDFD_JSON, '_get_forecast_url')
+    @patch.object(NDFD_JSON, '_make_api_request')
+    @patch.object(NDFD_JSON, '_extract_prediction_values')
     def test_ingest_series_success_air_temperature(self, mock_extract_values,
                                                   mock_api_request, mock_get_url, mock_get_lat_lon,
                                                   mock_series_description, mock_time_description):
@@ -680,10 +681,10 @@ class TestNDFDJSON:
 
 
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    @patch.object(NDFD_JSON, '_get_lat_lon_from_location_code')
+    @patch.object(NDFD_JSON, '_get_forecast_url')
+    @patch.object(NDFD_JSON, '_make_api_request')
+    @patch.object(NDFD_JSON, '_extract_prediction_values')
     def test_ingest_series_success_wind_speed(self, mock_extract_values,
                                                   mock_api_request, mock_get_url, mock_get_lat_lon,
                                                   mock_series_description, mock_time_description):
@@ -740,10 +741,10 @@ class TestNDFDJSON:
         pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
 
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    @patch.object(NDFD_JSON, '_get_lat_lon_from_location_code')
+    @patch.object(NDFD_JSON, '_get_forecast_url')
+    @patch.object(NDFD_JSON, '_make_api_request')
+    @patch.object(NDFD_JSON, '_extract_prediction_values')
     def test_ingest_series_success_wind_direction(self, mock_extract_values,
                                                   mock_api_request, mock_get_url, mock_get_lat_lon,
                                                   mock_series_description, mock_time_description):
@@ -796,10 +797,10 @@ class TestNDFDJSON:
         pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
 
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    @patch.object(NDFD_JSON, '_get_lat_lon_from_location_code')
+    @patch.object(NDFD_JSON, '_get_forecast_url')
+    @patch.object(NDFD_JSON, '_make_api_request')
+    @patch.object(NDFD_JSON, '_extract_prediction_values')
     def test_ingest_series_success_wind_component_x(self, mock_extract_values,
                                                    mock_api_request, mock_get_url, mock_get_lat_lon,
                                                    mock_series_description, mock_time_description):
@@ -852,10 +853,10 @@ class TestNDFDJSON:
         pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
 
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    @patch.object(NDFD_JSON, '_get_lat_lon_from_location_code')
+    @patch.object(NDFD_JSON, '_get_forecast_url')
+    @patch.object(NDFD_JSON, '_make_api_request')
+    @patch.object(NDFD_JSON, '_extract_prediction_values')
     def test_ingest_series_success_wind_component_y(self, mock_extract_values,
                                                    mock_api_request, mock_get_url, mock_get_lat_lon,
                                                    mock_series_description, mock_time_description):
@@ -907,10 +908,10 @@ class TestNDFDJSON:
         assert result.timeDescription == mock_time_description
         pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    @patch.object(NDFD_JSON, '_get_lat_lon_from_location_code')
+    @patch.object(NDFD_JSON, '_get_forecast_url')
+    @patch.object(NDFD_JSON, '_make_api_request')
+    @patch.object(NDFD_JSON, '_extract_prediction_values')
     def test_ingest_series_success_air_smaller_time_range(self, mock_extract_values,
                                                   mock_api_request, mock_get_url, mock_get_lat_lon,
                                                   mock_series_description, mock_time_description):
@@ -960,10 +961,10 @@ class TestNDFDJSON:
         assert result.timeDescription == mock_time_description
         pandas.testing.assert_frame_equal(result.dataFrame, pandas.DataFrame(expected_results))
 
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_lat_lon_from_location_code')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._get_forecast_url')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._make_api_request')
-    @patch('DataIngestion.DI_Classes.NDFD_JSON.NDFD_JSON._extract_prediction_values')
+    @patch.object(NDFD_JSON, '_get_lat_lon_from_location_code')
+    @patch.object(NDFD_JSON, '_get_forecast_url')
+    @patch.object(NDFD_JSON, '_make_api_request')
+    @patch.object(NDFD_JSON, '_extract_prediction_values')
     def test_ingest_series_no_time_range_match(self, mock_extract_values,
                                                   mock_api_request, mock_get_url, mock_get_lat_lon,
                                                   mock_series_description, mock_time_description):

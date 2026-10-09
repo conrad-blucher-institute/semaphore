@@ -7,34 +7,32 @@
 #----------------------------------
 """ This provides unit tests for the dataGatherer class
 
-docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_dataGatherer.py
+docker exec semaphore-core python3 -m pytest tests/UnitTests/test_dataGatherer.py
  """ 
 #----------------------------------
 # 
 #
-import sys
-sys.path.append('/app/src')
 
 from datetime import datetime, timedelta, timezone
-import sys
 import pytest
 from pandas import DataFrame, date_range
 import copy
 from numpy import nan
 from unittest.mock import MagicMock, patch
-from src.ModelExecution.dataGatherer import DataGatherer
-from src.ModelExecution.dspecParser import Dspec, DependentSeries, PostProcessCall
-from src.DataClasses import Series, SeriesDescription, TimeDescription, DataIntegrityDescription
+from semaphore.ModelExecution.dataGatherer import DataGatherer
+import semaphore.ModelExecution.dataGatherer as dataGatherer_module
+from semaphore.ModelExecution.dspecParser import Dspec, DependentSeries, PostProcessCall
+from semaphore.DataClasses import Series, SeriesDescription, TimeDescription, DataIntegrityDescription
 
 ## Mocks
 @pytest.fixture
 def mock_series_provider():
-    with patch('src.ModelExecution.dataGatherer.SeriesProvider') as MockSeriesProvider:
+    with patch.object(dataGatherer_module, 'SeriesProvider') as MockSeriesProvider:
         yield MockSeriesProvider
 
 @pytest.fixture
 def mock_postProcessFactory():
-    with patch('src.ModelExecution.dataGatherer.post_processing_factory') as mock_factory:
+    with patch.object(dataGatherer_module, 'post_processing_factory') as mock_factory:
         # The mock factory should return a mock class
         mock_post_process_class = MagicMock()
         mock_factory.return_value = mock_post_process_class
@@ -42,7 +40,7 @@ def mock_postProcessFactory():
 
 @pytest.fixture
 def mock_integrity_factory():
-    with patch('src.ModelExecution.dataGatherer.data_integrity_factory') as mock_integrity_factory:
+    with patch.object(dataGatherer_module, 'data_integrity_factory') as mock_integrity_factory:
         # The mock factory should return a mock class
         mock_integrity_class = MagicMock()
         mock_integrity_factory.return_value = mock_integrity_class
@@ -148,7 +146,7 @@ def test_post_process_data(data_gatherer, mock_dspec):
     series_repository = {'key1': MagicMock(spec=Series)}
     post_process_call = mock_dspec.postProcessCall[0]
 
-    with patch('src.ModelExecution.dataGatherer.post_processing_factory') as mock_factory:
+    with patch.object(dataGatherer_module, 'post_processing_factory') as mock_factory:
         mock_processing_class = mock_factory.return_value
         mock_processing_class.post_process_data.return_value = {'key2': MagicMock(spec=Series)}
 
@@ -307,7 +305,7 @@ def test_data_validation_call(data_gatherer):
     })
 
     # Patch the validation factory
-    with patch("src.ModelExecution.dataGatherer.data_validation_factory") as mock_factory:
+    with patch.object(dataGatherer_module, 'data_validation_factory') as mock_factory:
         # Set up a mock validator object
         mock_validator = MagicMock()
         mock_validator.validate.return_value = True

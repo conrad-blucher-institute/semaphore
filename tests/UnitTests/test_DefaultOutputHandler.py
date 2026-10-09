@@ -8,21 +8,19 @@
  2D model predictions into a 3D tensor format (models, input_vectors, outputs), preserves prediction values, 
  and returns a properly structured output DataFrame with the expected metadata fields.
 
-run: docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_DefaultOutputHandler.py
+run: docker exec semaphore-core python3 -m pytest tests/UnitTests/test_DefaultOutputHandler.py
  """
 #----------------------------------
 #
 #
-import sys
-sys.path.append('/app/src')
 
 from datetime import datetime, timedelta
 import pytest
-from src.ModelExecution.dspecParser import Dspec, OutputInfo, ExpectedOutputShape
+from semaphore.ModelExecution.dspecParser import Dspec, OutputInfo, ExpectedOutputShape
 import numpy as np
-from src.ModelExecution.IOutputHandler import output_handler_factory
+from semaphore.ModelExecution.IOutputHandler import output_handler_factory
 from pandas import DataFrame
-from exceptions import Semaphore_Exception
+from semaphore.exceptions import Semaphore_Exception
 
 
 

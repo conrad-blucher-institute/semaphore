@@ -14,8 +14,8 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 
-from DataClasses import SeriesDescription, TimeDescription
-from DataIngestion.DI_Classes.NDFD_JSON import NDFD_JSON
+from semaphore.DataClasses import SeriesDescription, TimeDescription
+from semaphore.DataIngestion.DI_Classes.NDFD_JSON import NDFD_JSON
 
 load_dotenv()
 

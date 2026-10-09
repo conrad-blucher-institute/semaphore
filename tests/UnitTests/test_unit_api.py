@@ -8,14 +8,14 @@
 """
 This file tests that the api can correctly serialize ndarrays in the dataValue column of a data frame correctly
 
-docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_api.py
+docker exec semaphore-core python3 -m pytest tests/UnitTests/test_unit_api.py
 """
 import numpy as np
 import pandas as pd
 import pytest
 from datetime import datetime, timezone
-from DataClasses import Series, SemaphoreSeriesDescription
-from src.API.apiDriver import serialize_output_series, serialize_statistics
+from semaphore.DataClasses import Series, SemaphoreSeriesDescription
+from apiDriver import serialize_output_series, serialize_statistics
 
 @pytest.mark.parametrize(
     "data_array",
@@ -116,7 +116,7 @@ def test_serialize_output(data_array):
     This test verifies that ndarrays in the dataValue column get converted to a list and serialized correctly.
     This test also checks that for a dataValue of None or containing NaNs, that the serialized output has dataValue set to None
 
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_api.py::test_serialize_output -s
+    docker exec semaphore-core python3 -m pytest tests/UnitTests/test_unit_api.py::test_serialize_output -s
     """
 
     df = pd.DataFrame([
@@ -152,7 +152,7 @@ def test_serialize_output_multiple_rows():
     This test verifies that when a data frame has many rows, that each row's dataValue column
     gets converted to a list and serialized correctly.
 
-    docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_unit_api.py::test_serialize_output_multiple_rows -s
+    docker exec semaphore-core python3 -m pytest tests/UnitTests/test_unit_api.py::test_serialize_output_multiple_rows -s
     """
 
     # (3, 5, 2)

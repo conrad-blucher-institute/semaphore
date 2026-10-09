@@ -4,14 +4,9 @@
 # pytest configuration file
 # This file is automatically loaded by pytest
 #----------------------------------
-import sys
 import pytest
 
-# Add src directory to Python path
-sys.path.insert(0, '/app/src')
-
-# NOW import without 'src.' prefix since we added /app/src to path
-from utility import LogLocationDirector, VerbosityController
+from semaphore.utility import LogLocationDirector, VerbosityController
 
 def pytest_addoption(parser):
     parser.addoption("--run-slow", action="store_true", default=False, help="Run tests marked as slow")

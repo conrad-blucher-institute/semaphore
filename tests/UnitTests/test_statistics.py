@@ -8,12 +8,12 @@
 """
 This file tests the Statistics class in statistics.py
 
-docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_statistics.py
+docker exec semaphore-core python3 -m pytest tests/UnitTests/test_statistics.py
 """ 
 #----------------------------------
 import pytest
 import numpy as np
-from src.ModelExecution.statistics import Statistics
+from semaphore.ModelExecution.statistics import Statistics
 
 
 class TestStatistics():

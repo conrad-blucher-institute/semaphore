@@ -3,8 +3,6 @@
 #----------------------------------
 """ Test suite for logging verbosity control"""
 #----------------------------------
-import sys
-sys.path.append('/app/src')
 
 import pytest
 import os
@@ -13,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # Import the modules to test
-from utility import (
+from semaphore.utility import (
     log, 
     log_success, 
     log_error, 

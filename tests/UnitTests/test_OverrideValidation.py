@@ -1,6 +1,6 @@
 import pandas as pd
-from DataValidation.DataValidationClasses.OverrideValidation import OverrideValidation
-from DataValidation.IDataValidation import data_validation_factory
+from semaphore.DataValidation.DataValidationClasses.OverrideValidation import OverrideValidation
+from semaphore.DataValidation.IDataValidation import data_validation_factory
 from unittest.mock import MagicMock
 
 def test_validate_empty_dataframe():

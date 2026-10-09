@@ -8,7 +8,7 @@
 """
 This file tests the date range validation class
 
-docker exec semaphore-core python3 -m pytest src/tests/UnitTests/test_DateRangeValidation.py
+docker exec semaphore-core python3 -m pytest tests/UnitTests/test_DateRangeValidation.py
 """ 
 #----------------------------------
 # 
@@ -17,8 +17,8 @@ import unittest
 from unittest.mock import MagicMock
 import pandas as pd
 from datetime import datetime, timedelta, timezone
-from DataValidation.DataValidationClasses.DateRangeValidation import DateRangeValidation
-from DataValidation.IDataValidation import data_validation_factory
+from semaphore.DataValidation.DataValidationClasses.DateRangeValidation import DateRangeValidation
+from semaphore.DataValidation.IDataValidation import data_validation_factory
 
 class TestDateRangeValidation(unittest.TestCase):
 
