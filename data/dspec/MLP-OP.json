@@ -20,18 +20,18 @@
     "dependentSeries": [
         { 
             "_name": "Water Temp",
-            "location": "NPSBI",
-            "source": "LIGHTHOUSE",
+            "location": "SBI",
+            "source": "NOAATANDC",
             "series": "dWaterTmp",
             "unit": "celsius",
             "interval": 3600,
             "range": [1, -25],
-            "outKey": "NPSBI_DWT_24"
+            "outKey": "SBI_DWT_24"
         },
         { 
             "_name": "Air Temp",
-            "location": "PACKER",
-            "source": "LIGHTHOUSE",
+            "location": "packChan",
+            "source": "NOAATANDC",
             "series": "dAirTmp",
             "unit": "celsius",
             "interval": 3600,
@@ -52,7 +52,7 @@
     ],
     "postProcessCall": [],
     "vectorOrder": [
-        { "key": "NPSBI_DWT_24", "dType": "float", "indexes": [2, 25] },
+        { "key": "SBI_DWT_24",   "dType": "float", "indexes": [2, 25] },
         { "key": "PACK_DAT_24",  "dType": "float", "indexes": [2, 25] },
         { "key": "SBI_PAT_16",   "dType": "float" }
     ]
