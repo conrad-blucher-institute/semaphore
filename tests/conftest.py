@@ -5,6 +5,12 @@
 # This file is automatically loaded by pytest
 #----------------------------------
 import pytest
+from dotenv import load_dotenv
+
+# Load .env so every test sees the same settings (DB_LOCATION_STRING, ISERIESSTORAGE_INSTANCE, ...)
+# no matter which tests run or in what order. Before this, tests only got them as a side effect of
+# another test importing apiDriver. Variables already set (e.g. by Docker Compose) are not overwritten.
+load_dotenv()
 
 from semaphore.utility import LogLocationDirector, VerbosityController
 
