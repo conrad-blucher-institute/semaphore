@@ -8,8 +8,22 @@ services:
         - action: sync
           path: ./tools
           target: /app/tools
+        # The unit tests run in this container, and test_unit_api imports apiDriver
+        - action: sync
+          path: ./tests
+          target: /app/tests
+        - action: sync
+          path: ./api
+          target: /app/api
         - action: rebuild
           path: ./.env
+        # These are installed at image build time, so a change needs a rebuild
+        - action: rebuild
+          path: ./pyproject.toml
+        - action: rebuild
+          path: ./requirements.txt
+        - action: rebuild
+          path: ./requirements-test.txt
 
   api:
     command: [
@@ -28,7 +42,15 @@ services:
           path: ./src
           target: /app/src
         - action: sync
+          path: ./api
+          target: /app/api
+        - action: sync
           path: ./tools
           target: /app/tools
         - action: rebuild
           path: ./.env
+        # These are installed at image build time, so a change needs a rebuild
+        - action: rebuild
+          path: ./pyproject.toml
+        - action: rebuild
+          path: ./requirements.txt

@@ -26,6 +26,10 @@ RUN pip install -r requirements.txt
 # Copy the source code from ./src to the Docker image
 COPY . .
 
+# Install the semaphore package. Editable, so Compose Watch's sync of ./src is picked up without reinstalling.
+# --no-deps: the dependencies were installed above, in a layer that stays cached until the requirements change.
+RUN pip install --no-deps -e .
+
 # Create the service account user, skip if it already exists
 RUN if ! id -u ${SERVICE_ACCOUNT_USERNAME} >/dev/null 2>&1; then \
         if getent passwd ${SERVICE_ACCOUNT_UID} >/dev/null 2>&1; then \

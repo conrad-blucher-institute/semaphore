@@ -5,7 +5,7 @@
 # version 3.0
 #----------------------------------
 """ A file to run semaphore from the command line. 
-    Run with: python3 src/semaphoreRunner.py -d test_dspec.json to run
+    Run with: python3 -m semaphore.semaphoreRunner -d test_dspec.json to run
     Assumes that the user has the database and the correct rows loaded.
  """ 
 #----------------------------------
