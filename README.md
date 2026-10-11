@@ -47,7 +47,8 @@ The unit tests run with pytest. `pyproject.toml` points pytest at `tests/UnitTes
   1. `pip install -e '.[test]'`
   2. `python -m pytest`
 
-  Tests that need the database (in `test_NOAATANDC.py`, `test_select_input.py` and `test_unit_sqlAlchemy.py`) fail locally, because the database is only reachable inside Docker.
+  Tests that need the database (in `test_NOAATANDC.py`, `test_select_input.py` and `test_unit_sqlAlchemy.py`) use the `semaphore-db` container, so start it first (`docker compose up -d db`). `.env` points at `host.docker.internal`, which only resolves inside the containers; on Linux, add it to your hosts file once so it resolves locally too:
+  `echo '127.0.0.1 host.docker.internal' | sudo tee -a /etc/hosts`
 - Add `--run-slow` to also run the tests marked as slow.
 - `tests/IntegrationTests` is not run by default; run a file there by naming it, e.g. `python -m pytest tests/IntegrationTests/test_API.py`.
 
