@@ -5,7 +5,7 @@
 Semaphore is a student-built and maintained Python application that semi-automates the process of operationalizing AI models. Semaphore downloads and postprocess' data, runs models, and saves the output to our database. Semaphore currently takes model data in the form of .H5, .keras file. Input specifications for each model are located in the DSPEC JSON. Examples are included in this repository.
 
 ## Dependency
-- Python version >= 3.10
+- Python version >= 3.12
 - Some version of SQLite (deprecated) [SQLite Download Page](https://www.sqlite.org/download.html) OR
 - PostGres 15.4 with SQLAlchemy 2.0.20  //you can use pgAdmin to access and view the PG database
 
@@ -14,7 +14,7 @@ Semaphore is a student-built and maintained Python application that semi-automat
   - `Docker Desktop`
   - `docker-compose`
 - Dependencies:
-  - Python 3.10.5
+  - Python 3.12
 
 0. You will need to create a `.env` file in the root directory of the project. This file will contain the environment variables for the docker container. You can copy the contents of `env.dist` and replace the values with your own. Semaphore will not run successfully without the appropriate configuration. Feel free to reach out to one of the authors for help getting Semaphore up and running.
 
@@ -26,17 +26,30 @@ Semaphore is a student-built and maintained Python application that semi-automat
  ![Enter your database credentials to register to pgAdmin](https://user-images.githubusercontent.com/7061990/268778380-36b907c7-da08-4ba8-a232-0c7646dfbb82.png)
 5. To stop the containers: Press `ctrl+C` in the terminal or if running in background close in Docker Desktop (`docker compose down` also works)
 6. If you are making changes to the code, be sure to repeat step 2. If you are making changes to the database, be sure to delete the existing DB volume using `docker compose down --volumes`(Only use this command LOCALLY) on Docker Desktop before repeating step 2.
-7. Run Semaphore with the following command:`python3 src/semaphoreRunner.py -d test_dspec.json`.
+7. Run Semaphore with the following command: `docker exec semaphore-core python3 -m semaphore.semaphoreRunner -d test_dspec.json`.
 Each DSPEC corresponds to a specific model. To run a model in Semaphore, provide the DSPEC associated with that model.
 
 Find common commands used in Semaphore here: https://github.com/conrad-blucher-institute/semaphore/wiki/Common-Commands
 
 ## Running FastAPI Application
 1. Make sure your environment is activated! `source ./venv/vsem/Scripts/activate`
-2. `pip install -r requirements.txt` to install new dependencies (if you haven't already)
-3. From the root directory, run `uvicorn src.API.apiDriver:app`
+2. `pip install -e .` to install the `semaphore` package and its dependencies (if you haven't already)
+3. From the root directory, run `uvicorn apiDriver:app --app-dir api`
 4. You can specify `--host` and `--port` if you so desire
 5. uvicorn will give you a link to the index page of the API. Add `/docs` to the URL to access the docs page
+
+## Running the Unit Tests
+The unit tests run with pytest. `pyproject.toml` points pytest at `tests/UnitTests`, so no path is needed.
+
+- In the core container (all tests pass here, since it can reach the database):
+  `docker exec semaphore-core python3 -m pytest`
+- Locally: install the package with its test dependencies once, then run pytest from the root directory:
+  1. `pip install -e '.[test]'`
+  2. `python -m pytest`
+
+  Tests that need the database (in `test_NOAATANDC.py`, `test_select_input.py` and `test_unit_sqlAlchemy.py`) fail locally, because the database is only reachable inside Docker.
+- Add `--run-slow` to also run the tests marked as slow.
+- `tests/IntegrationTests` is not run by default; run a file there by naming it, e.g. `python -m pytest tests/IntegrationTests/test_API.py`.
 
 
 #### Output
