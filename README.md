@@ -38,18 +38,30 @@ Find common commands used in Semaphore here: https://github.com/conrad-blucher-i
 4. You can specify `--host` and `--port` if you so desire
 5. uvicorn will give you a link to the index page of the API. Add `/docs` to the URL to access the docs page
 
+## Running Semaphore Locally (outside Docker)
+Useful for debugging. Semaphore runs from your virtual environment and uses the database container.
+
+One-time setup, from the root directory:
+1. `pip install -e '.[test]'` installs the `semaphore` package in editable mode (code changes are picked up without reinstalling) plus the test dependencies.
+2. On Linux, add `host.docker.internal` to your hosts file: `echo '127.0.0.1 host.docker.internal' | sudo tee -a /etc/hosts`. `.env` points the database at `host.docker.internal`, which otherwise only resolves inside the containers.
+
+Each time:
+1. Start the database container: `docker compose up -d db`
+2. Point the folder settings at your copy of the repo. `.env` sets them to `/app/...`, which only exists inside the containers. Variables you set in your shell take precedence over `.env`:
+   ```bash
+   export DSPEC_FOLDER_PATH=$PWD/data/dspec/ MODEL_FOLDER_PATH=$PWD/data/models/ LOG_BASE_PATH=$PWD/logs
+   ```
+3. Run Semaphore, e.g. with `-t` so the prediction isn't saved:
+   `python -m semaphore.semaphoreRunner -d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json -t`
+
+   Logs are written under `./logs/`.
+
 ## Running the Unit Tests
 The unit tests run with pytest. `pyproject.toml` points pytest at `tests/UnitTests`, so no path is needed.
 
-- In the core container (all tests pass here, since it can reach the database):
-  `docker exec semaphore-core python3 -m pytest`
-- Locally: install the package with its test dependencies once, then run pytest from the root directory:
-  1. `pip install -e '.[test]'`
-  2. `python -m pytest`
-
-  Tests that need the database (in `test_NOAATANDC.py`, `test_select_input.py` and `test_unit_sqlAlchemy.py`) use the `semaphore-db` container, so start it first (`docker compose up -d db`). `.env` points at `host.docker.internal`, which only resolves inside the containers; on Linux, add it to your hosts file once so it resolves locally too:
-  `echo '127.0.0.1 host.docker.internal' | sudo tee -a /etc/hosts`
-- Add `--run-slow` to also run the tests marked as slow.
+- In the core container: `docker exec semaphore-core python3 -m pytest`
+- Locally, after the one-time setup in [Running Semaphore Locally](#running-semaphore-locally-outside-docker) and with the database container running: `python -m pytest`
+- Add `--run-slow` to also run the tests marked as slow. These run real models, so locally they also need the folder settings from step 2 of "Each time" above.
 - `tests/IntegrationTests` is not run by default; run a file there by naming it, e.g. `python -m pytest tests/IntegrationTests/test_API.py`.
 
 
