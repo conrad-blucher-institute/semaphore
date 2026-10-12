@@ -182,6 +182,8 @@ It supports running one or more DSPECs in a single execution and provides severa
 
 ### Example
 
+These commands run inside the `semaphore-core` container (prefix them with `docker exec semaphore-core`). To run Semaphore on your machine instead, for example to debug it, see "Running Semaphore Locally" in the README.
+
 Run a single model:
 
 ```bash
