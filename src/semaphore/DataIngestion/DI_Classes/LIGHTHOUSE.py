@@ -128,7 +128,9 @@ class LIGHTHOUSE(IDataIngestion):
 
             dt = datetime.fromtimestamp(epochTimeStamp, tz=timezone.utc)
 
-            if dataPoint[dataValueIndex] == None: # If lighthouse does not have a requested value, it will return None
+            # If lighthouse does not have a requested value, it will return None
+            value = dataPoint[dataValueIndex]
+            if value is None or str(value).strip().lower() in ('', 'nan', 'null', 'none'):
                 continue
 
             # Use now_time for prediction series, otherwise use dt

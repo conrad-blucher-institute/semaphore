@@ -1,0 +1,4956 @@
+{
+  "description": {
+    "dataSource": "SEMAPHORE",
+    "dataSeries": "magnolia_12|2.0.0|pSurge",
+    "dataLocation": "EstMagnoliaBeach",
+    "dataDatum": null,
+    "dataIntegrityDescription": null,
+    "verificationOverride": null
+  },
+  "timeDescription": {
+    "fromDateTime": "2026-09-01T00:00:00+00:00",
+    "toDateTime": "2026-10-01T00:00:00+00:00",
+    "interval": null,
+    "stalenessOffset": null
+  },
+  "_Series__sentinelValue": null,
+  "isComplete": true,
+  "_Series__data": [
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T00:00:00",
+      "timeGenerated": "2026-08-31T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T01:00:00",
+      "timeGenerated": "2026-08-31T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T02:00:00",
+      "timeGenerated": "2026-08-31T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T03:00:00",
+      "timeGenerated": "2026-08-31T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T04:00:00",
+      "timeGenerated": "2026-08-31T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T05:00:00",
+      "timeGenerated": "2026-08-31T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T06:00:00",
+      "timeGenerated": "2026-08-31T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T07:00:00",
+      "timeGenerated": "2026-09-01T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T08:00:00",
+      "timeGenerated": "2026-09-01T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T09:00:00",
+      "timeGenerated": "2026-09-01T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T10:00:00",
+      "timeGenerated": "2026-09-01T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T11:00:00",
+      "timeGenerated": "2026-09-01T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T12:00:00",
+      "timeGenerated": "2026-09-01T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T13:00:00",
+      "timeGenerated": "2026-09-01T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T14:00:00",
+      "timeGenerated": "2026-09-01T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T15:00:00",
+      "timeGenerated": "2026-09-01T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T16:00:00",
+      "timeGenerated": "2026-09-01T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T17:00:00",
+      "timeGenerated": "2026-09-01T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T18:00:00",
+      "timeGenerated": "2026-09-01T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T19:00:00",
+      "timeGenerated": "2026-09-01T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T20:00:00",
+      "timeGenerated": "2026-09-01T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T21:00:00",
+      "timeGenerated": "2026-09-01T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T22:00:00",
+      "timeGenerated": "2026-09-01T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-01T23:00:00",
+      "timeGenerated": "2026-09-01T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T00:00:00",
+      "timeGenerated": "2026-09-01T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T01:00:00",
+      "timeGenerated": "2026-09-01T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T02:00:00",
+      "timeGenerated": "2026-09-01T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T03:00:00",
+      "timeGenerated": "2026-09-01T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T04:00:00",
+      "timeGenerated": "2026-09-01T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T05:00:00",
+      "timeGenerated": "2026-09-01T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T06:00:00",
+      "timeGenerated": "2026-09-01T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T07:00:00",
+      "timeGenerated": "2026-09-02T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T08:00:00",
+      "timeGenerated": "2026-09-02T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T09:00:00",
+      "timeGenerated": "2026-09-02T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T10:00:00",
+      "timeGenerated": "2026-09-02T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T11:00:00",
+      "timeGenerated": "2026-09-02T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T12:00:00",
+      "timeGenerated": "2026-09-02T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T13:00:00",
+      "timeGenerated": "2026-09-02T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T14:00:00",
+      "timeGenerated": "2026-09-02T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T15:00:00",
+      "timeGenerated": "2026-09-02T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T16:00:00",
+      "timeGenerated": "2026-09-02T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T17:00:00",
+      "timeGenerated": "2026-09-02T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T18:00:00",
+      "timeGenerated": "2026-09-02T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T19:00:00",
+      "timeGenerated": "2026-09-02T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T20:00:00",
+      "timeGenerated": "2026-09-02T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T21:00:00",
+      "timeGenerated": "2026-09-02T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T22:00:00",
+      "timeGenerated": "2026-09-02T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-02T23:00:00",
+      "timeGenerated": "2026-09-02T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-03T00:00:00",
+      "timeGenerated": "2026-09-02T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-03T01:00:00",
+      "timeGenerated": "2026-09-02T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-03T02:00:00",
+      "timeGenerated": "2026-09-02T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-03T03:00:00",
+      "timeGenerated": "2026-09-02T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-03T04:00:00",
+      "timeGenerated": "2026-09-02T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-03T05:00:00",
+      "timeGenerated": "2026-09-02T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.0064619]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T08:00:00",
+      "timeGenerated": "2026-09-07T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.01974091]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T09:00:00",
+      "timeGenerated": "2026-09-07T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03592685]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T10:00:00",
+      "timeGenerated": "2026-09-07T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03502155]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T11:00:00",
+      "timeGenerated": "2026-09-07T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03020278]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T12:00:00",
+      "timeGenerated": "2026-09-07T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.0299949]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T13:00:00",
+      "timeGenerated": "2026-09-07T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.02835219]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T14:00:00",
+      "timeGenerated": "2026-09-07T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.02913056]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T15:00:00",
+      "timeGenerated": "2026-09-07T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03942172]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T16:00:00",
+      "timeGenerated": "2026-09-07T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.04777341]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T17:00:00",
+      "timeGenerated": "2026-09-07T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.04875434]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T18:00:00",
+      "timeGenerated": "2026-09-07T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.05302321]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T19:00:00",
+      "timeGenerated": "2026-09-07T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.04670271]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T20:00:00",
+      "timeGenerated": "2026-09-07T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T21:00:00",
+      "timeGenerated": "2026-09-07T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T22:00:00",
+      "timeGenerated": "2026-09-07T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-07T23:00:00",
+      "timeGenerated": "2026-09-07T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T00:00:00",
+      "timeGenerated": "2026-09-07T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03111494]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T01:00:00",
+      "timeGenerated": "2026-09-07T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03223658]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T02:00:00",
+      "timeGenerated": "2026-09-07T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T03:00:00",
+      "timeGenerated": "2026-09-07T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T04:00:00",
+      "timeGenerated": "2026-09-07T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03722709]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T05:00:00",
+      "timeGenerated": "2026-09-07T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03414175]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T06:00:00",
+      "timeGenerated": "2026-09-07T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03388983]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T07:00:00",
+      "timeGenerated": "2026-09-08T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03024471]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T08:00:00",
+      "timeGenerated": "2026-09-08T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03486733]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T09:00:00",
+      "timeGenerated": "2026-09-08T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03185359]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T10:00:00",
+      "timeGenerated": "2026-09-08T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03852166]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T11:00:00",
+      "timeGenerated": "2026-09-08T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03000094]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T12:00:00",
+      "timeGenerated": "2026-09-08T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.02822376]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T13:00:00",
+      "timeGenerated": "2026-09-08T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.0257309]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T14:00:00",
+      "timeGenerated": "2026-09-08T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.02616708]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T15:00:00",
+      "timeGenerated": "2026-09-08T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.02272149]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T16:00:00",
+      "timeGenerated": "2026-09-08T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03143221]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T17:00:00",
+      "timeGenerated": "2026-09-08T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03439414]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T18:00:00",
+      "timeGenerated": "2026-09-08T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.02656645]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T19:00:00",
+      "timeGenerated": "2026-09-08T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.04418566]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T20:00:00",
+      "timeGenerated": "2026-09-08T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.03690645]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T21:00:00",
+      "timeGenerated": "2026-09-08T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T22:00:00",
+      "timeGenerated": "2026-09-08T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-08T23:00:00",
+      "timeGenerated": "2026-09-08T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T00:00:00",
+      "timeGenerated": "2026-09-08T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00449644]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T01:00:00",
+      "timeGenerated": "2026-09-08T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00887228]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T02:00:00",
+      "timeGenerated": "2026-09-08T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T03:00:00",
+      "timeGenerated": "2026-09-08T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T04:00:00",
+      "timeGenerated": "2026-09-08T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00110088]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T05:00:00",
+      "timeGenerated": "2026-09-08T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00089523]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T06:00:00",
+      "timeGenerated": "2026-09-08T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00122751]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T07:00:00",
+      "timeGenerated": "2026-09-09T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00704171]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T08:00:00",
+      "timeGenerated": "2026-09-09T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00247705]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T09:00:00",
+      "timeGenerated": "2026-09-09T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01089279]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T10:00:00",
+      "timeGenerated": "2026-09-09T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01452973]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T11:00:00",
+      "timeGenerated": "2026-09-09T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00289547]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T12:00:00",
+      "timeGenerated": "2026-09-09T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00428474]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T13:00:00",
+      "timeGenerated": "2026-09-09T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T14:00:00",
+      "timeGenerated": "2026-09-09T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.01157794]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T15:00:00",
+      "timeGenerated": "2026-09-09T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00595728]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T16:00:00",
+      "timeGenerated": "2026-09-09T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00842705]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T17:00:00",
+      "timeGenerated": "2026-09-09T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00881102]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T18:00:00",
+      "timeGenerated": "2026-09-09T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.0125265]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T19:00:00",
+      "timeGenerated": "2026-09-09T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0025548]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T20:00:00",
+      "timeGenerated": "2026-09-09T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00954071]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T21:00:00",
+      "timeGenerated": "2026-09-09T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00084902]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T22:00:00",
+      "timeGenerated": "2026-09-09T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00924352]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-09T23:00:00",
+      "timeGenerated": "2026-09-09T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02354186]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T00:00:00",
+      "timeGenerated": "2026-09-09T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02929873]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T01:00:00",
+      "timeGenerated": "2026-09-09T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03603175]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T02:00:00",
+      "timeGenerated": "2026-09-09T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06775581]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T03:00:00",
+      "timeGenerated": "2026-09-09T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06090979]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T04:00:00",
+      "timeGenerated": "2026-09-09T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0547203]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T05:00:00",
+      "timeGenerated": "2026-09-09T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06232524]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T06:00:00",
+      "timeGenerated": "2026-09-09T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06790832]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T07:00:00",
+      "timeGenerated": "2026-09-10T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05617195]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T08:00:00",
+      "timeGenerated": "2026-09-10T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04318229]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T09:00:00",
+      "timeGenerated": "2026-09-10T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04616786]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T10:00:00",
+      "timeGenerated": "2026-09-10T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03392233]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T11:00:00",
+      "timeGenerated": "2026-09-10T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03126327]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T12:00:00",
+      "timeGenerated": "2026-09-10T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03366193]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T13:00:00",
+      "timeGenerated": "2026-09-10T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T14:00:00",
+      "timeGenerated": "2026-09-10T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01918484]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T15:00:00",
+      "timeGenerated": "2026-09-10T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03164714]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T16:00:00",
+      "timeGenerated": "2026-09-10T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03429703]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T17:00:00",
+      "timeGenerated": "2026-09-10T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02163743]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T18:00:00",
+      "timeGenerated": "2026-09-10T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02694182]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T19:00:00",
+      "timeGenerated": "2026-09-10T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02050275]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T20:00:00",
+      "timeGenerated": "2026-09-10T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T21:00:00",
+      "timeGenerated": "2026-09-10T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05659347]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T22:00:00",
+      "timeGenerated": "2026-09-10T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06314258]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-10T23:00:00",
+      "timeGenerated": "2026-09-10T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07341161]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T00:00:00",
+      "timeGenerated": "2026-09-10T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06451874]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T01:00:00",
+      "timeGenerated": "2026-09-10T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07513739]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T02:00:00",
+      "timeGenerated": "2026-09-10T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08370977]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T03:00:00",
+      "timeGenerated": "2026-09-10T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08460512]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T04:00:00",
+      "timeGenerated": "2026-09-10T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08565803]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T05:00:00",
+      "timeGenerated": "2026-09-10T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08207037]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T06:00:00",
+      "timeGenerated": "2026-09-10T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09410362]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T08:00:00",
+      "timeGenerated": "2026-09-11T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09742451]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T09:00:00",
+      "timeGenerated": "2026-09-11T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09256785]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T10:00:00",
+      "timeGenerated": "2026-09-11T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08996705]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T11:00:00",
+      "timeGenerated": "2026-09-11T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07046147]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T12:00:00",
+      "timeGenerated": "2026-09-11T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06888939]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T13:00:00",
+      "timeGenerated": "2026-09-11T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05337422]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T14:00:00",
+      "timeGenerated": "2026-09-11T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04819117]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T15:00:00",
+      "timeGenerated": "2026-09-11T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0457199]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T16:00:00",
+      "timeGenerated": "2026-09-11T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0402627]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T17:00:00",
+      "timeGenerated": "2026-09-11T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05473831]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T18:00:00",
+      "timeGenerated": "2026-09-11T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06207617]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T19:00:00",
+      "timeGenerated": "2026-09-11T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0712861]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T20:00:00",
+      "timeGenerated": "2026-09-11T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08806002]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T21:00:00",
+      "timeGenerated": "2026-09-11T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09310753]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T22:00:00",
+      "timeGenerated": "2026-09-11T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10300723]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-11T23:00:00",
+      "timeGenerated": "2026-09-11T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10662062]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T00:00:00",
+      "timeGenerated": "2026-09-11T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11076535]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T01:00:00",
+      "timeGenerated": "2026-09-11T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09354221]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T02:00:00",
+      "timeGenerated": "2026-09-11T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08360389]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T03:00:00",
+      "timeGenerated": "2026-09-11T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07880033]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T04:00:00",
+      "timeGenerated": "2026-09-11T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08654292]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T05:00:00",
+      "timeGenerated": "2026-09-11T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0929352]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T06:00:00",
+      "timeGenerated": "2026-09-11T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0907845]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T07:00:00",
+      "timeGenerated": "2026-09-12T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09657677]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T08:00:00",
+      "timeGenerated": "2026-09-12T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08653831]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T09:00:00",
+      "timeGenerated": "2026-09-12T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07745825]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T10:00:00",
+      "timeGenerated": "2026-09-12T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07382407]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T11:00:00",
+      "timeGenerated": "2026-09-12T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07566462]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T12:00:00",
+      "timeGenerated": "2026-09-12T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06420594]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T13:00:00",
+      "timeGenerated": "2026-09-12T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06433645]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T14:00:00",
+      "timeGenerated": "2026-09-12T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05904958]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T15:00:00",
+      "timeGenerated": "2026-09-12T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06055923]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T16:00:00",
+      "timeGenerated": "2026-09-12T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06808291]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T17:00:00",
+      "timeGenerated": "2026-09-12T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08562069]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T18:00:00",
+      "timeGenerated": "2026-09-12T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08371788]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T19:00:00",
+      "timeGenerated": "2026-09-12T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07267403]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T20:00:00",
+      "timeGenerated": "2026-09-12T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0709239]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T21:00:00",
+      "timeGenerated": "2026-09-12T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07158051]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T22:00:00",
+      "timeGenerated": "2026-09-12T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0778085]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-12T23:00:00",
+      "timeGenerated": "2026-09-12T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07700067]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T00:00:00",
+      "timeGenerated": "2026-09-12T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07334759]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T01:00:00",
+      "timeGenerated": "2026-09-12T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07508832]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T02:00:00",
+      "timeGenerated": "2026-09-12T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0709499]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T03:00:00",
+      "timeGenerated": "2026-09-12T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05995783]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T04:00:00",
+      "timeGenerated": "2026-09-12T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06083188]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T05:00:00",
+      "timeGenerated": "2026-09-12T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06855528]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T06:00:00",
+      "timeGenerated": "2026-09-12T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07495645]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T07:00:00",
+      "timeGenerated": "2026-09-13T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0734585]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T08:00:00",
+      "timeGenerated": "2026-09-13T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07778208]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T09:00:00",
+      "timeGenerated": "2026-09-13T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07660431]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T10:00:00",
+      "timeGenerated": "2026-09-13T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07157574]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T11:00:00",
+      "timeGenerated": "2026-09-13T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06410092]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T12:00:00",
+      "timeGenerated": "2026-09-13T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05526385]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T13:00:00",
+      "timeGenerated": "2026-09-13T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04722976]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T14:00:00",
+      "timeGenerated": "2026-09-13T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04764546]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T15:00:00",
+      "timeGenerated": "2026-09-13T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04005522]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T16:00:00",
+      "timeGenerated": "2026-09-13T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05702643]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T17:00:00",
+      "timeGenerated": "2026-09-13T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05691204]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T18:00:00",
+      "timeGenerated": "2026-09-13T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05188732]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T19:00:00",
+      "timeGenerated": "2026-09-13T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05361484]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T20:00:00",
+      "timeGenerated": "2026-09-13T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05176552]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T21:00:00",
+      "timeGenerated": "2026-09-13T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05467705]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T22:00:00",
+      "timeGenerated": "2026-09-13T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05228613]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-13T23:00:00",
+      "timeGenerated": "2026-09-13T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05137951]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T00:00:00",
+      "timeGenerated": "2026-09-13T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05526014]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T01:00:00",
+      "timeGenerated": "2026-09-13T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04522451]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T02:00:00",
+      "timeGenerated": "2026-09-13T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03542284]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T03:00:00",
+      "timeGenerated": "2026-09-13T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04051375]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T04:00:00",
+      "timeGenerated": "2026-09-13T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03496316]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T05:00:00",
+      "timeGenerated": "2026-09-13T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04144759]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T06:00:00",
+      "timeGenerated": "2026-09-13T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04775389]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T07:00:00",
+      "timeGenerated": "2026-09-14T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05211625]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T08:00:00",
+      "timeGenerated": "2026-09-14T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04797796]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T09:00:00",
+      "timeGenerated": "2026-09-14T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04186226]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T10:00:00",
+      "timeGenerated": "2026-09-14T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04481944]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T11:00:00",
+      "timeGenerated": "2026-09-14T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05592974]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T12:00:00",
+      "timeGenerated": "2026-09-14T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06307012]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T13:00:00",
+      "timeGenerated": "2026-09-14T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06276079]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T14:00:00",
+      "timeGenerated": "2026-09-14T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07435894]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T15:00:00",
+      "timeGenerated": "2026-09-14T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06136174]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T16:00:00",
+      "timeGenerated": "2026-09-14T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05333466]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T17:00:00",
+      "timeGenerated": "2026-09-14T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03902448]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T18:00:00",
+      "timeGenerated": "2026-09-14T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03289783]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T19:00:00",
+      "timeGenerated": "2026-09-14T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02888244]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T20:00:00",
+      "timeGenerated": "2026-09-14T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02468422]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T21:00:00",
+      "timeGenerated": "2026-09-14T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02968727]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T22:00:00",
+      "timeGenerated": "2026-09-14T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02871224]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-14T23:00:00",
+      "timeGenerated": "2026-09-14T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03211532]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T00:00:00",
+      "timeGenerated": "2026-09-14T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03096524]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T01:00:00",
+      "timeGenerated": "2026-09-14T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02663762]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T02:00:00",
+      "timeGenerated": "2026-09-14T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0216424]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T03:00:00",
+      "timeGenerated": "2026-09-14T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01377102]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T04:00:00",
+      "timeGenerated": "2026-09-14T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01828147]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T05:00:00",
+      "timeGenerated": "2026-09-14T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02349116]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T06:00:00",
+      "timeGenerated": "2026-09-14T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02538123]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T07:00:00",
+      "timeGenerated": "2026-09-15T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01768906]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T08:00:00",
+      "timeGenerated": "2026-09-15T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00964944]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T09:00:00",
+      "timeGenerated": "2026-09-15T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00488567]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T10:00:00",
+      "timeGenerated": "2026-09-15T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00690233]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T11:00:00",
+      "timeGenerated": "2026-09-15T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02023605]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T12:00:00",
+      "timeGenerated": "2026-09-15T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02763266]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T13:00:00",
+      "timeGenerated": "2026-09-15T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03239463]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T14:00:00",
+      "timeGenerated": "2026-09-15T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03427184]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T15:00:00",
+      "timeGenerated": "2026-09-15T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03493597]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T16:00:00",
+      "timeGenerated": "2026-09-15T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0355537]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T17:00:00",
+      "timeGenerated": "2026-09-15T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05183458]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T18:00:00",
+      "timeGenerated": "2026-09-15T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05986088]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T19:00:00",
+      "timeGenerated": "2026-09-15T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06155267]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T20:00:00",
+      "timeGenerated": "2026-09-15T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06700282]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T21:00:00",
+      "timeGenerated": "2026-09-15T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0604397]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T22:00:00",
+      "timeGenerated": "2026-09-15T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05835981]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-15T23:00:00",
+      "timeGenerated": "2026-09-15T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.055151]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T00:00:00",
+      "timeGenerated": "2026-09-15T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04450019]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T01:00:00",
+      "timeGenerated": "2026-09-15T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03092423]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T02:00:00",
+      "timeGenerated": "2026-09-15T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.025324]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T03:00:00",
+      "timeGenerated": "2026-09-15T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02465707]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T04:00:00",
+      "timeGenerated": "2026-09-15T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02105504]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T05:00:00",
+      "timeGenerated": "2026-09-15T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00727936]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T06:00:00",
+      "timeGenerated": "2026-09-15T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00731491]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T07:00:00",
+      "timeGenerated": "2026-09-16T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00395637]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T08:00:00",
+      "timeGenerated": "2026-09-16T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00480407]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T09:00:00",
+      "timeGenerated": "2026-09-16T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.0049243]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T10:00:00",
+      "timeGenerated": "2026-09-16T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00133962]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T11:00:00",
+      "timeGenerated": "2026-09-16T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00267611]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T12:00:00",
+      "timeGenerated": "2026-09-16T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0047389]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T13:00:00",
+      "timeGenerated": "2026-09-16T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01937999]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T14:00:00",
+      "timeGenerated": "2026-09-16T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02494984]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T15:00:00",
+      "timeGenerated": "2026-09-16T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.037365]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T16:00:00",
+      "timeGenerated": "2026-09-16T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04129251]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T17:00:00",
+      "timeGenerated": "2026-09-16T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02446226]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T18:00:00",
+      "timeGenerated": "2026-09-16T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03009085]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T19:00:00",
+      "timeGenerated": "2026-09-16T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01839832]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T20:00:00",
+      "timeGenerated": "2026-09-16T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02383418]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T21:00:00",
+      "timeGenerated": "2026-09-16T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01656728]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T22:00:00",
+      "timeGenerated": "2026-09-16T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03042676]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-16T23:00:00",
+      "timeGenerated": "2026-09-16T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04470697]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T00:00:00",
+      "timeGenerated": "2026-09-16T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04802421]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T01:00:00",
+      "timeGenerated": "2026-09-16T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03065109]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T02:00:00",
+      "timeGenerated": "2026-09-16T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04418999]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T03:00:00",
+      "timeGenerated": "2026-09-16T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03133939]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T04:00:00",
+      "timeGenerated": "2026-09-16T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03009187]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T05:00:00",
+      "timeGenerated": "2026-09-16T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03104684]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T06:00:00",
+      "timeGenerated": "2026-09-16T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01949253]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T07:00:00",
+      "timeGenerated": "2026-09-17T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01405437]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T08:00:00",
+      "timeGenerated": "2026-09-17T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00942209]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T09:00:00",
+      "timeGenerated": "2026-09-17T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00674172]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T10:00:00",
+      "timeGenerated": "2026-09-17T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00348891]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T11:00:00",
+      "timeGenerated": "2026-09-17T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[-0.00572096]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T12:00:00",
+      "timeGenerated": "2026-09-17T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.00200473]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T13:00:00",
+      "timeGenerated": "2026-09-17T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.01408441]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T14:00:00",
+      "timeGenerated": "2026-09-17T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02167869]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T15:00:00",
+      "timeGenerated": "2026-09-17T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04243915]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T16:00:00",
+      "timeGenerated": "2026-09-17T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05216844]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T17:00:00",
+      "timeGenerated": "2026-09-17T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06827433]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T18:00:00",
+      "timeGenerated": "2026-09-17T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08447362]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T19:00:00",
+      "timeGenerated": "2026-09-17T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09935451]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T20:00:00",
+      "timeGenerated": "2026-09-17T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1152141]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T21:00:00",
+      "timeGenerated": "2026-09-17T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1221882]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T22:00:00",
+      "timeGenerated": "2026-09-17T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11803745]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-17T23:00:00",
+      "timeGenerated": "2026-09-17T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12589407]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T00:00:00",
+      "timeGenerated": "2026-09-17T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1248476]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T01:00:00",
+      "timeGenerated": "2026-09-17T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10380873]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T02:00:00",
+      "timeGenerated": "2026-09-17T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11150901]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T03:00:00",
+      "timeGenerated": "2026-09-17T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1275889]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T04:00:00",
+      "timeGenerated": "2026-09-17T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11447714]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T05:00:00",
+      "timeGenerated": "2026-09-17T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14500985]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T06:00:00",
+      "timeGenerated": "2026-09-17T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.17950091]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T08:00:00",
+      "timeGenerated": "2026-09-18T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.17007622]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T09:00:00",
+      "timeGenerated": "2026-09-18T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.17835593]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T10:00:00",
+      "timeGenerated": "2026-09-18T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.18192987]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T11:00:00",
+      "timeGenerated": "2026-09-18T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.18154442]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T12:00:00",
+      "timeGenerated": "2026-09-18T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1889759]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T13:00:00",
+      "timeGenerated": "2026-09-18T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.21101928]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T14:00:00",
+      "timeGenerated": "2026-09-18T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.21416605]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T15:00:00",
+      "timeGenerated": "2026-09-18T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.20688652]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T16:00:00",
+      "timeGenerated": "2026-09-18T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.20720431]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T17:00:00",
+      "timeGenerated": "2026-09-18T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.22427115]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T18:00:00",
+      "timeGenerated": "2026-09-18T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.25083914]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T19:00:00",
+      "timeGenerated": "2026-09-18T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.24867451]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T20:00:00",
+      "timeGenerated": "2026-09-18T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.25992012]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T21:00:00",
+      "timeGenerated": "2026-09-18T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.26159325]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T22:00:00",
+      "timeGenerated": "2026-09-18T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.252273]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-18T23:00:00",
+      "timeGenerated": "2026-09-18T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.26207477]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T00:00:00",
+      "timeGenerated": "2026-09-18T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.25316417]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T01:00:00",
+      "timeGenerated": "2026-09-18T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.24025384]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T02:00:00",
+      "timeGenerated": "2026-09-18T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.24463603]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T03:00:00",
+      "timeGenerated": "2026-09-18T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.21232158]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T04:00:00",
+      "timeGenerated": "2026-09-18T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.21756223]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T05:00:00",
+      "timeGenerated": "2026-09-18T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.19937271]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T06:00:00",
+      "timeGenerated": "2026-09-18T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.18700768]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T07:00:00",
+      "timeGenerated": "2026-09-19T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.17846921]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T08:00:00",
+      "timeGenerated": "2026-09-19T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.18043897]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T09:00:00",
+      "timeGenerated": "2026-09-19T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.19405445]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T10:00:00",
+      "timeGenerated": "2026-09-19T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.19664028]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T11:00:00",
+      "timeGenerated": "2026-09-19T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.20100763]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T12:00:00",
+      "timeGenerated": "2026-09-19T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.20198196]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T13:00:00",
+      "timeGenerated": "2026-09-19T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.19184095]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T14:00:00",
+      "timeGenerated": "2026-09-19T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.17175096]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T15:00:00",
+      "timeGenerated": "2026-09-19T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.16470718]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T16:00:00",
+      "timeGenerated": "2026-09-19T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.16727951]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T17:00:00",
+      "timeGenerated": "2026-09-19T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.18750584]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T18:00:00",
+      "timeGenerated": "2026-09-19T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.19352975]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T19:00:00",
+      "timeGenerated": "2026-09-19T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.2109271]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T20:00:00",
+      "timeGenerated": "2026-09-19T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.22614631]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T21:00:00",
+      "timeGenerated": "2026-09-19T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.22866797]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T22:00:00",
+      "timeGenerated": "2026-09-19T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.2299805]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-19T23:00:00",
+      "timeGenerated": "2026-09-19T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.22960606]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T00:00:00",
+      "timeGenerated": "2026-09-19T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.22830313]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T01:00:00",
+      "timeGenerated": "2026-09-19T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.22975126]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T02:00:00",
+      "timeGenerated": "2026-09-19T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.21963423]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T03:00:00",
+      "timeGenerated": "2026-09-19T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.20483962]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T04:00:00",
+      "timeGenerated": "2026-09-19T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.19552097]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T05:00:00",
+      "timeGenerated": "2026-09-19T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.18656403]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T06:00:00",
+      "timeGenerated": "2026-09-19T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.17272145]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T07:00:00",
+      "timeGenerated": "2026-09-20T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.17378381]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T08:00:00",
+      "timeGenerated": "2026-09-20T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.15380207]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T09:00:00",
+      "timeGenerated": "2026-09-20T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14680386]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T10:00:00",
+      "timeGenerated": "2026-09-20T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14262798]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T11:00:00",
+      "timeGenerated": "2026-09-20T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14860177]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T12:00:00",
+      "timeGenerated": "2026-09-20T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.15662307]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T13:00:00",
+      "timeGenerated": "2026-09-20T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.15065694]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T14:00:00",
+      "timeGenerated": "2026-09-20T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14723957]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T15:00:00",
+      "timeGenerated": "2026-09-20T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14618927]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T16:00:00",
+      "timeGenerated": "2026-09-20T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14704752]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T17:00:00",
+      "timeGenerated": "2026-09-20T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1466076]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T18:00:00",
+      "timeGenerated": "2026-09-20T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.15056735]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T19:00:00",
+      "timeGenerated": "2026-09-20T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.15359563]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T20:00:00",
+      "timeGenerated": "2026-09-20T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1741191]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T21:00:00",
+      "timeGenerated": "2026-09-20T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.17160457]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T22:00:00",
+      "timeGenerated": "2026-09-20T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.15218055]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-20T23:00:00",
+      "timeGenerated": "2026-09-20T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1483255]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T00:00:00",
+      "timeGenerated": "2026-09-20T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1396828]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T01:00:00",
+      "timeGenerated": "2026-09-20T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13223307]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T02:00:00",
+      "timeGenerated": "2026-09-20T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14019522]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T03:00:00",
+      "timeGenerated": "2026-09-20T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13754441]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T04:00:00",
+      "timeGenerated": "2026-09-20T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13050416]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T05:00:00",
+      "timeGenerated": "2026-09-20T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11988179]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T06:00:00",
+      "timeGenerated": "2026-09-20T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12647979]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T07:00:00",
+      "timeGenerated": "2026-09-21T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12270926]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T08:00:00",
+      "timeGenerated": "2026-09-21T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11461383]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T09:00:00",
+      "timeGenerated": "2026-09-21T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11861414]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T10:00:00",
+      "timeGenerated": "2026-09-21T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12266864]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T11:00:00",
+      "timeGenerated": "2026-09-21T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12101164]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T12:00:00",
+      "timeGenerated": "2026-09-21T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11676061]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T13:00:00",
+      "timeGenerated": "2026-09-21T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12216396]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T14:00:00",
+      "timeGenerated": "2026-09-21T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12944552]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T15:00:00",
+      "timeGenerated": "2026-09-21T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14126308]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T16:00:00",
+      "timeGenerated": "2026-09-21T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14412199]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T17:00:00",
+      "timeGenerated": "2026-09-21T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14248285]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T18:00:00",
+      "timeGenerated": "2026-09-21T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13300762]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T19:00:00",
+      "timeGenerated": "2026-09-21T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12211762]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T20:00:00",
+      "timeGenerated": "2026-09-21T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11907493]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T21:00:00",
+      "timeGenerated": "2026-09-21T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11714035]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T22:00:00",
+      "timeGenerated": "2026-09-21T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12211358]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-21T23:00:00",
+      "timeGenerated": "2026-09-21T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12770537]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T00:00:00",
+      "timeGenerated": "2026-09-21T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13822818]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T01:00:00",
+      "timeGenerated": "2026-09-21T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13050938]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T02:00:00",
+      "timeGenerated": "2026-09-21T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12346409]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T03:00:00",
+      "timeGenerated": "2026-09-21T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12224683]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T04:00:00",
+      "timeGenerated": "2026-09-21T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11058547]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T05:00:00",
+      "timeGenerated": "2026-09-21T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10773986]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T06:00:00",
+      "timeGenerated": "2026-09-21T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09577009]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T07:00:00",
+      "timeGenerated": "2026-09-22T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09384309]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T08:00:00",
+      "timeGenerated": "2026-09-22T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08952414]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T09:00:00",
+      "timeGenerated": "2026-09-22T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08637462]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T10:00:00",
+      "timeGenerated": "2026-09-22T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08604786]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T11:00:00",
+      "timeGenerated": "2026-09-22T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09168989]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T12:00:00",
+      "timeGenerated": "2026-09-22T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07652475]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T13:00:00",
+      "timeGenerated": "2026-09-22T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05783688]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T14:00:00",
+      "timeGenerated": "2026-09-22T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05201888]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T15:00:00",
+      "timeGenerated": "2026-09-22T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04063304]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T16:00:00",
+      "timeGenerated": "2026-09-22T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02519277]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T17:00:00",
+      "timeGenerated": "2026-09-22T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02339187]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T18:00:00",
+      "timeGenerated": "2026-09-22T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02139037]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T19:00:00",
+      "timeGenerated": "2026-09-22T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04372094]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T20:00:00",
+      "timeGenerated": "2026-09-22T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05923989]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T21:00:00",
+      "timeGenerated": "2026-09-22T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07922714]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T22:00:00",
+      "timeGenerated": "2026-09-22T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07906172]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-22T23:00:00",
+      "timeGenerated": "2026-09-22T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07846681]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T00:00:00",
+      "timeGenerated": "2026-09-22T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08703119]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T01:00:00",
+      "timeGenerated": "2026-09-22T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08436611]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T02:00:00",
+      "timeGenerated": "2026-09-22T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07824733]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T03:00:00",
+      "timeGenerated": "2026-09-22T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06030366]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T04:00:00",
+      "timeGenerated": "2026-09-22T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04898212]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T05:00:00",
+      "timeGenerated": "2026-09-22T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04391564]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T06:00:00",
+      "timeGenerated": "2026-09-22T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05959408]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T07:00:00",
+      "timeGenerated": "2026-09-23T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06091134]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T08:00:00",
+      "timeGenerated": "2026-09-23T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06217958]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T09:00:00",
+      "timeGenerated": "2026-09-23T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03660199]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T10:00:00",
+      "timeGenerated": "2026-09-23T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03462814]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T11:00:00",
+      "timeGenerated": "2026-09-23T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03211139]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T12:00:00",
+      "timeGenerated": "2026-09-23T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0347847]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T13:00:00",
+      "timeGenerated": "2026-09-23T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03103432]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T14:00:00",
+      "timeGenerated": "2026-09-23T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02907562]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T15:00:00",
+      "timeGenerated": "2026-09-23T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03761053]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T16:00:00",
+      "timeGenerated": "2026-09-23T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.03191881]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T17:00:00",
+      "timeGenerated": "2026-09-23T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.02931264]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T18:00:00",
+      "timeGenerated": "2026-09-23T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04313314]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T19:00:00",
+      "timeGenerated": "2026-09-23T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05860628]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T20:00:00",
+      "timeGenerated": "2026-09-23T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07917157]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T21:00:00",
+      "timeGenerated": "2026-09-23T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0921548]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T22:00:00",
+      "timeGenerated": "2026-09-23T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10994722]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-23T23:00:00",
+      "timeGenerated": "2026-09-23T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12132417]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T00:00:00",
+      "timeGenerated": "2026-09-23T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10867869]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T01:00:00",
+      "timeGenerated": "2026-09-23T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09022138]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T02:00:00",
+      "timeGenerated": "2026-09-23T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.077911]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T03:00:00",
+      "timeGenerated": "2026-09-23T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07266686]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T04:00:00",
+      "timeGenerated": "2026-09-23T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0687362]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T05:00:00",
+      "timeGenerated": "2026-09-23T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06346621]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T06:00:00",
+      "timeGenerated": "2026-09-23T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06273986]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T07:00:00",
+      "timeGenerated": "2026-09-24T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05591539]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T08:00:00",
+      "timeGenerated": "2026-09-24T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05939567]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T09:00:00",
+      "timeGenerated": "2026-09-24T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06157327]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T10:00:00",
+      "timeGenerated": "2026-09-24T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06093124]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T11:00:00",
+      "timeGenerated": "2026-09-24T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06481272]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T12:00:00",
+      "timeGenerated": "2026-09-24T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06198616]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T13:00:00",
+      "timeGenerated": "2026-09-24T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06604505]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T14:00:00",
+      "timeGenerated": "2026-09-24T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05831037]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T15:00:00",
+      "timeGenerated": "2026-09-24T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06574281]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T16:00:00",
+      "timeGenerated": "2026-09-24T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06458373]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T17:00:00",
+      "timeGenerated": "2026-09-24T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07118045]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T18:00:00",
+      "timeGenerated": "2026-09-24T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08501676]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T19:00:00",
+      "timeGenerated": "2026-09-24T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10796866]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T20:00:00",
+      "timeGenerated": "2026-09-24T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12617113]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T21:00:00",
+      "timeGenerated": "2026-09-24T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12384985]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T22:00:00",
+      "timeGenerated": "2026-09-24T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13152747]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-24T23:00:00",
+      "timeGenerated": "2026-09-24T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13054425]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T00:00:00",
+      "timeGenerated": "2026-09-24T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14239992]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T01:00:00",
+      "timeGenerated": "2026-09-24T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12713176]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T02:00:00",
+      "timeGenerated": "2026-09-24T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13106042]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T03:00:00",
+      "timeGenerated": "2026-09-24T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12401783]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T04:00:00",
+      "timeGenerated": "2026-09-24T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12864828]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T05:00:00",
+      "timeGenerated": "2026-09-24T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12297025]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T06:00:00",
+      "timeGenerated": "2026-09-24T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10489962]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T08:00:00",
+      "timeGenerated": "2026-09-25T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09777301]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T09:00:00",
+      "timeGenerated": "2026-09-25T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09060498]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T10:00:00",
+      "timeGenerated": "2026-09-25T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08926094]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T11:00:00",
+      "timeGenerated": "2026-09-25T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08514991]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T12:00:00",
+      "timeGenerated": "2026-09-25T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07612465]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T13:00:00",
+      "timeGenerated": "2026-09-25T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0784957]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T14:00:00",
+      "timeGenerated": "2026-09-25T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08436428]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T15:00:00",
+      "timeGenerated": "2026-09-25T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07890519]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T16:00:00",
+      "timeGenerated": "2026-09-25T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0834441]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T17:00:00",
+      "timeGenerated": "2026-09-25T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08799889]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T18:00:00",
+      "timeGenerated": "2026-09-25T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09958181]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T19:00:00",
+      "timeGenerated": "2026-09-25T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11196743]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T20:00:00",
+      "timeGenerated": "2026-09-25T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12894633]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T21:00:00",
+      "timeGenerated": "2026-09-25T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14690101]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T22:00:00",
+      "timeGenerated": "2026-09-25T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13803728]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-25T23:00:00",
+      "timeGenerated": "2026-09-25T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14989623]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T00:00:00",
+      "timeGenerated": "2026-09-25T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.16058251]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T01:00:00",
+      "timeGenerated": "2026-09-25T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14907143]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T02:00:00",
+      "timeGenerated": "2026-09-25T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14264539]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T03:00:00",
+      "timeGenerated": "2026-09-25T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13335346]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T04:00:00",
+      "timeGenerated": "2026-09-25T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13580394]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T05:00:00",
+      "timeGenerated": "2026-09-25T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13633761]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T06:00:00",
+      "timeGenerated": "2026-09-25T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13479035]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T07:00:00",
+      "timeGenerated": "2026-09-26T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12767643]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T08:00:00",
+      "timeGenerated": "2026-09-26T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11716311]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T09:00:00",
+      "timeGenerated": "2026-09-26T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10440345]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T10:00:00",
+      "timeGenerated": "2026-09-26T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09009366]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T11:00:00",
+      "timeGenerated": "2026-09-26T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07808194]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T12:00:00",
+      "timeGenerated": "2026-09-26T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07774542]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T13:00:00",
+      "timeGenerated": "2026-09-26T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0657409]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T14:00:00",
+      "timeGenerated": "2026-09-26T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06008388]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T15:00:00",
+      "timeGenerated": "2026-09-26T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06522387]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T16:00:00",
+      "timeGenerated": "2026-09-26T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06625973]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T17:00:00",
+      "timeGenerated": "2026-09-26T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07081535]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T21:00:00",
+      "timeGenerated": "2026-09-26T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08442169]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T22:00:00",
+      "timeGenerated": "2026-09-26T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09870448]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-26T23:00:00",
+      "timeGenerated": "2026-09-26T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09498293]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T00:00:00",
+      "timeGenerated": "2026-09-26T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10044554]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T01:00:00",
+      "timeGenerated": "2026-09-26T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12541415]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T02:00:00",
+      "timeGenerated": "2026-09-26T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12911952]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T03:00:00",
+      "timeGenerated": "2026-09-26T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12592798]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T04:00:00",
+      "timeGenerated": "2026-09-26T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12222655]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T05:00:00",
+      "timeGenerated": "2026-09-26T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12528624]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T06:00:00",
+      "timeGenerated": "2026-09-26T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12934531]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T07:00:00",
+      "timeGenerated": "2026-09-27T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12944043]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T08:00:00",
+      "timeGenerated": "2026-09-27T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13660896]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T09:00:00",
+      "timeGenerated": "2026-09-27T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12923074]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T10:00:00",
+      "timeGenerated": "2026-09-27T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12154335]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T11:00:00",
+      "timeGenerated": "2026-09-27T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10676803]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T12:00:00",
+      "timeGenerated": "2026-09-27T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10434005]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T13:00:00",
+      "timeGenerated": "2026-09-27T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08592227]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T14:00:00",
+      "timeGenerated": "2026-09-27T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08439436]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T15:00:00",
+      "timeGenerated": "2026-09-27T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07441855]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T16:00:00",
+      "timeGenerated": "2026-09-27T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07330715]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T17:00:00",
+      "timeGenerated": "2026-09-27T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07443982]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T18:00:00",
+      "timeGenerated": "2026-09-27T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07745889]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T19:00:00",
+      "timeGenerated": "2026-09-27T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08748695]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T20:00:00",
+      "timeGenerated": "2026-09-27T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11248992]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T21:00:00",
+      "timeGenerated": "2026-09-27T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12747745]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T22:00:00",
+      "timeGenerated": "2026-09-27T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13214958]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-27T23:00:00",
+      "timeGenerated": "2026-09-27T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1393205]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T00:00:00",
+      "timeGenerated": "2026-09-27T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13652128]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T01:00:00",
+      "timeGenerated": "2026-09-27T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13822058]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T02:00:00",
+      "timeGenerated": "2026-09-27T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1528951]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T03:00:00",
+      "timeGenerated": "2026-09-27T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1447497]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T04:00:00",
+      "timeGenerated": "2026-09-27T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1446786]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T05:00:00",
+      "timeGenerated": "2026-09-27T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13137034]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T06:00:00",
+      "timeGenerated": "2026-09-27T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12415718]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T07:00:00",
+      "timeGenerated": "2026-09-28T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12724216]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T08:00:00",
+      "timeGenerated": "2026-09-28T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13197333]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T09:00:00",
+      "timeGenerated": "2026-09-28T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13229717]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T10:00:00",
+      "timeGenerated": "2026-09-28T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11757168]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T11:00:00",
+      "timeGenerated": "2026-09-28T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10219159]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T12:00:00",
+      "timeGenerated": "2026-09-28T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "None",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T13:00:00",
+      "timeGenerated": "2026-09-28T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09522446]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T14:00:00",
+      "timeGenerated": "2026-09-28T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.08209717]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T15:00:00",
+      "timeGenerated": "2026-09-28T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.06801897]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T16:00:00",
+      "timeGenerated": "2026-09-28T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05481511]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T17:00:00",
+      "timeGenerated": "2026-09-28T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04281676]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T18:00:00",
+      "timeGenerated": "2026-09-28T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.04497122]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T19:00:00",
+      "timeGenerated": "2026-09-28T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.05262493]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T20:00:00",
+      "timeGenerated": "2026-09-28T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0618084]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T21:00:00",
+      "timeGenerated": "2026-09-28T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.07207517]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T22:00:00",
+      "timeGenerated": "2026-09-28T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0831439]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-28T23:00:00",
+      "timeGenerated": "2026-09-28T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09419081]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T00:00:00",
+      "timeGenerated": "2026-09-28T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11647573]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T01:00:00",
+      "timeGenerated": "2026-09-28T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1161064]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T02:00:00",
+      "timeGenerated": "2026-09-28T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11018497]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T03:00:00",
+      "timeGenerated": "2026-09-28T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11045706]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T04:00:00",
+      "timeGenerated": "2026-09-28T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.0980484]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T05:00:00",
+      "timeGenerated": "2026-09-28T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.09892412]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T06:00:00",
+      "timeGenerated": "2026-09-28T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10394195]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T07:00:00",
+      "timeGenerated": "2026-09-29T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10373788]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T08:00:00",
+      "timeGenerated": "2026-09-29T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.10527457]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T09:00:00",
+      "timeGenerated": "2026-09-29T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1009265]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T10:00:00",
+      "timeGenerated": "2026-09-29T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.11703392]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T11:00:00",
+      "timeGenerated": "2026-09-29T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1268904]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T12:00:00",
+      "timeGenerated": "2026-09-29T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12724605]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T13:00:00",
+      "timeGenerated": "2026-09-29T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13695244]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T14:00:00",
+      "timeGenerated": "2026-09-29T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14142422]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T15:00:00",
+      "timeGenerated": "2026-09-29T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14307949]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T16:00:00",
+      "timeGenerated": "2026-09-29T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13886882]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T17:00:00",
+      "timeGenerated": "2026-09-29T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.12869968]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T18:00:00",
+      "timeGenerated": "2026-09-29T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1297991]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T19:00:00",
+      "timeGenerated": "2026-09-29T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13100365]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T20:00:00",
+      "timeGenerated": "2026-09-29T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1374024]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T21:00:00",
+      "timeGenerated": "2026-09-29T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14420542]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T22:00:00",
+      "timeGenerated": "2026-09-29T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14609882]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-29T23:00:00",
+      "timeGenerated": "2026-09-29T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14706421]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T00:00:00",
+      "timeGenerated": "2026-09-29T17:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14653623]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T01:00:00",
+      "timeGenerated": "2026-09-29T18:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14065915]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T02:00:00",
+      "timeGenerated": "2026-09-29T19:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14624676]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T03:00:00",
+      "timeGenerated": "2026-09-29T20:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.13906488]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T04:00:00",
+      "timeGenerated": "2026-09-29T21:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.14812155]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T05:00:00",
+      "timeGenerated": "2026-09-29T22:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.1554277]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T06:00:00",
+      "timeGenerated": "2026-09-29T23:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.17053422]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T07:00:00",
+      "timeGenerated": "2026-09-30T00:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.16466999]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T08:00:00",
+      "timeGenerated": "2026-09-30T01:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.17646804]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T09:00:00",
+      "timeGenerated": "2026-09-30T02:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.17035998]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T10:00:00",
+      "timeGenerated": "2026-09-30T03:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.18673876]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T11:00:00",
+      "timeGenerated": "2026-09-30T04:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.19031104]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T12:00:00",
+      "timeGenerated": "2026-09-30T05:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.19945279]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T13:00:00",
+      "timeGenerated": "2026-09-30T06:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.21088088]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T14:00:00",
+      "timeGenerated": "2026-09-30T07:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.20377952]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T15:00:00",
+      "timeGenerated": "2026-09-30T08:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.21668884]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T16:00:00",
+      "timeGenerated": "2026-09-30T09:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.22332138]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T17:00:00",
+      "timeGenerated": "2026-09-30T10:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.2258428]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T18:00:00",
+      "timeGenerated": "2026-09-30T11:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.22470233]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T19:00:00",
+      "timeGenerated": "2026-09-30T12:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.2273058]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T20:00:00",
+      "timeGenerated": "2026-09-30T13:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.22247207]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T21:00:00",
+      "timeGenerated": "2026-09-30T14:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.23031396]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T22:00:00",
+      "timeGenerated": "2026-09-30T15:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.22861087]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-09-30T23:00:00",
+      "timeGenerated": "2026-09-30T16:00:00",
+      "longitude": null,
+      "latitude": null
+    },
+    {
+      "dataValue": "[[[0.24127555]]]",
+      "dataUnit": "meter",
+      "timeVerified": "2026-10-01T00:00:00",
+      "timeGenerated": "2026-09-30T17:00:00",
+      "longitude": null,
+      "latitude": null
+    }
+  ]
+}
