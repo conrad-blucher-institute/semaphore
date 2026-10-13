@@ -16,7 +16,7 @@ Semaphore is a student-built and maintained Python application that semi-automat
 - Dependencies:
   - Python 3.12
 
-0. You will need to create a `.env` file in the root directory of the project. This file will contain the environment variables for the docker container. You can copy the contents of `env.dist` and replace the values with your own. Semaphore will not run successfully without the appropriate configuration. Feel free to reach out to one of the authors for help getting Semaphore up and running.
+0. You will need to create a `.env` file in the root directory of the project. This file will contain the environment variables for the docker container. You can copy the contents of `.env.dist` and replace the values with your own. Semaphore will not run successfully without the appropriate configuration. Feel free to reach out to one of the authors for help getting Semaphore up and running.
 
 1. Ensure that Docker Desktop is running on your machine
 2. Run `docker compose up --build` (run `docker compose up -d --build` to run in the background)
@@ -26,8 +26,8 @@ Semaphore is a student-built and maintained Python application that semi-automat
  ![Enter your database credentials to register to pgAdmin](https://user-images.githubusercontent.com/7061990/268778380-36b907c7-da08-4ba8-a232-0c7646dfbb82.png)
 5. To stop the containers: Press `ctrl+C` in the terminal or if running in background close in Docker Desktop (`docker compose down` also works)
 6. If you are making changes to the code, be sure to repeat step 2. If you are making changes to the database, be sure to delete the existing DB volume using `docker compose down --volumes`(Only use this command LOCALLY) on Docker Desktop before repeating step 2.
-7. Run Semaphore with the following command: `docker exec semaphore-core python3 -m semaphore.semaphoreRunner -d test_dspec.json`.
-Each DSPEC corresponds to a specific model. To run a model in Semaphore, provide the DSPEC associated with that model.
+7. Run Semaphore with the following command: `docker exec semaphore-core python3 -m semaphore.semaphoreRunner -d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json`.
+Each DSPEC corresponds to a specific model. To run a model in Semaphore, provide the DSPEC associated with that model. DSPEC paths are relative to the root of the repository, which is `/app` inside the containers.
 
 Find common commands used in Semaphore here: https://github.com/conrad-blucher-institute/semaphore/wiki/Common-Commands
 
@@ -45,24 +45,24 @@ One-time setup, from the root directory:
 1. `pip install -e '.[test]'` installs the `semaphore` package in editable mode (code changes are picked up without reinstalling) plus the test dependencies.
 2. On Linux, add `host.docker.internal` to your hosts file: `echo '127.0.0.1 host.docker.internal' | sudo tee -a /etc/hosts`. `.env` points the database at `host.docker.internal`, which otherwise only resolves inside the containers.
 
-Each time:
+Each time, from the root directory:
 1. Start the database container: `docker compose up -d db`
-2. Point the folder settings at your copy of the repo. `.env` sets them to `/app/...`, which only exists inside the containers. Variables you set in your shell take precedence over `.env`:
-   ```bash
-   export DSPEC_FOLDER_PATH=$PWD/data/dspec/ MODEL_FOLDER_PATH=$PWD/data/models/ LOG_BASE_PATH=$PWD/logs
-   ```
-3. Run Semaphore, e.g. with `-t` so the prediction isn't saved:
+2. Run Semaphore, e.g. with `-t` so the prediction isn't saved:
    `python -m semaphore.semaphoreRunner -d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json -t`
 
-   Logs are written under `./logs/`.
+   Logs are written under `./data/logs/`. Only failures are logged unless you add `-v`.
+
+Run from the root directory: the folder settings in `.env` (`MODEL_FOLDER_PATH`, `LOG_BASE_PATH`) are relative paths, so they resolve against the folder you run from. That is the root directory on your machine and `/app` in the containers, so the same values work in both. If your `.env` was copied from an older `.env.dist` and still has `/app/...` values, update them to match `.env.dist`.
 
 ## Running the Unit Tests
 The unit tests run with pytest. `pyproject.toml` points pytest at `tests/UnitTests`, so no path is needed.
 
 - In the core container: `docker exec semaphore-core python3 -m pytest`
 - Locally, after the one-time setup in [Running Semaphore Locally](#running-semaphore-locally-outside-docker) and with the database container running: `python -m pytest`
-- Add `--run-slow` to also run the tests marked as slow. These run real models, so locally they also need the folder settings from step 2 of "Each time" above.
+- Add `--run-slow` to also run the tests marked as slow, or `--only-slow` to run only those. They run real models, using the same relative folder settings as Semaphore.
+- Run pytest from the root directory. Some tests find their files with paths relative to it.
 - `tests/IntegrationTests` is not run by default; run a file there by naming it, e.g. `python -m pytest tests/IntegrationTests/test_API.py`.
+- To run all tests, specify a path when running pytest, e.g., `python3 -m pytest tests/`.  Again, make sure to run pytest from the root folder (semaphore locally, or root in the container)
 
 
 #### Output

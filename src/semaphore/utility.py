@@ -12,7 +12,7 @@
 #
 #Imports
 from datetime import datetime, timezone
-from os.path import isabs, exists
+from os.path import isabs, exists, join
 from os import getcwd, makedirs
 from os import makedirs
 from os.path import exists
@@ -145,20 +145,21 @@ def log_error(text: str) -> None:
 
 
 def construct_true_path(path: str) -> str:
-	"""A method to determin if a given path is a relative or abolute path. If
-	its a relative path it concatinates the working dir with the relative path
+	"""constructs an absolute path from a given relative or absolute path. 
+	If the path is already absolute, it is returned as-is.
 
 	Parameters
 	---
 	path - String
-		The given path you want to test.
+		The relative or absolute path to construct an absolute path from.
 
 	Returns
 	---
-		str - The safe path to use.
+		str - The resulting absolute path constructed from the current working 
+		directory and the given path.
 	"""
 	if(not isabs(path)):
-		return getcwd() + path
+		return join(getcwd(), path)
 	else: return path
 
     

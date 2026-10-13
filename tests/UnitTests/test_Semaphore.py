@@ -17,7 +17,6 @@ import traceback
 import pandas as pd
 import pytest
 import random
-import os
 from unittest.mock import MagicMock, patch
 
 from semaphore.orchestrator import Orchestrator
@@ -29,8 +28,8 @@ from semaphore.DataClasses import (
 )
 
 
-# DSPEC_FOLDER_PATH lets these tests run outside the container; /app/data/dspec is where the container has them.
-DATA_DIR = Path(os.getenv("DSPEC_FOLDER_PATH", "/app/data/dspec"))
+# The path to the dspec directory is relative to the repo root/ container root, so run pytest from there, not from inside the tests folder
+DATA_DIR = Path("data/dspec")
 
 MODEL_GROUPS = [
     "ColdStunning",

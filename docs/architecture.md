@@ -182,26 +182,27 @@ It supports running one or more DSPECs in a single execution and provides severa
 
 ### Example
 
-These commands run inside the `semaphore-core` container (prefix them with `docker exec semaphore-core`). To run Semaphore on your machine instead, for example to debug it, see "Running Semaphore Locally" in the README.
+These commands can be run inside the `semaphore-core` container (prefix them with `docker exec semaphore-core`) and locally. DSPEC paths are relative to the root of the repository (`/app` in the container, `/semaphore` locally). Always run the commands form the root of the repo (if running inside the container, the docker `exec` command does that by default).
 
 Run a single model:
 
 ```bash
-python3 -m semaphore.semaphoreRunner -d test_dspec.json
+python3 -m semaphore.semaphoreRunner -d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json
 ```
 
 Run multiple models:
 
 ```bash
 python3 -m semaphore.semaphoreRunner \
--d model1.json model2.json model3.json
+-d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json \
+data/dspec/ColdStunning/Bird-Island_Water-Temperature_24hr.json
 ```
 
 Run a model using a historical reference time:
 
 ```bash
 python3 -m semaphore.semaphoreRunner \
--d test_dspec.json \
+-d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json \
 -p 202601010000
 ```
 ---

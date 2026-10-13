@@ -5,7 +5,7 @@
 # version 3.0
 #----------------------------------
 """ A file to run semaphore from the command line. 
-    Run with: python3 -m semaphore.semaphoreRunner -d test_dspec.json to run
+    Run from the repo root with: python3 -m semaphore.semaphoreRunner -d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json
     Assumes that the user has the database and the correct rows loaded.
  """ 
 #----------------------------------

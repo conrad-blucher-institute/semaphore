@@ -41,7 +41,7 @@ git fetch --tags
 Create a `.env` file in the repository root.
 
 ```bash
-cp env.dist .env
+cp .env.dist .env
 ```
 
 Populate the file with the correct values for the server.
