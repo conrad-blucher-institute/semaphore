@@ -47,12 +47,24 @@ One-time setup, from the root directory:
 
 Each time, from the root directory:
 1. Start the database container: `docker compose up -d db`
-2. Run Semaphore, e.g. with `-t` so the prediction isn't saved:
-   `python -m semaphore.semaphoreRunner -d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json -t`
+2. Run Semaphore, with the `-t` (toss) switch if you don't want to save the predictions and the `-v` (verbose) switch if you want it to print a bunch of intermediate data:
+   `python -m semaphore.semaphoreRunner -d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json -t -v`
 
    Logs are written under `./data/logs/`. Only failures are logged unless you add `-v`.
 
-Run from the root directory: the folder settings in `.env` (`MODEL_FOLDER_PATH`, `LOG_BASE_PATH`) are relative paths, so they resolve against the folder you run from. That is the root directory on your machine and `/app` in the containers, so the same values work in both. If your `.env` was copied from an older `.env.dist` and still has `/app/...` values, update them to match `.env.dist`.
+*Always run the semaphoreRunner from the root directory. This is because we use relative paths in the configuration (.env file) for the model and log folders, and the dspec paths passed with `-d` are relative too. We use relative paths so that they work both when running the code locally and when running the code in the container. For the code to then resolve the path properly, the code needs to be kicked off from the repo root folder. If your `.env` was copied from an older `.env.dist` and still has `/app/...` values, update them to match `.env.dist`.*
+
+## Running Semaphore in debug mode
+To run a model in VS Code with breakpoints, use the "Semaphore: debug a model locally" configuration in `.vscode/launch.json`. It runs Semaphore the same way as the command above, from the root directory.
+
+1. Complete the one-time setup in [Running Semaphore Locally](#running-semaphore-locally-outside-docker)
+2. Select the virtual environment as the Python interpreter in VS Code. Open the command palette (Ctrl+Shift+P), and look for the command `Python:Select interpreter`. If you don't see your venv listed, you can browse to it by selecting `enter interpreter path` in the dropdown.
+3. Start the database container: `docker compose up -d db` from any terminal. Semaphore relies on the DB being available to run any model. Make sure you have added a line in your hosts file if you are on linux or running under wsl in Windows (see [Running Semaphore Locally](#running-semaphore-locally-outside-docker) for detailed steps).
+4. To debug a different DSPEC, change the path in `args` in `.vscode/launch.json`. It runs `data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json` by default.
+5. Set breakpoints in the code under `src/semaphore/`.
+6. In the Run and Debug panel of VS Code, select "Semaphore: debug a model locally" and press F5 or click the run icon.
+
+The prediction is saved to the database. To run without saving it, add `"-t"` to `args`. Loading TensorFlow takes a few seconds, so the first breakpoint may take a moment to be hit.
 
 ## Running the Unit Tests
 The unit tests run with pytest. `pyproject.toml` points pytest at `tests/UnitTests`, so no path is needed.
