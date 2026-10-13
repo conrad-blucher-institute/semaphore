@@ -29,7 +29,7 @@ def load_intermediate_file(file_path):
     return data
 
 def build_semaphore_command(dspec_paths):
-    return f'docker exec semaphore-core python3 src/semaphoreRunner.py -d {" ".join(dspec_paths)}'
+    return f'docker exec semaphore-core python3 -m semaphore.semaphoreRunner -d {" ".join(dspec_paths)}'
 
 def main():
     args = parse_arguments()
