@@ -26,10 +26,11 @@
             "request": "launch",
             "module": "semaphore.semaphoreRunner",
             // Change the path to debug a different dspec (relative to the repo root)
-            "args": ["-d", "data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json"],
+            "args": ["-d", "data/dspec/ColdStunning/Bird-Island_Water-Temperature_6hr.json", "-t"],
+           // "args": ["-d", "data/dspec/Magnolia/48/magnolia_48.json", "-v"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": false
         },
     ],
     "compounds": []
