@@ -377,6 +377,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             {
                 'modelName': str,
                 'timeGenerated': timestamp in UTC,
+                'leadTime': timedelta,
                 'p1': float,
                 'p5': float,
                 'p10': float,
@@ -396,6 +397,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         SELECT
             o."modelName",
             o."timeGenerated",
+            o."leadTime",
             s."p1",
             s."p5",
             s."p10",
@@ -435,19 +437,20 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             statistics_dict = {
                 'modelName': row[0],
                 'timeGenerated': row[1].replace(tzinfo=timezone.utc),
-                'p1': row[2],
-                'p5': row[3],
-                'p10': row[4],
-                'p25': row[5],
-                'p50': row[6],
-                'p75': row[7],
-                'p90': row[8],
-                'p95': row[9],
-                'p99': row[10],
-                'min': row[11],
-                'max': row[12],
-                'mean': row[13],
-                'std_dev': row[14]
+                'leadTime': row[2],
+                'p1': row[3],
+                'p5': row[4],
+                'p10': row[5],
+                'p25': row[6],
+                'p50': row[7],
+                'p75': row[8],
+                'p90': row[9],
+                'p95': row[10],
+                'p99': row[11],
+                'min': row[12],
+                'max': row[13],
+                'mean': row[14],
+                'std_dev': row[15]
             }
             statistics_results.append(statistics_dict)
         
@@ -466,6 +469,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             {
                 'modelName': str,
                 'timeGenerated': timestamp in UTC,
+                'leadTime': timedelta,
                 'p1': float,
                 'p5': float,
                 'p10': float,
@@ -489,6 +493,7 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
         SELECT DISTINCT ON (o."modelName")
             o."modelName",
             o."timeGenerated",
+            o."leadTime",
             s."p1",
             s."p5",
             s."p10",
@@ -523,19 +528,20 @@ class SQLAlchemyORM_Postgres(ISeriesStorage):
             statistics_dict = {
                 'modelName': row[0],
                 'timeGenerated': row[1].replace(tzinfo=timezone.utc),
-                'p1': row[2],
-                'p5': row[3],
-                'p10': row[4],
-                'p25': row[5],
-                'p50': row[6],
-                'p75': row[7],
-                'p90': row[8],
-                'p95': row[9],
-                'p99': row[10],
-                'min': row[11],
-                'max': row[12],
-                'mean': row[13],
-                'std_dev': row[14]
+                'leadTime': row[2],
+                'p1': row[3],
+                'p5': row[4],
+                'p10': row[5],
+                'p25': row[6],
+                'p50': row[7],
+                'p75': row[8],
+                'p90': row[9],
+                'p95': row[10],
+                'p99': row[11],
+                'min': row[12],
+                'max': row[13],
+                'mean': row[14],
+                'std_dev': row[15]
             }
             statistics_results.append(statistics_dict)
         

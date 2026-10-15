@@ -419,9 +419,12 @@ def serialize_output_series(series: Series) -> dict[any]:
             else:
                 row_dict[k] = None if pd.isna(v) else v
 
+        # we do not store timeVerified in the output series, so we calculate it
+        # for the api response by timeVerified = timeGenerated + leadTime
         serialized_data.append({
             "dataValue":      jsonable_encoder(row_dict['dataValue']),
             "dataUnit":       jsonable_encoder(row_dict['dataUnit']),
+            "timeVerified":   jsonable_encoder(row_dict['timeGenerated'].replace(tzinfo=None) + row_dict['leadTime']),
             "timeGenerated":  jsonable_encoder(row_dict['timeGenerated'].replace(tzinfo=None)),
             "leadTime":       jsonable_encoder(row_dict['leadTime'])
         })
@@ -458,22 +461,30 @@ def serialize_statistics(statistics_results: list[dict] | None, requested_model_
 
 
     for stats in statistics_results:
+
+        # get the lead time and generated time to compute verified time if both GT and LT are available
+        leadTime = stats.get('leadTime', None)
+        timeGenerated = stats['timeGenerated'].replace(tzinfo=None) if stats.get('timeGenerated', None) is not None else None
+        timeVerified = timeGenerated + leadTime if timeGenerated is not None and leadTime is not None else None
+
         serialized = {
-            "modelName": stats["modelName"],
-            "timeGenerated": jsonable_encoder(stats['timeGenerated'].replace(tzinfo=None) if stats.get('timeGenerated') is not None else None ),
-            'p1': stats['p1'],
-            'p5': stats['p5'],
-            'p10': stats['p10'],
-            'p25': stats['p25'],
-            'p50': stats['p50'],
-            'p75': stats['p75'],
-            'p90': stats['p90'],
-            'p95': stats['p95'],
-            'p99': stats['p99'],
-            'min': stats['min'],
-            'max': stats['max'],
-            'mean': stats['mean'],
-            'std_dev': stats['std_dev']
+            "modelName":        stats["modelName"],
+            'timeVerified':     jsonable_encoder(timeVerified),
+            "timeGenerated":    jsonable_encoder(timeGenerated),
+            "leadTime":         jsonable_encoder(leadTime),
+            'p1':               stats['p1'],
+            'p5':               stats['p5'],
+            'p10':              stats['p10'],
+            'p25':              stats['p25'],
+            'p50':              stats['p50'],
+            'p75':              stats['p75'],
+            'p90':              stats['p90'],
+            'p95':              stats['p95'],
+            'p99':              stats['p99'],
+            'min':              stats['min'],
+            'max':              stats['max'],
+            'mean':             stats['mean'],
+            'std_dev':          stats['std_dev']
         }
 
         if ranged:
