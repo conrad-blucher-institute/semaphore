@@ -381,7 +381,7 @@ def serialize_output_series(series: Series) -> dict[any]:
     NOTE:: Expected out series serialization
     {
         "description": {
-            "modelName": "Bird-Island_Water-Temperature_102hr",
+            "modelName": "Bird-Island_Water-Temperature_3hr",
             "modelVersion": "1.0.0",
             "dataSeries": "pWaterTmp",
             "dataLocation": "SouthBirdIsland",
@@ -393,8 +393,9 @@ def serialize_output_series(series: Series) -> dict[any]:
             {
                 "dataValue": "23.878",
                 "dataUnit": "celsius",
+                "timeVerified": "2025-03-26T21:00:00",
                 "timeGenerated": "2025-03-26T18:00:00",
-                "leadTime": 367200
+                "leadTime": 10800
             },  
         ]
     }
