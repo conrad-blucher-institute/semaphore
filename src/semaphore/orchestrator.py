@@ -1,0 +1,296 @@
+# -*- coding: utf-8 -*-
+#orchestrator.py
+#----------------------------------
+# Created By : Matthew Kastl
+# version 1.0
+#----------------------------------
+""" 
+This file handles the following:
+    Orchestrating semaphore components to run correctly.
+    Provide a safe environment to catch any exceptions and ensure notifications and logging occurs properly.
+    Safe results or lack there of to the database.
+ """ 
+#----------------------------------
+# 
+#
+#Imports
+from os import path, getenv
+from datetime import datetime, timedelta, timezone
+import traceback
+import numpy as np
+from semaphore.exceptions import Semaphore_Exception, Semaphore_Data_Exception, Semaphore_Ingestion_Exception
+from semaphore.discord import Discord_Notify
+from semaphore.DataClasses import Series, SemaphoreSeriesDescription, get_output_dataFrame
+from semaphore.utility import log, LogLocationDirector, log_error, log_success
+
+from semaphore.SeriesStorage.ISeriesStorage import series_storage_factory
+from semaphore.ModelExecution.dataGatherer import DataGatherer
+from semaphore.ModelExecution.InputVectorBuilder import InputVectorBuilder
+from semaphore.ModelExecution.modelRunner import ModelRunner
+from semaphore.ModelExecution.dspecParser import DSPEC_Parser, Dspec
+from semaphore.ModelExecution.statistics import Statistics
+
+
+class Orchestrator:
+
+    def __init__(self) -> None:
+        self.DSPEC_parser = DSPEC_Parser()
+        self.dataGatherer = DataGatherer()
+        self.inputVectorBuilder = InputVectorBuilder()
+        self.modelRunner = ModelRunner()
+
+
+    def run_semaphore(self, dspecPaths: list[str], executionTime: datetime = None, toss: bool = False):
+        """Runs one dspec through semaphore protected to catch any possible error and handle results accordingly
+            - Parses the DSPEC file(s)
+            - Calculates the reference time
+            - For each DSPEC 
+                - Gathers the data
+                - Sets the log target
+                - Gathers data
+                - Builds the input vectors
+                - Makes the prediction
+                - Handles the successful prediction
+        NOTE: If a prediction fails, it will be handled by the __handle_failed_prediction method. This method will ensure that 
+            a notification is sent and that the result is logged in the database.
+
+        :param dspecPaths: list[str] - A list of paths to the DSPEC files that will be run through semaphore.
+        :param executionTime: datetime - The time Semaphore should build reference time off of. If not provided, 
+            the current time will be used.
+        :param toss: bool - A flag that will prevent the computed prediction from actually being saved in the database.
+        """
+        model_name = None
+        DSPEC = None
+        statistics_call = None
+
+        # By default the DSPECs will be ordered left -> right from the command
+        checked_dspecs = [self.__clean_and_check_dspec(dspec) for dspec in dspecPaths]
+        if executionTime is None: 
+                    executionTime = datetime.now(timezone.utc)
+
+        for dspecPath in checked_dspecs:
+            try:
+                try:
+                    
+                    DSPEC = self.DSPEC_parser.parse_dspec(dspecPath)
+                    statistics_call = DSPEC.outputInfo.statistics
+                    model_name: str = DSPEC.modelName
+                    reference_time = self.__calculate_referenceTime(executionTime, DSPEC)
+
+                    LogLocationDirector().set_log_target_path(getenv('LOG_BASE_PATH'), model_name)
+                    log(f'----Running {dspecPaths} for {executionTime}! Toss: {toss}----')
+
+                    data_repository = self.dataGatherer.get_data_repository(DSPEC, reference_time)
+                    input_vectors = self.inputVectorBuilder.build_batch(DSPEC, data_repository)
+                    
+                    self._log_input_vectors(model_name, reference_time, data_repository, DSPEC)
+
+                    result = self.modelRunner.make_predictions(DSPEC, input_vectors, reference_time)
+
+                    self.__handle_successful_prediction(model_name, reference_time, result, toss, statistics_call)
+                
+                except Exception:
+                        raise Semaphore_Exception('Error:: An unknown error ocurred!')
+                
+            except Semaphore_Exception as se:
+                log_error(f'Error:: Prediction failed due to Semaphore Exception')
+                log_error(f'Exception message: {se}')
+                log_error(f'Full stack trace:\n{traceback.format_exc()}')
+                self.__handle_failed_prediction(se, reference_time, model_name, DSPEC, toss)
+            except Semaphore_Data_Exception as sde:
+                log_error(f'Warning:: Prediction failed due to lack of data')
+                log_error(f'Exception message: {sde}')
+                log_error(f'Full stack trace:\n{traceback.format_exc()}')
+                self.__handle_failed_prediction(sde, reference_time, model_name, DSPEC, toss)
+            except Semaphore_Ingestion_Exception as sie:
+                log_error(f'Error:: Prediction failed due to Semaphore Ingestion Exception')
+                log_error(f'Exception message: {sie}')
+                log_error(f'Full stack trace:\n{traceback.format_exc()}')
+                self.__handle_failed_prediction(sie, reference_time, model_name, DSPEC, toss)
+
+    
+    def __clean_and_check_dspec(self, dspec_path: str) -> str:
+        """Checks that a depsc path ends with the .json extension and that the file actually exists.
+        
+        :param dspec_path: str - The path to the dspec file.
+        :returns: str - The path to the dspec file.
+        :raises FileNotFoundError: If the file does not exist.
+        """
+        #checking that dspec file passed exists in the dspec folder
+        if not dspec_path.endswith('.json'): 
+            dspec_path = dspec_path + '.json'
+
+        if not path.exists(dspec_path):
+            raise FileNotFoundError
+        return dspec_path
+    
+
+    def __calculate_referenceTime(self, execution_time: datetime, dspec: Dspec) -> datetime:
+        ''' This function clamps execution time to the nearest interval of the specified in the dspec.
+        NOTE:: Calculation execution_time - mod(execution_time, interval)
+        
+        :param execution: datetime -the execution time.
+        :param dspec: Dspec - the dspec object.
+        :returns: datetime - the reference time.
+        '''
+
+        return datetime.fromtimestamp(execution_time.timestamp() - (execution_time.timestamp() % dspec.timingInfo.interval),tz=timezone.utc)
+
+    def __handle_successful_prediction(self, model_name: str, execution_time: datetime, result_series: Series,
+                                        toss: bool, statistics_call: bool | None = None):
+        """Handels a successful run of semaphore, sending a notification and placing the result in the database.
+                - Safely sends a discord notification about the successful prediction.
+                - If the toss flag is not set, it will attempt to store the prediction in the database.
+
+        :param model_name: str - The name of the model that was run.
+        :param execution_time: datetime - The time the model was run.
+        :param result_series: Series - The series of results that were predicted.
+        :param toss: bool - A flag that will prevent the computed prediction from actually being saved in the database.
+        :param statistics_call: bool | None - A flag that indicates whether this model run should calculate statistics.
+            Defaults to None if not provided in the DSPEC.
+        """
+    
+        self.__safe_discord_notification(model_name, execution_time, 0, '')
+
+        try:
+            if not toss:
+                series_storage = series_storage_factory()
+                inserted_results, model_run_result = series_storage.insert_output_and_model_run(result_series, execution_time, 0)
+
+                # SUCCESS: Log successful database insertion
+                log_success(f"Model {model_name} completed successfully ✓")
+                log_success(f"Results inserted: {inserted_results}")
+                log_success(inserted_results.dataFrame if inserted_results is not None else 'No dataframe')
+
+                # only compute statistics if the call is true and the results were successfully inserted
+                if statistics_call and model_run_result is not None:
+                    # model_run_result has the form (id, outputID, executionTime, returnCode)
+                    output_table_id = model_run_result[1]
+                    inserted_data = inserted_results.dataFrame.iloc[0]['dataValue']
+                    self.__handle_statistics_call(model_name, inserted_data, output_table_id)
+        except:
+            log_error(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))    
+
+
+    def __handle_failed_prediction(
+                                self,
+                                exception: Semaphore_Exception | Semaphore_Data_Exception | Semaphore_Ingestion_Exception, 
+                                execution_time: datetime,
+                                model_name: str | None, 
+                                dspec: Dspec | None, 
+                                toss: bool
+                                ):
+        """Handles a failed predictions. This function handles semaphore in an unstable error state. It emits a notification and 
+        ensures something is logged in the database.
+            - Safely sends a discord notification about the failed prediction.
+            - If the toss flag is not set, it will attempt to store a Null prediction in the database.
+
+        :param exception: Semaphore_Exception | Semaphore_Data_Exception | Semaphore_Ingestion_Exception - The exception that occurred.
+        :param execution_time: datetime - The time the model was run.
+        :param model_name: str | None - The name of the model that was run or None if it was not discovered.
+        :param dspec: Dspec | None - The dspec object that was run or None if it was not parsed yet
+        :param toss: bool - A flag that will prevent the computed prediction from actually being saved in the database.
+        """
+
+        if execution_time is None: execution_time = datetime.min.replace(tzinfo=timezone.utc) # Execution time could not be instantiated yet
+        if model_name is None: model_name = 'Model Name Not Discovered Yet' # Model name might not be discovered if error was in dspec
+
+        self.__safe_discord_notification(model_name, execution_time, exception.error_code, exception.message)
+
+        try:
+            if not toss and dspec is not None:
+            
+                # Reconstruct the expected predictions information with a nulled result
+                predictionDesc = SemaphoreSeriesDescription(dspec.modelName, dspec.modelVersion, dspec.outputInfo.series, dspec.outputInfo.location, dspec.outputInfo.datum)
+                result_series = Series(predictionDesc)
+
+                # Generate null output
+                df_output = get_output_dataFrame() 
+                df_output.loc[0] = [None, dspec.outputInfo.unit, self.__calculate_referenceTime(execution_time, dspec), timedelta(seconds=dspec.outputInfo.leadTime)]
+                result_series.dataFrame = df_output
+
+                # Attempt to store both that in the outputs table and information about the model_run
+                series_storage = series_storage_factory()
+                inserted_results, _ = series_storage.insert_output_and_model_run(result_series, execution_time, exception.error_code)
+
+                # ERROR: Log failed prediction details (always verbose)
+                log_error(f"Model {model_name} FAILED - Null result inserted")
+                log_error(f"Failed results: {inserted_results}")
+                log_error(inserted_results.dataFrame if inserted_results is not None else 'No dataframe')
+        except:
+            log_error(Semaphore_Exception('ERROR:: An error occurred while trying to interact with series storage from semaphoreRunner'))
+    
+
+    def __safe_discord_notification(self, model_name: str, execution_time: datetime, error_code: int, message: str):
+        """Safely sends a discord notification if the user has enabled it in the environment variables. Ensures 
+        that if an error occurs while sending the notification, it is logged and not thrown and this method returns.
+
+        :param model_name: str - The name of the model that was run.
+        :param execution_time: datetime - The time the model was run.
+        :param error_code: int - The error code of the error that occurred.
+        :param message: str - The message of the error that occurred.
+        :logs Semaphore_Exception: If an error occurs while trying to send a discord notification.
+        """
+        try: 
+            if int(getenv('DISCORD_NOTIFY')) == 1: # Discord notification enabled in env
+                if int(getenv('IS_DEV')) == 1: # is dev server or prod server
+                    webhook = getenv('DISCORD_WEBHOOK_DEV')
+                else:
+                    webhook = getenv('DISCORD_WEBHOOK_PROD')
+
+                # send notification
+                discord_notify = Discord_Notify(webhook)
+                discord_notify.send_notification(model_name, execution_time, error_code, message)
+        except Exception as e:
+            log_error(Semaphore_Exception('ERROR:: An error occurred while trying to send a discord notification'))
+
+    
+    def _log_input_vectors(self, model_name: str, reference_time, data_repository: dict, dspec) -> None:
+        """
+        Logs the input vectors that were built for the model. 
+        This is a critical point that will help with debugging 
+        and ensuring that the data is being gathered and processed correctly.
+
+        :param model_name: str - The name of the model that was run.
+        :param reference_time: datetime - The reference time that was used to gather the data.
+        :param data_repository: dict - The data repository that was used to build the input vectors.
+        :param dspec: Dspec - The dspec that was used to build the input vectors.
+        """
+        lines = [f'[Orchestrator] Input vectors for {model_name} @ {reference_time}']
+        for k in dspec.orderedVector.keys:
+            df = data_repository[k].dataFrame
+            lines.append(f'\t[{k}]')
+            for i, (_, row) in enumerate(df.iterrows()):
+                lines.append(f'\t\t{i+1}. {row["timeVerified"]} : {row["dataValue"]}')
+        log('\n'.join(lines))
+    
+    
+    def __handle_statistics_call(self, model_name: str, data: np.ndarray, output_table_id: int) -> None:
+        '''
+        This function handles the logic for when a model run should also compute statistics. It will attempt
+        to compute the statistics based on the data stored in the output table, then store the statistics into
+        the statistics table. 
+
+        :param model_name: str - the name of the model that was run
+        :param data: np.ndarray - the data that was stored in the output table that the statistics should be computed on
+            The data is formatted in a 3D ndarray with the shape (member count, input vector count, outputs per vector).
+        :param output_table_id: int - the id to the output table entry this data is linked to
+
+        NOTE: On statistics failures, we do not want to raise an exception as this would show that the entire model run
+        failed. Instead, we simply log an error with a clear headline on statistics failures.
+        '''
+        statistics_class = Statistics()
+        series_storage = series_storage_factory()
+        try:
+            statistics_dict = statistics_class.compute_statistics(data)
+            storage_result = series_storage.insert_output_statistics(output_table_id, statistics_dict)
+            
+            if storage_result:
+                log_success(f"Computed and stored statistics for model: {model_name} successfully ✓")
+            else:
+                log_error('STATISTICS:: Failed to insert statistics into the database')
+        except Exception as e:
+            log_error(
+                f'STATISTICS:: An error occurred while trying to compute or store statistics for model: {model_name}'
+                f"\nError: {e}. Traceback: {traceback.format_exc()}"
+            )

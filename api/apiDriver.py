@@ -1,0 +1,510 @@
+# -*- coding: utf-8 -*-
+#apiDriver.py
+#----------------------------------
+# Created By: Beto Estrada Jr
+# Created Date: 9/06/2023
+#----------------------------------
+"""This script acts as the driver for the FastAPI application.
+ """ 
+#----------------------------------
+# 
+#
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Query
+
+from datetime import datetime, timedelta, timezone
+from semaphore.DataClasses import SeriesDescription, SemaphoreSeriesDescription, TimeDescription, Series
+from semaphore.SeriesProvider.SeriesProvider import SeriesProvider
+from semaphore.ModelExecution.statistics import Statistics
+from fastapi.encoders import jsonable_encoder
+import pandas as pd
+import numpy as np
+from contextvars import ContextVar
+import logging
+
+
+load_dotenv()
+
+app = FastAPI(root_path='/semaphore-api',)
+@app.get('/')
+def read_main():
+    return {'message': 'Hello World'}
+
+#region Logging
+# Context variable to hold process time for logging
+process_time_var: ContextVar[float] = ContextVar('process_time', default=0.0)
+
+# Custom logging filter to add process time to log records (Makes processtime accessible in log config file)
+class ProcessTimeFilter(logging.Filter):
+    def filter(self, record):
+        record.process_time = process_time_var.get()
+        return True
+
+@app.middleware("http")
+async def response_time_middleware(request, call_next):
+    """ Middleware to measure and log the processing time of each request. 
+        Stores the processing time in a context variable for logging.
+    """
+    start_time = start_time = datetime.now(timezone.utc)
+    response = await call_next(request)
+    process_time = datetime.now(timezone.utc) - start_time
+    process_time_var.set(process_time.total_seconds())
+    return response
+#endregion
+
+#region API Endpoints
+@app.get('/input/source={source}/series={series}/location={location}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
+async def get_input(source: str, series: str, location: str, fromDateTime: str, toDateTime: str, 
+                    datum: str = None, interval: int = None):
+    """
+    Retrieves input series object
+
+    Args:
+        - `source` (string): The data's source (e.g. "noaaT&C")
+        - `series` (string): The series name (e.g. "dXWnCmp")
+        - `location` (string): The location of the data (e.g. "packChan")
+        - `fromDateTime` (string): "YYYYMMDDHH" Date to start at
+        - `toDateTime` (string): "YYYYMMDDHH" Date to end at
+        - `datum` (string): Optional
+        - `interval` (int): Optional. The time step separating the data points in seconds (e.g. 3600 for hourly)
+
+    Returns:
+        Series: A series object holding either the requested data or an error message with the incomplete data. (src/DataClasses.py)
+
+    Raises:
+        HTTPException: If the series is not found.
+    """
+    try:
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+    except (ValueError, TypeError, OverflowError) as e:
+        raise HTTPException(status_code=404, detail=f'{e}')
+    
+    if interval is not None:
+        interval = timedelta(seconds=interval)
+    
+    requestDescription = SeriesDescription(
+        source, 
+        series,
+        location, 
+        datum
+    )
+    
+    nowTime = datetime.now(timezone.utc)
+    fromTimeIsInPast = from_time_in_past(fromDateTime, nowTime)
+
+    timeDescription = TimeDescription(
+        fromDateTime,
+        toDateTime,
+        interval,
+        stalenessOffset=(None if fromTimeIsInPast else timedelta(hours=7))
+    )
+
+    provider = SeriesProvider()
+    
+    responseSeries = provider.request_input(requestDescription, timeDescription, nowTime)
+
+    # Protect the API's JSON ENCODER from freaking out about floats sneaking from the ingestion class
+    responseSeries.dataFrame['dataValue'] = responseSeries.dataFrame['dataValue'].astype(str)
+
+    return serialize_series(responseSeries)
+
+
+@app.get('/output_latest/')
+async def get_outputs_latest(modelNames: list[str] = Query(None)):
+    """
+    Queries outputs for given models looking for the last prediction that was made with them.
+    Args:
+        - `modelNames` (string): The name of the model (e.g. "test AI"), you can repeat this parameter to request multiple models
+
+    Returns:
+        The results for each model index by the model name. If no data can be found for that model the value will be null.
+    """ 
+    if not modelNames:
+        raise HTTPException(status_code=422, detail='No model names were provided')
+    
+    provider = SeriesProvider()
+    resultSeries = provider.request_output('LATEST', model_names=modelNames)
+
+    # Build a lookup of modelName -> Series for the models that have outputs
+    series_by_model: dict[str, Series] = {}
+    if resultSeries:
+        for series in resultSeries:
+            series_by_model[series.description.modelName] = series
+
+    # Always return an entry for each requested model name.
+    # For models with no data, serialize a null/empty representation.
+    serializedResults = {}
+    for modelName in modelNames:
+        series = series_by_model.get(modelName)
+        if series is not None:
+            serializedResults[modelName] = serialize_series(series)
+        else:
+            serializedResults[modelName] = serialize_series(None)
+    
+    return serializedResults
+
+@app.get('/output_statistics/')
+async def get_output_statistics(modelNames: list[str] = Query(None)):
+    """
+    Queries output statistics for given models.
+     Args:
+        - `modelNames` (string): The name of the model (e.g. "test AI"), you can repeat this parameter to request multiple models
+    Returns:
+    - A list of dictionaries containing these statistics for each model:
+        model name, time generated, percentile values (p1-p99),
+        minimum, maximum, mean, and standard deviation.
+
+    """
+    if not modelNames:
+        raise HTTPException(
+            status_code=422,
+            detail='No model names were provided'
+        )
+
+    statistics_class = Statistics()
+
+    statistics_results = (statistics_class.retrieve_statistics(modelNames))
+
+    return serialize_statistics( statistics_results, modelNames)
+
+@app.get('/select_output_statistics_range/')
+async def get_output_statistics_range(modelNames: list[str] = Query(None), fromDateTime: str = Query(None), toDateTime: str = Query(None)):
+    """
+    Queries output statistics for given models in a specefic range of time.
+     Args:
+        - `modelNames` (string): The name of the model (e.g. "test AI"), you can repeat this parameter to request multiple models
+        - `fromDateTime` (string): "YYYYMMDDHH" UTC Date to start at. Ex. 2024010100 for Jan 1, 2024 at 00:00 UTC
+        - `toDateTime` (string): "YYYYMMDDHH" UTC Date to end at. Ex. 2024010200 for Jan 2, 2024 at 00:00 UTC
+    Returns:
+    - A list of dictionaries containing these statistics for each model:
+        model name, time generated, percentile values (p1-p99),
+        minimum, maximum, mean, and standard deviation.
+
+    """
+    if not modelNames:
+        raise HTTPException(
+            status_code=422,
+            detail='No model names were provided'
+        )
+
+    statistics_class = Statistics()
+
+    statistics_results = (statistics_class.retrieve_statistics(modelNames, fromDateTime=fromDateTime, toDateTime=toDateTime))
+
+    return serialize_statistics( statistics_results, modelNames, ranged=True)
+
+@app.get('/output_time_span/')
+async def get_outputs_time_span(fromDateTime: str, toDateTime: str, modelNames: list[str] = Query(None)):
+    """
+    Queries outputs for a given time range for given models.
+    Args:
+        - `fromDateTime` (string): "YYYYMMDDHH" Date to start at
+        - `toDateTime` (string): "YYYYMMDDHH" Date to end at
+        - `modelNames` (string): The name of the model (e.g. "test AI"), you can repeat this parameter to request multiple models
+
+    Returns:
+        The results for each model index by the model name. If no data can be found for that model for the provided time range the value will be null.
+    """ 
+    try:
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+    except (ValueError, TypeError, OverflowError) as e:
+        raise HTTPException(status_code=404, detail=f'{e}')
+
+    provider = SeriesProvider()
+    results = {}
+    for modelName in modelNames:
+        results[modelName] = serialize_series(provider.request_output('TIME_SPAN', model_name=modelName, from_time=fromDateTime, to_time=toDateTime))
+    return results
+
+
+
+@app.get('/output/modelName={modelName}/modelVersion={modelVersion}/series={series}/location={location}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
+async def get_output(modelName: str, modelVersion: str, series: str, location: str, fromDateTime: str, 
+                     toDateTime: str, datum: str = None, interval: int = None):
+    """
+    Retrieves output series object
+
+    Args:
+        - `modelName` (string): The name of the model (e.g. "test AI")
+        - `modelVersion` (string): The version of the model (e.g. "1.0.0")
+        - `series` (string): The series name (e.g. "waterHeight")
+        - `location` (string): The location of the data (e.g. "packChan")
+        - `fromDateTime` (string): "YYYYMMDDHH" Date to start at
+        - `toDateTime` (string): "YYYYMMDDHH" Date to end at
+        - `datum` (string): Optional
+        - `interval` (int): Optional. The time step separating the data points in seconds (e.g. 3600 for hourly)
+
+    Returns:
+        Series: A series object holding either the requested data or an error message with the incomplete data. (src/DataManagement/DataClasses.py)
+
+    Raises:
+        HTTPException: If the series is not found.
+    """ 
+    try:
+        fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+        toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
+    except (ValueError, TypeError, OverflowError) as e:
+        raise HTTPException(status_code=404, detail=f'{e}')
+    
+    if interval is not None:
+        interval = timedelta(seconds=interval)
+    
+    requestDescription = SemaphoreSeriesDescription(
+        modelName, 
+        modelVersion, 
+        series, 
+        location,
+        datum
+    )
+
+    timeDescription = TimeDescription(
+        fromDateTime,
+        toDateTime,
+        interval
+    )
+
+    provider = SeriesProvider()
+    responseSeries = provider.request_output('SPECIFIC', semaphoreSeriesDescription=requestDescription, timeDescription=timeDescription)
+
+    return serialize_series(responseSeries)
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "up"}
+
+
+def serialize_series(series: Series) -> dict[any]:
+    """ A custom serializer for the series object. This allows us to change
+    the series data structure but keep our API responses the same as to not break
+    anything downstream
+    """
+
+    if series is None:
+        return dict()
+    
+    if series.dataFrame is None:
+        # In this case we have no data to serialize but we still want to return the description and time description
+        serialized = jsonable_encoder(series, exclude={'_Series__dataFrame'})
+        serialized['isComplete'] = True # Ensure isComplete always exists for backward compatibility
+        serialized['_Series__data'] = [] # Ensure data always exists for backward compatibility
+        return serialized
+
+    if isinstance(series.description, SemaphoreSeriesDescription):
+        return serialize_output_series(series)
+
+    elif isinstance(series.description, SeriesDescription):
+        return serialize_input_series(series)
+    
+    else:
+        raise NotImplementedError("The series description is not supported")
+#endregion
+
+#region Serializers
+def serialize_input_series(series: Series) -> dict[any]:
+    """ Serializes an input series into a dictionary.
+    param: series - Series The input series to serialize.
+    return: A dictionary representation of the input series.
+
+    NOTE:: Ensures `isComplete` always exists and is set to True for backward compatibility.
+    NOTE:: Expected input series serialization
+    {
+        "description": {
+            "dataSource": "NOAATANDC",
+            "dataSeries": "dWl",
+            "dataLocation": "Aransas",
+            "dataDatum": "NAVD",
+            "dataIntegrityDescription": null,
+            "verificationOverride": null
+        },
+        "timeDescription": {
+            "fromDateTime": "2025-03-26T00:00:00",
+            "toDateTime": "2025-03-26T03:00:00",
+            "interval": 3600.0
+        },
+        "nonCompleteReason": null,
+        "_Series__data": [
+            {
+                "dataValue": "0.178",
+                "dataUnit": "meter",
+                "timeVerified": "2025-03-26T00:00:00",
+                "timeGenerated": "2025-03-26T00:00:00",
+                "longitude": "-97.0391",
+                "latitude": "27.8366"
+            },
+        ]
+    }
+    """
+
+    # Serialize the series object
+    serialized: dict[any] = jsonable_encoder(series)
+
+    # Remove the automatically serialized dataFrame
+    del serialized['_Series__dataFrame']
+
+    # Always include isComplete for backward compatibility
+    serialized['isComplete'] = True
+
+    # Serialize the dataFrame by our own rules
+    serialized_data = []
+    for _, row in series.dataFrame.iterrows():
+        row_dict = {
+            "dataValue":        row['dataValue'],
+            "dataUnit":         row['dataUnit'],
+            "timeVerified":     row['timeVerified'].replace(tzinfo=None),
+            "timeGenerated":    row['timeGenerated'].replace(tzinfo=None),
+            "longitude":        row['longitude'],
+            "latitude":         row['latitude']
+        }
+
+        #Replace NaNs with Nones so that jasonable_encoder doesn't freak out
+        row_dict = {k: None if pd.isna(v) else v for k, v in row_dict.items()}
+
+        #Encode the row dictionary to JSON
+        encode_row = {k: jsonable_encoder(v) for k, v in row_dict.items()}
+        serialized_data.append(encode_row)
+        
+    serialized['_Series__data'] = serialized_data # Add it back to the response
+    return serialized
+
+def from_time_in_past(fromDateTime: datetime, now: datetime) -> bool:
+    return fromDateTime < now
+
+def serialize_output_series(series: Series) -> dict[any]:
+    """ Serializes an output series into a dictionary.
+    param: series - Series The output series to serialize.
+    return: A dictionary representation of the output series.
+
+    NOTE:: Ensures `isComplete` always exists and is set to True for backward compatibility.
+    NOTE:: Expected out series serialization
+    {
+        "description": {
+            "modelName": "Bird-Island_Water-Temperature_3hr",
+            "modelVersion": "1.0.0",
+            "dataSeries": "pWaterTmp",
+            "dataLocation": "SouthBirdIsland",
+            "dataDatum": "celsius"
+        },
+        "timeDescription": null,
+        "nonCompleteReason": null,
+        "_Series__data": [
+            {
+                "dataValue": "23.878",
+                "dataUnit": "celsius",
+                "timeVerified": "2025-03-26T21:00:00",
+                "timeGenerated": "2025-03-26T18:00:00",
+                "leadTime": 10800
+            },  
+        ]
+    }
+    """
+
+    # Serialize the series object while ignoring the dataFrame since we will serialize it ourselves
+    serialized: dict[any] = jsonable_encoder(series, exclude={'_Series__dataFrame'})
+
+    # Always include isComplete for backward compatibility
+    serialized['isComplete'] = True
+
+    # Serialize the dataFrame by our own rules
+    serialized_data = []
+    for _, row in series.dataFrame.iterrows():
+        # Replace NaNs with None and ensure JSON safe types
+        row_dict = {}
+        for k, v in row.items():
+            if isinstance(v, list):
+                row_dict[k] = None if pd.isna(v).any() else v
+            elif isinstance(v, np.ndarray):
+                row_dict[k] = None if pd.isna(v).any() else v.tolist()
+            else:
+                row_dict[k] = None if pd.isna(v) else v
+
+        # we do not store timeVerified in the output series, so we calculate it
+        # for the api response by timeVerified = timeGenerated + leadTime
+        serialized_data.append({
+            "dataValue":      jsonable_encoder(row_dict['dataValue']),
+            "dataUnit":       jsonable_encoder(row_dict['dataUnit']),
+            "timeVerified":   jsonable_encoder(row_dict['timeGenerated'].replace(tzinfo=None) + row_dict['leadTime']),
+            "timeGenerated":  jsonable_encoder(row_dict['timeGenerated'].replace(tzinfo=None)),
+            "leadTime":       jsonable_encoder(row_dict['leadTime'])
+        })
+
+    serialized['_Series__data'] = serialized_data # Add it back to the response
+    return serialized
+
+def serialize_statistics(statistics_results: list[dict] | None, requested_model_names: list[str], ranged: bool = False) -> dict:
+    """
+    Serializes statistics results so that every requested model name
+    is included in the response, even if no statistics exist for it.
+
+    If ranged=False (default):
+        Returns one statistics dictionary per model.
+
+    If ranged=True:
+        Returns a list of statistics dictionaries per model.
+    """
+
+    if statistics_results is None:
+        return {
+            model_name: None
+            for model_name in requested_model_names
+        }
+    
+    # Build lookup table
+    if ranged:
+        statistics_by_model = {
+            model_name: []
+            for model_name in requested_model_names
+        }
+    else:
+        statistics_by_model = {}
+
+
+    for stats in statistics_results:
+
+        # get the lead time and generated time to compute verified time if both GT and LT are available
+        leadTime = stats.get('leadTime', None)
+        timeGenerated = stats['timeGenerated'].replace(tzinfo=None) if stats.get('timeGenerated', None) is not None else None
+        timeVerified = timeGenerated + leadTime if timeGenerated is not None and leadTime is not None else None
+
+        serialized = {
+            "modelName":        stats["modelName"],
+            'timeVerified':     jsonable_encoder(timeVerified),
+            "timeGenerated":    jsonable_encoder(timeGenerated),
+            "leadTime":         jsonable_encoder(leadTime),
+            'p1':               stats['p1'],
+            'p5':               stats['p5'],
+            'p10':              stats['p10'],
+            'p25':              stats['p25'],
+            'p50':              stats['p50'],
+            'p75':              stats['p75'],
+            'p90':              stats['p90'],
+            'p95':              stats['p95'],
+            'p99':              stats['p99'],
+            'min':              stats['min'],
+            'max':              stats['max'],
+            'mean':             stats['mean'],
+            'std_dev':          stats['std_dev']
+        }
+
+        if ranged:
+            statistics_by_model[stats["modelName"]].append(serialized)
+        else:
+            statistics_by_model[stats["modelName"]] = serialized
+
+    # Ensure all requested models exist
+    serialized_results = {}
+
+    for model_name in requested_model_names:
+        if ranged:
+            serialized_results[model_name] = (
+                statistics_by_model[model_name]
+                if statistics_by_model[model_name]
+                else None
+            )
+        else:
+            serialized_results[model_name] = statistics_by_model.get(model_name)
+
+    return serialized_results
+#endregion

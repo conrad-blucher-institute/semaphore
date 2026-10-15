@@ -20,6 +20,17 @@
             // "timeout": 9999999,
             "postDebugTask": "compose_stop_dev"
         },
+        {
+            "name": "Semaphore: debug a model locally",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "semaphore.semaphoreRunner",
+            // Change the path to debug a different dspec (relative to the repo root)
+            "args": ["-d", "data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
     ],
     "compounds": []
 }

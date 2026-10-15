@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "semaphore"
+version = "2.0.0"
+description = "Runs the Semaphore environmental prediction models: data ingestion, model execution, and output storage."
+requires-python = ">=3.12"
+# Read from requirements.txt instead of listing the dependencies here. This is because Docker installs from requirements.txt.
+# This way we only maintain one source of truth for the dependencies
+dynamic = ["dependencies", "optional-dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+# use: pip install -e '.[test]' to install the dependencies that include what is needed to run the tests
+optional-dependencies.test = { file = ["requirements-test.txt"] }
+
+[tool.setuptools.packages.find]
+# only include packages from the src folder and only the main semaphore packages
+where = ["src"]
+include = ["semaphore", "semaphore.*"]
+
+[tool.pytest.ini_options]
+# Only include the unit tests by default; tests/IntegrationTests may not run properly without specific things being setup, so run it only by naming it explicitly.
+testpaths = ["tests/UnitTests"]
+# To allow the API tests to import apiDriver without api/ being a package we set the python path to the api folder for pytest
+pythonpath = ["api"]
