@@ -12,6 +12,10 @@ Walks Semaphore log files for a given date range, pulls out "success" and
      table of individual failures with a blank column for investigator
      notes.
 
+If an earlier run's CSV exists (same dev/prod environment, with data that
+ends before this run's start date), the report also opens with a
+comparison against that previous run.
+
 Usage:
     ./model_run_stats.py 02/07/26 02/18/26
 
@@ -19,14 +23,14 @@ Dates are MM/DD/YY, matching the timestamp format used in the log files
 themselves (e.g. "08/07/26 15:31:26: ...").
 """
 # -------------------------------
-import argparse                        
-import html                            
-import re                              
-import socket                          
-import sys                             
-from datetime import datetime          
-from pathlib import Path               
-import pandas as pd                    
+import argparse
+import html
+import re
+import socket
+import sys
+from datetime import datetime
+from pathlib import Path
+import pandas as pd
 
 
 # =============================================================================
@@ -56,7 +60,7 @@ MODEL_FAMILIES = [
     "ThermalRefuge",
     "ar_inundation",
     "surge",
-    "magnolia_transform",               # must come before "magnolia" -- see note above                         
+    "magnolia_transform",               # must come before "magnolia" -- see note above
     "magnolia",
 ]
 
@@ -161,7 +165,7 @@ def build_patterns():
 # =============================================================================
 # SECTION 3: Failure-type detection
 # =============================================================================
-# ONE flat dict, {failure_type_name: regex_to_detect_it}, covering 
+# ONE flat dict, {failure_type_name: regex_to_detect_it}, covering
 # failure types. To add a brand-new failure type: add
 # ONE line to this dict.
 #
@@ -441,7 +445,7 @@ def month_patterns(start, end):
 
 
 # =============================================================================
-# SECTION 5: Locating input files and the output folder
+# SECTION 5: Locating input files, the output folder, and the previous run
 # =============================================================================
 
 def find_log_files(log_dir, start, end):
@@ -459,6 +463,13 @@ def find_log_files(log_dir, start, end):
     return sorted(found)
 
 
+def current_env_label():
+    """'prod' or 'dev', detected from the hostname. Shared by the output
+    folder name and the previous-run lookup, so both always agree.
+    """
+    return "prod" if "prod" in socket.gethostname().lower() else "dev"
+
+
 def resolve_output_dir(semaphore_root):
     """Build (and create) this run's output folder. Everything the run
     produces -- CSV and report.html -- lands in one folder together,
@@ -466,11 +477,55 @@ def resolve_output_dir(semaphore_root):
     never collide.
     """
     tools_dir = semaphore_root / "tools" / "parsed_semaphore_logs"
-    env_label = "prod" if "prod" in socket.gethostname().lower() else "dev"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_dir = tools_dir / f"semaphore_{env_label}_report_{timestamp}"
+    run_dir = tools_dir / f"semaphore_{current_env_label()}_report_{timestamp}"
     run_dir.mkdir(parents=True, exist_ok=True)
     return run_dir
+
+
+def find_previous_run(tools_dir, current_run_dir, current_start):
+    """Find the most recent earlier run (same dev/prod environment) whose
+    data ends BEFORE this run's start date, and load its CSV.
+
+    "Most recent folder" alone isn't enough: rerunning the same week
+    twice would compare the week against itself. Requiring the previous
+    data to end before current_start rules that out.
+
+    Folder names end in YYYYMMDD_HHMMSS, so sorting by name is also
+    sorting by run time. Returns (DataFrame, run_dir), or (None, None)
+    if no usable earlier run exists -- the report just skips the
+    comparison section in that case instead of failing.
+    """
+    run_dirs = sorted(
+        (
+            d for d in tools_dir.glob(f"semaphore_{current_env_label()}_report_*")
+            if d.is_dir() and d.resolve() != current_run_dir.resolve()
+        ),
+        key=lambda d: d.name,
+        reverse=True,
+    )
+    for run_dir in run_dirs:
+        csv_path = run_dir / "model_run_events.csv"
+        if not csv_path.is_file():
+            continue
+        try:
+            # The CSV stores timestamps the way pandas writes them
+            # ("2026-10-05 08:12:00"), not the logs' MM/DD/YY format, so
+            # let pandas parse them with its default rules.
+            prev = pd.read_csv(csv_path, parse_dates=["timestamp"])
+        except (ValueError, pd.errors.ParserError, pd.errors.EmptyDataError) as exc:
+            print(f"WARNING: skipping unreadable previous CSV {csv_path}: {exc}")
+            continue
+        if prev.empty:
+            continue
+        prev["date"] = prev["timestamp"].dt.date
+        # Re-derive families with TODAY's MODEL_FAMILIES, so an edit to
+        # that list since the old run doesn't make the two periods
+        # disagree about which family a model belongs to.
+        prev["model_family"] = prev["model_name"].astype(str).map(family_for_model)
+        if prev["date"].max() < current_start:
+            return prev, run_dir
+    return None, None
 
 
 # =============================================================================
@@ -918,6 +973,19 @@ def build_notes_table(df, family, cap=NOTES_TABLE_CAP):
     return capped, len(family_failures)  # also return the true total, for the "showing N of M" note
 
 
+def failure_count_comparison(prev_df, curr_df, column):
+    """Side-by-side failure counts per value of `column` (e.g. family or
+    reason) for the previous and current periods. Outer-joined, so
+    something that only failed in one of the two periods still shows up
+    (with a 0 for the other). Sorted worst-current-first.
+    """
+    prev_counts = prev_df[prev_df["status"] == "failed"][column].value_counts()
+    curr_counts = curr_df[curr_df["status"] == "failed"][column].value_counts()
+    table = pd.concat({"prev": prev_counts, "curr": curr_counts}, axis=1).fillna(0).astype(int)
+    table["diff"] = table["curr"] - table["prev"]
+    return table.sort_values(["curr", "diff"], ascending=False)
+
+
 # =============================================================================
 # SECTION 8: SVG chart-drawing functions
 # =============================================================================
@@ -1279,6 +1347,96 @@ def dataframe_to_html_table(df):
     return f"<table><thead><tr>{header}</tr></thead><tbody>{rows}</tbody></table>"
 
 
+def format_delta(prev, curr, higher_is_better, is_percent=False):
+    """Signed change between two numbers, colored green/red by whether
+    it's an improvement. higher_is_better=None means neutral (e.g. total
+    run count, where more or fewer isn't good or bad by itself).
+    """
+    diff = curr - prev
+    if is_percent:
+        text = f"{diff:+.2f} pts"
+    else:
+        diff = int(diff)
+        text = f"{diff:+d}"
+        if prev:
+            text += f" ({diff / prev * 100:+.0f}%)"
+    if higher_is_better is None or abs(diff) < 0.005:
+        css = "same"
+    else:
+        css = "better" if (diff > 0) == higher_is_better else "worse"
+    return f'<span class="{css}">{text}</span>'
+
+
+def comparison_table_html(table, label):
+    """Render a failure_count_comparison() table. Built by hand instead
+    of with dataframe_to_html_table because the Change cell holds a
+    colored <span>, which that function would escape.
+    """
+    rows = "".join(
+        f"<tr><td>{html.escape(str(name))}</td><td>{r['prev']}</td><td>{r['curr']}</td>"
+        f"<td>{format_delta(r['prev'], r['curr'], higher_is_better=False)}</td></tr>"
+        for name, r in table.iterrows()
+    )
+    return (
+        f"<table><thead><tr><th>{html.escape(label)}</th><th>Previous</th>"
+        f"<th>Current</th><th>Change</th></tr></thead><tbody>{rows}</tbody></table>"
+    )
+
+
+def render_comparison_section(prev_df, curr_df, prev_run_dir):
+    """Build the HTML for the comparison block at the top of the report:
+    headline numbers side by side, then failures by family and by reason.
+    """
+    prev_stats = compute_overall_stats(prev_df)
+    curr_stats = compute_overall_stats(curr_df)
+
+    def date_span(d):
+        return f"{d['date'].min():%m/%d/%y} to {d['date'].max():%m/%d/%y}"
+
+    prev_days = (prev_df["date"].max() - prev_df["date"].min()).days + 1
+    curr_days = (curr_df["date"].max() - curr_df["date"].min()).days + 1
+
+    html_str = "<h2>Compared to Previous Report</h2>"
+    html_str += (
+        f"<p class='note'>Previous: {date_span(prev_df)} ({prev_days} days, from "
+        f"<code>{html.escape(prev_run_dir.name)}</code>) &nbsp;|&nbsp; "
+        f"Current: {date_span(curr_df)} ({curr_days} days)</p>"
+    )
+    if prev_days != curr_days:
+        html_str += (
+            "<p class='note'>The two windows are different lengths, so raw counts "
+            "aren't directly comparable. Success rate is the fairer comparison.</p>"
+        )
+
+    # (label, stats key, higher_is_better, is_percent)
+    rows = [
+        ("Total runs", "total", None, False),
+        ("Successful", "success_count", True, False),
+        ("Failed", "failed_count", False, False),
+        ("Success rate", "success_rate", True, True),
+    ]
+    body = ""
+    for label, key, higher_is_better, is_pct in rows:
+        p, c = prev_stats[key], curr_stats[key]
+        fmt = (lambda v: f"{v:.2f}%") if is_pct else str
+        body += (
+            f"<tr><td>{label}</td><td>{fmt(p)}</td><td>{fmt(c)}</td>"
+            f"<td>{format_delta(p, c, higher_is_better, is_pct)}</td></tr>"
+        )
+    html_str += (
+        "<table><thead><tr><th>Metric</th><th>Previous</th><th>Current</th>"
+        f"<th>Change</th></tr></thead><tbody>{body}</tbody></table>"
+    )
+
+    html_str += "<h3>Failures by family</h3>"
+    html_str += comparison_table_html(failure_count_comparison(prev_df, curr_df, "model_family"), "Family")
+
+    html_str += "<h3>Failures by reason</h3>"
+    html_str += comparison_table_html(failure_count_comparison(prev_df, curr_df, "failure_reason"), "Reason")
+
+    return html_str
+
+
 def render_overall_section(stats, charts, top_reasons, top_models):
     """Build the HTML for the report's overall (all-families) section:
     summary numbers, the four whole-dataset charts, and the two overall
@@ -1375,6 +1533,9 @@ th { background: #f4f4f4; }
 .chart svg { max-width: 100%; height: auto; }
 .note { color: #666; font-size: 13px; font-style: italic; }
 .family-stats { font-size: 14px; }
+.better { color: #2e7d32; font-weight: bold; }
+.worse { color: #c62828; font-weight: bold; }
+.same { color: #666; }
 """
 
 
@@ -1387,12 +1548,12 @@ def write_events_csv(df, output_dir):
     return csv_path
 
 
-def build_report(df, output_dir):
-    """Build every chart, assemble the full HTML string (overall
-    section, then one section per family with failures, worst-first),
-    and write report.html into output_dir. Everything -- charts, tables,
-    styling -- lives in this one file; there are no separate PNGs or
-    stylesheets to keep track of.
+def build_report(df, output_dir, prev_df=None, prev_run_dir=None):
+    """Build every chart, assemble the full HTML string (comparison with
+    the previous run if one was found, overall section, then one section
+    per family with failures, worst-first), and write report.html into
+    output_dir. Everything -- charts, tables, styling -- lives in this
+    one file; there are no separate PNGs or stylesheets to keep track of.
     """
     stats = compute_overall_stats(df)
 
@@ -1416,6 +1577,11 @@ def build_report(df, output_dir):
         f"<strong>Generated:</strong> {datetime.now():%m/%d/%y %H:%M:%S}<br>"
         f"<strong>Source CSV:</strong> <code>model_run_events.csv</code></p>"
     )
+
+    if prev_df is not None:
+        body += render_comparison_section(prev_df, df, prev_run_dir)
+    else:
+        body += "<p class='note'>No earlier report found to compare against.</p>"
 
     body += render_overall_section(stats, charts, top_reasons, top_models_df)
 
@@ -1470,12 +1636,21 @@ def main():
         print("No events found in the given date range.")
         return 1
 
-    # 4. Save the raw event table.
+    # 4. Look for an earlier, non-overlapping run to compare against.
+    #    Done BEFORE writing this run's CSV, so this run can never pick
+    #    itself (the folder is also excluded explicitly).
+    prev_df, prev_run_dir = find_previous_run(output_dir.parent, output_dir, args.start_date)
+    if prev_df is not None:
+        print(f"Comparing against previous run: {prev_run_dir.name}")
+    else:
+        print("No earlier run found to compare against; skipping comparison.")
+
+    # 5. Save the raw event table.
     csv_path = write_events_csv(df, output_dir)
     print(f"\nSaved event CSV: {csv_path}")
 
-    # 5. Build the self-contained HTML report (charts + tables inline).
-    report_path = build_report(df, output_dir)
+    # 6. Build the self-contained HTML report (charts + tables inline).
+    report_path = build_report(df, output_dir, prev_df, prev_run_dir)
     print(f"Saved report: {report_path}")
 
     print(f"\nDone! See: {output_dir}")
