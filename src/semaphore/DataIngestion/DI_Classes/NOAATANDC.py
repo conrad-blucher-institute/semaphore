@@ -162,7 +162,7 @@ class NOAATANDC(IDataIngestion):
         if isSinglePoint:
             toTime = toTime + timeDescription.interval
 
-        # note that the way COOPS constructs the URL is fairly complicated. Yuo can 
+        # note that the way COOPS constructs the URL is fairly complicated. You can 
         # set a breakpoint in the COOPS station.py scripts to inspect the URL and 
         # parameters being used. But here is how the constructed url looks like.  
         # this is useful to have if you are running into performance issues with the 
