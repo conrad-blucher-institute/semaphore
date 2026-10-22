@@ -158,7 +158,7 @@ class Orchestrator:
                 inserted_results, model_run_result = series_storage.insert_output_and_model_run(result_series, execution_time, 0)
 
                 # SUCCESS: Log successful database insertion
-                log_success(f"Model {model_name} completed successfully ✓")
+                log_success(f"**SUCCESS** Model {model_name} completed successfully")
                 log_success(f"Results inserted: {inserted_results}")
                 log_success(inserted_results.dataFrame if inserted_results is not None else 'No dataframe')
 

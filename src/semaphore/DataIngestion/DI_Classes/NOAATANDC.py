@@ -162,6 +162,12 @@ class NOAATANDC(IDataIngestion):
         if isSinglePoint:
             toTime = toTime + timeDescription.interval
 
+        # note that the way COOPS constructs the URL is fairly complicated. You can 
+        # set a breakpoint in the COOPS station.py scripts to inspect the URL and 
+        # parameters being used. But here is how the constructed url looks like.  
+        # this is useful to have if you are running into performance issues with the 
+        # NOAA API requests.
+        # Example URL: 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=20261013+19%3A00&end_date=20261014+22%3A00&station=8776139&product=water_temperature&units=metric&time_zone=gmt&application=noaa_coops&format=json'
         try:
             station = Station(id=stationID)
             lat_lon = (station.lat_lon['lat'], station.lat_lon['lon'])
