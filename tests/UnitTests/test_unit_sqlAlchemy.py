@@ -17,6 +17,8 @@ High-level flow:
 6) Cleanup: delete only the rows inserted by this test module.
 
 docker exec semaphore-core python3 -m pytest tests/UnitTests/test_unit_sqlAlchemy.py
+
+python -m pytest tests/UnitTests/test_unit_sqlAlchemy.py -s
 """
 # -------------------------------
 
@@ -548,14 +550,15 @@ def test_deserialize(data_array):
         (
             # test tuples that would be returned from the DB query
             [
-                ( "ModelA", datetime(2026, 1, 1, 0, 0), 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0),
-                ( "ModelB", datetime(2026, 1, 1, 0, 0), 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0)
+                ( "ModelA", datetime(2026, 1, 1, 0, 0), timedelta(hours=3),   1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0),
+                ( "ModelB", datetime(2026, 1, 1, 0, 0), timedelta(hours=120), 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0)
             ],
             # the expected output after parsing the DB results
             [
                 {
                     'modelName': "ModelA",
                     'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
+                    'leadTime': timedelta(hours=3),
                     'p1':  1.0,
                     'p5':  2.0,
                     'p10': 3.0,
@@ -573,6 +576,7 @@ def test_deserialize(data_array):
                 {
                     'modelName': "ModelB",
                     'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
+                    'leadTime': timedelta(hours=120),
                     'p1': 2.0,
                     'p5': 4.0,
                     'p10': 6.0,
@@ -593,13 +597,14 @@ def test_deserialize(data_array):
         (
             # test tuples that would be returned from the DB query
             [
-                ( "ModelA", datetime(2026, 1, 1, 0, 0), 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0)
+                ( "ModelA", datetime(2026, 1, 1, 0, 0), timedelta(hours=36), 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0)
             ],
             # the expected tuple splicing
             [
                 {
                     'modelName': "ModelA",
-                    'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
+                    'timeGenerated': datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc),  # the result should be timezone aware and in UTC
+                    'leadTime': timedelta(hours=36),
                     'p1':  1.0,
                     'p5':  2.0,
                     'p10': 3.0,
@@ -652,8 +657,8 @@ def test_select_latest_output_statistics(test_data, expected_result):
         (
             # test tuples that would be returned from the DB query
             [
-                ( "ModelB", datetime(2026, 1, 2, 0, 0), 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0),
-                ( "ModelC", datetime(2026, 1, 3, 0, 0), 3.0, 6.0, 9.0, 12.0, 15.0, 18.0, 21.0, 24.0, 27.0, 30.0, 33.0, 36.0, 39.0),
+                ( "ModelB", datetime(2026, 1, 2, 0, 0), timedelta(hours=6),  2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0),
+                ( "ModelC", datetime(2026, 1, 3, 0, 0), timedelta(hours=12), 3.0, 6.0, 9.0, 12.0, 15.0, 18.0, 21.0, 24.0, 27.0, 30.0, 33.0, 36.0, 39.0),
             ],
             # the expected output after parsing the DB results
             [
@@ -661,6 +666,7 @@ def test_select_latest_output_statistics(test_data, expected_result):
                 {
                     'modelName': "ModelB",
                     'timeGenerated': datetime(2026, 1, 2, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
+                    'leadTime': timedelta(hours=6),
                     'p1': 2.0,
                     'p5': 4.0,
                     'p10': 6.0,
@@ -678,6 +684,7 @@ def test_select_latest_output_statistics(test_data, expected_result):
                 {
                     'modelName': "ModelC",
                     'timeGenerated': datetime(2026, 1, 3, 0, 0, tzinfo=timezone.utc), # the result should be timezone aware and in UTC
+                    'leadTime': timedelta(hours=12),
                     'p1': 3.0,
                     'p5': 6.0,
                     'p10': 9.0,

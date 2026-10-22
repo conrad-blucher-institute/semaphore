@@ -9,11 +9,13 @@
 This file tests that the api can correctly serialize ndarrays in the dataValue column of a data frame correctly
 
 docker exec semaphore-core python3 -m pytest tests/UnitTests/test_unit_api.py
+
+python -m pytest tests/UnitTests/test_unit_api.py -s
 """
 import numpy as np
 import pandas as pd
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from semaphore.DataClasses import Series, SemaphoreSeriesDescription
 from apiDriver import serialize_output_series, serialize_statistics
 
@@ -124,7 +126,7 @@ def test_serialize_output(data_array):
             "dataValue": data_array,
             "dataUnit": "celsius",
             "timeGenerated": datetime(2026, 1, 1, 0, 0, 0),
-            "leadTime": 367200
+            "leadTime": timedelta(seconds=367200)   # python converts the postgres interval types to a timedelta object
         }
     ])
 
@@ -146,6 +148,7 @@ def test_serialize_output(data_array):
     assert result['_Series__data'][0]['dataUnit'] == "celsius"
     assert result['_Series__data'][0]['leadTime'] == 367200
     assert result['_Series__data'][0]['timeGenerated'] == "2026-01-01T00:00:00"
+    assert result['_Series__data'][0]['timeVerified'] == "2026-01-05T06:00:00"
 
 def test_serialize_output_multiple_rows():
     """
@@ -207,7 +210,7 @@ def test_serialize_output_multiple_rows():
     ])
 
     tg = datetime(2026, 1, 1, 0, 0, 0)
-    lt = 367200
+    lt = timedelta(seconds=367200)
     unit = "celsius"
 
     df = pd.DataFrame([
@@ -262,6 +265,7 @@ def test_serialize_output_multiple_rows():
         assert result['_Series__data'][idx]['dataUnit'] == "celsius"
         assert result['_Series__data'][idx]['leadTime'] == 367200
         assert result['_Series__data'][idx]['timeGenerated'] == "2026-01-01T00:00:00"
+        assert result['_Series__data'][idx]['timeVerified'] == "2026-01-05T06:00:00"
 
 @pytest.mark.parametrize(
     "ranged, statistics_results, requested_model_names, expected_result",
@@ -273,6 +277,7 @@ def test_serialize_output_multiple_rows():
                 {
                     "modelName": "ModelA",
                     "timeGenerated": datetime(2026, 1, 1, tzinfo=timezone.utc),
+                    "leadTime": timedelta(seconds=10800),
                     "p1": 1.0,
                     "p5": 2.0,
                     "p10": 3.0,
@@ -290,6 +295,7 @@ def test_serialize_output_multiple_rows():
                 {
                     "modelName": "ModelB",
                     "timeGenerated": datetime(2026, 1, 2, tzinfo=timezone.utc),
+                    "leadTime": timedelta(seconds=21600),
                     "p1": 2.0,
                     "p5": 4.0,
                     "p10": 6.0,
@@ -309,7 +315,9 @@ def test_serialize_output_multiple_rows():
             {
                 "ModelA": {
                     "modelName": "ModelA",
+                    "timeVerified": "2026-01-01T03:00:00",
                     "timeGenerated": "2026-01-01T00:00:00",
+                    "leadTime": 10800,
                     "p1": 1.0,
                     "p5": 2.0,
                     "p10": 3.0,
@@ -326,7 +334,9 @@ def test_serialize_output_multiple_rows():
                 },
                 "ModelB": {
                     "modelName": "ModelB",
+                    "timeVerified": "2026-01-02T06:00:00",
                     "timeGenerated": "2026-01-02T00:00:00",
+                    "leadTime": 21600,
                     "p1": 2.0,
                     "p5": 4.0,
                     "p10": 6.0,
@@ -351,6 +361,7 @@ def test_serialize_output_multiple_rows():
                 {
                     "modelName": "ModelA",
                     "timeGenerated": datetime(2026, 1, 1, tzinfo=timezone.utc),
+                    "leadTime": timedelta(seconds=10800),
                     "p1": 1.0,
                     "p5": 2.0,
                     "p10": 3.0,
@@ -368,6 +379,7 @@ def test_serialize_output_multiple_rows():
                 {
                     "modelName": "ModelA",
                     "timeGenerated": datetime(2026, 1, 2, tzinfo=timezone.utc),
+                    "leadTime": timedelta(seconds=21600),
                     "p1": 2.0,
                     "p5": 4.0,
                     "p10": 6.0,
@@ -388,7 +400,9 @@ def test_serialize_output_multiple_rows():
                 "ModelA": [
                     {
                         "modelName": "ModelA",
+                        "timeVerified": "2026-01-01T03:00:00",
                         "timeGenerated": "2026-01-01T00:00:00",
+                        "leadTime": 10800,
                         "p1": 1.0,
                         "p5": 2.0,
                         "p10": 3.0,
@@ -405,7 +419,9 @@ def test_serialize_output_multiple_rows():
                     },
                     {
                         "modelName": "ModelA",
+                        "timeVerified": "2026-01-02T06:00:00",
                         "timeGenerated": "2026-01-02T00:00:00",
+                        "leadTime": 21600,
                         "p1": 2.0,
                         "p5": 4.0,
                         "p10": 6.0,
