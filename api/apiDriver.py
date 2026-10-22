@@ -40,21 +40,28 @@ class ProcessTimeFilter(logging.Filter):
         record.process_time = process_time_var.get()
         return True
 
-@app.middleware("http")
-async def response_time_middleware(request, call_next):
-    """ Middleware to measure and log the processing time of each request. 
-        Stores the processing time in a context variable for logging.
-    """
-    start_time = start_time = datetime.now(timezone.utc)
-    response = await call_next(request)
-    process_time = datetime.now(timezone.utc) - start_time
-    process_time_var.set(process_time.total_seconds())
-    return response
+"""
+TODO: figure out what we should do with this endpoint.
+This endpoint was originally made for
+profiling and to monitor performance, however this
+code is async and our entire app is not built to handle
+async code all the way through, causing issues.
+"""
+# @app.middleware("http")
+# async def response_time_middleware(request, call_next):
+#     """ Middleware to measure and log the processing time of each request. 
+#         Stores the processing time in a context variable for logging.
+#     """
+#     start_time = start_time = datetime.now(timezone.utc)
+#     response = await call_next(request)
+#     process_time = datetime.now(timezone.utc) - start_time
+#     process_time_var.set(process_time.total_seconds())
+#     return response
 #endregion
 
 #region API Endpoints
 @app.get('/input/source={source}/series={series}/location={location}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
-async def get_input(source: str, series: str, location: str, fromDateTime: str, toDateTime: str, 
+def get_input(source: str, series: str, location: str, fromDateTime: str, toDateTime: str, 
                     datum: str = None, interval: int = None):
     """
     Retrieves input series object
@@ -111,7 +118,7 @@ async def get_input(source: str, series: str, location: str, fromDateTime: str, 
 
 
 @app.get('/output_latest/')
-async def get_outputs_latest(modelNames: list[str] = Query(None)):
+def get_outputs_latest(modelNames: list[str] = Query(None)):
     """
     Queries outputs for given models looking for the last prediction that was made with them.
     Args:
@@ -145,7 +152,7 @@ async def get_outputs_latest(modelNames: list[str] = Query(None)):
     return serializedResults
 
 @app.get('/output_statistics/')
-async def get_output_statistics(modelNames: list[str] = Query(None)):
+def get_output_statistics(modelNames: list[str] = Query(None)):
     """
     Queries output statistics for given models.
      Args:
@@ -169,7 +176,7 @@ async def get_output_statistics(modelNames: list[str] = Query(None)):
     return serialize_statistics( statistics_results, modelNames)
 
 @app.get('/select_output_statistics_range/')
-async def get_output_statistics_range(modelNames: list[str] = Query(None), fromDateTime: str = Query(None), toDateTime: str = Query(None)):
+def get_output_statistics_range(modelNames: list[str] = Query(None), fromDateTime: str = Query(None), toDateTime: str = Query(None)):
     """
     Queries output statistics for given models in a specefic range of time.
      Args:
@@ -195,7 +202,7 @@ async def get_output_statistics_range(modelNames: list[str] = Query(None), fromD
     return serialize_statistics( statistics_results, modelNames, ranged=True)
 
 @app.get('/output_time_span/')
-async def get_outputs_time_span(fromDateTime: str, toDateTime: str, modelNames: list[str] = Query(None)):
+def get_outputs_time_span(fromDateTime: str, toDateTime: str, modelNames: list[str] = Query(None)):
     """
     Queries outputs for a given time range for given models.
     Args:
@@ -221,7 +228,7 @@ async def get_outputs_time_span(fromDateTime: str, toDateTime: str, modelNames: 
 
 
 @app.get('/output/modelName={modelName}/modelVersion={modelVersion}/series={series}/location={location}/fromDateTime={fromDateTime}/toDateTime={toDateTime}')
-async def get_output(modelName: str, modelVersion: str, series: str, location: str, fromDateTime: str, 
+def get_output(modelName: str, modelVersion: str, series: str, location: str, fromDateTime: str, 
                      toDateTime: str, datum: str = None, interval: int = None):
     """
     Retrieves output series object
