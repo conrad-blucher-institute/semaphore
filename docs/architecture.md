@@ -182,24 +182,27 @@ It supports running one or more DSPECs in a single execution and provides severa
 
 ### Example
 
+These commands can be run inside the `semaphore-core` container (prefix them with `docker exec semaphore-core`) and locally. DSPEC paths are relative to the root of the repository (`/app` in the container, `/semaphore` locally). Always run the commands form the root of the repo (if running inside the container, the docker `exec` command does that by default).
+
 Run a single model:
 
 ```bash
-python3 src/semaphoreRunner.py -d test_dspec.json
+python3 -m semaphore.semaphoreRunner -d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json
 ```
 
 Run multiple models:
 
 ```bash
-python3 src/semaphoreRunner.py \
--d model1.json model2.json model3.json
+python3 -m semaphore.semaphoreRunner \
+-d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json \
+data/dspec/ColdStunning/Bird-Island_Water-Temperature_24hr.json
 ```
 
 Run a model using a historical reference time:
 
 ```bash
-python3 src/semaphoreRunner.py \
--d test_dspec.json \
+python3 -m semaphore.semaphoreRunner \
+-d data/dspec/ColdStunning/Bird-Island_Water-Temperature_12hr.json \
 -p 202601010000
 ```
 ---
@@ -401,17 +404,21 @@ Most models can be added without modifying Semaphore's core logic.
 # Directory Overview
 
 ```text
-src/
-│
-├── API/
-├── DataGatherer/
-├── DataClasses/
-├── Database/
-├── DatabaseMigration/
-├── OutputHandler/
-├── PostProcessing/
-├── tools/
-└── semaphoreRunner.py
+pyproject.toml          # makes src/semaphore an installable package (pip install -e .)
+src/semaphore/          # the semaphore package
+├── DataIngestion/      # pulls data from external sources (DI_Classes/)
+├── DataIntegrity/      # interpolation and gap filling
+├── DataValidation/     # checks on gathered data
+├── ModelExecution/     # DSPEC parsing, data gathering, input vectors, model runs, output handlers
+├── PostProcessing/     # post-processing calls named in DSPECs
+├── SeriesProvider/     # gets series from storage, or ingests them when missing
+├── SeriesStorage/      # database access (SS_Classes/)
+├── DataClasses.py, utility.py, exceptions.py, discord.py
+├── orchestrator.py
+└── semaphoreRunner.py  # entry point: python3 -m semaphore.semaphoreRunner
+api/                    # FastAPI app (apiDriver.py); not part of the package
+tests/                  # UnitTests/ and IntegrationTests/
+tools/                  # cron, deployment and database migration scripts
 ```
 
-Each directory contains one major subsystem of Semaphore.
+Each directory under `src/semaphore/` contains one major subsystem of Semaphore. Inside the package, import with the full path, e.g. `from semaphore.DataClasses import Series`.

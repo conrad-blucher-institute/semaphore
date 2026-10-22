@@ -26,10 +26,13 @@ from importlib import import_module
 from datetime import datetime, timezone
 from json import load
 import argparse
+import re
 
 load_dotenv()
 TARGET_VERSION_FILEPATH = './tools/DatabaseMigration/target_version.json'
 DATABASE_MIGRATION_MODULE_PATH= './tools/DatabaseMigration'
+# Version folders are named <major>_<minor>, e.g. 3_8. Anything else in the folder (e.g. __pycache__) is not a version.
+VERSION_DIR_PATTERN = re.compile(r'^\d+_\d+$')
 
 
 class Version():
@@ -166,7 +169,8 @@ def create_version_lists() -> tuple[list[str], list[tuple[int]]]:
     base_path = path.join(getcwd(), DATABASE_MIGRATION_MODULE_PATH)
     # There is no 0_0 dir but that is the first theoretical version of the DB
 
-    names = ['0_0'] + [entry for entry in listdir(base_path) if path.isdir(path.join(base_path, entry))]
+    names = ['0_0'] + [entry for entry in listdir(base_path)
+                       if path.isdir(path.join(base_path, entry)) and VERSION_DIR_PATTERN.match(entry)]
     versions = [Version(name) for name in names]
     
     # Zips the two lists together, sorts them, unzips them

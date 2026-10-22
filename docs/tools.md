@@ -77,7 +77,7 @@ python3 tools/group_runner.py -i ./cron_jobs/job_300_3600_0.json
 The generated command looks similar to:
 
 ```bash
-docker exec semaphore-core python3 src/semaphoreRunner.py -d \
+docker exec semaphore-core python3 -m semaphore.semaphoreRunner -d \
 ./data/dspec/model1.json \
 ./data/dspec/model2.json \
 ./data/dspec/model3.json

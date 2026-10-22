@@ -26,6 +26,10 @@ RUN pip install -r requirements.txt
 # Copy the source code from ./src to the Docker image
 COPY . .
 
+# Install the semaphore package. Editable, so Compose Watch's sync of ./src is picked up without reinstalling.
+# --no-deps: the dependencies were installed above, in a layer that stays cached until the requirements change.
+RUN pip install --no-deps -e .
+
 # Create the service account user, skip if it already exists
 RUN if ! id -u ${SERVICE_ACCOUNT_USERNAME} >/dev/null 2>&1; then \
         if getent passwd ${SERVICE_ACCOUNT_UID} >/dev/null 2>&1; then \
@@ -45,5 +49,5 @@ RUN chown -R ${SERVICE_ACCOUNT_USERNAME}:${SERVICE_ACCOUNT_USERNAME} /app
 # Set the user to the service account user
 USER ${SERVICE_ACCOUNT_USERNAME}
 
-# Set the work directory to SRC such that imports work correctly
-WORKDIR /app/src
+# Run from the repo root; the semaphore package is installed, and uvicorn finds apiDriver via --app-dir
+WORKDIR /app

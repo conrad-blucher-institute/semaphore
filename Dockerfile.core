@@ -13,18 +13,22 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory to /app
 WORKDIR /app
 
-# Copy the requirements.txt file to the Docker image
-COPY requirements.txt .
+# Copy the requirements files to the Docker image (the test ones too: the unit tests run in this container)
+COPY requirements.txt requirements-test.txt ./
 
 # Create a virtual environment and activate it
 RUN python3 -m venv ./venv/vsem
 RUN /bin/bash -c "source ./venv/vsem/bin/activate"
 
 # Install the requirements using pip
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt -r requirements-test.txt
 
 # Copy the source code from ./src to the Docker image
 COPY . .
+
+# Install the semaphore package. Editable, so Compose Watch's sync of ./src is picked up without reinstalling.
+# --no-deps: the dependencies were installed above, in a layer that stays cached until the requirements change.
+RUN pip install --no-deps -e .
 
 # Create the service account user, skip if it already exists
 RUN if ! id -u ${SERVICE_ACCOUNT_USERNAME} >/dev/null 2>&1; then \

@@ -16,7 +16,6 @@ services:
     environment:
       - DB_LOCATION_STRING=${DB_LOCATION_STRING}
       - ISERIESSTORAGE_INSTANCE=${ISERIESSTORAGE_INSTANCE}
-      - DSPEC_FOLDER_PATH=${DSPEC_FOLDER_PATH}
       - MODEL_FOLDER_PATH=${MODEL_FOLDER_PATH}
       - IS_DEV=${IS_DEV}
       - DISCORD_NOTIFY=${DISCORD_NOTIFY}
@@ -38,10 +37,11 @@ services:
       - "host.docker.internal:host-gateway"
   api:
     command: [
-      "uvicorn", "API.apiDriver:app",
+      "uvicorn", "apiDriver:app",
+      "--app-dir", "/app/api",
       "--host", "0.0.0.0",
       "--port", "8000",
-      "--log-config", "./API/semaphore_api_log_config.json",
+      "--log-config", "./api/semaphore_api_log_config.json",
       "--workers", "8"
     ]
     container_name: semaphore-api
@@ -59,7 +59,6 @@ services:
     environment:
       - DB_LOCATION_STRING=${DB_LOCATION_STRING}
       - ISERIESSTORAGE_INSTANCE=${ISERIESSTORAGE_INSTANCE}
-      - DSPEC_FOLDER_PATH=${DSPEC_FOLDER_PATH}
       - MODEL_FOLDER_PATH=${MODEL_FOLDER_PATH}
     ports: 
       - "${API_HOST_PORT}:8000"
