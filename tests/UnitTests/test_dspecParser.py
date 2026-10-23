@@ -156,14 +156,18 @@ class TestDSPECParser:
             ({"series": "dWl"}, None),
 
             # other measurement series that doesn't start with d, no offset
-            ({"series": "WVHT"}, None)
+            ({"series": "WVHT"}, None),
+
+            # magnolia transform series follow their own rules
+            ({"series": "magnolia_48|2.0.0|pSurge", "stalenessOffset": 12345}, timedelta(seconds=12345))
         ],
         ids = [
             "explicit_offset",
             "default_offset",
             "harmonic_prediction",
             "measurement_series",
-            "other_measurement_series"
+            "other_measurement_series",
+            "magnolia_transform_series"
         ]
     )
     def test_parse_staleness_offset(self, dependent_series, expected_offset):
