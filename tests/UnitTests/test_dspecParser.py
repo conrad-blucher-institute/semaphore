@@ -144,71 +144,26 @@ class TestDSPECParser:
         "dependent_series, expected_offset",
         [
             # explicit offset
-            (
-                {
-                    "series": "pAirTemp",
-                    "range": [2, 1],
-                    "stalenessOffset": 12345
-                },
-                timedelta(seconds=12345)
-            ),
+            ({"series": "pAirTemp", "stalenessOffset": 12345}, timedelta(seconds=12345)),
+
             # default offset
-            (
-                {
-                    "series": "pWaterTmp",
-                    "range": [2, 1],
-                },
-                timedelta(hours=7)
-            ),
+            ({"series": "pWaterTmp"}, timedelta(hours=7)),
+
             # harmonic prediction, no offset
-            (
-                {
-                    "series": "pWl",
-                    "range": [100, 50],
-                },
-                None    # harmonic predictions do not use a staleness offset
-            ),
+            ({"series": "pWl"}, None),
+
             # measurement series, no offset
-            (
-                {
-                    "series": "dWl",
-                    "range": [0, -10],  # [0] is the toTime and [1] is the fromTime, so this indicates a measurement series
-                },
-                None
-            ),
-            # current hour harmonic prediction, no offset
-            (
-                {
-                    "series": "pWl",
-                    "range": [0, 0],
-                },
-                None    # a harmonic prediction for the current hour, so no staleness offset is applied
-            ),
-            # current hour measurement series, no offset
-            (
-                {
-                    "series": "dWl",
-                    "range": [0, 0],
-                },
-                None    # a measurement for the current hour, so no staleness offset is applied
-            ),
-            # now prediction series, no offset
-            (
-                {
-                    "series": "pAirTemp",
-                    "range": [24, 0],
-                },
-                None    # a prediction for the current hour, so no staleness offset is applied
-            )
+            ({"series": "dWl"}, None),
+
+            # other measurement series that doesn't start with d, no offset
+            ({"series": "WVHT"}, None)
         ],
         ids = [
             "explicit_offset",
             "default_offset",
             "harmonic_prediction",
             "measurement_series",
-            "current_harmonic_prediction",
-            "current_measurement_dWl",
-            "now_prediction_series"
+            "other_measurement_series"
         ]
     )
     def test_parse_staleness_offset(self, dependent_series, expected_offset):
