@@ -45,6 +45,10 @@ class DSPEC_Parser:
 
 
 class dspec_sub_Parser_2_0:
+
+    # predictions that do not have a staleness offset default to 7 hours
+    DEFAULT_STALENESS_OFFSET = timedelta(hours=7)
+
     def __init__(self, json: dict) -> None:
         self.__dspec_json = json
         self.__dspec = Dspec()
@@ -123,16 +127,7 @@ class dspec_sub_Parser_2_0:
                 dSeries.datum = dSeries_dict.get("datum")
                 dSeries.unit = dSeries_dict.get("unit")
                 dSeries.outKey = dSeries_dict.get("outKey")
-
-                # If staleness offset is provided we use it, else we set a default based on range:
-                # --- If data is in the past there is no staleness offset (None)
-                # --- If data is current/future we set a default staleness offset of 7 hours
-                fromTimeIsInPast = dSeries.range[1] < 0
-                stalenessOffsetValue = dSeries_dict.get("stalenessOffset", None if fromTimeIsInPast else timedelta(hours=7))
-                # Convert integer seconds to timedelta if needed
-                if isinstance(stalenessOffsetValue, int):
-                    stalenessOffsetValue = timedelta(seconds=stalenessOffsetValue)
-                dSeries.stalenessOffset = stalenessOffsetValue
+                dSeries.stalenessOffset = self.__parse_staleness_offset(dSeries_dict)
 
                 dSeries.verificationOverride = dSeries_dict.get("verificationOverride")
 
@@ -196,7 +191,38 @@ class dspec_sub_Parser_2_0:
         vectorOrder.indexes = indexes
         vectorOrder.multipliedKeys = multipliedKeys
         self.__dspec.orderedVector = vectorOrder
-                
+
+
+    def __parse_staleness_offset(self, dSeries_dict: dict) -> timedelta | None:
+        """
+        checks if a staleness offset is provided in the dspec, otherwise
+        sets a default staleness offset based on the name of the series.
+        Prediction series default to the staleness offset constant while
+        harmonic predictions and measurement series do not have a staleness offset.
+
+        NOTE: This function follows the convention that prediction series start with 'p'
+
+        Args:
+            dSeries_dict (dict): The dependent series dictionary from the dspec
+        
+        Returns:
+            timedelta | None: The staleness offset as a timedelta object, or None if the series
+            is a measurement or a harmonic prediction (pWl)
+        """
+
+        # if an offset is set in the dspec, use it
+        stalenessOffset = dSeries_dict.get("stalenessOffset", None)
+        if stalenessOffset is not None:
+            return timedelta(seconds=stalenessOffset)
+
+        # predictions (except harmonic) default to the constant
+        series = dSeries_dict['series']
+        if series.startswith('p') and series != 'pWl':
+            return self.DEFAULT_STALENESS_OFFSET
+
+        # measurements and harmonic predictions do not have a staleness offset
+        return None
+
 
 class Dspec:
     '''Parent Dspec class, includes header and metadata. Should include anything

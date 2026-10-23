@@ -407,3 +407,29 @@ class TestNOAATANDCUnit:
 
         # Check that the other columns remain unchanged for the rows that are kept
         assert result.equals(expected_df), f"Filtered DataFrame does not match expected DataFrame. Expected:\n{expected_df}\nGot:\n{result}"
+
+
+    def test_harmonic_series_uses_correct_time_generated(self):
+        """
+        Tests that harmonic series ingestion uses the constant timeGenerated value we expect
+        """
+        data = [
+            {'t': datetime(2026, 1, 1, 0, 0), 'v': 1.0},
+            {'t': datetime(2026, 1, 1, 1, 0), 'v': 2.0},
+            {'t': datetime(2026, 1, 1, 2, 0), 'v': 3.0},
+            {'t': datetime(2026, 1, 1, 3, 0), 'v': 4.0},
+            {'t': datetime(2026, 1, 1, 4, 0), 'v': 5.0}
+        ]
+        mock_df = pd.DataFrame(data).set_index('t')
+
+        with patch.object(self.noaa_ingester, '_NOAATANDC__fetch_NOAA_data') as mock_fetch:
+            mock_fetch.return_value = (mock_df, self.sample_lat_lon)
+            
+            series_desc = SeriesDescription("NOAATANDC", "pWl", "packChan", "MHHW")
+            time_desc = TimeDescription(self.from_date, self.to_date, timedelta(hours=1))
+            
+            result_series = self.noaa_ingester._NOAATANDC__fetch_pWl(series_desc, time_desc)
+            
+            # Check that the timeGenerated is set to the constant we expect for harmonic series ingestion
+            assert all(result_series.dataFrame['timeGenerated'] == NOAATANDC.HARMONIC_GENERATED_TIME), "timeGenerated should be set to midnight UTC of Dec 31, 2020 for harmonic series ingestion"
+            mock_fetch.assert_called_once_with(series_desc, time_desc, 'predictions')
