@@ -123,16 +123,7 @@ class dspec_sub_Parser_2_0:
                 dSeries.datum = dSeries_dict.get("datum")
                 dSeries.unit = dSeries_dict.get("unit")
                 dSeries.outKey = dSeries_dict.get("outKey")
-
-                # If staleness offset is provided we use it, else we set a default based on range:
-                # --- If data is in the past there is no staleness offset (None)
-                # --- If data is current/future we set a default staleness offset of 7 hours
-                fromTimeIsInPast = dSeries.range[1] < 0
-                stalenessOffsetValue = dSeries_dict.get("stalenessOffset", None if fromTimeIsInPast else timedelta(hours=7))
-                # Convert integer seconds to timedelta if needed
-                if isinstance(stalenessOffsetValue, int):
-                    stalenessOffsetValue = timedelta(seconds=stalenessOffsetValue)
-                dSeries.stalenessOffset = stalenessOffsetValue
+                dSeries.stalenessOffset = self.__parse_staleness_offset(dSeries_dict)
 
                 dSeries.verificationOverride = dSeries_dict.get("verificationOverride")
 
@@ -196,7 +187,44 @@ class dspec_sub_Parser_2_0:
         vectorOrder.indexes = indexes
         vectorOrder.multipliedKeys = multipliedKeys
         self.__dspec.orderedVector = vectorOrder
-                
+
+
+    def __parse_staleness_offset(self, dSeries_dict: dict) -> timedelta | None:
+        """
+        checks if a staleness offset is provided in the dspec, otherwise
+        sets a default staleness offset based on the from time range of the series.
+
+        NOTE: pWl for harmonic predictions does not use a staleness offset
+
+        NOTE: There is no staleness offset when the from time is in the past (fromTime < 0)
+        or for the current hour (fromTime == 0) for measurement series. There are currently no cases 
+        where a prediction series requests predictions from now, into the future,
+        such as [10, 0]. It also does not make sense to request a prediction for the current hour,
+        so in this case, the logic returns None for the staleness offset.
+
+        Args:
+            dSeries_dict (dict): The dependent series dictionary from the dspec
+        
+        Returns:
+            timedelta | None: The staleness offset as a timedelta object, or None if the series
+            is a measurement or a harmonic prediction (pWl)
+        """
+
+        # if an offset is set in the dspec, use it
+        stalenessOffset = dSeries_dict.get("stalenessOffset", None)
+        if stalenessOffset is not None:
+            return timedelta(seconds=stalenessOffset)
+
+        # harmonic predictions do not use a staleness offset
+        # and measurements that are in the past (fromTime < 0)
+        # or for the current hour (fromTime == 0) do not use a staleness offset
+        from_time_is_now_or_past = dSeries_dict['range'][1] <= 0
+        if dSeries_dict['series'] == 'pWl' or from_time_is_now_or_past:
+            return None
+
+        # from time is in the future, so we default to 7 hours for prediction series
+        return timedelta(hours=7)
+
 
 class Dspec:
     '''Parent Dspec class, includes header and metadata. Should include anything

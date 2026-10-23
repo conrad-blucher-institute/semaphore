@@ -268,8 +268,6 @@ class DataGatherer:
         :param referenceTime: datetime - The reference time to build the time description from.
 
         :returns: TimeDescription - The built time description
-
-        NOTE:: If no staleness offset is provided, it will default to 1 hour.
         """    
 
         # Build the to and from offsets by unpacking the range
