@@ -9,9 +9,14 @@
 This file is a communicator with the NOAA tides and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
 An object of this class must be initialized with a DBInterface, as fetched data is directly imported into the DB via that interface.
 
-NOAA predictions are "calculated 'on-the-fly'" and Predictions are a (relatively) mathematical calculation. There is no "pre-generation" stored copies of 
-predictions, no stored database table of these values. So because no relevant generatedTime can be calculated we're going to have both generatedTime and 
-verifiedTime be the given verifiedTime that NOAA's API provides.
+NOTE: NOAA predictions are "calculated 'on-the-fly'" so they do not have a timeGenerated we can use.
+For this reason, 
+    measurements: timeGenerated = timeVerified since measurements are collected/verified at the same time
+
+    harmonic predictions: timeGenerated = midnight of Dec 31, 2020 due to the current National Tidal Datum Epoch (NTDE).
+        See https://tidesandcurrents.noaa.gov/datum-updates/ntde/ for more info
+
+    predictions: timeGenerated = Now, since predictions are computed on the fly, so we use the Now time as the timeGenerated
 
 Documentation: 
     https://api.tidesandcurrents.noaa.gov/api/prod/
@@ -28,14 +33,13 @@ from semaphore.utility import log
 from math import cos, sin
 from noaa_coops import Station
 import re
-import datetime
 from pandas import DataFrame
-from datetime import timezone
-
-
+from datetime import timezone, datetime
 
 
 class NOAATANDC(IDataIngestion):
+
+    HARMONIC_GENERATED_TIME = datetime(2020, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
 
     def __init__(self):
         """
@@ -131,7 +135,12 @@ class NOAATANDC(IDataIngestion):
         return dbResult if dbResult else None
 
     
-    def __fetch_NOAA_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, NOAAProduct: str) -> None | DataFrame:
+    def __fetch_NOAA_data(
+            self,
+            seriesDescription: SeriesDescription,
+            timeDescription: TimeDescription,
+            NOAAProduct: str
+        ) -> tuple[DataFrame, tuple[float, float]] | tuple[None, None]:
         """
         Fetch data from NOAA API using the noaa_coops library.
         
@@ -144,8 +153,8 @@ class NOAATANDC(IDataIngestion):
             NOAAProduct (str): NOAA API product identifier (e.g., 'water_level', 'wind')
             
         Returns:
-            tuple[DataFrame, tuple[float, float]] | None: Tuple of (data DataFrame, (latitude, longitude))
-                or None if station mapping fails or API request fails
+            tuple[DataFrame, tuple[float, float]] | tuple[None, None]: Tuple of (data DataFrame, (latitude, longitude))
+                or tuple[None, None] if fetch fails
         """
         stationID = self.__get_station_number(seriesDescription.dataLocation)
         if stationID == None: 
@@ -246,6 +255,10 @@ class NOAATANDC(IDataIngestion):
             
         Returns:
             Series | None: Predicted water level data in meters, or None if fetch fails
+
+        NOTE: For harmonic predictions, we set the timeGenerated to midnight of
+        December 31, 2020. Harmonic predictions shouldn't set a stalenessOffset
+        either since they are valid for many years.
         """
 
         data, lat_lon = self.__fetch_NOAA_data(seriesDescription, timeDescription, 'predictions')
@@ -259,12 +272,12 @@ class NOAATANDC(IDataIngestion):
             value = data['v'][idx]
 
             df.loc[len(df)] = [
-                value,                  # dataValue
-                'meter',                # dataUnit
-                dt,                     # timeVerified
-                dt,                     # timeGenerated = timeVerified due to data source limitations detailed in header
-                lat_lon[1],             # longitude
-                lat_lon[0]              # Latitude
+                value,                              # dataValue
+                'meter',                            # dataUnit
+                dt,                                 # timeVerified
+                NOAATANDC.HARMONIC_GENERATED_TIME,  # timeGenerated
+                lat_lon[1],                         # longitude
+                lat_lon[0]                          # Latitude
             ]
 
         df['dataValue'] = df['dataValue'].astype(str)
@@ -312,7 +325,7 @@ class NOAATANDC(IDataIngestion):
                 surge,                  # dataValue
                 'meter',                # dataUnit
                 dt,                     # timeVerified
-                dt,                     # timeGenerated = timeVerified due to data source limitations detailed in header
+                dt,                     # timeGenerated
                 lat_lon[1],             # longitude
                 lat_lon[0]              # latitude
             ]
@@ -328,7 +341,7 @@ class NOAATANDC(IDataIngestion):
     
     def __fetch_WnDir(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
         """
-        Fetch wind direction data from NOAA.
+        Fetches observed wind direction data from NOAA.
         
         Retrieves wind direction in meteorological degrees (direction wind is coming from)
         using the 'wind' NOAA product.
@@ -352,8 +365,8 @@ class NOAATANDC(IDataIngestion):
             wind_dir = data['d'][idx]
 
             df.loc[len(df)] = [
-                wind_dir,          # dataValue
-                'degrees',        # dataUnit
+                wind_dir,       # dataValue
+                'degrees',      # dataUnit
                 dt,             # timeVerified
                 dt,             # timeGenerated
                 lat_lon[1],     # longitude
@@ -369,7 +382,7 @@ class NOAATANDC(IDataIngestion):
     
     def __fetch_WnSpd(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
         """
-        Fetch wind speed data from NOAA.
+        Fetches observed wind speed data from NOAA.
         
         Retrieves wind speed in meters per second using the 'wind' NOAA product.
         
@@ -446,8 +459,8 @@ class NOAATANDC(IDataIngestion):
             y_comp = wind_speed * sin(wind_dir - offset)
 
             x_df.loc[len(x_df)] = [
-                x_comp,          # dataValue
-                'mps',           # dataUnit
+                x_comp,         # dataValue
+                'mps',          # dataUnit
                 dt,             # timeVerified
                 dt,             # timeGenerated
                 lat_lon[1],     # longitude
@@ -455,8 +468,8 @@ class NOAATANDC(IDataIngestion):
             ]
 
             y_df.loc[len(y_df)] = [
-                y_comp,          # dataValue
-                'mps',           # dataUnit
+                y_comp,         # dataValue
+                'mps',          # dataUnit
                 dt,             # timeVerified
                 dt,             # timeGenerated
                 lat_lon[1],     # longitude
@@ -515,7 +528,7 @@ class NOAATANDC(IDataIngestion):
             mean_four_max,                  # dataValue
             'meter',                        # dataUnit
             timeDescription.toDateTime,     # timeVerified
-            timeDescription.toDateTime,         # timeGenerated
+            timeDescription.toDateTime,     # timeGenerated
             lat_lon[1],                     # longitude
             lat_lon[0]                      # latitude
         ]
@@ -531,7 +544,7 @@ class NOAATANDC(IDataIngestion):
         """
         Fetch air temperature data from NOAA.
         
-        Retrieves air temperature in Celsius using the 'air_temperature' NOAA product.
+        Retrieves air temperature measurements in Celsius using the 'air_temperature' NOAA product.
         
         Args:
             seriesDescription (SeriesDescription): Series specification
@@ -568,7 +581,7 @@ class NOAATANDC(IDataIngestion):
     
     def __fetch_dWaterTmp(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription) -> None | Series:
         """
-        Fetch water temperature data from NOAA.
+        Fetches observed water temperature data from NOAA.
         
         Retrieves water temperature in Celsius using the 'water_temperature' NOAA product.
         

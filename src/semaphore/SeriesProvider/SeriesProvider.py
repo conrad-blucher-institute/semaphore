@@ -105,6 +105,8 @@ class SeriesProvider():
                     raise Semaphore_Exception(f'Method {method} in SeriesProvider.request_output received {kwargs} call should be formatted like request_output("SPECIFIC", semaphoreSeriesDescription= DESCRIPTION, timeDescription= DESCRIPTION)')
             case _:
                 raise NotImplementedError(f'Method {method} has not been implemented in SeriesProvider.request_output')
+    
+    
     def db_has_freshly_acquired_data(self, seriesDescription: SeriesDescription, timeDescription: TimeDescription, referenceTime: datetime) -> bool:
         """
         Checks whether the database contains fresh data for the requested series. 
