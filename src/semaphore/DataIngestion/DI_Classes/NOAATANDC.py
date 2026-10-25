@@ -9,12 +9,14 @@
 This file is a communicator with the NOAA tides and currents API. Each public method will provide the ingestion of one series from NOAA Tides and currents
 An object of this class must be initialized with a DBInterface, as fetched data is directly imported into the DB via that interface.
 
-NOTE:
-NOAA predictions are "calculated 'on-the-fly'" so they do not have a timeGenerated we can use.
+NOTE: NOAA predictions are "calculated 'on-the-fly'" so they do not have a timeGenerated we can use.
 For this reason, 
-    - measurements - timeGenerated = timeVerified since measurements are verified/generated at the same time (when the measurment is taken).
-    - harmonic predictions - timeGenerated = midnight of December 31, 2020 since harmonic predictions are valid for many years.
-    - all other predictions - timeGenerated = now in UTC since these predictions are generated at the time of the request.
+    measurements: timeGenerated = timeVerified since measurements are collected/verified at the same time
+
+    harmonic predictions: timeGenerated = midnight of Dec 31, 2020 due to the current National Tidal Datum Epoch (NTDE).
+        See https://tidesandcurrents.noaa.gov/datum-updates/ntde/ for more info
+
+    predictions: timeGenerated = Now, since predictions are computed on the fly, so we use the Now time as the timeGenerated
 
 Documentation: 
     https://api.tidesandcurrents.noaa.gov/api/prod/
