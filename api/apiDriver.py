@@ -52,7 +52,7 @@ async code all the way through, causing issues.
 #     """ Middleware to measure and log the processing time of each request. 
 #         Stores the processing time in a context variable for logging.
 #     """
-#     start_time = start_time = datetime.now(timezone.utc)
+#     start_time = datetime.now(timezone.utc)
 #     response = await call_next(request)
 #     process_time = datetime.now(timezone.utc) - start_time
 #     process_time_var.set(process_time.total_seconds())
@@ -212,7 +212,10 @@ def get_outputs_time_span(fromDateTime: str, toDateTime: str, modelNames: list[s
 
     Returns:
         The results for each model index by the model name. If no data can be found for that model for the provided time range the value will be null.
-    """ 
+    """
+    if not modelNames:
+        raise HTTPException(status_code=422, detail='No model names were provided')
+
     try:
         fromDateTime = datetime.strptime(fromDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
         toDateTime = datetime.strptime(toDateTime, '%Y%m%d%H').replace(tzinfo=timezone.utc)
