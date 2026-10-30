@@ -1,4 +1,4 @@
 {
-    "Target Version" : "3.8",
-    "Description" : "Adds new rows to the ref_dataLocation table and the dataLocation_dataSource_mapping table for the operation of the ESB model."
+    "Target Version" : "3.9",
+    "Description" : "Removes lat/lon unique constraint from the inputs table by dropping then re-adding inputs_AK00"
 }
