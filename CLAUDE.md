@@ -49,5 +49,8 @@ engineers: use its terms when naming new code, database fields, and config.
   semantics, since a future dspec may fall outside the current range.
 - Execute multi-step plans one step at a time and stop after each. Never `git commit`;
   the user reviews and commits.
-- Verified docs: `docs/domain-model.md`. Any other doc (in `docs/`, `README.md`, etc.) is
-  unverified until it is added here. Check its claims against the code before relying on them.
+- Verified docs: `docs/domain-model.md` and `docs/semaphore_db_schema.sql` (DB
+  schema snapshot). The schema's header names the last migration it includes. Check
+  `tools/DatabaseMigration/` for any later migrations before trusting it as current.
+  Any other doc (in `docs/`, `README.md`, etc.) is unverified until it is added here. Check
+  its claims against the code before relying on them.
