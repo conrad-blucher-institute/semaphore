@@ -4,19 +4,19 @@
 # Created By: Florence Tissot
 # Created Date: 11/10/2026
 #----------------------------------
-"""Adds the inputs_archive table, which holds inputs rows that are too old for any model to request.
+"""Adds the inputs_archive table, which holds old inputs rows.
 
    The inputs table grows very fast (ensemble input vectors store one row per input vector member),
    which slows down every query that hits it. Old rows are moved out of inputs into inputs_archive by
    a separate script; this migration only creates the table.
 
-   inputs_archive has the same columns as inputs, plus archivedTime (UTC, like the other times), with these
-   deliberate differences:
+   inputs_archive has the same columns as inputs, plus an archivedTime column that stored when a row 
+   was inserted (presumably archived). The table also has deliberate differences from the inputs table:
      - id keeps the value the row had in inputs, so it has no sequence/default.
      - No primary key, no unique constraint, no foreign keys, and no indexes. No application code reads
        this table; it is only queried by hand. Indexes can be added later if those queries need them.
        Without a unique constraint, a row that was archived, then ingested again and archived again,
-       will appear twice. That is accepted.
+       will appear twice. This is to speed up any insert in this table.
  """
 #----------------------------------
 #
@@ -68,10 +68,9 @@ class Migrator(IDatabaseMigration):
         """This function rolls the database back to version 3.8 by dropping the inputs_archive table.
 
            The rollback refuses to run if inputs_archive contains any rows. This migration does not add
-           rows, so it is not the rollback's job to decide what happens to them. Whoever runs the rollback
-           must first move or delete those rows themselves.
+           rows, so it is not its job to decide what happens to rows that have been added. 
 
-           The table is locked before the check so the archive script can't add rows between the check
+           The table is locked before the check so nothing can add rows between the check
            and the drop.
 
            :param databaseEngine: Engine - the engine of the database we are connecting to (semaphore)
@@ -84,7 +83,8 @@ class Migrator(IDatabaseMigration):
         with databaseEngine.connect() as connection:
             connection.execute(stmt_lock_inputs_archive)
             if connection.execute(stmt_archive_has_rows).scalar():
-                connection.rollback()
+                # No explicit rollback needed: nothing was modified, and leaving the with block closes the
+                # connection, which ends the open transaction and releases the table lock.
                 print('inputs_archive is not empty. Move or delete its rows before rolling back to 3.8.')
                 return False
             connection.execute(stmt_drop_inputs_archive)
