@@ -32,7 +32,6 @@ engineers: use its terms when naming new code, database fields, and config.
 - `data/dspec/`: dspecs, mostly grouped into family folders that change over time. Some
   families have subfolders and some files sit at the top level. A question about "the dspecs"
   means all of them: search `data/dspec/` recursively first.
-- `local_docs/`: working notes and `ticket_list.md` (the running list of unfiled tickets).
 
 ## Running things (always from the repo root; paths are relative)
 - Tests, host: `python -m pytest` (venv with `pip install -e '.[test]'`, DB container up).
