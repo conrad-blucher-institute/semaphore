@@ -1,0 +1,1035 @@
+--
+-- PostgreSQL database cluster dump
+--
+
+-- Started on 2026-11-10 11:59:27 CST
+
+-- Note this is the status of the Semaphore schema that encompasses all migrations up to and including 3_8
+
+--
+-- TOC entry 230 (class 1259 OID 16494)
+-- Name: dataLocation_dataSource_mapping; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public."dataLocation_dataSource_mapping" (
+    id integer NOT NULL,
+    "dataLocationCode" character varying(25) NOT NULL,
+    "dataSourceCode" character varying(10) NOT NULL,
+    "dataSourceLocationCode" character varying(255) NOT NULL,
+    "priorityOrder" integer NOT NULL
+);
+
+
+--
+-- TOC entry 229 (class 1259 OID 16493)
+-- Name: dataLocation_dataSource_mapping_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public."dataLocation_dataSource_mapping_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3510 (class 0 OID 0)
+-- Dependencies: 229
+-- Name: dataLocation_dataSource_mapping_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public."dataLocation_dataSource_mapping_id_seq" OWNED BY public."dataLocation_dataSource_mapping".id;
+
+
+--
+-- TOC entry 232 (class 1259 OID 24780)
+-- Name: deployed_database_version; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.deployed_database_version (
+    id integer NOT NULL,
+    "versionNumber" character varying(10) NOT NULL,
+    "migrationTime" timestamp without time zone NOT NULL,
+    "versionNotes" character varying(255) NOT NULL
+);
+
+
+--
+-- TOC entry 231 (class 1259 OID 24779)
+-- Name: deployed_database_version_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.deployed_database_version_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3511 (class 0 OID 0)
+-- Dependencies: 231
+-- Name: deployed_database_version_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.deployed_database_version_id_seq OWNED BY public.deployed_database_version.id;
+
+
+--
+-- TOC entry 226 (class 1259 OID 16435)
+-- Name: inputs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.inputs (
+    id integer NOT NULL,
+    "generatedTime" timestamp without time zone NOT NULL,
+    "acquiredTime" timestamp without time zone NOT NULL,
+    "verifiedTime" timestamp without time zone NOT NULL,
+    "dataValue" character varying(25) NOT NULL,
+    "isActual" boolean NOT NULL,
+    "dataUnit" character varying(10) NOT NULL,
+    "dataSource" character varying(10) NOT NULL,
+    "dataLocation" character varying(25) NOT NULL,
+    "dataSeries" character varying(25) NOT NULL,
+    "dataDatum" character varying(10),
+    latitude character varying(16),
+    longitude character varying(16),
+    "ensembleMemberID" integer
+);
+
+
+--
+-- TOC entry 225 (class 1259 OID 16434)
+-- Name: inputs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.inputs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3512 (class 0 OID 0)
+-- Dependencies: 225
+-- Name: inputs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.inputs_id_seq OWNED BY public.inputs.id;
+
+
+--
+-- TOC entry 242 (class 1259 OID 25281)
+-- Name: model_runs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.model_runs (
+    id integer NOT NULL,
+    "outputID" integer NOT NULL,
+    "executionTime" timestamp without time zone NOT NULL,
+    "returnCode" integer NOT NULL
+);
+
+
+--
+-- TOC entry 241 (class 1259 OID 25280)
+-- Name: model_runs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.model_runs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3513 (class 0 OID 0)
+-- Dependencies: 241
+-- Name: model_runs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.model_runs_id_seq OWNED BY public.model_runs.id;
+
+
+--
+-- TOC entry 244 (class 1259 OID 26249)
+-- Name: output_statistics; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.output_statistics (
+    id integer NOT NULL,
+    "outputID" integer NOT NULL,
+    p1 double precision NOT NULL,
+    p5 double precision NOT NULL,
+    p10 double precision NOT NULL,
+    p25 double precision NOT NULL,
+    p50 double precision NOT NULL,
+    p75 double precision NOT NULL,
+    p90 double precision NOT NULL,
+    p95 double precision NOT NULL,
+    p99 double precision NOT NULL,
+    min double precision NOT NULL,
+    max double precision NOT NULL,
+    mean double precision NOT NULL,
+    std_dev double precision NOT NULL
+);
+
+
+--
+-- TOC entry 243 (class 1259 OID 26248)
+-- Name: output_statistics_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.output_statistics ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.output_statistics_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- TOC entry 240 (class 1259 OID 25251)
+-- Name: outputs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.outputs (
+    id integer NOT NULL,
+    "timeGenerated" timestamp without time zone NOT NULL,
+    "leadTime" interval NOT NULL,
+    "modelName" character varying(50) NOT NULL,
+    "modelVersion" character varying(10) NOT NULL,
+    "dataValue" bytea,
+    "dataUnit" character varying(10) NOT NULL,
+    "dataLocation" character varying(25) NOT NULL,
+    "dataSeries" character varying(25) NOT NULL,
+    "dataDatum" character varying(10)
+);
+
+
+--
+-- TOC entry 239 (class 1259 OID 25250)
+-- Name: outputs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.outputs ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.outputs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- TOC entry 224 (class 1259 OID 16426)
+-- Name: ref_dataDatum; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public."ref_dataDatum" (
+    id integer NOT NULL,
+    code character varying(10) NOT NULL,
+    "displayName" character varying(30) NOT NULL,
+    notes character varying(250)
+);
+
+
+--
+-- TOC entry 223 (class 1259 OID 16425)
+-- Name: ref_dataDatum_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public."ref_dataDatum_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3514 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: ref_dataDatum_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public."ref_dataDatum_id_seq" OWNED BY public."ref_dataDatum".id;
+
+
+--
+-- TOC entry 216 (class 1259 OID 16390)
+-- Name: ref_dataLocation; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public."ref_dataLocation" (
+    id integer NOT NULL,
+    code character varying(25) NOT NULL,
+    "displayName" character varying(30) NOT NULL,
+    notes character varying(250),
+    latitude character varying(16) NOT NULL,
+    longitude character varying(16) NOT NULL
+);
+
+
+--
+-- TOC entry 215 (class 1259 OID 16389)
+-- Name: ref_dataLocation_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public."ref_dataLocation_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3515 (class 0 OID 0)
+-- Dependencies: 215
+-- Name: ref_dataLocation_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public."ref_dataLocation_id_seq" OWNED BY public."ref_dataLocation".id;
+
+
+--
+-- TOC entry 220 (class 1259 OID 16408)
+-- Name: ref_dataSeries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public."ref_dataSeries" (
+    id integer NOT NULL,
+    code character varying(25) NOT NULL,
+    "displayName" character varying(30) NOT NULL,
+    notes character varying(250)
+);
+
+
+--
+-- TOC entry 219 (class 1259 OID 16407)
+-- Name: ref_dataSeries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public."ref_dataSeries_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3516 (class 0 OID 0)
+-- Dependencies: 219
+-- Name: ref_dataSeries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public."ref_dataSeries_id_seq" OWNED BY public."ref_dataSeries".id;
+
+
+--
+-- TOC entry 218 (class 1259 OID 16399)
+-- Name: ref_dataSource; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public."ref_dataSource" (
+    id integer NOT NULL,
+    code character varying(10) NOT NULL,
+    "displayName" character varying(30) NOT NULL,
+    notes character varying(250)
+);
+
+
+--
+-- TOC entry 217 (class 1259 OID 16398)
+-- Name: ref_dataSource_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public."ref_dataSource_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3517 (class 0 OID 0)
+-- Dependencies: 217
+-- Name: ref_dataSource_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public."ref_dataSource_id_seq" OWNED BY public."ref_dataSource".id;
+
+
+--
+-- TOC entry 222 (class 1259 OID 16417)
+-- Name: ref_dataUnit; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public."ref_dataUnit" (
+    id integer NOT NULL,
+    code character varying(10) NOT NULL,
+    "displayName" character varying(30) NOT NULL,
+    notes character varying(250)
+);
+
+
+--
+-- TOC entry 221 (class 1259 OID 16416)
+-- Name: ref_dataUnit_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public."ref_dataUnit_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3518 (class 0 OID 0)
+-- Dependencies: 221
+-- Name: ref_dataUnit_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public."ref_dataUnit_id_seq" OWNED BY public."ref_dataUnit".id;
+
+
+--
+-- TOC entry 236 (class 1259 OID 24850)
+-- Name: ref_predictionResults; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public."ref_predictionResults" (
+    code integer NOT NULL,
+    result character varying(32) NOT NULL
+);
+
+
+--
+-- TOC entry 235 (class 1259 OID 24849)
+-- Name: ref_predictionResults_code_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public."ref_predictionResults_code_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3519 (class 0 OID 0)
+-- Dependencies: 235
+-- Name: ref_predictionResults_code_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public."ref_predictionResults_code_seq" OWNED BY public."ref_predictionResults".code;
+
+
+--
+-- TOC entry 234 (class 1259 OID 24823)
+-- Name: retired_model_runs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.retired_model_runs (
+    id integer NOT NULL,
+    "outputID" integer NOT NULL,
+    "executionTime" timestamp without time zone NOT NULL,
+    "returnCode" integer NOT NULL
+);
+
+
+--
+-- TOC entry 233 (class 1259 OID 24822)
+-- Name: retired_model_runs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.retired_model_runs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3520 (class 0 OID 0)
+-- Dependencies: 233
+-- Name: retired_model_runs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.retired_model_runs_id_seq OWNED BY public.retired_model_runs.id;
+
+
+--
+-- TOC entry 228 (class 1259 OID 16467)
+-- Name: retired_outputs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.retired_outputs (
+    id integer NOT NULL,
+    "timeGenerated" timestamp without time zone NOT NULL,
+    "leadTime" interval NOT NULL,
+    "modelName" character varying(50) NOT NULL,
+    "modelVersion" character varying(10) NOT NULL,
+    "dataValue" character varying(25),
+    "dataUnit" character varying(10) NOT NULL,
+    "dataLocation" character varying(25) NOT NULL,
+    "dataSeries" character varying(25) NOT NULL,
+    "dataDatum" character varying(10),
+    "ensembleMemberID" integer
+);
+
+
+--
+-- TOC entry 227 (class 1259 OID 16466)
+-- Name: retired_outputs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.retired_outputs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3521 (class 0 OID 0)
+-- Dependencies: 227
+-- Name: retired_outputs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.retired_outputs_id_seq OWNED BY public.retired_outputs.id;
+
+
+--
+-- TOC entry 3283 (class 2604 OID 16497)
+-- Name: dataLocation_dataSource_mapping id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."dataLocation_dataSource_mapping" ALTER COLUMN id SET DEFAULT nextval('public."dataLocation_dataSource_mapping_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3284 (class 2604 OID 24783)
+-- Name: deployed_database_version id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.deployed_database_version ALTER COLUMN id SET DEFAULT nextval('public.deployed_database_version_id_seq'::regclass);
+
+
+--
+-- TOC entry 3281 (class 2604 OID 16438)
+-- Name: inputs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.inputs ALTER COLUMN id SET DEFAULT nextval('public.inputs_id_seq'::regclass);
+
+
+--
+-- TOC entry 3287 (class 2604 OID 25284)
+-- Name: model_runs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.model_runs ALTER COLUMN id SET DEFAULT nextval('public.model_runs_id_seq'::regclass);
+
+
+--
+-- TOC entry 3280 (class 2604 OID 16429)
+-- Name: ref_dataDatum id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataDatum" ALTER COLUMN id SET DEFAULT nextval('public."ref_dataDatum_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3276 (class 2604 OID 16393)
+-- Name: ref_dataLocation id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataLocation" ALTER COLUMN id SET DEFAULT nextval('public."ref_dataLocation_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3278 (class 2604 OID 16411)
+-- Name: ref_dataSeries id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataSeries" ALTER COLUMN id SET DEFAULT nextval('public."ref_dataSeries_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3277 (class 2604 OID 16402)
+-- Name: ref_dataSource id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataSource" ALTER COLUMN id SET DEFAULT nextval('public."ref_dataSource_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3279 (class 2604 OID 16420)
+-- Name: ref_dataUnit id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataUnit" ALTER COLUMN id SET DEFAULT nextval('public."ref_dataUnit_id_seq"'::regclass);
+
+
+--
+-- TOC entry 3286 (class 2604 OID 24853)
+-- Name: ref_predictionResults code; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_predictionResults" ALTER COLUMN code SET DEFAULT nextval('public."ref_predictionResults_code_seq"'::regclass);
+
+
+--
+-- TOC entry 3285 (class 2604 OID 25249)
+-- Name: retired_model_runs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retired_model_runs ALTER COLUMN id SET DEFAULT nextval('public.retired_model_runs_id_seq'::regclass);
+
+
+--
+-- TOC entry 3282 (class 2604 OID 25248)
+-- Name: retired_outputs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retired_outputs ALTER COLUMN id SET DEFAULT nextval('public.retired_outputs_id_seq'::regclass);
+
+
+--
+-- TOC entry 3318 (class 2606 OID 16501)
+-- Name: dataLocation_dataSource_mapping dataLocation_dataSource_mapping_AK00; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."dataLocation_dataSource_mapping"
+    ADD CONSTRAINT "dataLocation_dataSource_mapping_AK00" UNIQUE ("dataLocationCode", "dataSourceCode", "dataSourceLocationCode", "priorityOrder");
+
+
+--
+-- TOC entry 3320 (class 2606 OID 16499)
+-- Name: dataLocation_dataSource_mapping dataLocation_dataSource_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."dataLocation_dataSource_mapping"
+    ADD CONSTRAINT "dataLocation_dataSource_mapping_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3322 (class 2606 OID 24785)
+-- Name: deployed_database_version deployed_database_version_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.deployed_database_version
+    ADD CONSTRAINT deployed_database_version_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3310 (class 2606 OID 24858)
+-- Name: inputs inputs_AK00; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.inputs
+    ADD CONSTRAINT "inputs_AK00" UNIQUE NULLS NOT DISTINCT ("isActual", "generatedTime", "verifiedTime", "dataUnit", "dataSource", "dataLocation", "dataSeries", "dataDatum", latitude, longitude, "ensembleMemberID");
+
+
+--
+-- TOC entry 3312 (class 2606 OID 16440)
+-- Name: inputs inputs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.inputs
+    ADD CONSTRAINT inputs_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3334 (class 2606 OID 25288)
+-- Name: model_runs model_runs_AK00; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.model_runs
+    ADD CONSTRAINT "model_runs_AK00" UNIQUE ("outputID");
+
+
+--
+-- TOC entry 3336 (class 2606 OID 25286)
+-- Name: model_runs model_runs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.model_runs
+    ADD CONSTRAINT model_runs_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3338 (class 2606 OID 26255)
+-- Name: output_statistics output_statistics_outputID_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.output_statistics
+    ADD CONSTRAINT "output_statistics_outputID_key" UNIQUE ("outputID");
+
+
+--
+-- TOC entry 3340 (class 2606 OID 26253)
+-- Name: output_statistics output_statistics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.output_statistics
+    ADD CONSTRAINT output_statistics_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3330 (class 2606 OID 25259)
+-- Name: outputs outputs_AK00; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outputs
+    ADD CONSTRAINT "outputs_AK00" UNIQUE NULLS NOT DISTINCT ("timeGenerated", "leadTime", "modelName", "modelVersion", "dataLocation", "dataSeries", "dataDatum");
+
+
+--
+-- TOC entry 3332 (class 2606 OID 25257)
+-- Name: outputs outputs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outputs
+    ADD CONSTRAINT outputs_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3305 (class 2606 OID 16433)
+-- Name: ref_dataDatum ref_dataDatum_code_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataDatum"
+    ADD CONSTRAINT "ref_dataDatum_code_key" UNIQUE (code);
+
+
+--
+-- TOC entry 3307 (class 2606 OID 16431)
+-- Name: ref_dataDatum ref_dataDatum_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataDatum"
+    ADD CONSTRAINT "ref_dataDatum_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3289 (class 2606 OID 16397)
+-- Name: ref_dataLocation ref_dataLocation_code_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataLocation"
+    ADD CONSTRAINT "ref_dataLocation_code_key" UNIQUE (code);
+
+
+--
+-- TOC entry 3291 (class 2606 OID 16395)
+-- Name: ref_dataLocation ref_dataLocation_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataLocation"
+    ADD CONSTRAINT "ref_dataLocation_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3297 (class 2606 OID 24744)
+-- Name: ref_dataSeries ref_dataSeries_code_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataSeries"
+    ADD CONSTRAINT "ref_dataSeries_code_key" UNIQUE (code);
+
+
+--
+-- TOC entry 3299 (class 2606 OID 16413)
+-- Name: ref_dataSeries ref_dataSeries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataSeries"
+    ADD CONSTRAINT "ref_dataSeries_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3293 (class 2606 OID 16406)
+-- Name: ref_dataSource ref_dataSource_code_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataSource"
+    ADD CONSTRAINT "ref_dataSource_code_key" UNIQUE (code);
+
+
+--
+-- TOC entry 3295 (class 2606 OID 16404)
+-- Name: ref_dataSource ref_dataSource_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataSource"
+    ADD CONSTRAINT "ref_dataSource_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3301 (class 2606 OID 16424)
+-- Name: ref_dataUnit ref_dataUnit_code_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataUnit"
+    ADD CONSTRAINT "ref_dataUnit_code_key" UNIQUE (code);
+
+
+--
+-- TOC entry 3303 (class 2606 OID 16422)
+-- Name: ref_dataUnit ref_dataUnit_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_dataUnit"
+    ADD CONSTRAINT "ref_dataUnit_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3328 (class 2606 OID 24855)
+-- Name: ref_predictionResults ref_predictionResults_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."ref_predictionResults"
+    ADD CONSTRAINT "ref_predictionResults_pkey" PRIMARY KEY (code);
+
+
+--
+-- TOC entry 3324 (class 2606 OID 24830)
+-- Name: retired_model_runs retired_model_runs_AK00; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retired_model_runs
+    ADD CONSTRAINT "retired_model_runs_AK00" UNIQUE ("outputID");
+
+
+--
+-- TOC entry 3326 (class 2606 OID 24828)
+-- Name: retired_model_runs retired_model_runs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retired_model_runs
+    ADD CONSTRAINT retired_model_runs_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3314 (class 2606 OID 24860)
+-- Name: retired_outputs retired_outputs_AK00; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retired_outputs
+    ADD CONSTRAINT "retired_outputs_AK00" UNIQUE NULLS NOT DISTINCT ("timeGenerated", "leadTime", "modelName", "modelVersion", "dataLocation", "dataSeries", "dataDatum", "ensembleMemberID");
+
+
+--
+-- TOC entry 3316 (class 2606 OID 16472)
+-- Name: retired_outputs retired_outputs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retired_outputs
+    ADD CONSTRAINT retired_outputs_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3308 (class 1259 OID 25215)
+-- Name: idx_inputs_ordering; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_inputs_ordering ON public.inputs USING btree ("verifiedTime", "ensembleMemberID", "generatedTime" DESC);
+
+
+--
+-- TOC entry 3350 (class 2606 OID 16502)
+-- Name: dataLocation_dataSource_mapping dataLocation_dataSource_mapping_dataLocationCode_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."dataLocation_dataSource_mapping"
+    ADD CONSTRAINT "dataLocation_dataSource_mapping_dataLocationCode_fkey" FOREIGN KEY ("dataLocationCode") REFERENCES public."ref_dataLocation"(code);
+
+
+--
+-- TOC entry 3351 (class 2606 OID 16507)
+-- Name: dataLocation_dataSource_mapping dataLocation_dataSource_mapping_dataSourceCode_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."dataLocation_dataSource_mapping"
+    ADD CONSTRAINT "dataLocation_dataSource_mapping_dataSourceCode_fkey" FOREIGN KEY ("dataSourceCode") REFERENCES public."ref_dataSource"(code);
+
+
+--
+-- TOC entry 3341 (class 2606 OID 16461)
+-- Name: inputs inputs_dataDatum_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.inputs
+    ADD CONSTRAINT "inputs_dataDatum_fkey" FOREIGN KEY ("dataDatum") REFERENCES public."ref_dataDatum"(code);
+
+
+--
+-- TOC entry 3342 (class 2606 OID 16451)
+-- Name: inputs inputs_dataLocation_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.inputs
+    ADD CONSTRAINT "inputs_dataLocation_fkey" FOREIGN KEY ("dataLocation") REFERENCES public."ref_dataLocation"(code);
+
+
+--
+-- TOC entry 3343 (class 2606 OID 24750)
+-- Name: inputs inputs_dataSeries_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.inputs
+    ADD CONSTRAINT "inputs_dataSeries_fkey" FOREIGN KEY ("dataSeries") REFERENCES public."ref_dataSeries"(code);
+
+
+--
+-- TOC entry 3344 (class 2606 OID 16446)
+-- Name: inputs inputs_dataSource_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.inputs
+    ADD CONSTRAINT "inputs_dataSource_fkey" FOREIGN KEY ("dataSource") REFERENCES public."ref_dataSource"(code);
+
+
+--
+-- TOC entry 3345 (class 2606 OID 16441)
+-- Name: inputs inputs_dataUnit_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.inputs
+    ADD CONSTRAINT "inputs_dataUnit_fkey" FOREIGN KEY ("dataUnit") REFERENCES public."ref_dataUnit"(code);
+
+
+--
+-- TOC entry 3357 (class 2606 OID 25289)
+-- Name: model_runs model_runs_outputID_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.model_runs
+    ADD CONSTRAINT "model_runs_outputID_fkey" FOREIGN KEY ("outputID") REFERENCES public.outputs(id);
+
+
+--
+-- TOC entry 3358 (class 2606 OID 26256)
+-- Name: output_statistics output_statistics_outputID_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.output_statistics
+    ADD CONSTRAINT "output_statistics_outputID_fkey" FOREIGN KEY ("outputID") REFERENCES public.outputs(id);
+
+
+--
+-- TOC entry 3353 (class 2606 OID 25275)
+-- Name: outputs outputs_dataDatum_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outputs
+    ADD CONSTRAINT "outputs_dataDatum_fkey" FOREIGN KEY ("dataDatum") REFERENCES public."ref_dataDatum"(code);
+
+
+--
+-- TOC entry 3354 (class 2606 OID 25265)
+-- Name: outputs outputs_dataLocation_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outputs
+    ADD CONSTRAINT "outputs_dataLocation_fkey" FOREIGN KEY ("dataLocation") REFERENCES public."ref_dataLocation"(code);
+
+
+--
+-- TOC entry 3355 (class 2606 OID 25270)
+-- Name: outputs outputs_dataSeries_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outputs
+    ADD CONSTRAINT "outputs_dataSeries_fkey" FOREIGN KEY ("dataSeries") REFERENCES public."ref_dataSeries"(code);
+
+
+--
+-- TOC entry 3356 (class 2606 OID 25260)
+-- Name: outputs outputs_dataUnit_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outputs
+    ADD CONSTRAINT "outputs_dataUnit_fkey" FOREIGN KEY ("dataUnit") REFERENCES public."ref_dataUnit"(code);
+
+
+--
+-- TOC entry 3352 (class 2606 OID 24831)
+-- Name: retired_model_runs retired_model_runs_outputID_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retired_model_runs
+    ADD CONSTRAINT "retired_model_runs_outputID_fkey" FOREIGN KEY ("outputID") REFERENCES public.retired_outputs(id);
+
+
+--
+-- TOC entry 3346 (class 2606 OID 16488)
+-- Name: retired_outputs retired_outputs_dataDatum_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retired_outputs
+    ADD CONSTRAINT "retired_outputs_dataDatum_fkey" FOREIGN KEY ("dataDatum") REFERENCES public."ref_dataDatum"(code);
+
+
+--
+-- TOC entry 3347 (class 2606 OID 16478)
+-- Name: retired_outputs retired_outputs_dataLocation_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retired_outputs
+    ADD CONSTRAINT "retired_outputs_dataLocation_fkey" FOREIGN KEY ("dataLocation") REFERENCES public."ref_dataLocation"(code);
+
+
+--
+-- TOC entry 3348 (class 2606 OID 24745)
+-- Name: retired_outputs retired_outputs_dataSeries_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retired_outputs
+    ADD CONSTRAINT "retired_outputs_dataSeries_fkey" FOREIGN KEY ("dataSeries") REFERENCES public."ref_dataSeries"(code);
+
+
+--
+-- TOC entry 3349 (class 2606 OID 16473)
+-- Name: retired_outputs retired_outputs_dataUnit_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retired_outputs
+    ADD CONSTRAINT "retired_outputs_dataUnit_fkey" FOREIGN KEY ("dataUnit") REFERENCES public."ref_dataUnit"(code);
+
+
+-- Completed on 2026-11-10 11:59:38 CST
+
+
+
