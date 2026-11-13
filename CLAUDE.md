@@ -9,13 +9,7 @@ or outputs. It is canonical (the team wiki links to it) and describes intent; th
 does not fully match it yet. It is the shared language between domain experts and
 engineers: use its terms when naming new code, database fields, and config.
 
-## Glossary
-- **DSPEC** (Data Specification): a model's input vector requirements, meaning what data
-  goes into each input vector member and where it comes from. The JSON file also carries
-  some model and output settings, but that's an implementation detail. Parsed by
-  `src/semaphore/ModelExecution/dspecParser.py`. Filenames hint at location, predicted
-  variable, sometimes model type, and lead time in hours (`_12hr`, `_12h`). That's a
-  convention, not a format to parse.
+## Glossary Notes
 - **`p*` / `d*` series** (e.g. `pAirTemp`, `dWaterTmp`): `p` = predicted, `d` = observed.
 - **`outKey`**: the identifier that cross-references a series inside a dspec
   (`dependentSeries`, `postProcessCall.args.targetSeries`, `vectorOrder`). Hyphen/underscore,
