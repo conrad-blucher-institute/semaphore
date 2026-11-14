@@ -4,18 +4,11 @@ Semaphore runs environmental prediction models (neural nets) on a schedule: it i
 data, builds input vectors, executes the model, and stores the outputs.
 Each model's requirements are described by a JSON **dspec**.
 
-**Domain model:** read `docs/domain-model.md` before reasoning about models, runs, inputs,
-or outputs. It is canonical (the team wiki links to it) and describes intent; the code
+**Domain model:** read `docs/domain-model.md`. It is canonical (the team wiki links to it) and describes intent; the code
 does not fully match it yet. It is the shared language between domain experts and
 engineers: use its terms when naming new code, database fields, and config.
 
-## Glossary
-- **DSPEC** (Data Specification): a model's input vector requirements, meaning what data
-  goes into each input vector member and where it comes from. The JSON file also carries
-  some model and output settings, but that's an implementation detail. Parsed by
-  `src/semaphore/ModelExecution/dspecParser.py`. Filenames hint at location, predicted
-  variable, sometimes model type, and lead time in hours (`_12hr`, `_12h`). That's a
-  convention, not a format to parse.
+## Glossary Notes
 - **`p*` / `d*` series** (e.g. `pAirTemp`, `dWaterTmp`): `p` = predicted, `d` = observed.
 - **`outKey`**: the identifier that cross-references a series inside a dspec
   (`dependentSeries`, `postProcessCall.args.targetSeries`, `vectorOrder`). Hyphen/underscore,
@@ -46,9 +39,6 @@ engineers: use its terms when naming new code, database fields, and config.
 ## Working conventions
 - Don't design logic around what today's dspecs happen to contain. Design for the stated
   semantics, since a future dspec may fall outside the current range.
-- A DB migration's rollback only ever undoes what its update did. If the rollback would have
-  to delete data that the update didn't create (e.g. rows added since), it fails with a clear
-  message instead, and the person running it decides what to do with that data.
 - Execute multi-step plans one step at a time and stop after each. Never `git commit`;
   the user reviews and commits.
 - Verified docs: `docs/domain-model.md` and `docs/semaphore_db_schema.sql` (DB
