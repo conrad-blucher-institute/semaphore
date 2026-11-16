@@ -40,6 +40,9 @@ engineers: use its terms when naming new code, database fields, and config.
 ## Working conventions
 - Don't design logic around what today's dspecs happen to contain. Design for the stated
   semantics, since a future dspec may fall outside the current range.
+- A DB migration's rollback only ever undoes what its update did. If the rollback would have
+  to delete data that the update didn't create (e.g. rows added since), it fails with a clear
+  message instead, and the person running it decides what to do with that data.
 - Execute multi-step plans one step at a time and stop after each. Never `git commit`;
   the user reviews and commits.
 - Verified docs: `docs/domain-model.md` and `docs/semaphore_db_schema.sql` (DB

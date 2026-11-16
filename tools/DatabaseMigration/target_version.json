@@ -1,4 +1,4 @@
 {
-    "Target Version" : "3.8",
-    "Description" : "Adds new rows to the ref_dataLocation table and the dataLocation_dataSource_mapping table for the operation of the ESB model."
+    "Target Version" : "4.0",
+    "Description" : "Adds the inputs_archive table to hold inputs rows too old for any model to request."
 }
