@@ -4,8 +4,7 @@ Semaphore runs environmental prediction models (neural nets) on a schedule: it i
 data, builds input vectors, executes the model, and stores the outputs.
 Each model's requirements are described by a JSON **dspec**.
 
-**Domain model:** read `docs/domain-model.md` before reasoning about models, runs, inputs,
-or outputs. It is canonical (the team wiki links to it) and describes intent; the code
+**Domain model:** read `docs/domain-model.md`. It is canonical (the team wiki links to it) and describes intent; the code
 does not fully match it yet. It is the shared language between domain experts and
 engineers: use its terms when naming new code, database fields, and config.
 
